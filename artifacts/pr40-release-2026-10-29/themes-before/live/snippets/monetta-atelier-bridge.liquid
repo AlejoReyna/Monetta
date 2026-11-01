@@ -1,0 +1,145 @@
+{%- doc -%}
+  Bridge from Atelier's design variables to the Monetta tokens, for the pages that still render Atelier sections inside the Monetta
+  shell (layout/theme.liquid: contact, mayoreo, cómo vender, policies) and for the storefront password page (layout/password.liquid).
+  The merchant's content, blocks and layout settings are untouched; only what the store looks like changes: Inter and Playfair
+  instead of Atelier's fonts, the warm palette instead of Atelier's black-and-white colour schemes, pill buttons and 12px fields.
+  The theme settings (config/settings_data.json) are not edited, so the editor still shows Atelier's own values for these
+  sections. Replaces snippets/monetta-secondary-headings.liquid (22 Oct), which only swapped the heading face.
+
+  Colours are written as values because Atelier also reads each one as an "r g b" triplet for its opacities.
+{%- enddoc -%}
+<style>
+  /* Type: body copy is Inter at the body role's size; every heading preset is Playfair Display 400 (the merchant's sizes stay). */
+  body.mw-atelier {
+    --font-body--family: var(--font-sans);
+    --font-body--style: normal;
+    --font-body--weight: 400;
+    --font-subheading--family: var(--font-sans);
+    --font-subheading--style: normal;
+    --font-subheading--weight: 500;
+    --font-heading--family: var(--font-serif);
+    --font-heading--style: normal;
+    --font-heading--weight: 400;
+    --font-accent--family: var(--font-sans);
+    --font-accent--style: normal;
+    --font-accent--weight: 600;
+    --font-paragraph--family: var(--font-sans);
+    --font-paragraph--style: normal;
+    --font-paragraph--size: var(--type-body-size);
+    --font-paragraph--line-height: var(--type-body-lh);
+    {%- for level in (1..6) %}
+    --font-h{{ level }}--family: var(--font-serif);
+    --font-h{{ level }}--style: normal;
+    --font-h{{ level }}--weight: 400;
+    {%- endfor %}
+    --button-font-family-primary: var(--font-sans);
+    --button-font-family-secondary: var(--font-sans);
+    --cart-primary-font-family: var(--font-sans);
+    --cart-secondary-font-family: var(--font-sans);
+
+    /* Shapes: pill buttons, 12px fields and popovers, the card radius on product media. */
+    --style-border-radius-buttons-primary: 999px;
+    --style-border-radius-buttons-secondary: 999px;
+    --style-border-radius-inputs: var(--radius-control);
+    --style-border-radius-popover: var(--radius-card);
+    --style-border-width-inputs: 1px;
+    --minimum-touch-target: var(--tap);
+  }
+
+  body.mw-atelier :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6) {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-style: normal;
+    font-synthesis: none;
+  }
+
+  /* Colour schemes. Light schemes become the canvas with ink and the brown primary pill; Atelier's grey panel becomes the warm
+     panel; its black band becomes the dark chocolate; the transparent scheme keeps its transparency with the accent text. */
+  body.mw-atelier :is(.color-scheme-1, .color-scheme-2, .color-scheme-4, .color-scheme-0a32ce69-9b75-4fa4-b981-df69f787a972),
+  body.mw-atelier {
+    --color-background: rgb(251 248 242);
+    --color-background-rgb: 251 248 242;
+    --color-foreground: rgb(33 27 22);
+    --color-foreground-rgb: 33 27 22;
+    --color-foreground-heading: rgb(33 27 22);
+    --color-foreground-heading-rgb: 33 27 22;
+    --color-primary: rgb(33 27 22);
+    --color-primary-rgb: 33 27 22;
+    --color-primary-hover: rgb(128 92 50);
+    --color-primary-hover-rgb: 128 92 50;
+    --color-border: rgb(231 220 206);
+    --color-border-rgb: 231 220 206;
+    --color-shadow: rgb(61 43 28);
+    --color-shadow-rgb: 61 43 28;
+    --color-primary-button-text: rgb(255 255 255);
+    --color-primary-button-background: rgb(116 82 55);
+    --color-primary-button-border: rgb(116 82 55);
+    --color-primary-button-hover-text: rgb(255 255 255);
+    --color-primary-button-hover-background: rgb(102 72 48);
+    --color-primary-button-hover-border: rgb(102 72 48);
+    --color-secondary-button-text: rgb(33 27 22);
+    --color-secondary-button-background: rgb(251 248 242 / 0);
+    --color-secondary-button-border: rgb(138 119 102);
+    --color-secondary-button-hover-text: rgb(33 27 22);
+    --color-secondary-button-hover-background: rgb(243 234 223);
+    --color-secondary-button-hover-border: rgb(138 119 102);
+    --color-input-background: rgb(255 255 255);
+    --color-input-text: rgb(33 27 22);
+    --color-input-text-rgb: 33 27 22;
+    --color-input-border: rgb(138 119 102);
+    --color-input-hover-background: rgb(255 255 255);
+  }
+
+  body.mw-atelier .color-scheme-3 {
+    --color-background: rgb(243 234 223);
+    --color-background-rgb: 243 234 223;
+    --color-foreground: rgb(33 27 22);
+    --color-foreground-rgb: 33 27 22;
+    --color-foreground-heading: rgb(33 27 22);
+    --color-foreground-heading-rgb: 33 27 22;
+    --color-primary: rgb(33 27 22);
+    --color-primary-rgb: 33 27 22;
+    --color-border: rgb(231 220 206);
+    --color-border-rgb: 231 220 206;
+    --color-primary-button-text: rgb(255 255 255);
+    --color-primary-button-background: rgb(116 82 55);
+    --color-primary-button-border: rgb(116 82 55);
+    --color-primary-button-hover-background: rgb(102 72 48);
+    --color-primary-button-hover-border: rgb(102 72 48);
+    --color-primary-button-hover-text: rgb(255 255 255);
+  }
+
+  body.mw-atelier .color-scheme-5 {
+    --color-background: rgb(45 30 20);
+    --color-background-rgb: 45 30 20;
+    --color-foreground: rgb(251 248 242);
+    --color-foreground-rgb: 251 248 242;
+    --color-foreground-heading: rgb(251 248 242);
+    --color-foreground-heading-rgb: 251 248 242;
+    --color-primary: rgb(251 248 242);
+    --color-primary-rgb: 251 248 242;
+    --color-primary-button-text: rgb(33 27 22);
+    --color-primary-button-background: rgb(251 248 242);
+    --color-primary-button-border: rgb(251 248 242);
+    --color-primary-button-hover-text: rgb(33 27 22);
+    --color-primary-button-hover-background: rgb(243 234 223);
+    --color-primary-button-hover-border: rgb(243 234 223);
+  }
+
+  body.mw-atelier .color-scheme-6 {
+    --color-foreground: rgb(128 92 50);
+    --color-foreground-rgb: 128 92 50;
+    --color-foreground-heading: rgb(128 92 50);
+    --color-foreground-heading-rgb: 128 92 50;
+  }
+
+  /* Atelier's sections own their spacing: the Monetta .section gap must not stack on top of it. */
+  body.mw-atelier main .shopify-section .section {
+    margin-top: 0;
+  }
+
+  /* Atelier sizes every <img> to its box (img { width: 100% }); the shell's wordmarks keep their intrinsic width. */
+  body.mw-atelier :is(.wordmark, .menu__top) img {
+    width: auto;
+  }
+</style>

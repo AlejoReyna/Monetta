@@ -1,0 +1,805 @@
+{% doc %}
+  @prompt
+    Create a Shopify OS 2.0 block called "Vertical Timeline Accordion" with a premium, interactive design. Requirements:
+    
+    Layout & Frame: Each timeline entry must have a visible card frame (rounded corners, subtle border or soft box-shadow) wrapping the content. Inside each card: an image (full-width or left-aligned thumbnail, configurable), date/year, title, and description. Generous internal padding.
+    
+    Timeline line: A vertical connector line runs through all entries on the left side, with a dot/circle marker per entry. The line and dots animate progressively as the user scrolls — each entry fades and slides in sequentially using IntersectionObserver (no external libraries).
+    
+    Accordion toggle: All timeline content is collapsed by default. A "Ver más" button sits below the last visible entry, centered, with a chevron arrow icon placed below the button text (stacked vertically, not inline). On click, remaining entries expand smoothly (max-height transition, 400ms ease). Button label changes to "Ver menos" and arrow rotates 180°.
+    
+    Style: Minimalist and editorial — thin connector line, soft shadows on cards, clean sans-serif typography, neutral palette. Premium spa-like feel with whitespace.
+    
+    Settings (theme editor): Section heading, and up to 6 timeline entries as nested blocks, each with: image (image_picker), date/year text, entry title, entry description. All editable from the theme editor.
+    
+    Technical: JS fully scoped using block.id to support multiple instances per page. CSS inside scoped <style> tag. No external dependencies. Compatible with Shopify OS 2.0.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-timeline-accordion-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  .ai-timeline-heading-{{ ai_gen_id }} {
+    text-align: center;
+    margin-bottom: 60px;
+    font-size: 32px;
+    color: {{ block.settings.heading_color }};
+  }
+
+  .ai-timeline-container-{{ ai_gen_id }} {
+    position: relative;
+    padding-left: 60px;
+  }
+
+  .ai-timeline-line-{{ ai_gen_id }} {
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: {{ block.settings.line_color }};
+  }
+
+  .ai-timeline-entry-{{ ai_gen_id }} {
+    position: relative;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .ai-timeline-entry-{{ ai_gen_id }}.ai-timeline-visible-{{ ai_gen_id }} {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .ai-timeline-entry-{{ ai_gen_id }}.ai-timeline-hidden-{{ ai_gen_id }} {
+    display: none;
+  }
+
+  .ai-timeline-dot-{{ ai_gen_id }} {
+    position: absolute;
+    left: -40px;
+    top: 20px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: {{ block.settings.dot_color }};
+    border: 2px solid {{ block.settings.dot_border_color }};
+    z-index: 2;
+  }
+
+  .ai-timeline-card-{{ ai_gen_id }} {
+    background-color: {{ block.settings.card_background }};
+    border: 1px solid {{ block.settings.card_border_color }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    padding: {{ block.settings.card_padding }}px;
+    box-shadow: {{ block.settings.shadow_horizontal }}px {{ block.settings.shadow_vertical }}px {{ block.settings.shadow_blur }}px rgba(0, 0, 0, {{ block.settings.shadow_opacity }});
+  }
+
+  .ai-timeline-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    border-radius: {{ block.settings.image_border_radius }}px;
+    margin-bottom: 20px;
+  }
+
+  .ai-timeline-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 200px;
+    background-color: #f4f4f4;
+    border-radius: {{ block.settings.image_border_radius }}px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-timeline-image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 150px;
+    max-height: 150px;
+  }
+
+  .ai-timeline-date-{{ ai_gen_id }} {
+    font-size: 12px;
+    color: {{ block.settings.date_color }};
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .ai-timeline-title-{{ ai_gen_id }} {
+    font-size: 20px;
+    color: {{ block.settings.title_color }};
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .ai-timeline-description-{{ ai_gen_id }} {
+    font-size: 14px;
+    color: {{ block.settings.description_color }};
+    line-height: 1.6;
+  }
+
+  .ai-timeline-toggle-wrapper-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+  }
+
+  .ai-timeline-toggle-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    border: 1px solid {{ block.settings.button_border_color }};
+    border-radius: {{ block.settings.button_border_radius }}px;
+    padding: 12px 32px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .ai-timeline-toggle-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background }};
+    color: {{ block.settings.button_hover_text_color }};
+  }
+
+  .ai-timeline-toggle-text-{{ ai_gen_id }} {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .ai-timeline-toggle-icon-{{ ai_gen_id }} {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.4s ease;
+  }
+
+  .ai-timeline-toggle-icon-{{ ai_gen_id }}.ai-timeline-rotated-{{ ai_gen_id }} {
+    transform: rotate(180deg);
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-timeline-accordion-{{ ai_gen_id }} {
+      width: 100%;
+      padding: 30px 15px;
+    }
+
+    .ai-timeline-container-{{ ai_gen_id }} {
+      padding-left: 40px;
+    }
+
+    .ai-timeline-dot-{{ ai_gen_id }} {
+      left: -30px;
+    }
+
+    .ai-timeline-card-{{ ai_gen_id }} {
+      padding: 20px;
+    }
+  }
+{% endstyle %}
+
+<vertical-timeline-accordion-{{ ai_gen_id }}
+  class="ai-timeline-accordion-{{ ai_gen_id }}"
+  data-initial-visible="{{ block.settings.initial_visible_entries }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.section_heading != blank %}
+    <h2 class="ai-timeline-heading-{{ ai_gen_id }}">{{ block.settings.section_heading }}</h2>
+  {% endif %}
+
+  <div class="ai-timeline-container-{{ ai_gen_id }}">
+    <div class="ai-timeline-line-{{ ai_gen_id }}"></div>
+
+    {% for i in (1..6) %}
+      {% liquid
+        assign image_key = 'entry_' | append: i | append: '_image'
+        assign date_key = 'entry_' | append: i | append: '_date'
+        assign title_key = 'entry_' | append: i | append: '_title'
+        assign description_key = 'entry_' | append: i | append: '_description'
+
+        assign entry_image = block.settings[image_key]
+        assign entry_date = block.settings[date_key]
+        assign entry_title = block.settings[title_key]
+        assign entry_description = block.settings[description_key]
+      %}
+
+      {% if entry_title != blank or entry_description != blank or entry_date != blank or entry_image != blank %}
+        <div
+          class="ai-timeline-entry-{{ ai_gen_id }}"
+          data-entry-index="{{ i }}"
+        >
+          <div class="ai-timeline-dot-{{ ai_gen_id }}"></div>
+          <div class="ai-timeline-card-{{ ai_gen_id }}">
+            {% if entry_image %}
+              <img
+                src="{{ entry_image | image_url: width: 800 }}"
+                alt="{{ entry_image.alt | escape }}"
+                loading="lazy"
+                width="{{ entry_image.width }}"
+                height="{{ entry_image.height }}"
+                class="ai-timeline-image-{{ ai_gen_id }}"
+              >
+            {% else %}
+              <div class="ai-timeline-image-placeholder-{{ ai_gen_id }}">
+                {{ 'image' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+
+            {% if entry_date != blank %}
+              <div class="ai-timeline-date-{{ ai_gen_id }}">{{ entry_date }}</div>
+            {% endif %}
+
+            {% if entry_title != blank %}
+              <h3 class="ai-timeline-title-{{ ai_gen_id }}">{{ entry_title }}</h3>
+            {% endif %}
+
+            {% if entry_description != blank %}
+              <div class="ai-timeline-description-{{ ai_gen_id }}">{{ entry_description }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="ai-timeline-toggle-wrapper-{{ ai_gen_id }}">
+    <button
+      class="ai-timeline-toggle-{{ ai_gen_id }}"
+      aria-expanded="false"
+    >
+      <span class="ai-timeline-toggle-text-{{ ai_gen_id }}">Ver más</span>
+      <svg
+        class="ai-timeline-toggle-icon-{{ ai_gen_id }}"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </button>
+  </div>
+</vertical-timeline-accordion-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class VerticalTimelineAccordion{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.initialVisible = parseInt(this.dataset.initialVisible) || 3;
+        this.entries = [];
+        this.toggleButton = null;
+        this.toggleText = null;
+        this.toggleIcon = null;
+        this.isExpanded = false;
+        this.observer = null;
+      }
+
+      connectedCallback() {
+        this.entries = Array.from(this.querySelectorAll('.ai-timeline-entry-{{ ai_gen_id }}'));
+        this.toggleButton = this.querySelector('.ai-timeline-toggle-{{ ai_gen_id }}');
+        this.toggleText = this.querySelector('.ai-timeline-toggle-text-{{ ai_gen_id }}');
+        this.toggleIcon = this.querySelector('.ai-timeline-toggle-icon-{{ ai_gen_id }}');
+
+        this.initializeEntries();
+        this.setupIntersectionObserver();
+        this.setupToggleButton();
+      }
+
+      initializeEntries() {
+        this.entries.forEach((entry, index) => {
+          if (index >= this.initialVisible) {
+            entry.classList.add('ai-timeline-hidden-{{ ai_gen_id }}');
+          }
+        });
+
+        if (this.entries.length <= this.initialVisible) {
+          this.toggleButton.style.display = 'none';
+        }
+      }
+
+      setupIntersectionObserver() {
+        const options = {
+          root: null,
+          rootMargin: '0px',
+          threshold: 0.1
+        };
+
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('ai-timeline-visible-{{ ai_gen_id }}');
+            }
+          });
+        }, options);
+
+        this.entries.forEach((entry) => {
+          if (!entry.classList.contains('ai-timeline-hidden-{{ ai_gen_id }}')) {
+            this.observer.observe(entry);
+          }
+        });
+      }
+
+      setupToggleButton() {
+        this.toggleButton.addEventListener('click', () => {
+          this.isExpanded = !this.isExpanded;
+
+          if (this.isExpanded) {
+            this.expandEntries();
+          } else {
+            this.collapseEntries();
+          }
+        });
+      }
+
+      expandEntries() {
+        this.entries.forEach((entry, index) => {
+          if (index >= this.initialVisible) {
+            entry.classList.remove('ai-timeline-hidden-{{ ai_gen_id }}');
+            entry.style.maxHeight = '0px';
+            entry.style.overflow = 'hidden';
+            entry.style.transition = 'max-height 0.4s ease, opacity 0.4s ease';
+
+            setTimeout(() => {
+              const height = entry.scrollHeight;
+              entry.style.maxHeight = height + 'px';
+
+              setTimeout(() => {
+                entry.style.maxHeight = '';
+                entry.style.overflow = '';
+                this.observer.observe(entry);
+              }, 400);
+            }, index * 50);
+          }
+        });
+
+        this.toggleText.textContent = 'Ver menos';
+        this.toggleIcon.classList.add('ai-timeline-rotated-{{ ai_gen_id }}');
+        this.toggleButton.setAttribute('aria-expanded', 'true');
+      }
+
+      collapseEntries() {
+        const entriesToHide = this.entries.slice(this.initialVisible);
+
+        entriesToHide.reverse().forEach((entry, index) => {
+          setTimeout(() => {
+            entry.style.maxHeight = entry.scrollHeight + 'px';
+            entry.style.overflow = 'hidden';
+            entry.style.transition = 'max-height 0.4s ease, opacity 0.4s ease';
+
+            setTimeout(() => {
+              entry.style.maxHeight = '0px';
+
+              setTimeout(() => {
+                entry.classList.add('ai-timeline-hidden-{{ ai_gen_id }}');
+                entry.style.maxHeight = '';
+                entry.style.overflow = '';
+                this.observer.unobserve(entry);
+              }, 400);
+            }, 10);
+          }, index * 50);
+        });
+
+        this.toggleText.textContent = 'Ver más';
+        this.toggleIcon.classList.remove('ai-timeline-rotated-{{ ai_gen_id }}');
+        this.toggleButton.setAttribute('aria-expanded', 'false');
+
+        setTimeout(() => {
+          const firstHiddenEntry = this.entries[this.initialVisible];
+          if (firstHiddenEntry) {
+            const containerTop = this.getBoundingClientRect().top + window.pageYOffset;
+            const lastVisibleEntry = this.entries[this.initialVisible - 1];
+            const scrollTarget = lastVisibleEntry.getBoundingClientRect().bottom + window.pageYOffset - window.innerHeight / 2;
+
+            window.scrollTo({
+              top: scrollTarget,
+              behavior: 'smooth'
+            });
+          }
+        }, 200);
+      }
+
+      disconnectedCallback() {
+        if (this.observer) {
+          this.observer.disconnect();
+        }
+      }
+    }
+
+    customElements.define('vertical-timeline-accordion-{{ ai_gen_id }}', VerticalTimelineAccordion{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Timeline accordion",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "text",
+      "id": "section_heading",
+      "label": "Section heading",
+      "default": "Our Journey"
+    },
+    {
+      "type": "range",
+      "id": "initial_visible_entries",
+      "label": "Initial visible entries",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Timeline line"
+    },
+    {
+      "type": "color",
+      "id": "line_color",
+      "label": "Line color",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "Dot color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "dot_border_color",
+      "label": "Dot border color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Border color",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Padding",
+      "min": 15,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Shadow"
+    },
+    {
+      "type": "range",
+      "id": "shadow_horizontal",
+      "label": "Horizontal offset",
+      "min": -10,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "shadow_vertical",
+      "label": "Vertical offset",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "shadow_blur",
+      "label": "Blur",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "label": "Opacity",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "default": 0.1
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Section heading",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "date_color",
+      "label": "Date",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Entry title",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Toggle button"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Hover background",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Entry 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_1_date",
+      "label": "Date or year",
+      "default": "2020"
+    },
+    {
+      "type": "text",
+      "id": "entry_1_title",
+      "label": "Title",
+      "default": "The Beginning"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_1_description",
+      "label": "Description",
+      "default": "Our journey started with a simple idea and a passion for excellence."
+    },
+    {
+      "type": "header",
+      "content": "Entry 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_2_date",
+      "label": "Date or year",
+      "default": "2021"
+    },
+    {
+      "type": "text",
+      "id": "entry_2_title",
+      "label": "Title",
+      "default": "First Milestone"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_2_description",
+      "label": "Description",
+      "default": "We reached our first major milestone and expanded our vision."
+    },
+    {
+      "type": "header",
+      "content": "Entry 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_3_date",
+      "label": "Date or year",
+      "default": "2022"
+    },
+    {
+      "type": "text",
+      "id": "entry_3_title",
+      "label": "Title",
+      "default": "Growth Phase"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_3_description",
+      "label": "Description",
+      "default": "Rapid growth and new opportunities shaped our path forward."
+    },
+    {
+      "type": "header",
+      "content": "Entry 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_4_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_4_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_4_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_4_description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Entry 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_5_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_5_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_5_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_5_description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Entry 6"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_6_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_6_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_6_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_6_description",
+      "label": "Description"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Timeline accordion"
+    }
+  ]
+}
+{% endschema %}

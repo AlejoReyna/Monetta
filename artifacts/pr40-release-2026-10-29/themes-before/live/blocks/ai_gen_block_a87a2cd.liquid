@@ -1,0 +1,406 @@
+{% doc %}
+  @prompt
+    Task: Create a sophisticated, infinite-loop Collection Carousel for a "Custom Liquid" section, optimizing it for a clean, rounded, and high-end mobile experience.
+    
+    1. Mobile Peek Layout (First Card Centered):
+    
+    Snap Physics: Use scroll-snap-type: x mandatory with scroll-behavior: smooth.
+    
+    Peek Effect: Configure the carousel so the first active card is perfectly centered in the mobile viewport. The next card MUST be partially visible (approx. 20%) on the right side to indicate more swipable content. The previous card should have a 10% peek on the left.
+    
+    Container Styling: Add padding: 0 10% to the container to center the cards and create space for the peek effect. Use scroll-padding: 0 10%.
+    
+    2. Card Design (Ultra-Clean & Rounded):
+    
+    The Container: Each collection must be contained in a single card with an aspect-ratio of 4 / 5 (tall and wide). Use width: 80vw; and scroll-snap-align: center.
+    
+    The Rounded Contour: Apply a generous border-radius: 40px. CRITICAL: Use overflow: hidden; on the card to ensure images inside do not overlap or break the rounded corners.
+    
+    Clean Aesthetics: Use a pure white background #FFFFFF. Add a subtle, clean outline: border: 1px solid rgba(0,0,0,0.04). For depth, add a large-spread soft shadow: box-shadow: 0 15px 40px rgba(0,0,0,0.03).
+    
+    Floating Image: Center a placeholder transparent PNG image within the card.
+    
+    3. Animation & Physics:
+    
+    Smooth Motion: Apply transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1).
+    
+    Scaling: While scrolling, the centered card is scale(1.0) and opacity: 1, and the adjacent cards smoothly transition to scale(0.88) and opacity: 0.5.
+    
+    4. Content Structure & Infinite Loop:
+    
+    Loop through 3 collections (BOLSAS, CARTERAS, RELOJES) rendered twice to simulate an infinite scroll loop.
+    
+    Each card must include: a clean Serif title (<h3>), and a minimalist gold-accented button (<a>).
+    
+    5. Constraints:
+    
+    No Scrollbars: Hide them using scrollbar-width: none and ::-webkit-scrollbar { display: none; }.
+    
+    Namespace: All CSS classes must use the unique prefix .lux-clean-slider-. No external libraries.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .lux-clean-slider-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    padding: 60px 0;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .lux-clean-slider-container-{{ ai_gen_id }} {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 10%;
+    scroll-padding: 0 10%;
+  }
+
+  .lux-clean-slider-container-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lux-clean-slider-card-{{ ai_gen_id }} {
+    flex: 0 0 80vw;
+    width: 80vw;
+    aspect-ratio: 4 / 5;
+    scroll-snap-align: center;
+    background-color: #FFFFFF;
+    border-radius: 40px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 30px;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: scale(0.88);
+    opacity: 0.5;
+  }
+
+  .lux-clean-slider-card-{{ ai_gen_id }}.lux-clean-slider-active-{{ ai_gen_id }} {
+    transform: scale(1.0);
+    opacity: 1;
+  }
+
+  .lux-clean-slider-image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lux-clean-slider-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .lux-clean-slider-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 200px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+  }
+
+  .lux-clean-slider-placeholder-{{ ai_gen_id }} svg {
+    width: 80px;
+    height: 80px;
+    opacity: 0.2;
+  }
+
+  .lux-clean-slider-title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, serif;
+    font-size: {{ block.settings.title_size }}px;
+    font-weight: 400;
+    color: {{ block.settings.title_color }};
+    margin: 0 0 20px 0;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  .lux-clean-slider-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 14px 36px;
+    background-color: {{ block.settings.button_bg_color }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    border: 1px solid {{ block.settings.button_border_color }};
+  }
+
+  .lux-clean-slider-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_bg }};
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  @media screen and (min-width: 750px) {
+    .lux-clean-slider-container-{{ ai_gen_id }} {
+      padding: 0 20%;
+      scroll-padding: 0 20%;
+    }
+
+    .lux-clean-slider-card-{{ ai_gen_id }} {
+      flex: 0 0 60vw;
+      width: 60vw;
+      max-width: 500px;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .lux-clean-slider-container-{{ ai_gen_id }} {
+      padding: 0 25%;
+      scroll-padding: 0 25%;
+    }
+
+    .lux-clean-slider-card-{{ ai_gen_id }} {
+      flex: 0 0 50vw;
+      width: 50vw;
+      max-width: 600px;
+    }
+  }
+{% endstyle %}
+
+<lux-clean-slider-{{ ai_gen_id }} class="lux-clean-slider-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="lux-clean-slider-container-{{ ai_gen_id }}" data-slider-container>
+    {% liquid
+      assign collections_array = ''
+      if block.settings.collection_1 != blank
+        assign collections_array = collections_array | append: block.settings.collection_1.handle | append: ','
+      endif
+      if block.settings.collection_2 != blank
+        assign collections_array = collections_array | append: block.settings.collection_2.handle | append: ','
+      endif
+      if block.settings.collection_3 != blank
+        assign collections_array = collections_array | append: block.settings.collection_3.handle | append: ','
+      endif
+      assign collections_handles = collections_array | split: ','
+    %}
+
+    {% for i in (1..2) %}
+      {% for handle in collections_handles %}
+        {% if handle != blank %}
+          {% assign collection = collections[handle] %}
+          <div class="lux-clean-slider-card-{{ ai_gen_id }}" data-card>
+            <div class="lux-clean-slider-image-wrapper-{{ ai_gen_id }}">
+              {% if collection.image %}
+                <img
+                  src="{{ collection.image | image_url: width: 600 }}"
+                  alt="{{ collection.image.alt | escape }}"
+                  class="lux-clean-slider-image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="600"
+                  height="600"
+                >
+              {% elsif collection.products.first.featured_image %}
+                <img
+                  src="{{ collection.products.first.featured_image | image_url: width: 600 }}"
+                  alt="{{ collection.products.first.featured_image.alt | escape }}"
+                  class="lux-clean-slider-image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="600"
+                  height="600"
+                >
+              {% else %}
+                <div class="lux-clean-slider-placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </div>
+
+            {% if collection.title != blank %}
+              <h3 class="lux-clean-slider-title-{{ ai_gen_id }}">{{ collection.title }}</h3>
+            {% endif %}
+
+            <a href="{{ collection.url }}" class="lux-clean-slider-button-{{ ai_gen_id }}">
+              {{ block.settings.button_text }}
+            </a>
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </div>
+</lux-clean-slider-{{ ai_gen_id }}>
+
+<script>
+(function() {
+  class LuxCleanSlider{{ ai_gen_id }} extends HTMLElement {
+    constructor() {
+      super();
+      this.container = null;
+      this.cards = [];
+      this.observer = null;
+    }
+
+    connectedCallback() {
+      this.container = this.querySelector('[data-slider-container]');
+      this.cards = Array.from(this.querySelectorAll('[data-card]'));
+      
+      if (!this.container || this.cards.length === 0) return;
+
+      this.setupIntersectionObserver();
+      this.updateActiveCard();
+    }
+
+    setupIntersectionObserver() {
+      const options = {
+        root: this.container,
+        threshold: 0.6
+      };
+
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            this.cards.forEach((card) => {
+              card.classList.remove('lux-clean-slider-active-{{ ai_gen_id }}');
+            });
+            entry.target.classList.add('lux-clean-slider-active-{{ ai_gen_id }}');
+          }
+        });
+      }, options);
+
+      this.cards.forEach((card) => {
+        this.observer.observe(card);
+      });
+    }
+
+    updateActiveCard() {
+      if (this.cards.length > 0) {
+        this.cards[0].classList.add('lux-clean-slider-active-{{ ai_gen_id }}');
+      }
+    }
+
+    disconnectedCallback() {
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+    }
+  }
+
+  customElements.define('lux-clean-slider-{{ ai_gen_id }}', LuxCleanSlider{{ ai_gen_id }});
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Collection carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Explorar"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text",
+      "default": "#D4AF37"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border",
+      "default": "#D4AF37"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg",
+      "label": "Hover background",
+      "default": "#D4AF37"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Title font",
+      "default": "serif"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title size",
+      "min": 20,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#F8F8F8"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection carousel"
+    }
+  ]
+}
+{% endschema %}

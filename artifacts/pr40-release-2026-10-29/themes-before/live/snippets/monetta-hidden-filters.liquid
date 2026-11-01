@@ -1,0 +1,21 @@
+{%- doc -%}
+  Re-emits the active storefront filters (and the search terms) as hidden inputs, so a GET form that changes only the sort
+  keeps every filter and works without JavaScript.
+
+  @param {object} filters - collection.filters or search.filters.
+  @param {string} [query] - Search terms, for the search page.
+{%- enddoc -%}
+{%- if query != blank -%}
+  <input type="hidden" name="q" value="{{ query | escape }}">
+  <input type="hidden" name="type" value="product">
+{%- endif -%}
+{%- for filter in filters -%}
+  {%- if filter.type == 'price_range' -%}
+    {%- if filter.min_value.value != blank -%}<input type="hidden" name="{{ filter.min_value.param_name }}" value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}">{%- endif -%}
+    {%- if filter.max_value.value != blank -%}<input type="hidden" name="{{ filter.max_value.param_name }}" value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}">{%- endif -%}
+  {%- else -%}
+    {%- for value in filter.active_values -%}
+      <input type="hidden" name="{{ value.param_name }}" value="{{ value.value }}">
+    {%- endfor -%}
+  {%- endif -%}
+{%- endfor -%}

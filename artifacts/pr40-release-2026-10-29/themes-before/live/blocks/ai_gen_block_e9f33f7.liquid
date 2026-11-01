@@ -1,0 +1,647 @@
+{% doc %}
+  @prompt
+    Generate the HTML and CSS code for a 'Custom Liquid' section. This is a minimalist product carousel for a luxury store.
+    
+    Design Specifications:
+    
+    Background: Solid white (#FFFFFF).
+    
+    Layout: A horizontal carousel with 3 cards.
+    
+    Visual Style: Each card should feature a high-quality product image placeholder. The images will be transparent PNGs, so they must appear to float elegantly on the white background.
+    
+    Dimensions: Make the image area tall and wide (aspect ratio 4:5) to ensure a high-end, complete look.
+    
+    Functionality:
+    
+    Smooth Transitions: The scrolling must be ultra-smooth. Use scroll-snap-type: x mandatory and a CSS transition of 0.6s cubic-bezier(0.25, 1, 0.5, 1) for a premium feel.
+    
+    Interactive Effect: When a card is centered, it should be at 100% size and opacity. Cards on the left and right should be slightly smaller (scale 0.9) and slightly faded (opacity 0.6).
+    
+    Content:
+    
+    Card 1: Title "BOLSAS", Link to "/collections/all", Button "EXPLORAR".
+    
+    Card 2: Title "CARTERAS", Link to "/collections/all", Button "EXPLORAR".
+    
+    Card 3: Title "RELOJES", Link to "/collections/all", Button "EXPLORAR".
+    
+    Technical: Use scoped CSS with the prefix .luxury-slider- to avoid theme conflicts. Do not use external libraries.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .luxury-slider-container-{{ ai_gen_id }} {
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.section_padding }}px 0;
+    overflow: hidden;
+    display: block;
+  }
+
+  .luxury-slider-wrapper-{{ ai_gen_id }} {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    gap: {{ block.settings.card_gap }}px;
+    padding: 0 {{ block.settings.side_padding }}px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .luxury-slider-wrapper-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .luxury-slider-card-{{ ai_gen_id }} {
+    flex: 0 0 {{ block.settings.card_width }}%;
+    scroll-snap-align: center;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    opacity: {{ block.settings.inactive_opacity | divided_by: 100.0 }};
+    transform: scale({{ block.settings.inactive_scale | divided_by: 100.0 }});
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .luxury-slider-card-{{ ai_gen_id }}.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .luxury-slider-image-container-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: {{ block.settings.content_spacing }}px;
+    position: relative;
+  }
+
+  .luxury-slider-image-container-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .luxury-slider-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .luxury-slider-image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .luxury-slider-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_size }}px;
+    font-weight: {{ block.settings.title_weight }};
+    color: {{ block.settings.title_color }};
+    margin: 0 0 {{ block.settings.content_spacing }}px;
+    letter-spacing: {{ block.settings.title_letter_spacing }}px;
+    text-transform: {{ block.settings.title_transform }};
+  }
+
+  .luxury-slider-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: {{ block.settings.button_font_weight }};
+    letter-spacing: {{ block.settings.button_letter_spacing }}px;
+    text-transform: {{ block.settings.button_text_transform }};
+    border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border_color }};
+    border-radius: {{ block.settings.button_border_radius }}px;
+    transition: all 0.3s ease;
+  }
+
+  .luxury-slider-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background }};
+    color: {{ block.settings.button_hover_text_color }};
+    border-color: {{ block.settings.button_hover_border_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .luxury-slider-card-{{ ai_gen_id }} {
+      flex: 0 0 {{ block.settings.card_width_mobile }}%;
+    }
+
+    .luxury-slider-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+
+    .luxury-slider-button-{{ ai_gen_id }} {
+      font-size: {{ block.settings.button_font_size | times: 0.9 }}px;
+      padding: {{ block.settings.button_padding_vertical | times: 0.8 }}px {{ block.settings.button_padding_horizontal | times: 0.8 }}px;
+    }
+  }
+{% endstyle %}
+
+<luxury-carousel-{{ ai_gen_id }} class="luxury-slider-container-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="luxury-slider-wrapper-{{ ai_gen_id }}" data-carousel-wrapper>
+    <div class="luxury-slider-card-{{ ai_gen_id }}" data-carousel-card>
+      <div class="luxury-slider-image-container-{{ ai_gen_id }}">
+        {% if block.settings.image_1 %}
+          <img
+            src="{{ block.settings.image_1 | image_url: width: 1000 }}"
+            alt="{{ block.settings.title_1 | escape }}"
+            loading="lazy"
+            width="{{ block.settings.image_1.width }}"
+            height="{{ block.settings.image_1.height }}"
+          >
+        {% else %}
+          <div class="luxury-slider-image-placeholder-{{ ai_gen_id }}">
+            {{ 'product-1' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+      <h3 class="luxury-slider-title-{{ ai_gen_id }}">{{ block.settings.title_1 }}</h3>
+      <a href="{{ block.settings.link_1 }}" class="luxury-slider-button-{{ ai_gen_id }}">
+        {{ block.settings.button_text_1 }}
+      </a>
+    </div>
+
+    <div class="luxury-slider-card-{{ ai_gen_id }}" data-carousel-card>
+      <div class="luxury-slider-image-container-{{ ai_gen_id }}">
+        {% if block.settings.image_2 %}
+          <img
+            src="{{ block.settings.image_2 | image_url: width: 1000 }}"
+            alt="{{ block.settings.title_2 | escape }}"
+            loading="lazy"
+            width="{{ block.settings.image_2.width }}"
+            height="{{ block.settings.image_2.height }}"
+          >
+        {% else %}
+          <div class="luxury-slider-image-placeholder-{{ ai_gen_id }}">
+            {{ 'product-2' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+      <h3 class="luxury-slider-title-{{ ai_gen_id }}">{{ block.settings.title_2 }}</h3>
+      <a href="{{ block.settings.link_2 }}" class="luxury-slider-button-{{ ai_gen_id }}">
+        {{ block.settings.button_text_2 }}
+      </a>
+    </div>
+
+    <div class="luxury-slider-card-{{ ai_gen_id }}" data-carousel-card>
+      <div class="luxury-slider-image-container-{{ ai_gen_id }}">
+        {% if block.settings.image_3 %}
+          <img
+            src="{{ block.settings.image_3 | image_url: width: 1000 }}"
+            alt="{{ block.settings.title_3 | escape }}"
+            loading="lazy"
+            width="{{ block.settings.image_3.width }}"
+            height="{{ block.settings.image_3.height }}"
+          >
+        {% else %}
+          <div class="luxury-slider-image-placeholder-{{ ai_gen_id }}">
+            {{ 'product-3' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+      <h3 class="luxury-slider-title-{{ ai_gen_id }}">{{ block.settings.title_3 }}</h3>
+      <a href="{{ block.settings.link_3 }}" class="luxury-slider-button-{{ ai_gen_id }}">
+        {{ block.settings.button_text_3 }}
+      </a>
+    </div>
+  </div>
+</luxury-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class LuxuryCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.wrapper = this.querySelector('[data-carousel-wrapper]');
+        this.cards = this.querySelectorAll('[data-carousel-card]');
+      }
+
+      connectedCallback() {
+        this.setupIntersectionObserver();
+        this.wrapper.addEventListener('scroll', this.handleScroll.bind(this));
+        this.updateActiveCard();
+      }
+
+      setupIntersectionObserver() {
+        const options = {
+          root: this.wrapper,
+          threshold: 0.6
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              this.cards.forEach((card) => card.classList.remove('active'));
+              entry.target.classList.add('active');
+            }
+          });
+        }, options);
+
+        this.cards.forEach((card) => observer.observe(card));
+      }
+
+      handleScroll() {
+        this.updateActiveCard();
+      }
+
+      updateActiveCard() {
+        const wrapperCenter = this.wrapper.scrollLeft + this.wrapper.offsetWidth / 2;
+        
+        let closestCard = null;
+        let closestDistance = Infinity;
+
+        this.cards.forEach((card) => {
+          const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+          const distance = Math.abs(wrapperCenter - cardCenter);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        if (closestCard) {
+          this.cards.forEach((card) => card.classList.remove('active'));
+          closestCard.classList.add('active');
+        }
+      }
+    }
+
+    customElements.define('luxury-carousel-{{ ai_gen_id }}', LuxuryCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Luxury product carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "side_padding",
+      "label": "Side padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Card gap",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Card width desktop",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 35
+    },
+    {
+      "type": "range",
+      "id": "card_width_mobile",
+      "label": "Card width mobile",
+      "min": 60,
+      "max": 95,
+      "step": 5,
+      "unit": "%",
+      "default": 85
+    },
+    {
+      "type": "range",
+      "id": "content_spacing",
+      "label": "Content spacing",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Card effects"
+    },
+    {
+      "type": "range",
+      "id": "inactive_opacity",
+      "label": "Inactive opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "inactive_scale",
+      "label": "Inactive scale",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 90
+    },
+    {
+      "type": "header",
+      "content": "Card 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "title_1",
+      "label": "Title",
+      "default": "BOLSAS"
+    },
+    {
+      "type": "url",
+      "id": "link_1",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "button_text_1",
+      "label": "Button text",
+      "default": "EXPLORAR"
+    },
+    {
+      "type": "header",
+      "content": "Card 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "title_2",
+      "label": "Title",
+      "default": "CARTERAS"
+    },
+    {
+      "type": "url",
+      "id": "link_2",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "button_text_2",
+      "label": "Button text",
+      "default": "EXPLORAR"
+    },
+    {
+      "type": "header",
+      "content": "Card 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "title_3",
+      "label": "Title",
+      "default": "RELOJES"
+    },
+    {
+      "type": "url",
+      "id": "link_3",
+      "label": "Link"
+    },
+    {
+      "type": "text",
+      "id": "button_text_3",
+      "label": "Button text",
+      "default": "EXPLORAR"
+    },
+    {
+      "type": "header",
+      "content": "Title style"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Size",
+      "min": 12,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "select",
+      "id": "title_weight",
+      "label": "Weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "range",
+      "id": "title_letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "select",
+      "id": "title_transform",
+      "label": "Text transform",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "uppercase", "label": "Uppercase" },
+        { "value": "lowercase", "label": "Lowercase" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Button style"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "button_font_weight",
+      "label": "Font weight",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "range",
+      "id": "button_letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "button_text_transform",
+      "label": "Text transform",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "uppercase", "label": "Uppercase" },
+        { "value": "lowercase", "label": "Lowercase" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "label": "Padding vertical",
+      "min": 5,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "label": "Padding horizontal",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Hover background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border_color",
+      "label": "Hover border color",
+      "default": "#000000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Luxury product carousel"
+    }
+  ]
+}
+{% endschema %}

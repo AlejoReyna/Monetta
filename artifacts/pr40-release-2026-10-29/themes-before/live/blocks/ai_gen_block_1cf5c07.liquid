@@ -1,0 +1,631 @@
+{% doc %}
+  @prompt
+    Create a premium image card carousel block with exactly 3 cards. 
+    Each card must contain, in this exact order from top to bottom:
+    
+    1. A full-width image that fills the card edge-to-edge with no white space 
+       or padding around it. The image must have the same border-radius as the 
+       card top corners (50px) so it blends seamlessly.
+    
+    2. A heading (font: Aleo, 26px, color: #000000) below the image, 
+       with 16px padding on the sides.
+    
+    3. A body text paragraph (font: System UI, 15px, color: #666666) 
+       below the heading, with 16px padding on the sides.
+    
+    4. A pill-shaped button (border-radius: 50px, background: #dedede, 
+       text color: #000000, font: Andada Pro, 14px) with hover state that 
+       changes text to #aa7d44. The button has a customizable label field 
+       and an external URL link field (opens in new tab).
+    
+    5. Below the button, a separate URL input field labeled "Link URL" 
+       where the merchant can paste an external link.
+    
+    Card design:
+    - Background: #ffffff
+    - Border radius: 50px on all corners
+    - Premium floating shadow: box-shadow: 0 20px 60px rgba(0,0,0,0.18), 
+      0 6px 20px rgba(0,0,0,0.10) — gives a luxury "floating card" effect
+    - Gap between cards: 10px
+    - Desktop card width: 90% of carousel viewport
+    
+    Carousel behavior:
+    - Smooth, fluid horizontal scroll with momentum/inertia (CSS scroll-snap 
+      + scroll-behavior: smooth)
+    - Premium easing on navigation: cubic-bezier(0.25, 0.46, 0.45, 0.94)
+    - Navigation arrows with subtle fade-in on hover
+    - Snap to each card on scroll
+    - Mobile swipe-friendly
+    
+    Section settings:
+    - Full-width section
+    - Top padding: 63px, Bottom padding: 96px
+    - Center-aligned content
+    - No background color
+    
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-carousel-container-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding-top: {{ block.settings.padding_top }}px;
+    padding-bottom: {{ block.settings.padding_bottom }}px;
+    position: relative;
+  }
+
+  .ai-carousel-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .ai-carousel-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 5%;
+  }
+
+  .ai-carousel-track-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-carousel-card-{{ ai_gen_id }} {
+    flex: 0 0 {{ block.settings.card_width }}%;
+    scroll-snap-align: center;
+    background-color: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    box-shadow: {{ block.settings.card_shadow }};
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ai-carousel-image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: {{ block.settings.card_border_radius }}px {{ block.settings.card_border_radius }}px 0 0;
+  }
+
+  .ai-carousel-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .ai-carousel-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 4 / 3;
+  }
+
+  .ai-carousel-image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 300px;
+    max-height: 300px;
+  }
+
+  .ai-carousel-content-{{ ai_gen_id }} {
+    padding: 0 {{ block.settings.content_padding }}px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex-grow: 1;
+  }
+
+  .ai-carousel-heading-{{ ai_gen_id }} {
+    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-size: {{ block.settings.heading_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 16px 0 0 0;
+    line-height: 1.3;
+  }
+
+  .ai-carousel-text-{{ ai_gen_id }} {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: {{ block.settings.text_size }}px;
+    color: {{ block.settings.text_color }};
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .ai-carousel-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    font-family: {{ block.settings.button_font.family }}, {{ block.settings.button_font.fallback_families }};
+    font-size: {{ block.settings.button_font_size }}px;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    text-decoration: none;
+    text-align: center;
+    transition: color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    margin-bottom: 16px;
+  }
+
+  .ai-carousel-button-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.button_hover_text_color }};
+  }
+
+  .ai-carousel-nav-{{ ai_gen_id }} {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .ai-carousel-wrapper-{{ ai_gen_id }}:hover .ai-carousel-nav-{{ ai_gen_id }} {
+    opacity: 1;
+  }
+
+  .ai-carousel-nav-{{ ai_gen_id }}:hover {
+    background-color: rgba(255, 255, 255, 1);
+  }
+
+  .ai-carousel-nav-prev-{{ ai_gen_id }} {
+    left: 20px;
+  }
+
+  .ai-carousel-nav-next-{{ ai_gen_id }} {
+    right: 20px;
+  }
+
+  .ai-carousel-nav-{{ ai_gen_id }} svg {
+    width: 24px;
+    height: 24px;
+    stroke: #000000;
+    stroke-width: 2;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-carousel-card-{{ ai_gen_id }} {
+      flex: 0 0 85%;
+    }
+
+    .ai-carousel-nav-{{ ai_gen_id }} {
+      display: none;
+    }
+
+    .ai-carousel-heading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.heading_size | times: 0.8 }}px;
+    }
+
+    .ai-carousel-text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.text_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<premium-carousel-{{ ai_gen_id }}
+  class="ai-carousel-container-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-carousel-wrapper-{{ ai_gen_id }}">
+    <button
+      class="ai-carousel-nav-{{ ai_gen_id }} ai-carousel-nav-prev-{{ ai_gen_id }}"
+      aria-label="Previous card"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+
+    <div class="ai-carousel-track-{{ ai_gen_id }}">
+      {% for i in (1..3) %}
+        {% liquid
+          assign image_key = 'card_' | append: i | append: '_image'
+          assign heading_key = 'card_' | append: i | append: '_heading'
+          assign text_key = 'card_' | append: i | append: '_text'
+          assign button_label_key = 'card_' | append: i | append: '_button_label'
+          assign button_url_key = 'card_' | append: i | append: '_button_url'
+
+          assign card_image = block.settings[image_key]
+          assign card_heading = block.settings[heading_key]
+          assign card_text = block.settings[text_key]
+          assign button_label = block.settings[button_label_key]
+          assign button_url = block.settings[button_url_key]
+        %}
+
+        <div class="ai-carousel-card-{{ ai_gen_id }}">
+          <div class="ai-carousel-image-wrapper-{{ ai_gen_id }}">
+            {% if card_image %}
+              <img
+                src="{{ card_image | image_url: width: 800 }}"
+                alt="{{ card_image.alt | escape }}"
+                loading="lazy"
+                width="{{ card_image.width }}"
+                height="{{ card_image.height }}"
+                class="ai-carousel-image-{{ ai_gen_id }}"
+              >
+            {% else %}
+              <div class="ai-carousel-image-placeholder-{{ ai_gen_id }}">
+                {{ 'image' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="ai-carousel-content-{{ ai_gen_id }}">
+            {% if card_heading != blank %}
+              <h3 class="ai-carousel-heading-{{ ai_gen_id }}">{{ card_heading }}</h3>
+            {% endif %}
+
+            {% if card_text != blank %}
+              <p class="ai-carousel-text-{{ ai_gen_id }}">{{ card_text }}</p>
+            {% endif %}
+
+            {% if button_url != blank and button_label != blank %}
+              <a
+                href="{{ button_url }}"
+                class="ai-carousel-button-{{ ai_gen_id }}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {{ button_label }}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <button
+      class="ai-carousel-nav-{{ ai_gen_id }} ai-carousel-nav-next-{{ ai_gen_id }}"
+      aria-label="Next card"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </div>
+</premium-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class PremiumCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('.ai-carousel-track-{{ ai_gen_id }}');
+        this.prevButton = this.querySelector('.ai-carousel-nav-prev-{{ ai_gen_id }}');
+        this.nextButton = this.querySelector('.ai-carousel-nav-next-{{ ai_gen_id }}');
+        this.cards = this.querySelectorAll('.ai-carousel-card-{{ ai_gen_id }}');
+
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        this.prevButton.addEventListener('click', () => this.scrollPrev());
+        this.nextButton.addEventListener('click', () => this.scrollNext());
+      }
+
+      scrollPrev() {
+        const cardWidth = this.cards[0].offsetWidth;
+        const gap = {{ block.settings.card_gap }};
+        this.track.scrollBy({
+          left: -(cardWidth + gap),
+          behavior: 'smooth'
+        });
+      }
+
+      scrollNext() {
+        const cardWidth = this.cards[0].offsetWidth;
+        const gap = {{ block.settings.card_gap }};
+        this.track.scrollBy({
+          left: cardWidth + gap,
+          behavior: 'smooth'
+        });
+      }
+    }
+
+    customElements.define('premium-carousel-{{ ai_gen_id }}', PremiumCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Premium image carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 63
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 96
+    },
+    {
+      "type": "header",
+      "content": "Card 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "card_1_heading",
+      "label": "Heading",
+      "default": "Premium quality"
+    },
+    {
+      "type": "textarea",
+      "id": "card_1_text",
+      "label": "Text",
+      "default": "Discover our curated collection of luxury products designed for the modern lifestyle."
+    },
+    {
+      "type": "text",
+      "id": "card_1_button_label",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "card_1_button_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "header",
+      "content": "Card 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "card_2_heading",
+      "label": "Heading",
+      "default": "Exclusive designs"
+    },
+    {
+      "type": "textarea",
+      "id": "card_2_text",
+      "label": "Text",
+      "default": "Each piece is carefully crafted to bring elegance and sophistication to your space."
+    },
+    {
+      "type": "text",
+      "id": "card_2_button_label",
+      "label": "Button label",
+      "default": "Explore"
+    },
+    {
+      "type": "url",
+      "id": "card_2_button_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "header",
+      "content": "Card 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "card_3_heading",
+      "label": "Heading",
+      "default": "Timeless elegance"
+    },
+    {
+      "type": "textarea",
+      "id": "card_3_text",
+      "label": "Text",
+      "default": "Experience the perfect blend of classic design and contemporary style."
+    },
+    {
+      "type": "text",
+      "id": "card_3_button_label",
+      "label": "Button label",
+      "default": "Learn more"
+    },
+    {
+      "type": "url",
+      "id": "card_3_button_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "text",
+      "id": "card_shadow",
+      "label": "Shadow",
+      "default": "0 20px 60px rgba(0,0,0,0.18), 0 6px 20px rgba(0,0,0,0.10)"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 90
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "label": "Content padding",
+      "min": 8,
+      "max": 32,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Heading style"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 26
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Text style"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Button style"
+    },
+    {
+      "type": "font_picker",
+      "id": "button_font",
+      "label": "Font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Background",
+      "default": "#dedede"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text color",
+      "default": "#aa7d44"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    }
+  ],
+  "presets": [
+    {
+      "name": "Premium image carousel"
+    }
+  ]
+}
+{% endschema %}

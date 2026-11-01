@@ -1,0 +1,431 @@
+{% doc %}
+  @prompt
+    Task: Create a "Full-Height Hero" where the image occupies the maximum vertical space possible, leaving zero padding at the top and bottom.
+    
+    1. Space & Alignment (The Fix):
+    
+    Height: Force the section to exactly 100vh.
+    
+    Paddings: Set Top Padding to 0 and Bottom Padding to 0.
+    
+    Vertical Stretch: Align the content to occupy the entire vertical height. Ensure there is no empty space between the header and this section.
+    
+    2. Image Scale:
+    
+    Main Visual: Place a transparent product image in the center.
+    
+    Size Instruction: Set the image to "Fill Height" or "Large". The product must appear to almost touch the top and the bottom of the screen to eliminate white gaps.
+    
+    Constraint: No titles, no subtitles, no background elements.
+    
+    3. Scroll Indicator (Anchored):
+    
+    Position: Anchor the "VER MÁS" text and the arrow icon to the absolute bottom of the section.
+    
+    Design: Minimalist downward arrow with a slow, continuous pulsing animation.
+    
+    Typography: Use a clean, sans-serif font for "VER MÁS" with wide letter-spacing.
+    
+    4. Styling:
+    
+    Background: Pure White (#FFFFFF).
+    
+    Minimalism: Ensure the design feels like a full-screen application interface, not a standard website section., Task: Reconfigure the "Full Height Hero" to eliminate all excessive empty white space around the image. The section must be a tight, vertically compact container focused entirely on the image and the bottom indicator.
+    
+    1. Forced Layout Reset (The Spacing Fix):
+    
+    Zero Margin & Padding: Apply margin: 0 !important;, padding: 0 !important;, and line-height: 0; to the main section and all its inner containers.
+    
+    Container Sizing: Set the container's height to be determined by its content (e.g., height: auto), not a forced 100vh canvas. It must shrink-wrap the image.
+    
+    2. Maximum Image Impact:
+    
+    Content Ocupancy: Use the image of the person holding the checkered bag. Set its height to occupy 90-95% of the entire section's vertical height, reducing empty padding to near zero. Use object-fit: contain and ensure it has no internal padding.
+    
+    Constraint: DO NOT add any background text, decorative overlays, titles, descriptions, or "Explore" buttons within this section.
+    
+    3. Minimalist Footer Indicator (No Offset):
+    
+    Position: Absolute bottom center, anchored at bottom: 5px from the very edge of the container. It must have zero internal padding.
+    
+    Components: A small, sleek downward-pointing arrow and the text "VER MÁS".
+    
+    Typography: Small, clean, sans-serif, uppercase with wide 5px letter-spacing.
+    
+    Animation: Apply a subtle "Bobbing" effect to the arrow icon without adding vertical space.
+    
+    4. High-End Aesthetic:
+    
+    Background: Pure Solid White (#FFFFFF).
+    
+    Hardware Acceleration: Use transform: translate3d(0,0,0) to ensure smooth performance on mobile.
+    
+    Fade-in: Ensure the image has a soft opacity: 0 to opacity: 1 fade-in transition upon loading.
+    
+    5. Technical: Use the unique CSS prefix .compact-visual-hero-. Force the removal of any "Section Padding" settings from the Shopify theme editor.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .compact-visual-hero-{{ ai_gen_id }} {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: auto;
+    background-color: {{ block.settings.background_color }};
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0;
+    overflow: hidden;
+  }
+
+  .compact-visual-hero-container-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .compact-visual-hero-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .compact-visual-hero-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    max-height: {{ block.settings.image_max_height }}vh;
+    object-fit: contain;
+    display: block;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0;
+    animation: compact-visual-hero-fadein-{{ ai_gen_id }} {{ block.settings.fade_duration }}s ease-in-out forwards;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .compact-visual-hero-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .compact-visual-hero-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    max-width: 500px;
+    max-height: 500px;
+  }
+
+.compact-visual-hero-scroll-indicator-{{ ai_gen_id }} {
+  position: absolute;
+  bottom: {{ block.settings.indicator_bottom_spacing }}px;
+  left: 50%;
+  transform: translateX(-50%) translate3d(0, 0, 0);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0px;  ← AQUÍ ESTÁ
+  z-index: 10;
+  margin: 0 !important;
+  padding: -30px 16px;
+  min-width: max-content;
+  white-space: nowrap;
+}
+
+  .compact-visual-hero-scroll-text-{{ ai_gen_id }} {
+    font-family: {{ block.settings.indicator_font.family }}, {{ block.settings.indicator_font.fallback_families }};
+    font-weight: {{ block.settings.indicator_font.weight }};
+    font-size: {{ block.settings.indicator_text_size }}px;
+    color: {{ block.settings.indicator_color }};
+    letter-spacing: {{ block.settings.letter_spacing }}px;
+    text-transform: uppercase;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1;
+  }
+
+  .compact-visual-hero-scroll-arrow-{{ ai_gen_id }} {
+    width: {{ block.settings.arrow_size }}px;
+    height: {{ block.settings.arrow_size }}px;
+    color: {{ block.settings.indicator_color }};
+    margin: 0 !important;
+    padding: 0 !important;
+    animation: compact-visual-hero-bob-{{ ai_gen_id }} {{ block.settings.animation_speed }}s ease-in-out infinite;
+    transform: translate3d(0, 0, 0);
+  }
+
+  @keyframes compact-visual-hero-fadein-{{ ai_gen_id }} {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes compact-visual-hero-bob-{{ ai_gen_id }} {
+    0%, 100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(0, 6px, 0);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .compact-visual-hero-scroll-text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.indicator_text_size | times: 0.8 }}px;
+    }
+
+    .compact-visual-hero-scroll-arrow-{{ ai_gen_id }} {
+      width: {{ block.settings.arrow_size | times: 0.8 }}px;
+      height: {{ block.settings.arrow_size | times: 0.8 }}px;
+    }
+
+    .compact-visual-hero-image-{{ ai_gen_id }} {
+      max-height: {{ block.settings.image_max_height_mobile }}vh;
+    }
+  }
+{% endstyle %}
+
+<compact-visual-hero-{{ ai_gen_id }}
+  class="compact-visual-hero-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="compact-visual-hero-container-{{ ai_gen_id }}">
+    <div class="compact-visual-hero-image-wrapper-{{ ai_gen_id }}">
+      {% if block.settings.hero_image %}
+        <img
+          src="{{ block.settings.hero_image | image_url: width: 2000 }}"
+          alt="{{ block.settings.hero_image.alt | escape }}"
+          loading="eager"
+          width="{{ block.settings.hero_image.width }}"
+          height="{{ block.settings.hero_image.height }}"
+          class="compact-visual-hero-image-{{ ai_gen_id }}"
+        >
+      {% else %}
+        <div class="compact-visual-hero-placeholder-{{ ai_gen_id }}">
+          {{ 'product-1' | placeholder_svg_tag }}
+        </div>
+      {% endif %}
+    </div>
+
+    {% if block.settings.show_scroll_indicator %}
+      <div class="compact-visual-hero-scroll-indicator-{{ ai_gen_id }}">
+        <p class="compact-visual-hero-scroll-text-{{ ai_gen_id }}">{{ block.settings.scroll_text }}</p>
+        <svg
+          class="compact-visual-hero-scroll-arrow-{{ ai_gen_id }}"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+    {% endif %}
+  </div>
+</compact-visual-hero-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CompactVisualHero{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.optimizeRendering();
+      }
+
+      optimizeRendering() {
+        const image = this.querySelector('.compact-visual-hero-image-{{ ai_gen_id }}');
+        if (image) {
+          image.style.willChange = 'opacity';
+          image.addEventListener('load', () => {
+            setTimeout(() => {
+              image.style.willChange = 'auto';
+            }, {{ block.settings.fade_duration | times: 1000 }});
+          });
+        }
+      }
+    }
+
+    customElements.define('compact-visual-hero-{{ ai_gen_id }}', CompactVisualHero{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Compact visual hero",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero image"
+    },
+    {
+      "type": "range",
+      "id": "image_max_height",
+      "label": "Max height (desktop)",
+      "min": 70,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "default": 95
+    },
+    {
+      "type": "range",
+      "id": "image_max_height_mobile",
+      "label": "Max height (mobile)",
+      "min": 70,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "default": 90
+    },
+    {
+      "type": "range",
+      "id": "fade_duration",
+      "label": "Fade in duration",
+      "min": 0.5,
+      "max": 3,
+      "step": 0.5,
+      "unit": "s",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Scroll indicator"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_scroll_indicator",
+      "label": "Show scroll indicator",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "scroll_text",
+      "label": "Scroll text",
+      "default": "VER MÁS"
+    },
+    {
+      "type": "font_picker",
+      "id": "indicator_font",
+      "label": "Font",
+      "default": "sans-serif"
+    },
+    {
+      "type": "range",
+      "id": "indicator_text_size",
+      "label": "Text size",
+      "min": 8,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "arrow_size",
+      "label": "Arrow size",
+      "min": 12,
+      "max": 56,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "indicator_color",
+      "label": "Indicator color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "indicator_bottom_spacing",
+      "label": "Bottom spacing",
+      "min": -20,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "indicator_left_position",
+      "label": "Horizontal position",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "color",
+      "id": "indicator_bg_color",
+      "label": "Button background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "animation_speed",
+      "label": "Animation speed",
+      "min": 1,
+      "max": 4,
+      "step": 0.5,
+      "unit": "s",
+      "default": 2
+    }
+  ],
+  "presets": [
+    {
+      "name": "Compact visual hero"
+    }
+  ]
+}
+{% endschema %}

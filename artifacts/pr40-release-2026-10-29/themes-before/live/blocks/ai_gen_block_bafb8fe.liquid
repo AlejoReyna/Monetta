@@ -1,0 +1,616 @@
+{% doc %}
+  @prompt
+    Create a Shopify OS 2.0 block called "Vertical Timeline Accordion" with a premium, interactive design. Full requirements:
+    
+    Layout & Frame: Each timeline entry must have a visible card frame (rounded corners 12px, subtle border 1px solid #ece9e3, soft box-shadow 0 2px 16px rgba(0,0,0,0.06)) wrapping the content. Inside each card: an optional image (full-width, object-fit: cover, max-height 220px, border-radius 8px), a date/year label (uppercase, spaced, muted), a title, and a description. Generous internal padding (1.5rem 1.75rem).
+    
+    Timeline line: A vertical connector line (1px, color #d4d0cb) runs on the left side through all entries. Each entry has a dot/circle marker. The dot is fully configurable via theme editor settings: size (range 8–32px, default 14px), fill color, border color, and border width (1–4px). Dot position is centered on the line. When an entry becomes visible via scroll, optionally apply a pulse animation (configurable: pulse / none).
+    
+    Scroll-reveal: Each entry uses IntersectionObserver (no external libraries) to fade in (opacity 0→1) and slide up (translateY 20px→0) with 0.5s ease transition. Entries animate sequentially — only when they enter the viewport.
+    
+    Accordion behavior: Only the first entry is visible by default. All remaining entries are hidden (display: none). A "Ver más" button appears below, centered, styled as a pill (border-radius: 999px, border: 1px solid #ccc, uppercase, spaced text). The chevron arrow icon is placed below the button text (stacked vertically using flex-direction: column), not inline. On click: hidden entries are shown one by one with a staggered reveal (80ms delay per entry index) using IntersectionObserver. Button label changes to "Ver menos" and chevron rotates 180°. Clicking again collapses all extra entries and resets their visibility state.
+    
+    Style: Minimalist and editorial. Clean sans-serif typography. Neutral palette. Premium spa-like feel with generous whitespace. No decorative elements beyond the timeline line and dots.
+    
+    Theme editor settings:
+    
+    Section heading (text)
+    Dot size (range: 8–32px, step 2, default 14px)
+    Dot color (color picker, default #2a2a2a)
+    Dot border color (color picker, default #d4d0cb)
+    Dot border width (range: 1–4px, step 1, default 2px)
+    Dot animation (select: none / pulse)
+    Up to 6 timeline entries as nested blocks (type: timeline_entry), each with: image_picker, date/year text, entry title, entry description (textarea)
+    Technical requirements:
+    
+    All JS scoped inside an IIFE using block.id (converted to safe variable name) so multiple instances work independently on the same page
+    CSS inside a scoped <style> tag using #tl-{{ bid }} as root selector with CSS custom properties for dot size, color, border
+    Pulse animation defined as a scoped @keyframes block, only injected when dot_animation == 'pulse' (using Liquid {% if %})
+    No external JS or CSS dependencies
+    Compatible with Shopify OS 2.0 (block schema with "target": "section", "presets" array, max 6 blocks)
+    Schema at the bottom of the file in {% schema %} JSON... el bloque tiene j  problema y es quw duando le das a ver mas, no se muestran las demas tarjetas, corrigelo
+{% enddoc %}
+{% assign bid = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  #tl-{{ bid }} {
+    --dot-size: {{ block.settings.dot_size }}px;
+    --dot-color: {{ block.settings.dot_color }};
+    --dot-border-color: {{ block.settings.dot_border_color }};
+    --dot-border-width: {{ block.settings.dot_border_width }}px;
+    --line-color: #d4d0cb;
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  #tl-{{ bid }} .tl-heading {
+    font-family: {{ settings.type_heading_font.family }}, {{ settings.type_heading_font.fallback_families }};
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    text-align: center;
+    color: #2a2a2a;
+  }
+
+  #tl-{{ bid }} .tl-container {
+    position: relative;
+    padding-left: 3rem;
+  }
+
+  #tl-{{ bid }} .tl-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--line-color);
+  }
+
+  #tl-{{ bid }} .tl-entry {
+    position: relative;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  #tl-{{ bid }} .tl-entry.tl-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  #tl-{{ bid }} .tl-entry.tl-hidden {
+    display: none;
+  }
+
+  #tl-{{ bid }} .tl-dot {
+    position: absolute;
+    left: calc(-3rem - var(--dot-size) / 2 + 0.5px);
+    top: 1.75rem;
+    width: var(--dot-size);
+    height: var(--dot-size);
+    border-radius: 50%;
+    background-color: var(--dot-color);
+    border: var(--dot-border-width) solid var(--dot-border-color);
+    z-index: 2;
+  }
+
+  {% if block.settings.dot_animation == 'pulse' %}
+  #tl-{{ bid }} .tl-entry.tl-visible .tl-dot {
+    animation: tl-pulse-{{ bid }} 1.5s ease-in-out;
+  }
+
+  @keyframes tl-pulse-{{ bid }} {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 0.7;
+    }
+  }
+  {% endif %}
+
+  #tl-{{ bid }} .tl-card {
+    background: #ffffff;
+    border: 1px solid #ece9e3;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+    padding: 1.5rem 1.75rem;
+    overflow: hidden;
+  }
+
+  #tl-{{ bid }} .tl-image {
+    width: calc(100% + 3.5rem);
+    margin: -1.5rem -1.75rem 1.25rem;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+  }
+
+  #tl-{{ bid }} .tl-date {
+    font-family: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }};
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #999;
+    margin-bottom: 0.5rem;
+  }
+
+  #tl-{{ bid }} .tl-title {
+    font-family: {{ settings.type_heading_font.family }}, {{ settings.type_heading_font.fallback_families }};
+    font-size: 20px;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+
+  #tl-{{ bid }} .tl-description {
+    font-family: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }};
+    font-size: 14px;
+    line-height: 1.6;
+    color: #555;
+  }
+
+  #tl-{{ bid }} .tl-toggle-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 3rem auto 0;
+    padding: 0.75rem 2rem;
+    background: transparent;
+    border: 1px solid #ccc;
+    border-radius: 999px;
+    font-family: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }};
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  #tl-{{ bid }} .tl-toggle-btn:hover {
+    border-color: #999;
+    color: #2a2a2a;
+  }
+
+  #tl-{{ bid }} .tl-chevron {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.3s ease;
+  }
+
+  #tl-{{ bid }} .tl-toggle-btn.tl-expanded .tl-chevron {
+    transform: rotate(180deg);
+  }
+
+  @media screen and (max-width: 749px) {
+    #tl-{{ bid }} {
+      width: 100%;
+    }
+
+    #tl-{{ bid }} .tl-container {
+      padding-left: 2rem;
+    }
+
+    #tl-{{ bid }} .tl-dot {
+      left: calc(-2rem - var(--dot-size) / 2 + 0.5px);
+    }
+
+    #tl-{{ bid }} .tl-card {
+      padding: 1.25rem 1.5rem;
+    }
+
+    #tl-{{ bid }} .tl-image {
+      width: calc(100% + 3rem);
+      margin: -1.25rem -1.5rem 1rem;
+    }
+  }
+{% endstyle %}
+
+<timeline-accordion-{{ bid }} id="tl-{{ bid }}" {{ block.shopify_attributes }}>
+  {% if block.settings.section_heading != blank %}
+    <h2 class="tl-heading">{{ block.settings.section_heading }}</h2>
+  {% endif %}
+
+  <div class="tl-container">
+    <div class="tl-line"></div>
+
+    {% for i in (1..6) %}
+      {% assign image_key = 'entry_' | append: i | append: '_image' %}
+      {% assign date_key = 'entry_' | append: i | append: '_date' %}
+      {% assign title_key = 'entry_' | append: i | append: '_title' %}
+      {% assign desc_key = 'entry_' | append: i | append: '_description' %}
+
+      {% assign entry_image = block.settings[image_key] %}
+      {% assign entry_date = block.settings[date_key] %}
+      {% assign entry_title = block.settings[title_key] %}
+      {% assign entry_description = block.settings[desc_key] %}
+
+      {% if entry_title != blank or entry_description != blank %}
+        <div 
+          class="tl-entry {% if i > 1 %}tl-hidden{% endif %}" 
+          data-entry-index="{{ i }}"
+        >
+          <div class="tl-dot"></div>
+          <div class="tl-card">
+            {% if entry_image != blank %}
+              <img 
+                src="{{ entry_image | image_url: width: 800 }}" 
+                alt="{{ entry_title | escape }}"
+                class="tl-image"
+                loading="lazy"
+                width="800"
+                height="220"
+              >
+            {% endif %}
+
+            {% if entry_date != blank %}
+              <div class="tl-date">{{ entry_date }}</div>
+            {% endif %}
+
+            {% if entry_title != blank %}
+              <h3 class="tl-title">{{ entry_title }}</h3>
+            {% endif %}
+
+            {% if entry_description != blank %}
+              <div class="tl-description">{{ entry_description }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <button class="tl-toggle-btn" aria-expanded="false" style="display: none;">
+    <span class="tl-toggle-text">Ver más</span>
+    <svg class="tl-chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="2,4 6,8 10,4"></polyline>
+    </svg>
+  </button>
+</timeline-accordion-{{ bid }}>
+
+<script>
+(function() {
+  class TimelineAccordion{{ bid }} extends HTMLElement {
+    constructor() {
+      super();
+      this.entries = Array.from(this.querySelectorAll('.tl-entry'));
+      this.toggleBtn = this.querySelector('.tl-toggle-btn');
+      this.toggleText = this.querySelector('.tl-toggle-text');
+      this.isExpanded = false;
+      this.observer = null;
+    }
+
+    connectedCallback() {
+      this.setupIntersectionObserver();
+      
+      if (this.entries.length > 1 && this.toggleBtn) {
+        this.toggleBtn.style.display = 'flex';
+        this.toggleBtn.addEventListener('click', () => this.handleToggle());
+      }
+
+      this.revealVisibleEntries();
+    }
+
+    setupIntersectionObserver() {
+      const options = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.2
+      };
+
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('tl-visible');
+          }
+        });
+      }, options);
+    }
+
+    revealVisibleEntries() {
+      this.entries.forEach((entry, index) => {
+        if (index === 0 || !entry.classList.contains('tl-hidden')) {
+          this.observer.observe(entry);
+        }
+      });
+    }
+
+    handleToggle() {
+      this.isExpanded = !this.isExpanded;
+      this.toggleBtn.classList.toggle('tl-expanded', this.isExpanded);
+      this.toggleBtn.setAttribute('aria-expanded', this.isExpanded);
+
+      if (this.isExpanded) {
+        this.toggleText.textContent = 'Ver menos';
+        this.expandEntries();
+      } else {
+        this.toggleText.textContent = 'Ver más';
+        this.collapseEntries();
+      }
+    }
+
+    expandEntries() {
+      this.entries.forEach((entry, index) => {
+        if (index > 0) {
+          setTimeout(() => {
+            entry.classList.remove('tl-hidden');
+            entry.style.display = 'block';
+            
+            requestAnimationFrame(() => {
+              this.observer.observe(entry);
+            });
+          }, index * 80);
+        }
+      });
+    }
+
+    collapseEntries() {
+      this.entries.forEach((entry, index) => {
+        if (index > 0) {
+          entry.classList.add('tl-hidden');
+          entry.classList.remove('tl-visible');
+          entry.style.opacity = '0';
+          entry.style.transform = 'translateY(20px)';
+          
+          setTimeout(() => {
+            entry.style.display = 'none';
+          }, 500);
+        }
+      });
+    }
+
+    disconnectedCallback() {
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+    }
+  }
+
+  customElements.define('timeline-accordion-{{ bid }}', TimelineAccordion{{ bid }});
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Timeline accordion",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_heading",
+      "label": "Section heading",
+      "default": "Our Journey"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Timeline dot"
+    },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "label": "Dot size",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "Dot color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "dot_border_color",
+      "label": "Dot border color",
+      "default": "#d4d0cb"
+    },
+    {
+      "type": "range",
+      "id": "dot_border_width",
+      "label": "Dot border width",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "select",
+      "id": "dot_animation",
+      "label": "Dot animation",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "pulse",
+          "label": "Pulse"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "Entry 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_1_date",
+      "label": "Date or year",
+      "default": "2020"
+    },
+    {
+      "type": "text",
+      "id": "entry_1_title",
+      "label": "Title",
+      "default": "The Beginning"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_1_description",
+      "label": "Description",
+      "default": "Our story started with a simple idea and a passion for excellence."
+    },
+    {
+      "type": "header",
+      "content": "Entry 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_2_date",
+      "label": "Date or year",
+      "default": "2022"
+    },
+    {
+      "type": "text",
+      "id": "entry_2_title",
+      "label": "Title",
+      "default": "Growth & Expansion"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_2_description",
+      "label": "Description",
+      "default": "We expanded our reach and welcomed new team members to our family."
+    },
+    {
+      "type": "header",
+      "content": "Entry 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_3_date",
+      "label": "Date or year",
+      "default": "2024"
+    },
+    {
+      "type": "text",
+      "id": "entry_3_title",
+      "label": "Title",
+      "default": "Innovation"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_3_description",
+      "label": "Description",
+      "default": "Launched groundbreaking products that changed the industry landscape."
+    },
+    {
+      "type": "header",
+      "content": "Entry 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_4_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_4_date",
+      "label": "Date or year",
+      "default": "2026"
+    },
+    {
+      "type": "text",
+      "id": "entry_4_title",
+      "label": "Title",
+      "default": "Looking Forward"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_4_description",
+      "label": "Description",
+      "default": "Continuing to push boundaries and create exceptional experiences."
+    },
+    {
+      "type": "header",
+      "content": "Entry 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_5_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_5_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_5_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_5_description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Entry 6"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_6_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_6_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_6_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_6_description",
+      "label": "Description"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Timeline accordion"
+    }
+  ]
+}
+{% endschema %}

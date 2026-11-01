@@ -1,0 +1,515 @@
+{% doc %}
+  @prompt
+    Directives for Shopify UI Generation - Modern "About Us" Section:
+    
+    Task: Create a minimalist and elegant "About Us" section with a split-screen layout (Image on the left, Text on the right).
+    
+    1. Layout Architecture:
+    
+    Desktop: Use a 2-column flex or grid layout. The left column contains a large image, and the right column contains the text and buttons.
+    
+    Mobile: The layout must automatically stack vertically (Image on top, Text below).
+    
+    Centering: The entire section should be centered with a max-width: 1200px and a clean margin: 0 auto.
+    
+    2. Left Column (The Visual):
+    
+    Image Styling: The image must have a 32px border-radius to match the previous collection cards.
+    
+    Aspect Ratio: Use a vertical 4:5 or 2:3 ratio for the image to give it a "magazine editorial" look.
+    
+    Overflow: Ensure overflow: hidden is applied to keep the corners clean.
+    
+    3. Right Column (The Content):
+    
+    Alignment: Vertically center the text within the column. Add generous padding (40px) so the text doesn't touch the image.
+    
+    Typography: Use an elegant Serif font for the headline (e.g., "Nuestra Historia") and a clean Sans-Serif for the body text.
+    
+    Hierarchy: Include a small "Kicker" text in all caps (e.g., "SOBRE NOSOTROS") above the main title.
+    
+    4. Dual Button Design:
+    
+    Layout: Place two buttons side-by-side at the bottom of the text column.
+    
+    Button Styles: >     * Primary Button: Solid minimalist design with a subtle border-radius: 12px.
+    
+    Secondary Button: Outlined (ghost) style with the same border-radius.
+    
+    Typography: Use small, uppercase letters with wide letter-spacing for the button labels.
+    
+    5. Aesthetics:
+    
+    Background: Pure white (#FFFFFF) or an extremely light off-white (#FAFAFA) for subtle contrast.
+    
+    Spacing: Add a large margin-bottom: 60px to separate this section from the rest of the page.
+    
+    6. Technical: Use the CSS prefix .about-us-lux-. No horizontal scroll; ensure 100% responsiveness., HAZ LOS BOTONES MAS FINOS, CON LOS BORDES MAS CURVOS, TAMBIEN HAZ QUE EL TEXTO ESTE CENTRADO EN CADA BOTON, LOS DOS BOTONES SOLO TIENEN EL CONTORNO MARCADO EN NEGRO Y EL FONDO BLANCO
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .about-us-lux-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.section_padding }}px 20px;
+    margin-bottom: 60px;
+  }
+
+  .about-us-lux-container-{{ ai_gen_id }} {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: {{ block.settings.column_gap }}px;
+    align-items: center;
+  }
+
+  .about-us-lux-image-column-{{ ai_gen_id }} {
+    width: 100%;
+  }
+
+  .about-us-lux-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    aspect-ratio: {{ block.settings.image_aspect_ratio }};
+    border-radius: 32px;
+    overflow: hidden;
+  }
+
+  .about-us-lux-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .about-us-lux-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .about-us-lux-image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .about-us-lux-text-column-{{ ai_gen_id }} {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: {{ block.settings.text_spacing }}px;
+  }
+
+  .about-us-lux-kicker-{{ ai_gen_id }} {
+    font-family: {{ block.settings.kicker_font }}, sans-serif;
+    font-size: {{ block.settings.kicker_size }}px;
+    color: {{ block.settings.kicker_color }};
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+  }
+
+  .about-us-lux-title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font }}, serif;
+    font-size: {{ block.settings.title_size }}px;
+    line-height: 1.1;
+    color: {{ block.settings.title_color }};
+    margin: 0;
+  }
+
+  .about-us-lux-description-{{ ai_gen_id }} {
+    font-family: {{ block.settings.body_font }}, sans-serif;
+    font-size: {{ block.settings.body_size }}px;
+    line-height: 1.6;
+    color: {{ block.settings.body_color }};
+    margin: 0;
+  }
+
+  .about-us-lux-buttons-{{ ai_gen_id }} {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+  }
+
+  .about-us-lux-button-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 28px;
+    font-family: {{ block.settings.button_font }}, sans-serif;
+    font-size: {{ block.settings.button_size }}px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-decoration: none;
+    border-radius: 24px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background-color: {{ block.settings.button_bg }};
+    color: {{ block.settings.button_text }};
+    border: 1px solid {{ block.settings.button_border }};
+  }
+
+  .about-us-lux-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_bg }};
+    color: {{ block.settings.button_hover_text }};
+    border-color: {{ block.settings.button_hover_border }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .about-us-lux-container-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    .about-us-lux-text-column-{{ ai_gen_id }} {
+      padding: 0;
+    }
+
+    .about-us-lux-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.6 }}px;
+    }
+
+    .about-us-lux-buttons-{{ ai_gen_id }} {
+      flex-direction: column;
+    }
+
+    .about-us-lux-button-{{ ai_gen_id }} {
+      width: 100%;
+    }
+  }
+{% endstyle %}
+
+<div class="about-us-lux-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="about-us-lux-container-{{ ai_gen_id }}">
+    <div class="about-us-lux-image-column-{{ ai_gen_id }}">
+      <div class="about-us-lux-image-wrapper-{{ ai_gen_id }}">
+        {% if block.settings.image %}
+          <img
+            src="{{ block.settings.image | image_url: width: 1200 }}"
+            alt="{{ block.settings.image.alt | escape }}"
+            loading="lazy"
+            width="{{ block.settings.image.width }}"
+            height="{{ block.settings.image.height }}"
+            class="about-us-lux-image-{{ ai_gen_id }}"
+          >
+        {% else %}
+          <div class="about-us-lux-image-placeholder-{{ ai_gen_id }}">
+            {{ 'image' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="about-us-lux-text-column-{{ ai_gen_id }}">
+      {% if block.settings.kicker != blank %}
+        <p class="about-us-lux-kicker-{{ ai_gen_id }}">{{ block.settings.kicker }}</p>
+      {% endif %}
+
+      {% if block.settings.title != blank %}
+        <h2 class="about-us-lux-title-{{ ai_gen_id }}">{{ block.settings.title }}</h2>
+      {% endif %}
+
+      {% if block.settings.description != blank %}
+        <div class="about-us-lux-description-{{ ai_gen_id }}">{{ block.settings.description }}</div>
+      {% endif %}
+
+      {% if block.settings.show_buttons %}
+        <div class="about-us-lux-buttons-{{ ai_gen_id }}">
+          {% if block.settings.primary_btn_label != blank %}
+            <a
+              href="{{ block.settings.primary_btn_link }}"
+              class="about-us-lux-button-{{ ai_gen_id }}"
+            >
+              {{ block.settings.primary_btn_label }}
+            </a>
+          {% endif %}
+
+          {% if block.settings.secondary_btn_label != blank %}
+            <a
+              href="{{ block.settings.secondary_btn_link }}"
+              class="about-us-lux-button-{{ ai_gen_id }}"
+            >
+              {{ block.settings.secondary_btn_label }}
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "About us",
+  "tag": null,
+  "class": "about-us-lux-block",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Column gap",
+      "min": 20,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "Aspect ratio",
+      "options": [
+        {
+          "value": "4/5",
+          "label": "4:5 (Portrait)"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3 (Vertical)"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4 (Portrait)"
+        },
+        {
+          "value": "1/1",
+          "label": "1:1 (Square)"
+        }
+      ],
+      "default": "4/5"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker text",
+      "default": "SOBRE NOSOTROS"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Title",
+      "default": "Nuestra Historia"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Somos una marca comprometida con la excelencia y la autenticidad. Cada producto que creamos cuenta una historia de pasión, dedicación y atención al detalle.</p>"
+    },
+    {
+      "type": "range",
+      "id": "text_spacing",
+      "label": "Text spacing",
+      "min": 12,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "kicker_font",
+      "label": "Kicker font",
+      "default": "red_hat_text_n4"
+    },
+    {
+      "type": "range",
+      "id": "kicker_size",
+      "label": "Kicker size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "kicker_color",
+      "label": "Kicker color",
+      "default": "#666666"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Title font",
+      "default": "newsreader_n2"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Title size",
+      "min": 24,
+      "max": 72,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#000000"
+    },
+    {
+      "type": "font_picker",
+      "id": "body_font",
+      "label": "Body font",
+      "default": "red_hat_text_n4"
+    },
+    {
+      "type": "range",
+      "id": "body_size",
+      "label": "Body size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "body_color",
+      "label": "Body color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Buttons"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_buttons",
+      "label": "Show buttons",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "primary_btn_label",
+      "label": "Primary button label",
+      "default": "Descubre más"
+    },
+    {
+      "type": "url",
+      "id": "primary_btn_link",
+      "label": "Primary button link"
+    },
+    {
+      "type": "text",
+      "id": "secondary_btn_label",
+      "label": "Secondary button label",
+      "default": "Contáctanos"
+    },
+    {
+      "type": "url",
+      "id": "secondary_btn_link",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "font_picker",
+      "id": "button_font",
+      "label": "Button font",
+      "default": "red_hat_text_n4"
+    },
+    {
+      "type": "range",
+      "id": "button_size",
+      "label": "Button text size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Button colors"
+    },
+    {
+      "type": "color",
+      "id": "button_bg",
+      "label": "Background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_text",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_border",
+      "label": "Border",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg",
+      "label": "Hover background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text",
+      "label": "Hover text",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border",
+      "label": "Hover border",
+      "default": "#000000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "About us"
+    }
+  ]
+}
+{% endschema %}

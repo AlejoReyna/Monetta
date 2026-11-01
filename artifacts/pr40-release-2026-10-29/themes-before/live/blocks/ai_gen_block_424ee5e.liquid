@@ -1,0 +1,536 @@
+{% doc %}
+  @prompt
+    Task: Create a "Collection List" Carousel (Not Products).
+    
+    1. Content Type (Strict):
+    
+    Create a horizontal carousel that displays 3 Collections: BOLSAS, CARTERAS, and RELOJES.
+    
+    Each card must represent a Collection Link, not an individual product.
+    
+    2. Mobile Layout & Fit:
+    
+    Width: Each collection card must be 80% of the screen width.
+    
+    Centering: Position the cards in the vertical center of the section so they are not cut off at the bottom.
+    
+    The Peek: Align the cards to show a 15% preview of the next collection on the right to invite swiping.
+    
+    3. Premium Motion & Presence:
+    
+    Snappy Feel: Use an instant magnetic snap and ultra-fluid transitions.
+    
+    Pop-Up Effect: When a collection is centered, it should be full size (1.0), while the others shrink (0.9) for a high-end app feel.
+    
+    4. Elegant Aesthetic:
+    
+    Shape: 36px border-radius and white background with a soft shadow.
+    
+    Images: Use one large, transparent "hero" image per collection, centered and filling 75% of the card.
+    
+    Typography: Elegant Serif font for the collection titles (BOLSAS, CARTERAS, RELOJES) with a small button at the bottom.
+    
+    Cleanliness: Hide all scrollbars and keep 60px vertical margins.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-carousel-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    padding: 60px 0;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-collection-carousel-container-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ai-collection-carousel-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 10%;
+  }
+
+  .ai-collection-carousel-track-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-collection-carousel-card-{{ ai_gen_id }} {
+    flex: 0 0 80%;
+    scroll-snap-align: center;
+    background-color: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.border_radius }}px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-decoration: none;
+    color: {{ block.settings.text_color }};
+    position: relative;
+    min-height: 500px;
+  }
+
+  .ai-collection-carousel-card-{{ ai_gen_id }}.ai-centered-{{ ai_gen_id }} {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .ai-collection-carousel-card-{{ ai_gen_id }}:not(.ai-centered-{{ ai_gen_id }}) {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+
+  .ai-collection-carousel-image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    height: 75%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .ai-collection-carousel-image-{{ ai_gen_id }} {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .ai-collection-carousel-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4;
+    border-radius: 12px;
+  }
+
+  .ai-collection-carousel-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-collection-carousel-title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, serif;
+    font-size: {{ block.settings.title_size }}px;
+    font-weight: {{ block.settings.title_font.weight }};
+    text-align: center;
+    margin: 0 0 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .ai-collection-carousel-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    border: 1px solid {{ block.settings.button_border_color }};
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.button_font_size }}px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .ai-collection-carousel-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background }};
+    color: {{ block.settings.button_hover_text_color }};
+    border-color: {{ block.settings.button_hover_border_color }};
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-collection-carousel-{{ ai_gen_id }} {
+      width: {{ block.settings.desktop_width_percent }}%;
+      margin: 0 auto;
+    }
+
+    .ai-collection-carousel-card-{{ ai_gen_id }} {
+      flex: 0 0 {{ block.settings.desktop_card_width }}%;
+    }
+
+    .ai-collection-carousel-track-{{ ai_gen_id }} {
+      padding: 0 calc((100% - {{ block.settings.desktop_card_width }}%) / 2);
+    }
+  }
+{% endstyle %}
+
+<collection-carousel-{{ ai_gen_id }}
+  class="ai-collection-carousel-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-collection-carousel-container-{{ ai_gen_id }}">
+    <div class="ai-collection-carousel-track-{{ ai_gen_id }}" data-carousel-track>
+      {% for i in (1..3) %}
+        {% liquid
+          assign collection_key = 'collection_' | append: i
+          assign collection = block.settings[collection_key]
+        %}
+
+        {% if collection != blank %}
+          <a
+            href="{{ collection.url }}"
+            class="ai-collection-carousel-card-{{ ai_gen_id }}"
+            data-card-index="{{ forloop.index0 }}"
+          >
+            <div class="ai-collection-carousel-image-wrapper-{{ ai_gen_id }}">
+              {% if collection.featured_image %}
+                <img
+                  src="{{ collection.featured_image | image_url: width: 800 }}"
+                  alt="{{ collection.featured_image.alt | escape }}"
+                  class="ai-collection-carousel-image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="800"
+                  height="800"
+                >
+              {% else %}
+                <div class="ai-collection-carousel-placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </div>
+            <h3 class="ai-collection-carousel-title-{{ ai_gen_id }}">{{ collection.title }}</h3>
+            <span class="ai-collection-carousel-button-{{ ai_gen_id }}">
+              {{ block.settings.button_text }}
+            </span>
+          </a>
+        {% else %}
+          <div
+            class="ai-collection-carousel-card-{{ ai_gen_id }}"
+            data-card-index="{{ forloop.index0 }}"
+          >
+            <div class="ai-collection-carousel-image-wrapper-{{ ai_gen_id }}">
+              <div class="ai-collection-carousel-placeholder-{{ ai_gen_id }}">
+                {{ 'collection-1' | placeholder_svg_tag }}
+              </div>
+            </div>
+            <h3 class="ai-collection-carousel-title-{{ ai_gen_id }}">Colección {{ i }}</h3>
+            <span class="ai-collection-carousel-button-{{ ai_gen_id }}">
+              {{ block.settings.button_text }}
+            </span>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</collection-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CollectionCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.track = null;
+        this.cards = [];
+        this.currentIndex = 0;
+        this.isScrolling = false;
+        this.scrollTimeout = null;
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('[data-carousel-track]');
+        this.cards = Array.from(this.querySelectorAll('[data-card-index]'));
+        
+        if (!this.track || this.cards.length === 0) return;
+
+        this.setupCarousel();
+        this.attachEventListeners();
+        this.updateCenteredCard();
+      }
+
+      setupCarousel() {
+        this.currentIndex = 0;
+        this.scrollToCard(this.currentIndex, false);
+      }
+
+      attachEventListeners() {
+        this.track.addEventListener('scroll', this.handleScroll.bind(this));
+        
+        this.cards.forEach((card, index) => {
+          card.addEventListener('click', (e) => {
+            const cardIndex = parseInt(card.getAttribute('data-card-index'));
+            if (cardIndex !== this.currentIndex) {
+              e.preventDefault();
+              this.scrollToCard(cardIndex, true);
+            }
+          });
+        });
+      }
+
+      handleScroll() {
+        if (this.scrollTimeout) {
+          clearTimeout(this.scrollTimeout);
+        }
+
+        this.scrollTimeout = setTimeout(() => {
+          this.snapToNearestCard();
+        }, 150);
+
+        this.updateCenteredCard();
+      }
+
+      snapToNearestCard() {
+        const trackRect = this.track.getBoundingClientRect();
+        const trackCenter = trackRect.left + trackRect.width / 2;
+        
+        let closestCard = null;
+        let closestDistance = Infinity;
+
+        this.cards.forEach((card) => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const distance = Math.abs(cardCenter - trackCenter);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        if (closestCard) {
+          const newIndex = parseInt(closestCard.getAttribute('data-card-index'));
+          if (newIndex !== this.currentIndex) {
+            this.currentIndex = newIndex;
+            this.scrollToCard(this.currentIndex, true);
+          }
+        }
+      }
+
+      scrollToCard(index, smooth = true) {
+        if (index < 0 || index >= this.cards.length) return;
+
+        const card = this.cards[index];
+        const trackRect = this.track.getBoundingClientRect();
+        const cardRect = card.getBoundingClientRect();
+        
+        const scrollLeft = this.track.scrollLeft + (cardRect.left - trackRect.left) - (trackRect.width - cardRect.width) / 2;
+
+        this.track.scrollTo({
+          left: scrollLeft,
+          behavior: smooth ? 'smooth' : 'auto'
+        });
+
+        this.currentIndex = index;
+        this.updateCenteredCard();
+      }
+
+      updateCenteredCard() {
+        const trackRect = this.track.getBoundingClientRect();
+        const trackCenter = trackRect.left + trackRect.width / 2;
+
+        this.cards.forEach((card) => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const distance = Math.abs(cardCenter - trackCenter);
+          
+          if (distance < cardRect.width / 3) {
+            card.classList.add('ai-centered-{{ ai_gen_id }}');
+          } else {
+            card.classList.remove('ai-centered-{{ ai_gen_id }}');
+          }
+        });
+      }
+    }
+
+    customElements.define('collection-carousel-{{ ai_gen_id }}', CollectionCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Carrusel de colecciones",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colecciones"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Colección 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Colección 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Colección 3"
+    },
+    {
+      "type": "header",
+      "content": "Diseño"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Ancho en escritorio",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "desktop_card_width",
+      "label": "Ancho de tarjeta en escritorio",
+      "min": 30,
+      "max": 60,
+      "step": 5,
+      "unit": "%",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Espacio entre tarjetas",
+      "min": 10,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Radio de borde",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "header",
+      "content": "Colores"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Fondo de sección",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Fondo de tarjeta",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color de texto",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Título"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Fuente del título",
+      "default": "serif"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Tamaño del título",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "header",
+      "content": "Botón"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Texto del botón",
+      "default": "Ver colección"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Tamaño de fuente",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Radio de borde",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Fondo del botón",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Color de texto",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Color de borde",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Fondo al pasar",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Color de texto al pasar",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border_color",
+      "label": "Color de borde al pasar",
+      "default": "#383838"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carrusel de colecciones"
+    }
+  ]
+}
+{% endschema %}

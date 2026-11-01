@@ -1,0 +1,36 @@
+{%- liquid
+  assign predictive_language = request.locale.iso_code | slice: 0, 2
+  unless predictive_language == 'en'
+    assign predictive_language = 'es'
+  endunless
+-%}
+{{ 'monetta-predictive-search.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'monetta-predictive-search.js' | asset_url }}" type="module"></script>
+<section class="monetta-predictive-section" aria-labelledby="monetta-predictive-heading-{{ section.id }}" lang="{{ predictive_language }}">
+  <h2 class="monetta-predictive-section__title" id="monetta-predictive-heading-{{ section.id }}">
+    {%- if section.settings.heading != blank -%}
+      <span lang="{{ request.locale.iso_code | escape }}">{{ section.settings.heading | escape }}</span>
+    {%- else -%}
+      {% render 'monetta-predictive-copy', key: 'section' %}
+    {%- endif -%}
+  </h2>
+  {% render 'monetta-predictive-search',
+    instance_id: section.id,
+    placeholder: section.settings.placeholder,
+    limit: section.settings.limit,
+    recent_limit: section.settings.recent_limit,
+    include_assets: false
+  %}
+</section>
+{% schema %}
+{
+  "name": "Monetta · Predictivo",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Título (opcional)" },
+    { "type": "text", "id": "placeholder", "label": "Texto del campo (opcional)" },
+    { "type": "range", "id": "limit", "label": "Productos sugeridos", "min": 1, "max": 10, "step": 1, "default": 6 },
+    { "type": "range", "id": "recent_limit", "label": "Búsquedas recientes (0 desactiva)", "min": 0, "max": 10, "step": 1, "default": 5 }
+  ],
+  "presets": [{ "name": "Monetta · Predictivo" }]
+}
+{% endschema %}

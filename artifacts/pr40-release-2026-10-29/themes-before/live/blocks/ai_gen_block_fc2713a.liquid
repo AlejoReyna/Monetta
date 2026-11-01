@@ -1,0 +1,467 @@
+{% doc %}
+  @prompt
+    Create a new custom liquid block called "Nuevos productos carrusel". Display all store products sorted by newest first using collections.all.products with sort_by: created-descending. Do NOT use a collection picker.
+    
+    Carousel behavior (HORIZONTAL only):
+    
+    Single horizontal row, user swipes LEFT/RIGHT
+    On mobile: 2 cards visible side by side
+    On desktop: 4 cards visible side by side
+    display: flex; flex-direction: row; overflow-x: auto;
+    scroll-snap-type: x mandatory on container, scroll-snap-align: start on each card
+    Hide scrollbar visually, keep scroll functional
+    Carousel container padding controlled by carousel_padding setting so shadows never get clipped
+    Image format:
+    
+    All product images must display in 3:4 portrait ratio (width: 100%, padding-top: 133.33%, position relative with image absolute inside)
+    object-fit: cover to fill the frame without distortion
+    Image container border-radius matches card_border_radius setting
+    Card design:
+    
+    Card width: 45vw on mobile, 22% on desktop
+    White background (controlled by setting)
+    Internal padding controlled by card_padding setting
+    Border-radius controlled by card_border_radius setting
+    Box-shadow fully controlled by settings (color, opacity, blur, spread, offset X, offset Y)
+    Smooth hover shadow transition on desktop
+    Theme editor settings (ALL editable in sidebar):
+    
+    Section heading:
+    
+    heading_text — Section title text (default: "Nuevos productos")
+    heading_color — Title color (color picker)
+    heading_size — Font size px (range 16–48, default 24)
+    heading_alignment — Text alignment: left / center / right (select)
+    Card texts:
+    
+    card_title_color — Product title color (color picker)
+    card_title_size — Product title font size px (range 12–24, default 14)
+    card_price_color — Price color (color picker)
+    card_price_size — Price font size px (range 12–22, default 14)
+    card_vendor_color — Vendor/brand color (color picker)
+    show_price — Show/hide price (checkbox, default true)
+    show_vendor — Show/hide vendor (checkbox, default false)
+    Card shadow (full control):
+    
+    shadow_color — Shadow color (color picker, default #000000)
+    shadow_opacity — Opacity 0–30 (range, default 8)
+    shadow_offset_x — Horizontal offset px (range -20 to 20, default 0)
+    shadow_offset_y — Vertical offset px (range 0–30, default 4)
+    shadow_blur — Blur radius px (range 0–60, default 12)
+    shadow_spread — Spread radius px (range -10 to 20, default 0)
+    Card layout:
+    
+    card_background — Card background color (color picker)
+    card_border_radius — Corner radius px (range 0–24, default 12)
+    card_padding — Internal padding px (range 8–32, default 12)
+    carousel_padding — Outer carousel padding px (range 8–40, default 20)
+    products_to_show — Number of products (range 4–24, default 8)
+    Important:
+    
+    Images MUST be 3:4 portrait ratio, never square or landscape
+    All colors, shadow values, font sizes, and spacing must come exclusively from theme settings — no hardcoded values in CSS
+    Layout must always be horizontal, never vertical or grid
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-nuevos-productos-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: 40px 0;
+  }
+
+  .ai-nuevos-productos-heading-{{ ai_gen_id }} {
+    margin: 0 0 24px;
+    padding: 0 {{ block.settings.carousel_padding }}px;
+    color: {{ block.settings.heading_color }};
+    font-size: {{ block.settings.heading_size }}px;
+    text-align: {{ block.settings.heading_alignment }};
+  }
+
+  .ai-nuevos-productos-carousel-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 16px;
+    padding: 0 {{ block.settings.carousel_padding }}px {{ block.settings.carousel_padding }}px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ai-nuevos-productos-carousel-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-nuevos-productos-card-{{ ai_gen_id }} {
+    flex: 0 0 45vw;
+    scroll-snap-align: start;
+    background-color: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    padding: {{ block.settings.card_padding }}px;
+    text-decoration: none;
+    display: block;
+    {% assign shadow_opacity_decimal = block.settings.shadow_opacity | divided_by: 100.0 %}
+    {% assign shadow_color_rgb = block.settings.shadow_color | color_to_rgb | remove: 'rgb(' | remove: ')' %}
+    box-shadow: {{ block.settings.shadow_offset_x }}px {{ block.settings.shadow_offset_y }}px {{ block.settings.shadow_blur }}px {{ block.settings.shadow_spread }}px rgba({{ shadow_color_rgb }}, {{ shadow_opacity_decimal }});
+    transition: box-shadow 0.3s ease;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-nuevos-productos-card-{{ ai_gen_id }} {
+      flex: 0 0 22%;
+    }
+
+    .ai-nuevos-productos-card-{{ ai_gen_id }}:hover {
+      {% assign hover_opacity = block.settings.shadow_opacity | plus: 5 | divided_by: 100.0 %}
+      box-shadow: {{ block.settings.shadow_offset_x }}px {{ block.settings.shadow_offset_y | plus: 2 }}px {{ block.settings.shadow_blur | plus: 4 }}px {{ block.settings.shadow_spread }}px rgba({{ shadow_color_rgb }}, {{ hover_opacity }});
+    }
+  }
+
+  .ai-nuevos-productos-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    padding-top: 133.33%;
+    overflow: hidden;
+    border-radius: {{ block.settings.card_border_radius }}px;
+    margin-bottom: 12px;
+  }
+
+  .ai-nuevos-productos-image-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-nuevos-productos-image-placeholder-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-nuevos-productos-image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-nuevos-productos-title-{{ ai_gen_id }} {
+    margin: 0 0 8px;
+    color: {{ block.settings.card_title_color }};
+    font-size: {{ block.settings.card_title_size }}px;
+    line-height: 1.3;
+    font-weight: 500;
+  }
+
+  .ai-nuevos-productos-vendor-{{ ai_gen_id }} {
+    margin: 0 0 8px;
+    color: {{ block.settings.card_vendor_color }};
+    font-size: {{ block.settings.card_title_size | minus: 2 }}px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ai-nuevos-productos-price-{{ ai_gen_id }} {
+    margin: 0;
+    color: {{ block.settings.card_price_color }};
+    font-size: {{ block.settings.card_price_size }}px;
+    font-weight: 600;
+  }
+{% endstyle %}
+
+<nuevos-productos-carousel-{{ ai_gen_id }} class="ai-nuevos-productos-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  {% if block.settings.heading_text != blank %}
+    <h2 class="ai-nuevos-productos-heading-{{ ai_gen_id }}">{{ block.settings.heading_text }}</h2>
+  {% endif %}
+
+  <div class="ai-nuevos-productos-carousel-{{ ai_gen_id }}">
+    {% assign sorted_products = collections.all.products | sort: 'created_at' | reverse %}
+    {% for product in sorted_products limit: block.settings.products_to_show %}
+      <a href="{{ product.url }}" class="ai-nuevos-productos-card-{{ ai_gen_id }}">
+        <div class="ai-nuevos-productos-image-wrapper-{{ ai_gen_id }}">
+          {% if product.featured_image %}
+            <img
+              src="{{ product.featured_image | image_url: width: 600 }}"
+              alt="{{ product.featured_image.alt | escape }}"
+              class="ai-nuevos-productos-image-{{ ai_gen_id }}"
+              loading="lazy"
+              width="600"
+              height="800"
+            >
+          {% else %}
+            <div class="ai-nuevos-productos-image-placeholder-{{ ai_gen_id }}">
+              {{ 'product-1' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+
+        {% if block.settings.show_vendor and product.vendor != blank %}
+          <div class="ai-nuevos-productos-vendor-{{ ai_gen_id }}">{{ product.vendor }}</div>
+        {% endif %}
+
+        <h3 class="ai-nuevos-productos-title-{{ ai_gen_id }}">{{ product.title }}</h3>
+
+        {% if block.settings.show_price %}
+          <div class="ai-nuevos-productos-price-{{ ai_gen_id }}">{{ product.price | money }}</div>
+        {% endif %}
+      </a>
+    {% endfor %}
+  </div>
+</nuevos-productos-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class NuevosProductosCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.carousel = this.querySelector('.ai-nuevos-productos-carousel-{{ ai_gen_id }}');
+        if (this.carousel) {
+          this.setupAccessibility();
+        }
+      }
+
+      setupAccessibility() {
+        this.carousel.setAttribute('role', 'region');
+        this.carousel.setAttribute('aria-label', 'Nuevos productos carousel');
+      }
+    }
+
+    customElements.define('nuevos-productos-carousel-{{ ai_gen_id }}', NuevosProductosCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Nuevos productos carrusel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section heading"
+    },
+    {
+      "type": "text",
+      "id": "heading_text",
+      "label": "Heading text",
+      "default": "Nuevos productos"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Card texts"
+    },
+    {
+      "type": "color",
+      "id": "card_title_color",
+      "label": "Product title color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "card_title_size",
+      "label": "Product title size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show price",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "card_price_color",
+      "label": "Price color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "card_price_size",
+      "label": "Price size",
+      "min": 12,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "card_vendor_color",
+      "label": "Vendor color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Card shadow"
+    },
+    {
+      "type": "color",
+      "id": "shadow_color",
+      "label": "Shadow color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "label": "Shadow opacity",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "shadow_offset_x",
+      "label": "Shadow offset X",
+      "min": -20,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "shadow_offset_y",
+      "label": "Shadow offset Y",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "shadow_blur",
+      "label": "Shadow blur",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "shadow_spread",
+      "label": "Shadow spread",
+      "min": -10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Card layout"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Card padding",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "carousel_padding",
+      "label": "Carousel padding",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to show",
+      "min": 4,
+      "max": 24,
+      "step": 1,
+      "default": 8
+    }
+  ],
+  "presets": [
+    {
+      "name": "Nuevos productos carrusel"
+    }
+  ]
+}
+{% endschema %}

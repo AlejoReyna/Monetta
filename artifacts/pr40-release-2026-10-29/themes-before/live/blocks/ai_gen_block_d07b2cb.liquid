@@ -1,0 +1,252 @@
+{% doc %}
+  @prompt
+    Shopify Liquid block. Horizontally scrollable carousel with 3 cards. Each card is a full-bleed image — no text, no overlay, no background, just the image filling the entire card.
+    
+    MOBILE OVERFLOW — CRITICAL: Never cause horizontal page overflow. Custom element and wrapper must have display: block, width: 100%, max-width: 100%, overflow: hidden, margin: 0, box-sizing: border-box. Never use force-full-width, negative margins, or width: 100vw. Use if (!customElements.get(...)) guard before registering the custom element.
+    
+    CARDS: width: 80vw, max-width: 320px. aspect-ratio: 3/4 (portrait). border-radius: 24px. overflow: hidden. Image fills card completely: object-fit: cover, width: 100%, height: 100%. Zero padding inside card. No background color visible. Shadow: 0 8px 24px rgba(0,0,0,0.12), 0 24px 48px rgba(0,0,0,0.10) — creates a deep, premium floating effect.
+    
+    HOVER/TOUCH POP EFFECT: transform: translateY(-8px) scale(1.03). Shadow intensifies to 0 20px 60px rgba(0,0,0,0.20), 0 40px 80px rgba(0,0,0,0.14). Transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1) — smooth, springy, premium feel.
+    
+    CAROUSEL SCROLL: display: flex, flex-direction: row, gap: 20px, overflow-x: auto, scroll-snap-type: x mandatory, scroll-snap-stop: always, -webkit-overflow-scrolling: touch, scrollbar-width: none. Each card: scroll-snap-align: center. Wrapper padding: 24px 20px to allow shadows to breathe and never get clipped.
+    
+    SCROLL BEHAVIOR: scroll-behavior: smooth. Force scrollLeft = 0 on DOMContentLoaded, window load, setTimeout 100ms and 500ms. Never use justify-content: center or margin: auto on the scroll container.
+    
+    SETTINGS: 3 image pickers (image_1, image_2, image_3), each with a link picker (link_1, link_2, link_3). Border-radius (default 24px
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-carousel-wrapper-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    margin: 0;
+    box-sizing: border-box;
+    padding: 0;
+  }
+
+  .ai-carousel-container-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-snap-stop: always;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    padding: 24px 20px;
+    box-sizing: border-box;
+  }
+
+  .ai-carousel-container-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-carousel-card-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    width: 80vw;
+    max-width: 320px;
+    aspect-ratio: 3/4;
+    border-radius: {{ block.settings.border_radius }}px;
+    overflow: hidden;
+    scroll-snap-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 24px 48px rgba(0,0,0,0.10);
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    cursor: pointer;
+    position: relative;
+  }
+
+  .ai-carousel-card-{{ ai_gen_id }}:hover,
+  .ai-carousel-card-{{ ai_gen_id }}:active {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.20), 0 40px 80px rgba(0,0,0,0.14);
+  }
+
+  .ai-carousel-card-link-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+  }
+
+  .ai-carousel-card-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ai-carousel-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-carousel-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+{% endstyle %}
+
+<image-carousel-{{ ai_gen_id }} class="ai-carousel-wrapper-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-carousel-container-{{ ai_gen_id }}" data-carousel-container>
+    {% for i in (1..3) %}
+      {% liquid
+        assign image_key = 'image_' | append: i
+        assign link_key = 'link_' | append: i
+        assign image = block.settings[image_key]
+        assign link = block.settings[link_key]
+      %}
+      
+      <div class="ai-carousel-card-{{ ai_gen_id }}">
+        {% if link != blank %}
+          <a href="{{ link }}" class="ai-carousel-card-link-{{ ai_gen_id }}">
+            {% if image %}
+              <img
+                src="{{ image | image_url: width: 640 }}"
+                srcset="{{ image | image_url: width: 320 }} 320w, {{ image | image_url: width: 640 }} 640w"
+                sizes="(max-width: 749px) 80vw, 320px"
+                alt="{{ image.alt | escape }}"
+                width="{{ image.width }}"
+                height="{{ image.height }}"
+                loading="lazy"
+                class="ai-carousel-card-image-{{ ai_gen_id }}"
+              >
+            {% else %}
+              <div class="ai-carousel-placeholder-{{ ai_gen_id }}">
+                {{ 'image' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </a>
+        {% else %}
+          {% if image %}
+            <img
+              src="{{ image | image_url: width: 640 }}"
+              srcset="{{ image | image_url: width: 320 }} 320w, {{ image | image_url: width: 640 }} 640w"
+              sizes="(max-width: 749px) 80vw, 320px"
+              alt="{{ image.alt | escape }}"
+              width="{{ image.width }}"
+              height="{{ image.height }}"
+              loading="lazy"
+              class="ai-carousel-card-image-{{ ai_gen_id }}"
+            >
+          {% else %}
+            <div class="ai-carousel-placeholder-{{ ai_gen_id }}">
+              {{ 'image' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</image-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    if (!customElements.get('image-carousel-{{ ai_gen_id }}')) {
+      class ImageCarousel{{ ai_gen_id }} extends HTMLElement {
+        constructor() {
+          super();
+          this.container = null;
+        }
+
+        connectedCallback() {
+          this.container = this.querySelector('[data-carousel-container]');
+          if (!this.container) return;
+
+          this.resetScroll();
+
+          document.addEventListener('DOMContentLoaded', () => this.resetScroll());
+          window.addEventListener('load', () => this.resetScroll());
+          
+          setTimeout(() => this.resetScroll(), 100);
+          setTimeout(() => this.resetScroll(), 500);
+        }
+
+        resetScroll() {
+          if (this.container) {
+            this.container.scrollLeft = 0;
+          }
+        }
+      }
+
+      customElements.define('image-carousel-{{ ai_gen_id }}', ImageCarousel{{ ai_gen_id }});
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Image carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Card 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "link_1",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Card 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "link_2",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Card 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "link_3",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image carousel"
+    }
+  ]
+}
+{% endschema %}

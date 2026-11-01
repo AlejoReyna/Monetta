@@ -1,0 +1,455 @@
+{% doc %}
+  @prompt
+    Act as a Senior Frontend Developer specializing in luxury e-commerce. Generate the HTML and embedded CSS for a Shopify "Custom Liquid" section that contains ONLY a product carousel. Do not include headers, footers, or trust bars.
+    
+    Design & Aesthetic:
+    
+    Pure white background (#FFFFFF).
+    
+    Ultra-minimalist, clean, and elegant.
+    
+    Minimal typography (sans-serif like Montserrat).
+    
+    The Carousel (Core Requirement - Silky Smooth Transitions):
+    
+    I need a horizontal scrolling carousel that feels incredibly smooth and fluid on mobile devices.
+    
+    Use scroll-snap-type: x mandatory for snapping, but hide the scrollbar completely (::-webkit-scrollbar { display: none; }).
+    
+    The Smooth Effect: Implement a CSS-only coverflow-style effect. As the user scrolls, the card in the center should be fully visible (opacity: 1, transform: scale(1)). The cards on the sides should smoothly scale down (e.g., scale(0.85)) and fade slightly (opacity: 0.4).
+    
+    Hardware Acceleration: Use will-change: transform, opacity; and transform: translateZ(0); to ensure the scrolling doesn't drop frames on mobile.
+    
+    Transitions: Use a premium easing curve (e.g., transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;) so the change from one image to the next feels buttery smooth, not sudden or rigid.
+    
+    Content (Placeholders):
+    
+    Include 3 simple product cards inside the carousel.
+    
+    Card 1: Guess Bag placeholder image, brand name "GUESS", price.
+    
+    Card 2: Steve Madden Wallet placeholder image, brand name "STEVE MADDEN", price.
+    
+    Card 3: Tommy Hilfiger Watch placeholder image, brand name "TOMMY HILFIGER", price.
+    
+    The images should rest natively on the white background (no 3D boxes or pedestals, just the clean image).
+    
+    Technical restrictions:
+    
+    100% pure HTML and CSS. Do NOT use JavaScript libraries like Swiper.js or Slick.
+    
+    All CSS must be scoped within a <style> tag using unique classes (e.g., .smooth-slider-).
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .smooth-slider-container-{{ ai_gen_id }} {
+    width: 100%;
+    background-color: #FFFFFF;
+    padding: {{ block.settings.section_padding }}px 0;
+    overflow: hidden;
+    display: block;
+  }
+
+  .smooth-slider-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .smooth-slider-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    padding: 40px 20px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .smooth-slider-track-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .smooth-slider-card-{{ ai_gen_id }} {
+    flex: 0 0 {{ block.settings.card_width }}%;
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;
+    will-change: transform, opacity;
+    transform: translateZ(0) scale(0.85);
+    opacity: 0.4;
+  }
+
+  .smooth-slider-card-{{ ai_gen_id }}.center {
+    transform: translateZ(0) scale(1);
+    opacity: 1;
+  }
+
+  .smooth-slider-image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: {{ block.settings.image_max_width }}px;
+    margin: 0 auto {{ block.settings.image_margin_bottom }}px;
+    position: relative;
+  }
+
+  .smooth-slider-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+
+  .smooth-slider-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .smooth-slider-image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .smooth-slider-brand-{{ ai_gen_id }} {
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: {{ block.settings.brand_font_size }}px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: {{ block.settings.brand_color }};
+    margin-bottom: {{ block.settings.brand_margin_bottom }}px;
+  }
+
+  .smooth-slider-price-{{ ai_gen_id }} {
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: {{ block.settings.price_font_size }}px;
+    font-weight: 400;
+    color: {{ block.settings.price_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .smooth-slider-card-{{ ai_gen_id }} {
+      flex: 0 0 {{ block.settings.card_width_mobile }}%;
+    }
+
+    .smooth-slider-brand-{{ ai_gen_id }} {
+      font-size: {{ block.settings.brand_font_size | times: 0.85 }}px;
+    }
+
+    .smooth-slider-price-{{ ai_gen_id }} {
+      font-size: {{ block.settings.price_font_size | times: 0.85 }}px;
+    }
+  }
+{% endstyle %}
+
+<smooth-slider-{{ ai_gen_id }}
+  class="smooth-slider-container-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="smooth-slider-wrapper-{{ ai_gen_id }}">
+    <div class="smooth-slider-track-{{ ai_gen_id }}" data-slider-track>
+      {% for i in (1..3) %}
+        {% liquid
+          assign product_key = 'product_' | append: i
+          assign product = block.settings[product_key]
+        %}
+
+        <div class="smooth-slider-card-{{ ai_gen_id }}" data-slider-card>
+          <div class="smooth-slider-image-wrapper-{{ ai_gen_id }}">
+            {% if product != blank and product.featured_image %}
+              <img
+                src="{{ product.featured_image | image_url: width: 800 }}"
+                alt="{{ product.featured_image.alt | escape }}"
+                class="smooth-slider-image-{{ ai_gen_id }}"
+                loading="lazy"
+                width="800"
+                height="800"
+              >
+            {% else %}
+              <div class="smooth-slider-image-placeholder-{{ ai_gen_id }}">
+                {{ 'product-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="smooth-slider-brand-{{ ai_gen_id }}">
+            {% if product != blank %}
+              {{ product.vendor }}
+            {% else %}
+              {% case i %}
+                {% when 1 %}
+                  GUESS
+                {% when 2 %}
+                  STEVE MADDEN
+                {% when 3 %}
+                  TOMMY HILFIGER
+              {% endcase %}
+            {% endif %}
+          </div>
+
+          <div class="smooth-slider-price-{{ ai_gen_id }}">
+            {% if product != blank %}
+              {{ product.price | money }}
+            {% else %}
+              {% case i %}
+                {% when 1 %}
+                  $1,299.00 MXN
+                {% when 2 %}
+                  $899.00 MXN
+                {% when 3 %}
+                  $2,499.00 MXN
+              {% endcase %}
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</smooth-slider-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class SmoothSlider{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.track = null;
+        this.cards = [];
+        this.observer = null;
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('[data-slider-track]');
+        this.cards = Array.from(this.querySelectorAll('[data-slider-card]'));
+
+        if (!this.track || this.cards.length === 0) return;
+
+        this.setupIntersectionObserver();
+        this.updateCenterCard();
+      }
+
+      setupIntersectionObserver() {
+        const options = {
+          root: this.track,
+          threshold: [0, 0.25, 0.5, 0.75, 1],
+          rootMargin: '0px'
+        };
+
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            const card = entry.target;
+            const ratio = entry.intersectionRatio;
+
+            if (ratio > 0.6) {
+              card.classList.add('center');
+            } else {
+              card.classList.remove('center');
+            }
+          });
+        }, options);
+
+        this.cards.forEach((card) => {
+          this.observer.observe(card);
+        });
+      }
+
+      updateCenterCard() {
+        if (!this.track) return;
+
+        const trackRect = this.track.getBoundingClientRect();
+        const trackCenter = trackRect.left + trackRect.width / 2;
+
+        let closestCard = null;
+        let closestDistance = Infinity;
+
+        this.cards.forEach((card) => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const distance = Math.abs(trackCenter - cardCenter);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        this.cards.forEach((card) => {
+          if (card === closestCard) {
+            card.classList.add('center');
+          } else {
+            card.classList.remove('center');
+          }
+        });
+      }
+
+      disconnectedCallback() {
+        if (this.observer) {
+          this.observer.disconnect();
+        }
+      }
+    }
+
+    customElements.define('smooth-slider-{{ ai_gen_id }}', SmoothSlider{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Luxury product carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    {
+      "type": "product",
+      "id": "product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Card width (desktop)",
+      "min": 25,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "card_width_mobile",
+      "label": "Card width (mobile)",
+      "min": 70,
+      "max": 95,
+      "step": 5,
+      "unit": "%",
+      "default": 85
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "range",
+      "id": "image_max_width",
+      "label": "Max width",
+      "min": 200,
+      "max": 600,
+      "step": 20,
+      "unit": "px",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "image_margin_bottom",
+      "label": "Bottom spacing",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Brand name"
+    },
+    {
+      "type": "range",
+      "id": "brand_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "brand_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "brand_margin_bottom",
+      "label": "Bottom spacing",
+      "min": 5,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Price"
+    },
+    {
+      "type": "range",
+      "id": "price_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Color",
+      "default": "#666666"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Luxury product carousel"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,541 @@
+{% doc %}
+  @prompt
+    Create a custom Liquid block for Shopify with the following layout:
+    
+    Display 3 circular collection cards in a single horizontal row, all aligned side by side (flexbox, flex-direction: row, justify-content: center). Each card contains only:
+    
+    A circular image (aspect ratio 1:1, border-radius: 50%) with no shadow — do not apply any box-shadow to the circle or any element
+    Collection name centered below the circle, clean minimal typography
+    No card container background, no border-radius wrapper — just bare circle + label, completely shadow-free
+    Hover effect: transform: scale(1.04) on the circle
+    
+    Expandable drawer (2 extra cards):
+    
+    Below the 3 cards, show a centered chevron arrow (▼)
+    When clicked, smoothly reveals 2 additional circular collection cards in the same style, in a horizontal centered row
+    The arrow moves to the bottom of the revealed cards and always stays below all visible content
+    Clicking again collapses and the arrow returns above
+    No shadows anywhere — critical:
+    
+    Do NOT apply any box-shadow to circles, cards, containers, or any element
+    The expandable drawer uses overflow: visible on the inner wrapper and overflow: hidden on the outer animated container, with padding-bottom: 24px to prevent clipping
+    Smooth arrow transition — critical:
+    
+    Use transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) for rotation and transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1) for position changes
+    Do NOT abruptly reposition the arrow — animate it smoothly as the drawer opens/closes
+    The arrow rotates 180° when expanded (pointing up ▲)
+    Expand/collapse uses max-height transition with 400ms cubic-bezier(0.4, 0, 0.2, 1)
+    Responsive:
+    
+    First 3 cards always in one horizontal row on all screen sizes (scale down to fit)
+    2 extra cards also horizontal when expanded
+    On very small screens, allow wrapping only if absolutely necessary
+    Total of 5 collection slots, each configurable in the theme editor via collection picker. Clean minimal CSS, no external dependencies, all logic in vanilla JS within the Liquid block.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-circles-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: {{ block.settings.section_padding }}px 0;
+  }
+
+  .ai-collection-circles__main-row-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: {{ block.settings.card_gap }}px;
+    flex-wrap: wrap;
+  }
+
+  .ai-collection-circles__card-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: {{ block.settings.label_gap }}px;
+    text-decoration: none;
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .ai-collection-circles__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: {{ block.settings.circle_size }}px;
+    height: {{ block.settings.circle_size }}px;
+    border-radius: 50%;
+    overflow: hidden;
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ai-collection-circles__card-{{ ai_gen_id }}:hover .ai-collection-circles__image-wrapper-{{ ai_gen_id }} {
+    transform: scale(1.04);
+  }
+
+  .ai-collection-circles__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-collection-circles__placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: {{ block.settings.placeholder_color }};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-collection-circles__placeholder-{{ ai_gen_id }} svg {
+    width: 50%;
+    height: 50%;
+    opacity: 0.3;
+  }
+
+  .ai-collection-circles__label-{{ ai_gen_id }} {
+    font-size: {{ block.settings.label_size }}px;
+    color: {{ block.settings.label_color }};
+    text-align: center;
+    font-weight: {{ block.settings.label_weight }};
+    text-transform: {{ block.settings.label_transform }};
+    max-width: {{ block.settings.circle_size }}px;
+    word-wrap: break-word;
+  }
+
+  .ai-collection-circles__toggle-wrapper-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    margin-top: {{ block.settings.arrow_spacing }}px;
+    position: relative;
+  }
+
+  .ai-collection-circles__toggle-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ai-collection-circles__arrow-{{ ai_gen_id }} {
+    width: {{ block.settings.arrow_size }}px;
+    height: {{ block.settings.arrow_size }}px;
+    fill: {{ block.settings.arrow_color }};
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ai-collection-circles__toggle-{{ ai_gen_id }}.expanded .ai-collection-circles__arrow-{{ ai_gen_id }} {
+    transform: rotate(180deg);
+  }
+
+  .ai-collection-circles__drawer-outer-{{ ai_gen_id }} {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ai-collection-circles__drawer-outer-{{ ai_gen_id }}.expanded {
+    max-height: 500px;
+  }
+
+  .ai-collection-circles__drawer-inner-{{ ai_gen_id }} {
+    overflow: visible;
+    padding-bottom: 24px;
+    padding-top: {{ block.settings.drawer_spacing }}px;
+  }
+
+  .ai-collection-circles__extra-row-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: {{ block.settings.card_gap }}px;
+    flex-wrap: wrap;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-collection-circles__image-wrapper-{{ ai_gen_id }} {
+      width: {{ block.settings.circle_size_mobile }}px;
+      height: {{ block.settings.circle_size_mobile }}px;
+    }
+
+    .ai-collection-circles__label-{{ ai_gen_id }} {
+      font-size: {{ block.settings.label_size_mobile }}px;
+      max-width: {{ block.settings.circle_size_mobile }}px;
+    }
+  }
+{% endstyle %}
+
+<collection-circles-{{ ai_gen_id }} class="ai-collection-circles-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-collection-circles__main-row-{{ ai_gen_id }}">
+    {% for i in (1..3) %}
+      {% liquid
+        assign collection_key = 'collection_' | append: i
+        assign collection = block.settings[collection_key]
+      %}
+      {% if collection != blank %}
+        <a href="{{ collection.url }}" class="ai-collection-circles__card-{{ ai_gen_id }}">
+          <div class="ai-collection-circles__image-wrapper-{{ ai_gen_id }}">
+            {% if collection.featured_image %}
+              <img
+                src="{{ collection.featured_image | image_url: width: 600 }}"
+                alt="{{ collection.featured_image.alt | escape }}"
+                class="ai-collection-circles__image-{{ ai_gen_id }}"
+                loading="lazy"
+                width="600"
+                height="600"
+              >
+            {% else %}
+              <div class="ai-collection-circles__placeholder-{{ ai_gen_id }}">
+                {{ 'collection-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+          <div class="ai-collection-circles__label-{{ ai_gen_id }}">
+            {{ collection.title }}
+          </div>
+        </a>
+      {% else %}
+        <div class="ai-collection-circles__card-{{ ai_gen_id }}">
+          <div class="ai-collection-circles__image-wrapper-{{ ai_gen_id }}">
+            <div class="ai-collection-circles__placeholder-{{ ai_gen_id }}">
+              {{ 'collection-1' | placeholder_svg_tag }}
+            </div>
+          </div>
+          <div class="ai-collection-circles__label-{{ ai_gen_id }}">
+            Collection {{ i }}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="ai-collection-circles__toggle-wrapper-{{ ai_gen_id }}">
+    <button
+      class="ai-collection-circles__toggle-{{ ai_gen_id }}"
+      aria-label="Show more collections"
+      aria-expanded="false"
+    >
+      <svg class="ai-collection-circles__arrow-{{ ai_gen_id }}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 10l5 5 5-5z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="ai-collection-circles__drawer-outer-{{ ai_gen_id }}">
+    <div class="ai-collection-circles__drawer-inner-{{ ai_gen_id }}">
+      <div class="ai-collection-circles__extra-row-{{ ai_gen_id }}">
+        {% for i in (4..5) %}
+          {% liquid
+            assign collection_key = 'collection_' | append: i
+            assign collection = block.settings[collection_key]
+          %}
+          {% if collection != blank %}
+            <a href="{{ collection.url }}" class="ai-collection-circles__card-{{ ai_gen_id }}">
+              <div class="ai-collection-circles__image-wrapper-{{ ai_gen_id }}">
+                {% if collection.featured_image %}
+                  <img
+                    src="{{ collection.featured_image | image_url: width: 600 }}"
+                    alt="{{ collection.featured_image.alt | escape }}"
+                    class="ai-collection-circles__image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="600"
+                    height="600"
+                  >
+                {% else %}
+                  <div class="ai-collection-circles__placeholder-{{ ai_gen_id }}">
+                    {{ 'collection-1' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="ai-collection-circles__label-{{ ai_gen_id }}">
+                {{ collection.title }}
+              </div>
+            </a>
+          {% else %}
+            <div class="ai-collection-circles__card-{{ ai_gen_id }}">
+              <div class="ai-collection-circles__image-wrapper-{{ ai_gen_id }}">
+                <div class="ai-collection-circles__placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+              </div>
+              <div class="ai-collection-circles__label-{{ ai_gen_id }}">
+                Collection {{ i }}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</collection-circles-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CollectionCircles{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.toggleButton = this.querySelector('.ai-collection-circles__toggle-{{ ai_gen_id }}');
+        this.drawerOuter = this.querySelector('.ai-collection-circles__drawer-outer-{{ ai_gen_id }}');
+        this.isExpanded = false;
+
+        this.toggleButton.addEventListener('click', () => this.toggle());
+      }
+
+      toggle() {
+        this.isExpanded = !this.isExpanded;
+
+        if (this.isExpanded) {
+          this.toggleButton.classList.add('expanded');
+          this.drawerOuter.classList.add('expanded');
+          this.toggleButton.setAttribute('aria-expanded', 'true');
+          this.toggleButton.setAttribute('aria-label', 'Show fewer collections');
+        } else {
+          this.toggleButton.classList.remove('expanded');
+          this.drawerOuter.classList.remove('expanded');
+          this.toggleButton.setAttribute('aria-expanded', 'false');
+          this.toggleButton.setAttribute('aria-label', 'Show more collections');
+        }
+      }
+    }
+
+    customElements.define('collection-circles-{{ ai_gen_id }}', CollectionCircles{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection circles",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "drawer_spacing",
+      "label": "Drawer top spacing",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Circle style"
+    },
+    {
+      "type": "range",
+      "id": "circle_size",
+      "label": "Circle size (desktop)",
+      "min": 80,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 180
+    },
+    {
+      "type": "range",
+      "id": "circle_size_mobile",
+      "label": "Circle size (mobile)",
+      "min": 60,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "placeholder_color",
+      "label": "Placeholder background",
+      "default": "#f2f2f2"
+    },
+    {
+      "type": "header",
+      "content": "Label style"
+    },
+    {
+      "type": "range",
+      "id": "label_gap",
+      "label": "Gap below circle",
+      "min": 5,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Label size (desktop)",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "label_size_mobile",
+      "label": "Label size (mobile)",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "label_weight",
+      "label": "Label weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "select",
+      "id": "label_transform",
+      "label": "Label case",
+      "options": [
+        {
+          "value": "none",
+          "label": "Default"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "header",
+      "content": "Arrow style"
+    },
+    {
+      "type": "range",
+      "id": "arrow_spacing",
+      "label": "Arrow top spacing",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "arrow_size",
+      "label": "Arrow size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "arrow_color",
+      "label": "Arrow color",
+      "default": "#000000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection circles"
+    }
+  ]
+}
+{% endschema %}

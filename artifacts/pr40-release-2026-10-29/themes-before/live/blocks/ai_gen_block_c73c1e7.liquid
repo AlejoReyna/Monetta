@@ -1,0 +1,362 @@
+{% doc %}
+  @prompt
+    "Crea un bloque de botón personalizado para mi tema de Shopify con las siguientes características:
+    
+    Forma redondeada (pill shape, border-radius: 50px o más)
+    Color de fondo del botón editable desde el editor del tema
+    Color del texto editable desde el editor del tema
+    Color hover personalizable (cambia al pasar el cursor)
+    Sombra sutil (box-shadow) que le dé profundidad y sensación premium
+    Campo de texto para el label del botón
+    Campo de URL para el enlace
+    Diseño minimalista y elegante, estilo marca de lujo
+    El bloque debe instalarse como un theme block en Shopify y ser editable desde el Theme Editor.", AÑADE UN BORDE AL BOTON 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-luxury-button-{{ ai_gen_id }} {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    font-size: {{ block.settings.font_size }}px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: {{ block.settings.shadow_horizontal }}px {{ block.settings.shadow_vertical }}px {{ block.settings.shadow_blur }}px {{ block.settings.shadow_spread }}px {{ block.settings.shadow_color }};
+    font-weight: {{ block.settings.font_weight }};
+    letter-spacing: {{ block.settings.letter_spacing }}px;
+    text-transform: {{ block.settings.text_transform }};
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+  }
+
+  .ai-luxury-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background }};
+    color: {{ block.settings.button_hover_text_color }};
+    border-color: {{ block.settings.border_hover_color }};
+    box-shadow: {{ block.settings.hover_shadow_horizontal }}px {{ block.settings.hover_shadow_vertical }}px {{ block.settings.hover_shadow_blur }}px {{ block.settings.hover_shadow_spread }}px {{ block.settings.hover_shadow_color }};
+    transform: translateY(-2px);
+  }
+
+  .ai-luxury-button-container-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+  }
+{% endstyle %}
+
+<div class="ai-luxury-button-container-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <a
+    href="{{ block.settings.button_link }}"
+    class="ai-luxury-button-{{ ai_gen_id }}"
+  >
+    {{ block.settings.button_text }}
+  </a>
+</div>
+
+{% schema %}
+{
+  "name": "Botón premium",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Contenido"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Texto del botón",
+      "default": "Comprar ahora"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Enlace del botón"
+    },
+    {
+      "type": "header",
+      "content": "Estilo del botón"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Color de fondo",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Color del texto",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Color de fondo al pasar el cursor",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Color del texto al pasar el cursor",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Redondeo de bordes",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Tamaño de fuente",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Peso de fuente",
+      "options": [
+        {
+          "value": "300",
+          "label": "Ligera"
+        },
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Media"
+        },
+        {
+          "value": "600",
+          "label": "Semi-negrita"
+        },
+        {
+          "value": "700",
+          "label": "Negrita"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "select",
+      "id": "text_transform",
+      "label": "Transformación de texto",
+      "options": [
+        {
+          "value": "none",
+          "label": "Normal"
+        },
+        {
+          "value": "uppercase",
+          "label": "Mayúsculas"
+        },
+        {
+          "value": "lowercase",
+          "label": "Minúsculas"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalizar"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Espaciado entre letras",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "Borde"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Grosor del borde",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Color del borde",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "border_hover_color",
+      "label": "Color del borde al pasar el cursor",
+      "default": "#383838"
+    },
+    {
+      "type": "header",
+      "content": "Espaciado interno"
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "label": "Espaciado vertical",
+      "min": 5,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Espaciado horizontal",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Sombra"
+    },
+    {
+      "type": "range",
+      "id": "shadow_horizontal",
+      "label": "Posición horizontal",
+      "min": -20,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "shadow_vertical",
+      "label": "Posición vertical",
+      "min": -20,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "shadow_blur",
+      "label": "Difuminado",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "shadow_spread",
+      "label": "Expansión",
+      "min": -10,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "shadow_color",
+      "label": "Color de sombra",
+      "default": "#00000026"
+    },
+    {
+      "type": "header",
+      "content": "Sombra al pasar el cursor"
+    },
+    {
+      "type": "range",
+      "id": "hover_shadow_horizontal",
+      "label": "Posición horizontal",
+      "min": -20,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "hover_shadow_vertical",
+      "label": "Posición vertical",
+      "min": -20,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "hover_shadow_blur",
+      "label": "Difuminado",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "hover_shadow_spread",
+      "label": "Expansión",
+      "min": -10,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "hover_shadow_color",
+      "label": "Color de sombra",
+      "default": "#00000033"
+    },
+    {
+      "type": "header",
+      "content": "Ancho"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Ancho en escritorio",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    }
+  ],
+  "presets": [
+    {
+      "name": "Botón premium"
+    }
+  ]
+}
+{% endschema %}

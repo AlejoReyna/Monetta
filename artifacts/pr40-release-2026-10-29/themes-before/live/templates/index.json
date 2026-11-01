@@ -1,0 +1,61 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "layout": "monetta",
+  "sections": {
+    "carrusel": {
+      "type": "monetta-guia-home",
+      "settings": { "mode": "carousel" }
+    },
+    "estilos": {
+      "type": "monetta-guia-home",
+      "settings": { "mode": "styles" }
+    },
+    "marcas": {
+      "type": "monetta-guia-home",
+      "settings": { "mode": "brands" }
+    },
+    "nueva": {
+      "type": "monetta-product-rail",
+      "settings": {
+        "heading": "Nueva colección",
+        "collection": "all",
+        "products_to_show": 8,
+        "link_label": "Ver todo",
+        "link_url": "/collections/all?sort_by=created-descending",
+        "newest_first": true
+      }
+    },
+    "buscado": {
+      "type": "monetta-product-rail",
+      "settings": {
+        "heading": "Lo más buscado",
+        "collection": "all",
+        "products_to_show": 8,
+        "link_label": "Ver todo",
+        "link_url": "/collections/all?sort_by=best-selling",
+        "newest_first": false
+      }
+    },
+    "mayoreo": {
+      "type": "monetta-guia-home",
+      "settings": { "mode": "offers" }
+    },
+    "servicios": {
+      "type": "monetta-guia-home",
+      "settings": { "mode": "services" }
+    },
+    "registro": {
+      "type": "monetta-guia-home",
+      "settings": { "mode": "register" }
+    }
+  },
+  "order": ["carrusel", "estilos", "marcas", "nueva", "buscado", "mayoreo", "servicios", "registro"]
+}

@@ -1,0 +1,270 @@
+{% doc %}
+  @prompt
+    Create a new custom liquid block called "Nuevos productos carrusel". It must display the most recently added products from the store, in a horizontal scrollable carousel (NOT a vertical grid or list).
+    
+    Carousel behavior (HORIZONTAL only):
+    
+    The product cards must be arranged in a single horizontal row
+    On mobile: show exactly 2 cards side by side, user swipes LEFT/RIGHT to see more
+    On desktop: show 4 cards side by side, user scrolls horizontally to see more
+    Use display: flex; flex-direction: row; overflow-x: auto; on the container
+    Use scroll-snap-type: x mandatory on the container and scroll-snap-align: start on each card
+    Hide scrollbar visually but keep scroll functional
+    Products source:
+    
+    Use collection.products sorted by newest first (sort_by: 'created-descending')
+    Show up to 8 products by default
+    Allow merchant to select the collection in theme editor settings
+    Card design (premium/minimalist):
+    
+    Fixed card width: 45vw on mobile, 22% on desktop
+    Product image square (1:1 ratio, object-fit: cover, border-radius: 12px)
+    Product title centered below image, single line with ellipsis if too long
+    Price below title, clean and simple
+    Subtle shadow on each card: box-shadow: 0 2px 12px rgba(0,0,0,0.08)
+    Card border-radius: 12px
+    White card background with 12px padding
+    On hover (desktop): shadow becomes 0 6px 20px rgba(0,0,0,0.14) with smooth transition
+    Theme editor settings:
+    
+    Section heading text
+    Collection picker
+    Number of products (default 8)
+    Toggle to show/hide price
+    Important: The layout must be strictly horizontal. Do NOT use CSS Grid or vertical stacking. Cards must always appear side by side in a single scrollable row.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-nuevos-productos-carousel-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: 40px 0;
+  }
+
+  .ai-nuevos-productos-heading-{{ ai_gen_id }} {
+    text-align: center;
+    margin: 0 0 32px;
+    font-size: 32px;
+    color: #000000;
+  }
+
+  .ai-nuevos-productos-container-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 16px;
+    padding: 0 20px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ai-nuevos-productos-container-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-nuevos-productos-card-{{ ai_gen_id }} {
+    flex: 0 0 45vw;
+    scroll-snap-align: start;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ai-nuevos-productos-card-{{ ai_gen_id }}:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+  }
+
+  .ai-nuevos-productos-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+
+  .ai-nuevos-productos-image-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-nuevos-productos-placeholder-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-nuevos-productos-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-nuevos-productos-title-{{ ai_gen_id }} {
+    text-align: center;
+    font-size: 14px;
+    margin: 0 0 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #000000;
+  }
+
+  .ai-nuevos-productos-price-{{ ai_gen_id }} {
+    text-align: center;
+    font-size: 14px;
+    margin: 0;
+    color: #666666;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-nuevos-productos-card-{{ ai_gen_id }} {
+      flex: 0 0 22%;
+    }
+  }
+{% endstyle %}
+
+<nuevos-productos-carousel-{{ ai_gen_id }}
+  class="ai-nuevos-productos-carousel-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.heading != blank %}
+    <h2 class="ai-nuevos-productos-heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h2>
+  {% endif %}
+
+  <div class="ai-nuevos-productos-container-{{ ai_gen_id }}">
+    {% if block.settings.collection != blank %}
+      {% assign sorted_products = block.settings.collection.products | sort: 'created_at' | reverse %}
+      {% assign product_limit = block.settings.product_count %}
+      
+      {% for product in sorted_products limit: product_limit %}
+        <a
+          href="{{ product.url }}"
+          class="ai-nuevos-productos-card-{{ ai_gen_id }}"
+        >
+          <div class="ai-nuevos-productos-image-wrapper-{{ ai_gen_id }}">
+            {% if product.featured_image %}
+              <img
+                src="{{ product.featured_image | image_url: width: 600 }}"
+                alt="{{ product.featured_image.alt | escape }}"
+                class="ai-nuevos-productos-image-{{ ai_gen_id }}"
+                loading="lazy"
+                width="600"
+                height="600"
+              >
+            {% else %}
+              <div class="ai-nuevos-productos-placeholder-{{ ai_gen_id }}">
+                {{ 'product-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+
+          <h3 class="ai-nuevos-productos-title-{{ ai_gen_id }}">{{ product.title }}</h3>
+
+          {% if block.settings.show_price %}
+            <div class="ai-nuevos-productos-price-{{ ai_gen_id }}">
+              {{ product.price | money }}
+            </div>
+          {% endif %}
+        </a>
+      {% endfor %}
+    {% else %}
+      {% for i in (1..8) %}
+        <div class="ai-nuevos-productos-card-{{ ai_gen_id }}">
+          <div class="ai-nuevos-productos-image-wrapper-{{ ai_gen_id }}">
+            <div class="ai-nuevos-productos-placeholder-{{ ai_gen_id }}">
+              {{ 'product-1' | placeholder_svg_tag }}
+            </div>
+          </div>
+          <h3 class="ai-nuevos-productos-title-{{ ai_gen_id }}">Producto {{ i }}</h3>
+          {% if block.settings.show_price %}
+            <div class="ai-nuevos-productos-price-{{ ai_gen_id }}">$0.00</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</nuevos-productos-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class NuevosProductosCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.container = this.querySelector('.ai-nuevos-productos-container-{{ ai_gen_id }}');
+        
+        if (this.container) {
+          this.container.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
+        }
+      }
+
+      handleTouchStart(e) {
+        this.container.style.scrollBehavior = 'smooth';
+      }
+    }
+
+    customElements.define('nuevos-productos-carousel-{{ ai_gen_id }}', NuevosProductosCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Nuevos productos carrusel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Nuevos productos"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "product_count",
+      "label": "Number of products",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show price",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Nuevos productos carrusel"
+    }
+  ]
+}
+{% endschema %}

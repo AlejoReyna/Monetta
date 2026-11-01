@@ -1,0 +1,98 @@
+{%- doc -%}
+  Standalone GET search enhanced by the Shopify Predictive Search section response.
+  Does not use Atelier or the legacy .search-field / data-search-clear hooks.
+
+  @param {string} instance_id - Unique, stable prefix for each rendered instance.
+  @param {string} [input_id] - Preserve page-search-input / header-search-input for monetta-listing.js.
+  @param {string} [placeholder] - Optional merchant text in the current store language.
+  @param {boolean} [hide_label] - Visually hide the input label.
+  @param {boolean} [search_autofocus] - Emit the existing monetta-listing.js focus hook.
+  @param {number} [limit] - Product suggestions, 1–10 (default 6).
+  @param {number} [recent_limit] - Recent searches, 0–10 (default 5).
+  @param {boolean} [include_assets] - Defaults to true. Modules execute once per URL.
+{%- enddoc -%}
+{%- liquid
+  assign predictive_id = instance_id | default: section.id | default: 'search'
+  assign predictive_input_id = input_id | default: predictive_id | append: '-input'
+  if input_id != blank
+    assign predictive_input_id = input_id
+  endif
+  assign predictive_language = request.locale.iso_code | slice: 0, 2
+  unless predictive_language == 'en'
+    assign predictive_language = 'es'
+  endunless
+  assign predictive_limit = limit | default: 6 | at_least: 1 | at_most: 10
+  assign predictive_recent_limit = recent_limit | default: 5 | at_least: 0 | at_most: 10
+  assign predictive_query = search.terms | default: ''
+  assign predictive_encoded_query = predictive_query | url_encode
+-%}
+{%- capture predictive_label -%}{% render 'monetta-predictive-copy', key: 'label' %}{%- endcapture -%}
+{%- capture predictive_placeholder -%}{% render 'monetta-predictive-copy', key: 'placeholder' %}{%- endcapture -%}
+{%- capture predictive_loading -%}{% render 'monetta-predictive-copy', key: 'loading' %}{%- endcapture -%}
+{%- capture predictive_empty -%}{% render 'monetta-predictive-copy', key: 'empty' %}{%- endcapture -%}
+{%- capture predictive_error -%}{% render 'monetta-predictive-copy', key: 'error' %}{%- endcapture -%}
+{%- capture predictive_count -%}{% render 'monetta-predictive-copy', key: 'count' %}{%- endcapture -%}
+{%- capture predictive_recent_count -%}{% render 'monetta-predictive-copy', key: 'recent_count' %}{%- endcapture -%}
+{%- capture predictive_forgotten -%}{% render 'monetta-predictive-copy', key: 'forgotten' %}{%- endcapture -%}
+{%- unless include_assets == false -%}
+  {{ 'monetta-predictive-search.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'monetta-predictive-search.js' | asset_url }}" type="module"></script>
+{%- endunless -%}
+<monetta-predictive-search
+  class="monetta-predictive-search"
+  lang="{{ predictive_language }}"
+  data-predictive-url="{{ routes.predictive_search_url | escape }}"
+  data-limit="{{ predictive_limit }}"
+  data-recent-limit="{{ predictive_recent_limit }}"
+  data-history-scope="{{ request.locale.iso_code | escape }}:{{ localization.country.iso_code | escape }}:{{ cart.currency.iso_code | escape }}"
+  data-loading-message="{{ predictive_loading | escape }}"
+  data-empty-message="{{ predictive_empty | escape }}"
+  data-error-message="{{ predictive_error | escape }}"
+  data-count-message="{{ predictive_count | escape }}"
+  data-recent-count-message="{{ predictive_recent_count | escape }}"
+  data-forgotten-message="{{ predictive_forgotten | escape }}"
+>
+  <form action="{{ routes.search_url }}" method="get" role="search" aria-label="{{ predictive_label | escape }}" data-monetta-predictive-form>
+    <label class="monetta-predictive-search__label{% if hide_label %} monetta-predictive-search__sr-only{% endif %}" for="{{ predictive_input_id | escape }}">{{ predictive_label }}</label>
+    <div class="monetta-predictive-search__controls" data-monetta-predictive-anchor>
+      <div class="monetta-predictive-search__field">
+        <input
+          class="monetta-predictive-search__input"
+          id="{{ predictive_input_id | escape }}"
+          type="search"
+          name="q"
+          value="{{ predictive_query | escape }}"
+          placeholder="{{ placeholder | default: predictive_placeholder | escape }}"
+          {% if placeholder != blank %}lang="{{ request.locale.iso_code | escape }}"{% endif %}
+          maxlength="200"
+          autocomplete="off"
+          enterkeyhint="search"
+          {% if search_autofocus %}data-search-autofocus{% endif %}
+          data-monetta-predictive-input
+        >
+        <button class="monetta-predictive-search__clear" type="button" data-monetta-predictive-clear hidden>
+          <span class="monetta-predictive-search__sr-only">{% render 'monetta-predictive-copy', key: 'clear' %}</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false"><path d="m6 6 12 12M6 18 18 6"/></svg>
+        </button>
+      </div>
+      <input type="hidden" name="type" value="product">
+      <input type="hidden" name="options[prefix]" value="last">
+      <button class="monetta-predictive-search__submit" type="submit">{% render 'monetta-predictive-copy', key: 'submit' %}</button>
+    </div>
+  </form>
+  <p class="monetta-predictive-search__sr-only" id="{{ predictive_id | escape }}-help" data-monetta-predictive-help>{% render 'monetta-predictive-copy', key: 'help' %}</p>
+  <div class="monetta-predictive-search__panel" data-monetta-predictive-panel hidden>
+    <div class="monetta-predictive-search__toolbar">
+      <p class="monetta-predictive-search__heading" data-monetta-predictive-heading>{% render 'monetta-predictive-copy', key: 'heading' %}</p>
+      <p class="monetta-predictive-search__heading" data-monetta-predictive-recent-heading hidden>{% render 'monetta-predictive-copy', key: 'recent' %}</p>
+      <button class="monetta-predictive-search__action" type="button" data-monetta-predictive-close>{% render 'monetta-predictive-copy', key: 'close' %}</button>
+    </div>
+    <p class="monetta-predictive-search__message" data-monetta-predictive-message hidden></p>
+    <ul class="monetta-predictive-search__list" id="{{ predictive_id | escape }}-listbox" role="listbox" aria-label="{{ predictive_label | escape }}" data-monetta-predictive-list></ul>
+    <div class="monetta-predictive-search__footer">
+      <a class="monetta-predictive-search__all" href="{{ routes.search_url }}?type=product&amp;options%5Bprefix%5D=last&amp;q={{ predictive_encoded_query }}" data-monetta-predictive-all>{% render 'monetta-predictive-copy', key: 'all' %}</a>
+      <button class="monetta-predictive-search__action" type="button" data-monetta-predictive-forget hidden>{% render 'monetta-predictive-copy', key: 'forget' %}</button>
+    </div>
+  </div>
+  <span class="monetta-predictive-search__sr-only" role="status" aria-live="polite" aria-atomic="true" data-monetta-predictive-live></span>
+</monetta-predictive-search>

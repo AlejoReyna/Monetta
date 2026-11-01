@@ -1,0 +1,283 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "footer",
+  "name": "Footer",
+  "sections": {
+    "section_WYVKQc": {
+      "type": "section",
+      "blocks": {
+        "text_WkGeWX": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<h2>REGISTRÁTE</h2>",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "center",
+            "type_preset": "h1",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_rEYqqi": {
+          "type": "text",
+          "settings": {
+            "text": "<p><strong>PARA OBTENER ENVÍO GRATIS EN TU PRIMER PEDIDO</strong></p>",
+            "width": "100%",
+            "max_width": "none",
+            "alignment": "center",
+            "type_preset": "custom",
+            "font": "var(--font-body--family)",
+            "font_size": "0.75rem",
+            "line_height": "normal",
+            "letter_spacing": "loose",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 8,
+            "padding-block-end": 21,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "ai_gen_block_84c8399_rVwdPR": {
+          "type": "ai_gen_block_84c8399",
+          "settings": {
+            "button_text": "REGISTRARME AHORA",
+            "button_link": "/account/login",
+            "alignment": "center",
+            "horizontal_padding": 70,
+            "vertical_padding": 12,
+            "button_background_color": "#dedede",
+            "button_text_color": "#000000",
+            "button_hover_color": "#aa7d44",
+            "button_hover_text_color": "#ffffff",
+            "font_size": 21,
+            "border_width": 0,
+            "border_color": "#969696",
+            "border_hover_color": "#969696",
+            "shadow_horizontal": 0,
+            "shadow_vertical": 0,
+            "shadow_blur": 8,
+            "shadow_color": "#969696"
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_WkGeWX",
+        "text_rEYqqi",
+        "ai_gen_block_84c8399_rVwdPR"
+      ],
+      "name": "t:names.email_signup",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 6,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "scheme-0a32ce69-9b75-4fa4-b981-df69f787a972",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "solid",
+        "border_width": 0,
+        "border_opacity": 0,
+        "border_radius": 43,
+        "toggle_overlay": true,
+        "overlay_color": "#9f9f9f21",
+        "overlay_style": "gradient",
+        "gradient_direction": "to bottom",
+        "padding-block-start": 40,
+        "padding-block-end": 31
+      }
+    },
+    "section_3chKAK": {
+      "type": "section",
+      "blocks": {
+        "text_txmfgH": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<h4>ENVÍOS RÁPIDOS Y GARANTIZADOS</h4>",
+            "width": "100%",
+            "max_width": "none",
+            "alignment": "center",
+            "type_preset": "custom",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "loose",
+            "case": "none",
+            "wrap": "nowrap",
+            "color": "var(--color-primary)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 11,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "payment_icons_3ECLhB": {
+          "type": "payment-icons",
+          "name": "t:names.payment_icons",
+          "settings": {
+            "horizontal_alignment": "center",
+            "gap": 14,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_txmfgH",
+        "payment_icons_3ECLhB"
+      ],
+      "name": "t:names.custom_section",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 9,
+        "section_width": "full-width",
+        "section_height": "",
+        "section_height_custom": 0,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 16,
+        "padding-block-end": 6
+      }
+    },
+    "utilities": {
+      "type": "footer-utilities",
+      "blocks": {
+        "social_links_THQ3yt": {
+          "type": "social-links",
+          "name": "t:names.social_media_links",
+          "settings": {
+            "label_text": "NUESTRAS REDES SOCIALES",
+            "icon_size": 42,
+            "facebook_url": "https://www.facebook.com/profile.php?id=100091065527635&mibextid=LQQJ4d",
+            "instagram_url": "https://www.instagram.com/_monetta.mx?igsh=NjhjcjBuZnMwdDF4&utm_source=qr",
+            "youtube_url": "",
+            "tiktok_url": "https://www.tiktok.com/@monetta.oficial?_t=ZM-8vX8mCfRlw6&_r=1",
+            "twitter_url": "",
+            "threads_url": "",
+            "linkedin_url": "",
+            "bluesky_url": "",
+            "snapchat_url": "",
+            "pinterest_url": "",
+            "tumblr_url": "",
+            "vimeo_url": "",
+            "whatsapp_url": "http://wa.me/528261066868",
+            "custom_url": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "social_links_THQ3yt"
+      ],
+      "settings": {
+        "section_width": "full-width",
+        "gap": 11,
+        "divider_thickness": 0,
+        "color_scheme": "scheme-4",
+        "padding-block-start": 21,
+        "padding-block-end": 25
+      }
+    },
+    "footer_utilities_iz6VzA": {
+      "type": "footer-utilities",
+      "blocks": {
+        "footer_copyright_4nCMia": {
+          "type": "footer-copyright",
+          "settings": {
+            "show_powered_by": false,
+            "font_size": "0.875rem",
+            "case": "uppercase"
+          },
+          "blocks": {}
+        },
+        "footer_policy_list_7wamPb": {
+          "type": "footer-policy-list",
+          "settings": {
+            "font_size": "1rem",
+            "case": "uppercase"
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "footer_copyright_4nCMia",
+        "footer_policy_list_7wamPb"
+      ],
+      "name": "t:names.policies_and_links",
+      "settings": {
+        "section_width": "full-width",
+        "gap": 13,
+        "divider_thickness": 1,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 36,
+        "padding-block-end": 57
+      }
+    }
+  },
+  "order": [
+    "section_WYVKQc",
+    "section_3chKAK",
+    "utilities",
+    "footer_utilities_iz6VzA"
+  ]
+}

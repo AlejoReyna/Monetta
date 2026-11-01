@@ -1,0 +1,1043 @@
+{% doc %}
+  @prompt
+    Create a block called "Expandable Drawer". It shows a button with the text "Ver más" and a chevron arrow. When the button is clicked, a content area below expands smoothly. When clicked again it collapses. Use vanilla JavaScript and max-height transition.
+    
+    The block has these settings:
+    
+    Button settings: button label text, button background color, button text color, button border radius, button shadow blur (range 0 to 40), button shadow color.
+    
+    Inside the expanded area show three cards and one text section in this order: Card 1, then a text section, then Card 2, then Card 3.
+    
+    Each card has: a heading with color, size (range 14 to 48), alignment (left center right), and bold option. A body text with color, size (range 12 to 32), alignment, and bold option. A background that can be solid color or an image. A border radius setting. Padding top, bottom, left, right. A soft box shadow. On hover the card moves up 6 pixels with a smooth transition.
+    
+    The text section has: a heading with color, size, alignment, bold. A body text with color, size, alignment, bold. Padding top, bottom, left, right. No background or shadow.
+    
+    Use inline styles with the setting values. Scope all CSS to the block. Make it mobile responsive.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-expandable-drawer-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+  }
+
+  .ai-expandable-drawer__button-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px 24px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .ai-expandable-drawer__chevron-{{ ai_gen_id }} {
+    width: 25px;
+    height: 35px;
+    transition: transform 0.3s ease;
+  }
+
+  .ai-expandable-drawer__chevron-{{ ai_gen_id }}.expanded {
+    transform: rotate(180deg);
+  }
+
+  .ai-expandable-drawer__content-{{ ai_gen_id }} {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    padding-top: 24px;
+  }
+
+  .ai-expandable-drawer__content-{{ ai_gen_id }}.expanded {
+    max-height: 5000px;
+  }
+
+  .ai-expandable-drawer__inner-{{ ai_gen_id }} {
+    padding: 24px 0;
+  }
+
+  .ai-expandable-drawer__card-{{ ai_gen_id }} {
+    margin-bottom: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .ai-expandable-drawer__card-{{ ai_gen_id }}:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  .ai-expandable-drawer__card-{{ ai_gen_id }}:last-child {
+    margin-bottom: 0;
+  }
+
+  .ai-expandable-drawer__text-section-{{ ai_gen_id }} {
+    margin-bottom: 20px;
+  }
+
+  .ai-expandable-drawer__card-heading-{{ ai_gen_id }},
+  .ai-expandable-drawer__text-heading-{{ ai_gen_id }} {
+    margin: 0 0 12px 0;
+  }
+
+  .ai-expandable-drawer__card-body-{{ ai_gen_id }},
+  .ai-expandable-drawer__text-body-{{ ai_gen_id }} {
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .ai-expandable-drawer__card-bg-{{ ai_gen_id }} {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-expandable-drawer__button-{{ ai_gen_id }} {
+      padding: 14px 20px;
+      font-size: 15px;
+    }
+
+    .ai-expandable-drawer__inner-{{ ai_gen_id }} {
+      padding: 16px 0;
+    }
+
+    .ai-expandable-drawer__card-{{ ai_gen_id }} {
+      margin-bottom: 16px;
+    }
+
+    .ai-expandable-drawer__text-section-{{ ai_gen_id }} {
+      margin-bottom: 16px;
+    }
+  }
+{% endstyle %}
+
+<expandable-drawer-{{ ai_gen_id }} class="ai-expandable-drawer-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <button
+    class="ai-expandable-drawer__button-{{ ai_gen_id }}"
+    style="
+      background-color: {{ block.settings.button_bg_color }};
+      color: {{ block.settings.button_text_color }};
+      border-radius: {{ block.settings.button_border_radius }}px;
+      box-shadow: 0 0 {{ block.settings.button_shadow_blur }}px {{ block.settings.button_shadow_color }};
+    "
+    aria-expanded="false"
+  >
+    <span>{{ block.settings.button_label }}</span>
+    <svg
+      class="ai-expandable-drawer__chevron-{{ ai_gen_id }}"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </button>
+
+  <div class="ai-expandable-drawer__content-{{ ai_gen_id }}">
+    <div class="ai-expandable-drawer__inner-{{ ai_gen_id }}">
+      
+      <div
+        class="ai-expandable-drawer__card-{{ ai_gen_id }} {% if block.settings.card1_bg_image %}ai-expandable-drawer__card-bg-{{ ai_gen_id }}{% endif %}"
+        style="
+          {% if block.settings.card1_bg_image %}
+            background-image: url('{{ block.settings.card1_bg_image | image_url: width: 1000 }}');
+          {% else %}
+            background-color: {{ block.settings.card1_bg_color }};
+          {% endif %}
+          border-radius: {{ block.settings.card1_border_radius }}px;
+          padding: {{ block.settings.card1_padding_top }}px {{ block.settings.card1_padding_right }}px {{ block.settings.card1_padding_bottom }}px {{ block.settings.card1_padding_left }}px;
+        "
+      >
+        <h3
+          class="ai-expandable-drawer__card-heading-{{ ai_gen_id }}"
+          style="
+            color: {{ block.settings.card1_heading_color }};
+            font-size: {{ block.settings.card1_heading_size }}px;
+            text-align: {{ block.settings.card1_heading_align }};
+            font-weight: {% if block.settings.card1_heading_bold %}700{% else %}400{% endif %};
+          "
+        >
+          {{ block.settings.card1_heading }}
+        </h3>
+        <p
+          class="ai-expandable-drawer__card-body-{{ ai_gen_id }}"
+          style="
+            color: {{ block.settings.card1_body_color }};
+            font-size: {{ block.settings.card1_body_size }}px;
+            text-align: {{ block.settings.card1_body_align }};
+            font-weight: {% if block.settings.card1_body_bold %}700{% else %}400{% endif %};
+          "
+        >
+          {{ block.settings.card1_body }}
+        </p>
+      </div>
+
+      <!-- BOTON CARD 1 -->
+<div style="text-align: {{ block.settings.card1_btn_align }}; margin-top: 12px; margin-bottom: 20px;">
+  <a
+    href="{{ block.settings.card1_btn_url }}"
+    style="
+      display: inline-block;
+      background-color: {{ block.settings.card1_btn_bg }};
+      color: {{ block.settings.card1_btn_color }};
+      font-size: {{ block.settings.card1_btn_size }}px;
+      border-radius: {{ block.settings.card1_btn_radius }}px;
+      padding: {{ block.settings.card1_btn_pt }}px {{ block.settings.card1_btn_pr }}px {{ block.settings.card1_btn_pt }}px {{ block.settings.card1_btn_pl }}px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.2s ease;
+    "
+  >
+    {{ block.settings.card1_btn_label }}
+  </a>
+</div>
+
+      <div
+        class="ai-expandable-drawer__text-section-{{ ai_gen_id }}"
+        style="
+          padding: {{ block.settings.text_padding_top }}px {{ block.settings.text_padding_right }}px {{ block.settings.text_padding_bottom }}px {{ block.settings.text_padding_left }}px;
+        "
+      >
+        <h3
+          class="ai-expandable-drawer__text-heading-{{ ai_gen_id }}"
+          style="
+            color: {{ block.settings.text_heading_color }};
+            font-size: {{ block.settings.text_heading_size }}px;
+            text-align: {{ block.settings.text_heading_align }};
+            font-weight: {% if block.settings.text_heading_bold %}700{% else %}400{% endif %};
+          "
+        >
+          {{ block.settings.text_heading }}
+        </h3>
+        <p
+          class="ai-expandable-drawer__text-body-{{ ai_gen_id }}"
+          style="
+            color: {{ block.settings.text_body_color }};
+            font-size: {{ block.settings.text_body_size }}px;
+            text-align: {{ block.settings.text_body_align }};
+            font-weight: {% if block.settings.text_body_bold %}700{% else %}400{% endif %};
+          "
+        >
+          {{ block.settings.text_body }}
+        </p>
+      </div>
+
+      <div
+        class="ai-expandable-drawer__card-{{ ai_gen_id }} {% if block.settings.card2_bg_image %}ai-expandable-drawer__card-bg-{{ ai_gen_id }}{% endif %}"
+        style="
+          {% if block.settings.card2_bg_image %}
+            background-image: url('{{ block.settings.card2_bg_image | image_url: width: 1000 }}');
+          {% else %}
+            background-color: {{ block.settings.card2_bg_color }};
+          {% endif %}
+          border-radius: {{ block.settings.card2_border_radius }}px;
+          padding: {{ block.settings.card2_padding_top }}px {{ block.settings.card2_padding_right }}px {{ block.settings.card2_padding_bottom }}px {{ block.settings.card2_padding_left }}px;
+        "
+      >
+        <h3
+          class="ai-expandable-drawer__card-heading-{{ ai_gen_id }}"
+          style="
+            color: {{ block.settings.card2_heading_color }};
+            font-size: {{ block.settings.card2_heading_size }}px;
+            text-align: {{ block.settings.card2_heading_align }};
+            font-weight: {% if block.settings.card2_heading_bold %}700{% else %}400{% endif %};
+          "
+        >
+          {{ block.settings.card2_heading }}
+        </h3>
+        <p
+          class="ai-expandable-drawer__card-body-{{ ai_gen_id }}"
+          style="
+            color: {{ block.settings.card2_body_color }};
+            font-size: {{ block.settings.card2_body_size }}px;
+            text-align: {{ block.settings.card2_body_align }};
+            font-weight: {% if block.settings.card2_body_bold %}700{% else %}400{% endif %};
+          "
+        >
+          {{ block.settings.card2_body }}
+        </p>
+      </div>
+
+      <div
+        class="ai-expandable-drawer__card-{{ ai_gen_id }} {% if block.settings.card3_bg_image %}ai-expandable-drawer__card-bg-{{ ai_gen_id }}{% endif %}"
+        style="
+          {% if block.settings.card3_bg_image %}
+            background-image: url('{{ block.settings.card3_bg_image | image_url: width: 1000 }}');
+          {% else %}
+            background-color: {{ block.settings.card3_bg_color }};
+          {% endif %}
+          border-radius: {{ block.settings.card3_border_radius }}px;
+          padding: {{ block.settings.card3_padding_top }}px {{ block.settings.card3_padding_right }}px {{ block.settings.card3_padding_bottom }}px {{ block.settings.card3_padding_left }}px;
+        "
+      >
+        <h3
+          class="ai-expandable-drawer__card-heading-{{ ai_gen_id }}"
+          style="
+            color: {{ block.settings.card3_heading_color }};
+            font-size: {{ block.settings.card3_heading_size }}px;
+            text-align: {{ block.settings.card3_heading_align }};
+            font-weight: {% if block.settings.card3_heading_bold %}700{% else %}400{% endif %};
+          "
+        >
+          {{ block.settings.card3_heading }}
+        </h3>
+        <p
+          class="ai-expandable-drawer__card-body-{{ ai_gen_id }}"
+          style="
+            color: {{ block.settings.card3_body_color }};
+            font-size: {{ block.settings.card3_body_size }}px;
+            text-align: {{ block.settings.card3_body_align }};
+            font-weight: {% if block.settings.card3_body_bold %}700{% else %}400{% endif %};
+          "
+        >
+          {{ block.settings.card3_body }}
+        </p>
+      </div>
+
+    </div>
+  </div>
+</expandable-drawer-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ExpandableDrawer{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.button = this.querySelector('.ai-expandable-drawer__button-{{ ai_gen_id }}');
+        this.content = this.querySelector('.ai-expandable-drawer__content-{{ ai_gen_id }}');
+        this.chevron = this.querySelector('.ai-expandable-drawer__chevron-{{ ai_gen_id }}');
+        
+        this.button.addEventListener('click', () => this.toggle());
+      }
+
+      toggle() {
+        const isExpanded = this.content.classList.contains('expanded');
+        
+        if (isExpanded) {
+          this.content.classList.remove('expanded');
+          this.chevron.classList.remove('expanded');
+          this.button.setAttribute('aria-expanded', 'false');
+        } else {
+          this.content.classList.add('expanded');
+          this.chevron.classList.add('expanded');
+          this.button.setAttribute('aria-expanded', 'true');
+        }
+      }
+    }
+
+    customElements.define('expandable-drawer-{{ ai_gen_id }}', ExpandableDrawer{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Expandable drawer",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Label",
+      "default": "Ver más"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "button_shadow_blur",
+      "label": "Shadow blur",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "button_shadow_color",
+      "label": "Shadow color",
+      "default": "#00000020"
+    },
+    {
+      "type": "header",
+      "content": "Card 1"
+    },
+    {
+      "type": "text",
+      "id": "card1_heading",
+      "label": "Heading",
+      "default": "Card 1 Heading"
+    },
+    {
+      "type": "color",
+      "id": "card1_heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "card1_heading_size",
+      "label": "Heading size",
+      "min": 14,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "card1_heading_align",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "card1_heading_bold",
+      "label": "Heading bold",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "card1_body",
+      "label": "Body text",
+      "default": "This is the body text for card 1."
+    },
+    {
+      "type": "color",
+      "id": "card1_body_color",
+      "label": "Body color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "card1_body_size",
+      "label": "Body size",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "card1_body_align",
+      "label": "Body alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "card1_body_bold",
+      "label": "Body bold",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "card1_bg_color",
+      "label": "Background color",
+      "default": "#f4f4f4"
+    },
+    {
+      "type": "image_picker",
+      "id": "card1_bg_image",
+      "label": "Background image"
+    },
+    {
+      "type": "range",
+      "id": "card1_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "card1_padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card1_padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card1_padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card1_padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Botón Card 1"
+    },
+    {
+      "type": "text",
+      "id": "card1_btn_label",
+      "label": "Texto del botón",
+      "default": "Ver más"
+    },
+    {
+      "type": "url",
+      "id": "card1_btn_url",
+      "label": "Enlace del botón"
+    },
+    {
+      "type": "color",
+      "id": "card1_btn_bg",
+      "label": "Color de fondo",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "card1_btn_color",
+      "label": "Color de texto",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card1_btn_size",
+      "label": "Tamaño de texto",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "card1_btn_radius",
+      "label": "Radio de borde",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card1_btn_pt",
+      "label": "Padding vertical",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "card1_btn_pl",
+      "label": "Padding horizontal izquierdo",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card1_btn_pr",
+      "label": "Padding horizontal derecho",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "card1_btn_align",
+      "label": "Alineación",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centro" },
+        { "value": "right", "label": "Derecha" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Text section"
+    },
+    {
+      "type": "text",
+      "id": "text_heading",
+      "label": "Heading",
+      "default": "Text Section Heading"
+    },
+    {
+      "type": "color",
+      "id": "text_heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "text_heading_size",
+      "label": "Heading size",
+      "min": 14,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "text_heading_align",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "text_heading_bold",
+      "label": "Heading bold",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "text_body",
+      "label": "Body text",
+      "default": "This is the body text for the text section."
+    },
+    {
+      "type": "color",
+      "id": "text_body_color",
+      "label": "Body color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "text_body_size",
+      "label": "Body size",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "text_body_align",
+      "label": "Body alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "text_body_bold",
+      "label": "Body bold",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "text_padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "text_padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "text_padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "text_padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Card 2"
+    },
+    {
+      "type": "text",
+      "id": "card2_heading",
+      "label": "Heading",
+      "default": "Card 2 Heading"
+    },
+    {
+      "type": "color",
+      "id": "card2_heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "card2_heading_size",
+      "label": "Heading size",
+      "min": 14,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "card2_heading_align",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "card2_heading_bold",
+      "label": "Heading bold",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "card2_body",
+      "label": "Body text",
+      "default": "This is the body text for card 2."
+    },
+    {
+      "type": "color",
+      "id": "card2_body_color",
+      "label": "Body color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "card2_body_size",
+      "label": "Body size",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "card2_body_align",
+      "label": "Body alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "card2_body_bold",
+      "label": "Body bold",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "card2_bg_color",
+      "label": "Background color",
+      "default": "#f4f4f4"
+    },
+    {
+      "type": "image_picker",
+      "id": "card2_bg_image",
+      "label": "Background image"
+    },
+    {
+      "type": "range",
+      "id": "card2_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "card2_padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card2_padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card2_padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card2_padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Card 3"
+    },
+    {
+      "type": "text",
+      "id": "card3_heading",
+      "label": "Heading",
+      "default": "Card 3 Heading"
+    },
+    {
+      "type": "color",
+      "id": "card3_heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "card3_heading_size",
+      "label": "Heading size",
+      "min": 14,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "card3_heading_align",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "card3_heading_bold",
+      "label": "Heading bold",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "card3_body",
+      "label": "Body text",
+      "default": "This is the body text for card 3."
+    },
+    {
+      "type": "color",
+      "id": "card3_body_color",
+      "label": "Body color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "card3_body_size",
+      "label": "Body size",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "card3_body_align",
+      "label": "Body alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "card3_body_bold",
+      "label": "Body bold",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "card3_bg_color",
+      "label": "Background color",
+      "default": "#f4f4f4"
+    },
+    {
+      "type": "image_picker",
+      "id": "card3_bg_image",
+      "label": "Background image"
+    },
+    {
+      "type": "range",
+      "id": "card3_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "card3_padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card3_padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card3_padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card3_padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "presets": [
+    {
+      "name": "Expandable drawer"
+    }
+  ]
+}
+{% endschema %}

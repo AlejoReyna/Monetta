@@ -1,0 +1,396 @@
+{% doc %}
+  @prompt
+    Task: Create a Custom 3-Row Horizontal Collection Grid with a Global Heading (Strict 3:4 Card Proportion).
+    
+    1. Section Title:
+    
+    Add a prominent, centered heading at the very top of the section: "TODAS LAS MARCAS".
+    
+    Use an elegant Serif font with wide letter-spacing and a generous bottom margin (e.g., 40px) to separate it cleanly from the grid below.
+    
+    2. Structural Architecture (The 3x3 Scroll Fix):
+    
+    Generate a new custom HTML/CSS section (do not use a standard Collection template).
+    
+    Main Wrapper: Add 60px padding at the top and bottom of the entire section. Apply max-width: 100vw and strict overflow: hidden to prevent any horizontal page body stretching. The section background must be Pure White (#FFFFFF).
+    
+    Grid Track (The Core Fix): Inside the wrapper, BELOW the title, create a container (overflow-x: auto) for exactly 9 individual cards. This container MUST use CSS Grid with these exact properties: display: grid, grid-template-rows: repeat(3, 1fr), and grid-auto-flow: column. This forces the 9 cards to stack into exactly 3 rows first, then flow horizontally as a single track.
+    
+    3. Mobile Sizing & Containment:
+    
+    Mobile Sizing: Set each column width to 42vw (or similar). This ensures exactly 2 full columns are visible on the mobile screen, leaving a small 16% peek of the next column on the right side to invite swiping.
+    
+    Gap: Apply a consistent 15px gap between all cards.
+    
+    4. Card Aesthetics (Minimalist Link-Only & 3:4 Proportion):
+    
+    Aspect Ratio (CRUCIAL): Enforce a strict 3:4 vertical aspect ratio (aspect-ratio: 3 / 4) on all cards so they are elegantly taller than they are wide.
+    
+    Content: Cards must display ONLY images. Absolutely NO text, titles, or buttons inside or outside the cards. Each card must act as a direct functional link to its corresponding collection page.
+    
+    Geometry: 24px border-radius, and a very thin, elegant drop shadow strictly at the bottom of each card for a premium lift. The image must fill the 3:4 card area completely (use object-fit: cover to avoid distortion).
+    
+    5. High-End Interaction:
+    
+    Use frictionless horizontal scroll snapping (scroll-snap-type: x mandatory).
+    
+    Apply a subtle pop-up scaling transition (0.5s ease-out). As a card (column) enters the center of the viewport, it should scale to 1.0, while surrounding cards scale smoothly to 0.9.
+    
+    Hide all scrollbars. Strictly maintain the horizontal layout; do NOT stack items vertically on mobile.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-grid-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: 100vw;
+    overflow: hidden;
+    padding: 60px 0;
+    background-color: #FFFFFF;
+  }
+
+  .ai-collection-grid__title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, serif;
+    font-weight: {{ block.settings.title_font.weight }};
+    font-size: {{ block.settings.title_size }}px;
+    letter-spacing: {{ block.settings.title_letter_spacing }}px;
+    text-align: center;
+    margin: 0 0 40px 0;
+    color: {{ block.settings.title_color }};
+    text-transform: uppercase;
+  }
+
+  .ai-collection-grid__scroll-container-{{ ai_gen_id }} {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ai-collection-grid__scroll-container-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-collection-grid__grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: {{ block.settings.card_width }}vw;
+    gap: 15px;
+    padding: 0 15px;
+  }
+
+  .ai-collection-grid__card-{{ ai_gen_id }} {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    border-radius: 24px;
+    overflow: hidden;
+    scroll-snap-align: start;
+    transition: transform 0.5s ease-out;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .ai-collection-grid__card-link-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+  }
+
+  .ai-collection-grid__card-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-collection-grid__card-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-collection-grid__card-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-collection-grid__grid-{{ ai_gen_id }} {
+      grid-auto-columns: {{ block.settings.card_width_desktop }}vw;
+    }
+  }
+{% endstyle %}
+
+<ai-collection-grid-{{ ai_gen_id }}
+  class="ai-collection-grid-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.section_title != blank %}
+    <h2 class="ai-collection-grid__title-{{ ai_gen_id }}">
+      {{ block.settings.section_title }}
+    </h2>
+  {% endif %}
+
+  <div class="ai-collection-grid__scroll-container-{{ ai_gen_id }}">
+    <div class="ai-collection-grid__grid-{{ ai_gen_id }}">
+      {% for i in (1..9) %}
+        {% liquid
+          assign collection_key = 'collection_' | append: i
+          assign collection = block.settings[collection_key]
+        %}
+
+        <div
+          class="ai-collection-grid__card-{{ ai_gen_id }}"
+          data-card-index="{{ i }}"
+        >
+          {% if collection != blank %}
+            <a
+              href="{{ collection.url }}"
+              class="ai-collection-grid__card-link-{{ ai_gen_id }}"
+              aria-label="{{ collection.title }}"
+            >
+              {% if collection.featured_image %}
+                <img
+                  src="{{ collection.featured_image | image_url: width: 800 }}"
+                  alt="{{ collection.featured_image.alt | escape }}"
+                  class="ai-collection-grid__card-image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="800"
+                  height="1067"
+                >
+              {% else %}
+                <div class="ai-collection-grid__card-placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </a>
+          {% else %}
+            <div class="ai-collection-grid__card-placeholder-{{ ai_gen_id }}">
+              {{ 'collection-1' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</ai-collection-grid-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class AiCollectionGrid{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.scrollContainer = null;
+        this.cards = [];
+        this.observer = null;
+      }
+
+      connectedCallback() {
+        this.scrollContainer = this.querySelector('.ai-collection-grid__scroll-container-{{ ai_gen_id }}');
+        this.cards = Array.from(this.querySelectorAll('.ai-collection-grid__card-{{ ai_gen_id }}'));
+        
+        this.setupIntersectionObserver();
+      }
+
+      setupIntersectionObserver() {
+        const options = {
+          root: this.scrollContainer,
+          threshold: [0, 0.25, 0.5, 0.75, 1],
+          rootMargin: '0px'
+        };
+
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            const card = entry.target;
+            const ratio = entry.intersectionRatio;
+            
+            if (ratio > 0.5) {
+              card.style.transform = 'scale(1)';
+            } else {
+              card.style.transform = 'scale(0.9)';
+            }
+          });
+        }, options);
+
+        this.cards.forEach((card) => {
+          this.observer.observe(card);
+        });
+      }
+
+      disconnectedCallback() {
+        if (this.observer) {
+          this.observer.disconnect();
+        }
+      }
+    }
+
+    customElements.define('ai-collection-grid-{{ ai_gen_id }}', AiCollectionGrid{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection grid 3x3",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Título de sección"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Título",
+      "default": "TODAS LAS MARCAS"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Fuente del título",
+      "default": "serif"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Tamaño del título",
+      "min": 16,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "title_letter_spacing",
+      "label": "Espaciado de letras",
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color del título",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Configuración de tarjetas"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Ancho de tarjeta (móvil)",
+      "min": 30,
+      "max": 60,
+      "step": 2,
+      "unit": "vw",
+      "default": 42
+    },
+    {
+      "type": "range",
+      "id": "card_width_desktop",
+      "label": "Ancho de tarjeta (escritorio)",
+      "min": 15,
+      "max": 40,
+      "step": 1,
+      "unit": "vw",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Colección 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Colección"
+    },
+    {
+      "type": "header",
+      "content": "Colección 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Colección"
+    },
+    {
+      "type": "header",
+      "content": "Colección 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Colección"
+    },
+    {
+      "type": "header",
+      "content": "Colección 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Colección"
+    },
+    {
+      "type": "header",
+      "content": "Colección 5"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Colección"
+    },
+    {
+      "type": "header",
+      "content": "Colección 6"
+    },
+    {
+      "type": "collection",
+      "id": "collection_6",
+      "label": "Colección"
+    },
+    {
+      "type": "header",
+      "content": "Colección 7"
+    },
+    {
+      "type": "collection",
+      "id": "collection_7",
+      "label": "Colección"
+    },
+    {
+      "type": "header",
+      "content": "Colección 8"
+    },
+    {
+      "type": "collection",
+      "id": "collection_8",
+      "label": "Colección"
+    },
+    {
+      "type": "header",
+      "content": "Colección 9"
+    },
+    {
+      "type": "collection",
+      "id": "collection_9",
+      "label": "Colección"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection grid 3x3"
+    }
+  ]
+}
+{% endschema %}

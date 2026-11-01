@@ -1,0 +1,418 @@
+{% doc %}
+  @prompt
+    Goal: Create a 100% mobile-first collection carousel with maximum card presence, elegant depth, and an ultra-fluid, subtle "pop-up" scale animation.
+    
+    1. Structural Layout (Maximum Presence + Peek):
+    
+    Create a horizontal scrolling section for 3 collections (BOLSAS, CARTERAS, RELOJES).
+    
+    Standard Margins: Add exactly 60px vertical padding (top and bottom) to the section.
+    
+    Wide Card Configuration (The Fix): Each card must occupy 85% of the viewport width (85vw). This maximizes presence while still allowing a peek.
+    
+    Asymmetric Alignment for Depth: To create tension and show the next card, align the active card slightly to the left using padding-left: 5%; padding-right: 10%. This displays a defined 10% peek of the next card on the right, incitng the user to swipe.
+    
+    Scroll Snap: Enforce scroll-snap-type: x mandatory for a precise "magnetic" lock.
+    
+    2. Elegant Motion & Pop-Up Physics:
+    
+    Fluid Transitions: Use an active-to-inactive transition of 0.6s cubic-bezier(0.23, 1, 0.32, 1). This specific curve provides a high-end, elastic feel that starts fast and slows down with extreme smoothness.
+    
+    Subtle Pop-Up Scale: Implement an interactive scaling effect. The centered (active) card is scale(1.0), and inactive/side cards are scale(0.92). As the user swipes, the cards transition smoothly between these states, creating a tenure, fluid "popping" motion.
+    
+    3. Modern & Clean Card Design:
+    
+    Contours: Use a 36px border-radius on all cards with overflow: hidden.
+    
+    Image Focus: The product image must be large, centered, and occupy 75% of the card’s height. Use transparent images for a floating effect.
+    
+    Aesthetic: Pure White (#FFFFFF) cards with a subtle, diffused shadow (box-shadow: 0 15px 40px rgba(0,0,0,0.03)) and a very thin 1px light gray border.
+    
+    4. Minimalist Details:
+    
+    Use an elegant Serif font for titles. Place a compact, minimalist button at the bottom of each card.
+    
+    Hide all scrollbars to maintain a clean, app-like mobile interface.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-mobile-carousel-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: 60px 0;
+    overflow: hidden;
+  }
+
+  .ai-mobile-carousel__container-{{ ai_gen_id }} {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-left: 5%;
+    padding-right: 10%;
+    gap: 20px;
+  }
+
+  .ai-mobile-carousel__container-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-mobile-carousel__card-{{ ai_gen_id }} {
+    flex: 0 0 85vw;
+    scroll-snap-align: start;
+    background-color: #FFFFFF;
+    border-radius: 36px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(230, 230, 230, 0.5);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    transform: scale(0.92);
+  }
+
+  .ai-mobile-carousel__card-{{ ai_gen_id }}.active {
+    transform: scale(1.0);
+  }
+
+  .ai-mobile-carousel__image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    height: 75%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px 20px;
+  }
+
+  .ai-mobile-carousel__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .ai-mobile-carousel__image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+  }
+
+  .ai-mobile-carousel__image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-mobile-carousel__content-{{ ai_gen_id }} {
+    padding: 20px 30px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .ai-mobile-carousel__title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, serif;
+    font-size: {{ block.settings.title_size }}px;
+    font-weight: 400;
+    color: {{ block.settings.title_color }};
+    text-align: center;
+    margin: 0;
+    letter-spacing: 0.5px;
+  }
+
+  .ai-mobile-carousel__button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 10px 24px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: {{ block.settings.button_radius }}px;
+    border: 1px solid {{ block.settings.button_border_color }};
+    transition: all 0.3s ease;
+  }
+
+  .ai-mobile-carousel__button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background }};
+    color: {{ block.settings.button_hover_text_color }};
+    border-color: {{ block.settings.button_hover_border_color }};
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-mobile-carousel-{{ ai_gen_id }} {
+      width: {{ block.settings.desktop_width_percent }}%;
+      margin: 0 auto;
+    }
+  }
+{% endstyle %}
+
+<mobile-carousel-{{ ai_gen_id }} class="ai-mobile-carousel-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-mobile-carousel__container-{{ ai_gen_id }}">
+    {% for i in (1..3) %}
+      {% liquid
+        assign collection_key = 'collection_' | append: i
+        assign collection = block.settings[collection_key]
+      %}
+      
+      <div class="ai-mobile-carousel__card-{{ ai_gen_id }}" data-card-index="{{ forloop.index0 }}">
+        <div class="ai-mobile-carousel__image-wrapper-{{ ai_gen_id }}">
+          {% if collection and collection.image %}
+            <img
+              src="{{ collection.image | image_url: width: 800 }}"
+              alt="{{ collection.image.alt | escape }}"
+              class="ai-mobile-carousel__image-{{ ai_gen_id }}"
+              loading="lazy"
+              width="800"
+              height="800"
+            >
+          {% elsif collection and collection.products.first and collection.products.first.featured_image %}
+            <img
+              src="{{ collection.products.first.featured_image | image_url: width: 800 }}"
+              alt="{{ collection.products.first.featured_image.alt | escape }}"
+              class="ai-mobile-carousel__image-{{ ai_gen_id }}"
+              loading="lazy"
+              width="800"
+              height="800"
+            >
+          {% else %}
+            <div class="ai-mobile-carousel__image-placeholder-{{ ai_gen_id }}">
+              {{ 'collection-1' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="ai-mobile-carousel__content-{{ ai_gen_id }}">
+          {% if collection %}
+            <h3 class="ai-mobile-carousel__title-{{ ai_gen_id }}">{{ collection.title }}</h3>
+            <a href="{{ collection.url }}" class="ai-mobile-carousel__button-{{ ai_gen_id }}">
+              {{ block.settings.button_text }}
+            </a>
+          {% else %}
+            <h3 class="ai-mobile-carousel__title-{{ ai_gen_id }}">Colección {{ i }}</h3>
+            <a href="#" class="ai-mobile-carousel__button-{{ ai_gen_id }}">
+              {{ block.settings.button_text }}
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</mobile-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class MobileCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.container = this.querySelector('.ai-mobile-carousel__container-{{ ai_gen_id }}');
+        this.cards = this.querySelectorAll('.ai-mobile-carousel__card-{{ ai_gen_id }}');
+        this.activeIndex = 0;
+      }
+
+      connectedCallback() {
+        this.updateActiveCard();
+        this.container.addEventListener('scroll', this.handleScroll.bind(this));
+        
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                const index = parseInt(entry.target.dataset.cardIndex);
+                this.setActiveCard(index);
+              }
+            });
+          },
+          {
+            root: this.container,
+            threshold: 0.6
+          }
+        );
+
+        this.cards.forEach((card) => observer.observe(card));
+      }
+
+      handleScroll() {
+        clearTimeout(this.scrollTimeout);
+        this.scrollTimeout = setTimeout(() => {
+          this.updateActiveCard();
+        }, 100);
+      }
+
+      updateActiveCard() {
+        const containerRect = this.container.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+        
+        let closestCard = null;
+        let closestDistance = Infinity;
+
+        this.cards.forEach((card) => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const distance = Math.abs(containerCenter - cardCenter);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        if (closestCard) {
+          const newIndex = parseInt(closestCard.dataset.cardIndex);
+          this.setActiveCard(newIndex);
+        }
+      }
+
+      setActiveCard(index) {
+        if (this.activeIndex !== index) {
+          this.activeIndex = index;
+          this.cards.forEach((card, i) => {
+            if (i === index) {
+              card.classList.add('active');
+            } else {
+              card.classList.remove('active');
+            }
+          });
+        }
+      }
+    }
+
+    customElements.define('mobile-carousel-{{ ai_gen_id }}', MobileCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "header",
+      "content": "Title"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Font",
+      "default": "serif"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Text",
+      "default": "Explorar"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Hover background",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border_color",
+      "label": "Hover border color",
+      "default": "#383838"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection carousel"
+    }
+  ]
+}
+{% endschema %}

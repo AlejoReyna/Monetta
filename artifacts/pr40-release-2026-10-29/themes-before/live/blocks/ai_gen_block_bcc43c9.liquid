@@ -1,0 +1,756 @@
+{% doc %}
+  @prompt
+    Task: Create a Premium 2-Card Social Carousel Section with image support.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-social-carousel-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.section_background }};
+    padding: {{ block.settings.section_padding_top }}px 0 20px {{ block.settings.section_padding_bottom }}px;
+  }
+
+  .ai-social-carousel-container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  .ai-social-carousel-grid-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 50px 24px;
+  }
+
+  .ai-social-carousel-grid-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-social-carousel-grid-{{ ai_gen_id }} {
+      justify-content: center;
+      overflow-x: visible;
+    }
+  }
+
+  .ai-social-carousel-card-{{ ai_gen_id }} {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+    background-color: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    border: {{ block.settings.card_border_width }}px solid {{ block.settings.card_border_color }};
+    box-shadow: {{ block.settings.card_shadow }};
+    padding: {{ block.settings.card_padding }}px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-height: 400px;
+    outline: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-social-carousel-card-{{ ai_gen_id }} {
+      flex: 0 0 {{ block.settings.card_width_desktop }}px;
+      min-height: {{ block.settings.card_height_desktop }}px;
+    }
+  }
+
+  .ai-social-carousel-icon-{{ ai_gen_id }} {
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+    margin-bottom: {{ block.settings.icon_margin_bottom }}px;
+    flex-shrink: 0;
+  }
+
+  .ai-social-carousel-icon-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    stroke: {{ block.settings.icon_color }};
+    fill: none;
+    stroke-width: {{ block.settings.icon_stroke_width }};
+  }
+
+  .ai-social-carousel-icon-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .ai-social-carousel-description-{{ ai_gen_id }} {
+    flex-grow: 1;
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.text_size }}px;
+    line-height: 1.6;
+    margin-bottom: {{ block.settings.text_margin_bottom }}px;
+    font-family: {{ block.settings.text_font }}, sans-serif;
+  }
+
+  .ai-social-carousel-buttons-{{ ai_gen_id }} {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.button_gap }}px;
+    margin-top: auto;
+  }
+
+  .ai-social-carousel-button-{{ ai_gen_id }} {
+    width: 100%;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+ .ai-social-carousel-button-primary-{{ ai_gen_id }} {
+  background-color: {{ block.settings.primary_button_bg }};
+  color: {{ block.settings.primary_button_text }};
+  border: {{ block.settings.primary_button_border_width }}px solid {{ block.settings.primary_button_border_color }};
+}
+
+  .ai-social-carousel-button-primary-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.primary_button_hover_bg }};
+    color: {{ block.settings.primary_button_hover_text }};
+  }
+
+  .ai-social-carousel-button-secondary-{{ ai_gen_id }} {
+    background-color: {{ block.settings.secondary_button_bg }};
+    color: {{ block.settings.secondary_button_text }};
+    border: {{ block.settings.secondary_button_border_width }}px solid {{ block.settings.secondary_button_border }};
+  }
+
+  .ai-social-carousel-button-secondary-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.secondary_button_hover_bg }};
+    color: {{ block.settings.secondary_button_hover_text }};
+    border-color: {{ block.settings.secondary_button_hover_border }};
+  }
+{% endstyle %}
+
+<social-carousel-{{ ai_gen_id }} class="ai-social-carousel-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-social-carousel-container-{{ ai_gen_id }}">
+    <div class="ai-social-carousel-grid-{{ ai_gen_id }}">
+
+      <!-- Card 1: WhatsApp -->
+      <div class="ai-social-carousel-card-{{ ai_gen_id }}">
+        <div class="ai-social-carousel-icon-{{ ai_gen_id }}">
+          {% if block.settings.whatsapp_image != blank %}
+            <img src="{{ block.settings.whatsapp_image | image_url: width: 200 }}" alt="WhatsApp">
+          {% else %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+          {% endif %}
+        </div>
+        <div class="ai-social-carousel-description-{{ ai_gen_id }}">
+          {{ block.settings.whatsapp_description }}
+        </div>
+        <div class="ai-social-carousel-buttons-{{ ai_gen_id }}">
+          {% if block.settings.whatsapp_button_1_text != blank %}
+            <a href="{{ block.settings.whatsapp_button_1_link }}" class="ai-social-carousel-button-{{ ai_gen_id }} ai-social-carousel-button-primary-{{ ai_gen_id }}" {% if block.settings.whatsapp_button_1_link contains 'whatsapp' %}target="_blank" rel="noopener noreferrer"{% endif %}>
+              {{ block.settings.whatsapp_button_1_text }}
+            </a>
+          {% endif %}
+          {% if block.settings.whatsapp_button_2_text != blank %}
+            <a href="{{ block.settings.whatsapp_button_2_link }}" class="ai-social-carousel-button-{{ ai_gen_id }} ai-social-carousel-button-secondary-{{ ai_gen_id }}" {% if block.settings.whatsapp_button_2_link contains 'whatsapp' %}target="_blank" rel="noopener noreferrer"{% endif %}>
+              {{ block.settings.whatsapp_button_2_text }}
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Card 2: Facebook -->
+      <div class="ai-social-carousel-card-{{ ai_gen_id }}">
+        <div class="ai-social-carousel-icon-{{ ai_gen_id }}">
+          {% if block.settings.facebook_image != blank %}
+            <img src="{{ block.settings.facebook_image | image_url: width: 200 }}" alt="Facebook">
+          {% else %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+            </svg>
+          {% endif %}
+        </div>
+        <div class="ai-social-carousel-description-{{ ai_gen_id }}">
+          {{ block.settings.facebook_description }}
+        </div>
+        <div class="ai-social-carousel-buttons-{{ ai_gen_id }}">
+          {% if block.settings.facebook_button_text != blank %}
+            <a href="{{ block.settings.facebook_button_link }}" class="ai-social-carousel-button-{{ ai_gen_id }} ai-social-carousel-button-primary-{{ ai_gen_id }}" {% if block.settings.facebook_button_link contains 'facebook' %}target="_blank" rel="noopener noreferrer"{% endif %}>
+              {{ block.settings.facebook_button_text }}
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</social-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class SocialCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this._rafId = null;
+      }
+
+      connectedCallback() {
+        this.carousel = this.querySelector('.ai-social-carousel-grid-{{ ai_gen_id }}');
+        this.cards = this.querySelectorAll('.ai-social-carousel-card-{{ ai_gen_id }}');
+        this.setupDrag();
+        this.setupPopEffect();
+      }
+
+      setupDrag() {
+        if (!this.carousel) return;
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let velX = 0;
+        let lastX = 0;
+        let lastTime = 0;
+        let momentumId;
+
+        const cancelMomentum = () => {
+          if (momentumId) cancelAnimationFrame(momentumId);
+        };
+
+        const applyMomentum = () => {
+          if (Math.abs(velX) < 0.5) return;
+          this.carousel.scrollLeft += velX;
+          velX *= 0.92;
+          momentumId = requestAnimationFrame(applyMomentum);
+        };
+
+        this.carousel.addEventListener('mousedown', (e) => {
+          isDown = true;
+          cancelMomentum();
+          this.carousel.style.cursor = 'grabbing';
+          this.carousel.style.scrollSnapType = 'none';
+          startX = e.pageX - this.carousel.offsetLeft;
+          scrollLeft = this.carousel.scrollLeft;
+          lastX = e.pageX;
+          lastTime = Date.now();
+        });
+
+        this.carousel.addEventListener('mouseleave', () => {
+          if (!isDown) return;
+          isDown = false;
+          this.carousel.style.cursor = 'grab';
+          this.carousel.style.scrollSnapType = 'x mandatory';
+          applyMomentum();
+        });
+
+        this.carousel.addEventListener('mouseup', () => {
+          isDown = false;
+          this.carousel.style.cursor = 'grab';
+          this.carousel.style.scrollSnapType = 'x mandatory';
+          applyMomentum();
+        });
+
+        this.carousel.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - this.carousel.offsetLeft;
+          const walk = x - startX;
+          this.carousel.scrollLeft = scrollLeft - walk;
+
+          const now = Date.now();
+          const dt = now - lastTime || 1;
+          velX = (lastX - e.pageX) / dt * 16;
+          lastX = e.pageX;
+          lastTime = now;
+        });
+
+        // Touch: dejar que el navegador maneje nativamente (más suave)
+        this.carousel.addEventListener('touchstart', () => {
+          cancelMomentum();
+          this.carousel.style.scrollSnapType = 'x mandatory';
+        }, { passive: true });
+      }
+
+      setupPopEffect() {
+        if (!this.carousel || !this.cards.length) return;
+
+        this.cards.forEach(card => {
+          card.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
+          card.style.willChange = 'transform, opacity';
+        });
+
+        const updateCards = () => {
+          this._rafId = null;
+          const carouselRect = this.carousel.getBoundingClientRect();
+          const carouselCenter = carouselRect.left + carouselRect.width / 2;
+
+          this.cards.forEach(card => {
+            const cardRect = card.getBoundingClientRect();
+            const cardCenter = cardRect.left + cardRect.width / 2;
+            const distance = Math.abs(carouselCenter - cardCenter);
+            const maxDistance = carouselRect.width * 0.55;
+            const ratio = Math.min(distance / maxDistance, 1);
+
+            const scale = 1 - ratio * 0.05;
+            const opacity = 1 - ratio * 0.2;
+
+            card.style.transform = `scale(${scale})`;
+            card.style.opacity = opacity;
+          });
+        };
+
+        const scheduleUpdate = () => {
+          if (this._rafId) return;
+          this._rafId = requestAnimationFrame(updateCards);
+        };
+
+        updateCards();
+        this.carousel.addEventListener('scroll', scheduleUpdate, { passive: true });
+        window.addEventListener('resize', scheduleUpdate, { passive: true });
+      }
+    }
+
+    customElements.define('social-carousel-{{ ai_gen_id }}', SocialCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+
+
+{% schema %}
+{
+  "name": "Social carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "color",
+      "id": "section_background",
+      "label": "Background",
+      "default": "#fafafa"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max width",
+      "min": 800,
+      "max": 1400,
+      "step": 50,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "header",
+      "content": "Cards"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Border color",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "text",
+      "id": "card_shadow",
+      "label": "Shadow",
+      "default": "0 8px 24px rgba(0,0,0,0.08)"
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Padding",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "card_width_desktop",
+      "label": "Desktop width",
+      "min": 300,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 450
+    },
+    {
+      "type": "range",
+      "id": "card_height_desktop",
+      "label": "Desktop min height",
+      "min": 400,
+      "max": 700,
+      "step": 10,
+      "unit": "px",
+      "default": 500
+    },
+    {
+      "type": "header",
+      "content": "Icons"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Size",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "icon_stroke_width",
+      "label": "Stroke width",
+      "min": 1,
+      "max": 3,
+      "step": 0.5,
+      "default": 1.5
+    },
+    {
+      "type": "range",
+      "id": "icon_margin_bottom",
+      "label": "Bottom margin",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "select",
+      "id": "text_font",
+      "label": "Font",
+      "options": [
+        { "value": "serif", "label": "Serif" },
+        { "value": "sans-serif", "label": "Sans-serif" }
+      ],
+      "default": "sans-serif"
+    },
+    {
+      "type": "range",
+      "id": "text_margin_bottom",
+      "label": "Bottom margin",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Buttons"
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "label": "Vertical padding",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Font size",
+      "min": 11,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "button_gap",
+      "label": "Gap between buttons",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Primary button"
+    },
+    {
+      "type": "range",
+      "id": "primary_button_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "color",
+      "id": "primary_button_border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "primary_button_bg",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "primary_button_text",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "primary_button_hover_bg",
+      "label": "Hover background",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "primary_button_hover_text",
+      "label": "Hover text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Secondary button"
+    },
+    {
+      "type": "color",
+      "id": "secondary_button_bg",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "secondary_button_text",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "secondary_button_border",
+      "label": "Border",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "secondary_button_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "secondary_button_hover_bg",
+      "label": "Hover background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "secondary_button_hover_text",
+      "label": "Hover text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "secondary_button_hover_border",
+      "label": "Hover border",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "WhatsApp card"
+    },
+    {
+      "type": "image_picker",
+      "id": "whatsapp_image",
+      "label": "Image (replaces icon)"
+    },
+    {
+      "type": "richtext",
+      "id": "whatsapp_description",
+      "label": "Description",
+      "default": "<p>Connect with us instantly on WhatsApp for personalized assistance and exclusive offers.</p>"
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_button_1_text",
+      "label": "Button 1 text",
+      "default": "Chat now"
+    },
+    {
+      "type": "url",
+      "id": "whatsapp_button_1_link",
+      "label": "Button 1 link"
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_button_2_text",
+      "label": "Button 2 text",
+      "default": "Learn more"
+    },
+    {
+      "type": "url",
+      "id": "whatsapp_button_2_link",
+      "label": "Button 2 link"
+    },
+    {
+      "type": "header",
+      "content": "Facebook card"
+    },
+    {
+      "type": "image_picker",
+      "id": "facebook_image",
+      "label": "Image (replaces icon)"
+    },
+    {
+      "type": "richtext",
+      "id": "facebook_description",
+      "label": "Description",
+      "default": "<p>Follow us on Facebook to stay updated with our latest collections and community events.</p>"
+    },
+    {
+      "type": "text",
+      "id": "facebook_button_text",
+      "label": "Button text",
+      "default": "Visit page"
+    },
+    {
+      "type": "url",
+      "id": "facebook_button_link",
+      "label": "Button link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Social carousel"
+    }
+  ]
+}
+{% endschema %}

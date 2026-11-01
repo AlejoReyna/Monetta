@@ -1,0 +1,39 @@
+{%- doc -%}
+  Responsive <img> with real intrinsic size (no layout shift), srcset capped at the image's own width and an optional
+  focal-point object-position taken from the image's focal point in the Shopify admin.
+
+  @param {object} image - Shopify image.
+  @param {string} sizes - The sizes attribute for the slot (docs/web-redesign/IMPLEMENTATION_HANDOFF.md section 5).
+  @param {string} [widths] - Comma separated widths, default '360,540,720,1080,1440'.
+  @param {string} [alt] - Alt text; pass '' for decorative images. Defaults to the image's alt.
+  @param {string} [class] - CSS class for the <img>.
+  @param {boolean} [eager] - Eager + high priority for the first viewport; everything else lazy-loads.
+  @param {boolean} [focal] - Apply the focal point as object-position.
+{%- enddoc -%}
+{%- liquid
+  assign width_list = widths | default: '360,540,720,1080,1440' | split: ','
+  assign alt_text = alt
+  if alt == nil
+    assign alt_text = image.alt
+  endif
+  assign position = ''
+  if focal and image.presentation.focal_point
+    assign position = image.presentation.focal_point
+  endif
+-%}
+<img
+  src="{{ image | image_url: width: 720 }}"
+  srcset="
+    {%- for w in width_list -%}
+      {%- assign wn = w | plus: 0 -%}
+      {%- if wn <= image.width -%}{{ image | image_url: width: wn }} {{ wn }}w{% unless forloop.last %}, {% endunless %}{%- endif -%}
+    {%- endfor -%}
+  "
+  sizes="{{ sizes }}"
+  width="{{ image.width }}"
+  height="{{ image.height }}"
+  alt="{{ alt_text | escape }}"
+  {% if class != blank %}class="{{ class }}"{% endif %}
+  {% if eager %}fetchpriority="high" decoding="async"{% else %}loading="lazy" decoding="async"{% endif %}
+  {% if position != blank %}style="object-position: {{ position }}"{% endif %}
+>

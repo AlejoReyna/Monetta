@@ -1,0 +1,70 @@
+{%- doc -%}
+  Prints the destination of a guide category, silhouette, brand or page. A collection or page the owner creates with
+  the expected handle wins; until then Shopify's automatic listings stand in (checked on staging: tag filters for the
+  silhouettes, product types for carteras and relojes, the vendor listing for brands; guia-1a1/RESULTADO.md, F0).
+  Capture it and strip: {% capture url %}{% render 'monetta-guia-url', key: 'tote' %}{% endcapture %}
+
+  @param {string} key - bolsas, carteras, relojes, perfumes, accesorios, crossbody, tote, shoulder, satchel, categorias,
+    catalogo, mayoreo, rewards, contacto or brand.
+  @param {string} [brand] - The vendor, when key is 'brand'.
+{%- enddoc -%}
+{%- liquid
+  assign handle = ''
+  assign fallback = ''
+  case key
+    when 'bolsas'
+      assign handle = 'bolsas'
+      assign fallback = routes.all_products_collection_url | append: '/bolsa'
+    when 'carteras'
+      assign handle = 'carteras'
+      assign fallback = routes.collections_url | append: '/types?q=Cartera'
+    when 'relojes'
+      assign handle = 'relojes'
+      assign fallback = routes.collections_url | append: '/types?q=Reloj'
+    when 'perfumes'
+      assign handle = 'perfumes'
+      assign fallback = routes.all_products_collection_url | append: '/perfume'
+    when 'accesorios'
+      assign handle = 'accesorios'
+      assign fallback = routes.all_products_collection_url | append: '/accessory'
+    when 'crossbody'
+      assign handle = 'crossbody'
+      assign fallback = routes.all_products_collection_url | append: '/crossbody'
+    when 'tote', 'totes'
+      assign handle = 'totes'
+      assign fallback = routes.all_products_collection_url | append: '/tote'
+    when 'shoulder'
+      assign handle = 'shoulder'
+      assign fallback = routes.all_products_collection_url | append: '/shoulder'
+    when 'satchel', 'bolsos-de-mano'
+      assign handle = 'bolsos-de-mano'
+      assign fallback = routes.all_products_collection_url | append: '/satchel'
+    when 'brand'
+      assign handle = brand | handleize
+      assign fallback = brand | url_for_vendor
+  endcase
+-%}
+{%- if handle != blank -%}
+  {%- if collections[handle].id != blank -%}{{ collections[handle].url }}{%- else -%}{{ fallback }}{%- endif -%}
+{%- else -%}
+  {%- case key -%}
+    {%- when 'categorias' -%}{{ routes.collections_url }}
+    {%- when 'catalogo' -%}{{ routes.all_products_collection_url }}
+    {%- comment -%}
+      Guide pages use the new templates page.guia-mayoreo, -contacto and -rewards; the owner's own templates stay. Until a
+      page is assigned its guide template in the admin, the link asks for it with ?view= on the page that exists.
+    {%- endcomment -%}
+    {%- when 'mayoreo', 'rewards', 'contacto' -%}
+      {%- liquid
+        assign suffix = 'guia-' | append: key
+        assign target = pages[key]
+        if key == 'contacto'
+          assign target = pages['contact']
+        endif
+        if target.id == blank
+          assign target = pages['contact']
+        endif
+      -%}
+      {%- if target.id == blank -%}{{ routes.root_url }}{%- elsif target.template_suffix == suffix -%}{{ target.url }}{%- else -%}{{ target.url }}?view={{ suffix }}{%- endif -%}
+  {%- endcase -%}
+{%- endif -%}

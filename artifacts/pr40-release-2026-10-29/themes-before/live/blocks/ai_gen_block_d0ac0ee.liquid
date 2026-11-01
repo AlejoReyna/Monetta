@@ -1,0 +1,512 @@
+{% doc %}
+  @prompt
+    Circular Collection Cards with Expandable Drawer
+    
+    Create a custom Liquid block for Shopify. The layout is strictly horizontal rows — never vertical stacking.
+    
+    First row — always visible:
+    
+    Exactly 3 circular collection cards side by side in one horizontal line
+    display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: center; — nowrap obligatorio
+    Cada card: flex: 0 0 33%
+    En mobile, las cards escalan para caber en una fila — nunca se apilan
+    Cada card contiene solo:
+    
+    Imagen circular (1:1, border-radius: 50%) con sombra: box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06)
+    Nombre de colección centrado debajo
+    Hover: transform: scale(1.04)
+    Sin fondo de card, sin wrapper box
+    Arrow click — fix crítico, un solo clic debe funcionar:
+    
+    El event listener del arrow debe usar un único addEventListener('click', handler) — sin doble binding, sin listeners duplicados
+    El estado debe manejarse con una sola variable booleana isExpanded = false
+    En cada clic: toggle isExpanded, luego ejecutar la animación correspondiente — nunca depender de clases CSS para leer el estado
+    Asegurarse de que el arrow button no tenga pointer-events: none ni esté cubierto por otro elemento que intercepte el primer clic
+    El arrow no debe tener tabindex="-1" ni estar dentro de un elemento con overflow: hidden que bloquee eventos
+    Usar button HTML nativo para el arrow (no div) para garantizar que los eventos de clic funcionen correctamente desde el primer toque
+    Arrow behavior:
+    
+    Collapsed: arrow debajo de los 3 cards, apuntando abajo (▼)
+    Al hacer clic (1 solo clic): drawer se abre, arrow se mueve debajo de los 2 cards revelados, apuntando arriba (▲)
+    Al hacer clic de nuevo (1 solo clic): drawer se cierra, arrow regresa debajo de los 3 primeros, apuntando abajo (▼)
+    Transición del arrow: 180ms ease-out
+    Segunda fila — oculta por defecto:
+    
+    2 cards circulares en fila horizontal, flex-wrap: nowrap
+    Cada card: flex: 0 0 50%
+    Animación: max-height 220ms ease-out + opacity 180ms ease-out
+    padding-bottom: 40px para evitar que se corten las sombras
+    Configuración en theme editor:
+    
+    Collection picker para los 5 slots
+    Tamaño del círculo (small / medium / large)
+    Font size y color del label
+    Intensidad de sombra (none / subtle / medium / strong)
+    Color y tamaño del arrow
+    Color de fondo del bloque
+    Gap entre cards
+    Padding top/bottom del bloque
+    CSS mínimo, sin dependencias externas, JS vanilla dentro del bloque Liquid.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-circular-collections-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding-top: {{ block.settings.padding_top }}px;
+    padding-bottom: {{ block.settings.padding_bottom }}px;
+  }
+
+  .ai-circular-collections__container-{{ ai_gen_id }} {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .ai-circular-collections__row-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: {{ block.settings.gap }}px;
+    margin-bottom: 20px;
+  }
+
+  .ai-circular-collections__card-{{ ai_gen_id }} {
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ai-circular-collections__row-{{ ai_gen_id }}--first .ai-circular-collections__card-{{ ai_gen_id }} {
+    flex: 0 0 33%;
+  }
+
+  .ai-circular-collections__row-{{ ai_gen_id }}--second .ai-circular-collections__card-{{ ai_gen_id }} {
+    flex: 0 0 50%;
+  }
+
+  .ai-circular-collections__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    max-width: {{ block.settings.circle_size }}px;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    transition: transform 180ms ease-out;
+  }
+
+  .ai-circular-collections__card-{{ ai_gen_id }}:hover .ai-circular-collections__image-wrapper-{{ ai_gen_id }} {
+    transform: scale(1.04);
+  }
+
+  .ai-circular-collections__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    {% if block.settings.shadow_intensity == 'subtle' %}
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+    {% elsif block.settings.shadow_intensity == 'medium' %}
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+    {% elsif block.settings.shadow_intensity == 'strong' %}
+      box-shadow: 0 12px 48px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.10);
+    {% endif %}
+  }
+
+  .ai-circular-collections__placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    {% if block.settings.shadow_intensity == 'subtle' %}
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+    {% elsif block.settings.shadow_intensity == 'medium' %}
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+    {% elsif block.settings.shadow_intensity == 'strong' %}
+      box-shadow: 0 12px 48px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.10);
+    {% endif %}
+  }
+
+  .ai-circular-collections__placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-circular-collections__label-{{ ai_gen_id }} {
+    margin-top: 12px;
+    font-size: {{ block.settings.label_font_size }}px;
+    color: {{ block.settings.label_color }};
+    font-weight: 500;
+  }
+
+  .ai-circular-collections__arrow-wrapper-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .ai-circular-collections__arrow-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    transition: transform 180ms ease-out;
+    color: {{ block.settings.arrow_color }};
+  }
+
+  .ai-circular-collections__arrow-{{ ai_gen_id }} svg {
+    width: {{ block.settings.arrow_size }}px;
+    height: {{ block.settings.arrow_size }}px;
+    display: block;
+  }
+
+  .ai-circular-collections__arrow-{{ ai_gen_id }}.rotated {
+    transform: rotate(180deg);
+  }
+
+  .ai-circular-collections__drawer-{{ ai_gen_id }} {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 220ms ease-out, opacity 180ms ease-out;
+    padding-bottom: 0;
+  }
+
+  .ai-circular-collections__drawer-{{ ai_gen_id }}.expanded {
+    max-height: 500px;
+    opacity: 1;
+    padding-bottom: 40px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-circular-collections__image-wrapper-{{ ai_gen_id }} {
+      max-width: calc({{ block.settings.circle_size }}px * 0.7);
+    }
+
+    .ai-circular-collections__label-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.label_font_size }}px * 0.9);
+    }
+  }
+{% endstyle %}
+
+<circular-collections-{{ ai_gen_id }} class="ai-circular-collections-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-circular-collections__container-{{ ai_gen_id }}">
+    <div class="ai-circular-collections__row-{{ ai_gen_id }} ai-circular-collections__row-{{ ai_gen_id }}--first">
+      {% for i in (1..3) %}
+        {% liquid
+          assign collection_key = 'collection_' | append: i
+          assign collection = block.settings[collection_key]
+        %}
+        {% if collection != blank %}
+          <a href="{{ collection.url }}" class="ai-circular-collections__card-{{ ai_gen_id }}">
+            <div class="ai-circular-collections__image-wrapper-{{ ai_gen_id }}">
+              {% if collection.image %}
+                <img
+                  src="{{ collection.image | image_url: width: 600 }}"
+                  alt="{{ collection.image.alt | escape }}"
+                  loading="lazy"
+                  width="600"
+                  height="600"
+                  class="ai-circular-collections__image-{{ ai_gen_id }}"
+                >
+              {% elsif collection.products.first and collection.products.first.featured_image %}
+                <img
+                  src="{{ collection.products.first.featured_image | image_url: width: 600 }}"
+                  alt="{{ collection.products.first.featured_image.alt | escape }}"
+                  loading="lazy"
+                  width="600"
+                  height="600"
+                  class="ai-circular-collections__image-{{ ai_gen_id }}"
+                >
+              {% else %}
+                <div class="ai-circular-collections__placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="ai-circular-collections__label-{{ ai_gen_id }}">{{ collection.title }}</div>
+          </a>
+        {% else %}
+          <div class="ai-circular-collections__card-{{ ai_gen_id }}">
+            <div class="ai-circular-collections__image-wrapper-{{ ai_gen_id }}">
+              <div class="ai-circular-collections__placeholder-{{ ai_gen_id }}">
+                {{ 'collection-1' | placeholder_svg_tag }}
+              </div>
+            </div>
+            <div class="ai-circular-collections__label-{{ ai_gen_id }}">Collection {{ i }}</div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="ai-circular-collections__arrow-wrapper-{{ ai_gen_id }}">
+      <button
+        type="button"
+        class="ai-circular-collections__arrow-{{ ai_gen_id }}"
+        aria-label="Toggle collections"
+        aria-expanded="false"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <div class="ai-circular-collections__drawer-{{ ai_gen_id }}">
+      <div class="ai-circular-collections__row-{{ ai_gen_id }} ai-circular-collections__row-{{ ai_gen_id }}--second">
+        {% for i in (4..5) %}
+          {% liquid
+            assign collection_key = 'collection_' | append: i
+            assign collection = block.settings[collection_key]
+          %}
+          {% if collection != blank %}
+            <a href="{{ collection.url }}" class="ai-circular-collections__card-{{ ai_gen_id }}">
+              <div class="ai-circular-collections__image-wrapper-{{ ai_gen_id }}">
+                {% if collection.image %}
+                  <img
+                    src="{{ collection.image | image_url: width: 600 }}"
+                    alt="{{ collection.image.alt | escape }}"
+                    loading="lazy"
+                    width="600"
+                    height="600"
+                    class="ai-circular-collections__image-{{ ai_gen_id }}"
+                  >
+                {% elsif collection.products.first and collection.products.first.featured_image %}
+                  <img
+                    src="{{ collection.products.first.featured_image | image_url: width: 600 }}"
+                    alt="{{ collection.products.first.featured_image.alt | escape }}"
+                    loading="lazy"
+                    width="600"
+                    height="600"
+                    class="ai-circular-collections__image-{{ ai_gen_id }}"
+                  >
+                {% else %}
+                  <div class="ai-circular-collections__placeholder-{{ ai_gen_id }}">
+                    {{ 'collection-1' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="ai-circular-collections__label-{{ ai_gen_id }}">{{ collection.title }}</div>
+            </a>
+          {% else %}
+            <div class="ai-circular-collections__card-{{ ai_gen_id }}">
+              <div class="ai-circular-collections__image-wrapper-{{ ai_gen_id }}">
+                <div class="ai-circular-collections__placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+              </div>
+              <div class="ai-circular-collections__label-{{ ai_gen_id }}">Collection {{ i }}</div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</circular-collections-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CircularCollections{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.isExpanded = false;
+      }
+
+      connectedCallback() {
+        this.arrow = this.querySelector('.ai-circular-collections__arrow-{{ ai_gen_id }}');
+        this.drawer = this.querySelector('.ai-circular-collections__drawer-{{ ai_gen_id }}');
+        
+        if (this.arrow && this.drawer) {
+          this.arrow.addEventListener('click', this.handleToggle.bind(this));
+        }
+      }
+
+      handleToggle() {
+        this.isExpanded = !this.isExpanded;
+        
+        if (this.isExpanded) {
+          this.drawer.classList.add('expanded');
+          this.arrow.classList.add('rotated');
+          this.arrow.setAttribute('aria-expanded', 'true');
+        } else {
+          this.drawer.classList.remove('expanded');
+          this.arrow.classList.remove('rotated');
+          this.arrow.setAttribute('aria-expanded', 'false');
+        }
+      }
+    }
+
+    customElements.define('circular-collections-{{ ai_gen_id }}', CircularCollections{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Circular collection cards",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "header",
+      "content": "Circle style"
+    },
+    {
+      "type": "range",
+      "id": "circle_size",
+      "label": "Circle size",
+      "min": 100,
+      "max": 400,
+      "step": 20,
+      "unit": "px",
+      "default": 240
+    },
+    {
+      "type": "select",
+      "id": "shadow_intensity",
+      "label": "Shadow intensity",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "subtle",
+          "label": "Subtle"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "strong",
+          "label": "Strong"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "header",
+      "content": "Label"
+    },
+    {
+      "type": "range",
+      "id": "label_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Arrow"
+    },
+    {
+      "type": "range",
+      "id": "arrow_size",
+      "label": "Size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "arrow_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap between cards",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Circular collection cards"
+    }
+  ]
+}
+{% endschema %}

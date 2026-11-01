@@ -1,0 +1,50 @@
+{%- comment -%}
+  Colecciones: editorial cards with a cover photograph, a legibility scrim and a serif title
+  (_CollectionEditorialCard). A rail on phones, three columns from 768 px.
+{%- endcomment -%}
+{%- assign heading_id = section.id | append: '-heading' -%}
+<section class="section container collections-rail" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
+  {% render 'monetta-section-header', id: heading_id, title: section.settings.heading %}
+  <div class="rail">
+    <ul class="rail__track" role="list" aria-label="{{ section.settings.heading | escape }}">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign target = block.settings.collection
+          assign href = block.settings.link | default: target.url
+          assign label = block.settings.title | default: target.title
+          assign art = block.settings.image | default: target.featured_image
+        -%}
+        {%- if href != blank and label != blank -%}
+          <li {{ block.shopify_attributes }}>
+            <a class="collection-card" href="{{ href }}">
+              {%- if art -%}
+                {% render 'monetta-image', image: art, widths: '460,700,920', sizes: '(min-width: 768px) 33vw, 73vw', alt: '', focal: true %}
+              {%- endif -%}
+              <span class="collection-card__label"><span class="collection-card__title">{{ label | escape }}</span>{% render 'monetta-icon', name: 'arrowForward', size: 22 %}</span>
+            </a>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Monetta · Colecciones",
+  "settings": [ { "type": "text", "id": "heading", "label": "Título", "default": "Colecciones" } ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Tarjeta",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Imagen", "info": "1200×1500 (4:5). El punto focal de la imagen decide el recorte." },
+        { "type": "text", "id": "title", "label": "Título", "info": "Sin título se usa el de la colección." },
+        { "type": "collection", "id": "collection", "label": "Colección" },
+        { "type": "url", "id": "link", "label": "Enlace", "info": "Tiene prioridad sobre la colección." }
+      ]
+    }
+  ],
+  "presets": [ { "name": "Monetta · Colecciones" } ]
+}
+{% endschema %}

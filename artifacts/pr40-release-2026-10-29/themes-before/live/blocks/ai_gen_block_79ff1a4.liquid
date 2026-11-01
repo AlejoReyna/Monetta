@@ -1,0 +1,505 @@
+{% doc %}
+  @prompt
+    Directives for Shopify UI Generation - Modern Minimalist Collage:
+    
+    Goal: Create a 100% mobile-optimized "Masonry Grid" collage with 6 collection cards. The design must be clean, structured, and luxurious.
+    
+    1. Grid Architecture (The Collage):
+    
+    Layout: Use a CSS Grid with a 2-column structure on mobile and a 3-column structure on desktop.
+    
+    Asymmetry: Make at least 2 cards span two rows or two columns (e.g., the first card should be a "Featured" large vertical card) to create a modern collage feel instead of a simple repetitive grid.
+    
+    Gap: Use a clean gap: 12px between all cards.
+    
+    2. Card Aesthetics (Clean & Rounded):
+    
+    Contours: Apply a 24px border-radius to every card. Use overflow: hidden to ensure images and overlays respect the rounded corners.
+    
+    Styling: Cards should have a white background (#FFFFFF). Use a very thin, subtle border (1px solid #f2f2f2) and a soft, flat shadow for a clean "lifted" effect.
+    
+    3. Visual Hierarchy & Concise Info:
+    
+    Image Treatment: Collection images (transparent PNGs) must be centered within each card, leaving enough white space (padding: 15%) to feel minimalist.
+    
+    Overlay Text: Place the collection title at the bottom-left of each card using an elegant Serif font.
+    
+    CTA: Include a very small, minimalist "EXPLORAR" text link or button with wide letter-spacing.
+    
+    4. Responsive Constraints:
+    
+    Width: The collage must fit within 100vw without causing any horizontal page overflow.
+    
+    Padding: Add 15px of side padding to the entire section so cards don't touch the screen edges.
+    
+    5. Content Logic:
+    
+    Generate 6 collection slots: BOLSAS, CARTERAS, RELOJES, ACCESORIOS, NOVEDADES, and MAYOREO.
+    
+    6. Technical: Use the CSS prefix .modern-collage- for all classes. Ensure 100% responsiveness and no fixed pixel widths., made the desing equal in every card size, make all of it less biig and also make it in an aspect were is 2 per row, making 3 columns of 2 collectiosn per row, put some space between each card, if you have to make resize, do it, put more space between rows, put more space between, i dont want any card to touch any other, put the desing in the middle of the page , the desing is not in the middle of the page, put the separation between cards in the middle of the page, elimina el boton explorar y simplificalo con solo el titulo personalizado, quiero que este no sea tan alto para que no tape la foto, igualmente quiero que la redondes de la tarjeta sea mas fina y la separacion entre tarjetas haga que el diseño quede en el medio de la pagina, haz que el titulo personalizado este en el centro de la tarjeta, y tambien haz que las tarjetas de la izquierda esten pegadas al margen de la seccion, put the personalized title more in the bottom. and make the cards more circular, put the left cards in the border of the page section
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .modern-collage-container-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .modern-collage-grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: {{ block.settings.card_gap }}px;
+    row-gap: {{ block.settings.row_gap }}px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 15px 0 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .modern-collage-grid-{{ ai_gen_id }} {
+      grid-template-columns: repeat(2, 1fr);
+      width: {{ block.settings.desktop_width_percent }}%;
+      max-width: 1200px;
+      padding: 0;
+    }
+  }
+
+  .modern-collage-card-{{ ai_gen_id }} {
+    position: relative;
+    background-color: #FFFFFF;
+    border: 1px solid #f2f2f2;
+    border-radius: {{ block.settings.border_radius }}px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: {{ block.settings.card_height_mobile }}px;
+    aspect-ratio: 1 / 1;
+  }
+
+  @media screen and (min-width: 750px) {
+    .modern-collage-card-{{ ai_gen_id }} {
+      min-height: {{ block.settings.card_height_desktop }}px;
+    }
+  }
+
+  .modern-collage-card-{{ ai_gen_id }}:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  .modern-collage-card-link-{{ ai_gen_id }} {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+    width: 100%;
+  }
+
+  .modern-collage-card-content-{{ ai_gen_id }} {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .modern-collage-image-wrapper-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15%;
+  }
+
+  .modern-collage-image-{{ ai_gen_id }} {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .modern-collage-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+  }
+
+  .modern-collage-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .modern-collage-text-overlay-{{ ai_gen_id }} {
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.9);
+    padding: {{ block.settings.overlay_padding }}px {{ block.settings.overlay_padding | times: 1.5 }}px;
+    border-radius: {{ block.settings.border_radius }}px;
+    text-align: center;
+    margin-bottom: {{ block.settings.title_bottom_spacing }}px;
+  }
+
+  .modern-collage-title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, serif;
+    font-weight: {{ block.settings.title_font.weight }};
+    font-size: {{ block.settings.title_size_mobile }}px;
+    color: {{ block.settings.title_color }};
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  @media screen and (min-width: 750px) {
+    .modern-collage-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size }}px;
+    }
+  }
+{% endstyle %}
+
+<modern-collage-{{ ai_gen_id }} class="modern-collage-container-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="modern-collage-grid-{{ ai_gen_id }}">
+    {% liquid
+      assign collections_array = ''
+      assign collections_array = collections_array | append: block.settings.collection_1.handle | append: ','
+      assign collections_array = collections_array | append: block.settings.collection_2.handle | append: ','
+      assign collections_array = collections_array | append: block.settings.collection_3.handle | append: ','
+      assign collections_array = collections_array | append: block.settings.collection_4.handle | append: ','
+      assign collections_array = collections_array | append: block.settings.collection_5.handle | append: ','
+      assign collections_array = collections_array | append: block.settings.collection_6.handle
+      assign collections_handles = collections_array | split: ','
+      
+      assign titles_array = ''
+      assign titles_array = titles_array | append: block.settings.title_1 | append: '|||'
+      assign titles_array = titles_array | append: block.settings.title_2 | append: '|||'
+      assign titles_array = titles_array | append: block.settings.title_3 | append: '|||'
+      assign titles_array = titles_array | append: block.settings.title_4 | append: '|||'
+      assign titles_array = titles_array | append: block.settings.title_5 | append: '|||'
+      assign titles_array = titles_array | append: block.settings.title_6
+      assign custom_titles = titles_array | split: '|||'
+    %}
+
+    {% for i in (1..6) %}
+      {% liquid
+        assign index = i | minus: 1
+        assign collection_handle = collections_handles[index]
+        assign collection = collections[collection_handle]
+        assign custom_title = custom_titles[index]
+      %}
+
+      <div class="modern-collage-card-{{ ai_gen_id }}">
+        {% if collection != blank %}
+          <a href="{{ collection.url }}" class="modern-collage-card-link-{{ ai_gen_id }}">
+            <div class="modern-collage-card-content-{{ ai_gen_id }}">
+              <div class="modern-collage-image-wrapper-{{ ai_gen_id }}">
+                {% if collection.image %}
+                  <img
+                    src="{{ collection.image | image_url: width: 600 }}"
+                    alt="{{ collection.image.alt | escape }}"
+                    class="modern-collage-image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="{{ collection.image.width }}"
+                    height="{{ collection.image.height }}"
+                  >
+                {% elsif collection.products.first and collection.products.first.featured_image %}
+                  <img
+                    src="{{ collection.products.first.featured_image | image_url: width: 600 }}"
+                    alt="{{ collection.products.first.featured_image.alt | escape }}"
+                    class="modern-collage-image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="{{ collection.products.first.featured_image.width }}"
+                    height="{{ collection.products.first.featured_image.height }}"
+                  >
+                {% else %}
+                  <div class="modern-collage-placeholder-{{ ai_gen_id }}">
+                    {{ 'collection-apparel-1' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
+              </div>
+              
+              <div class="modern-collage-text-overlay-{{ ai_gen_id }}">
+                <h3 class="modern-collage-title-{{ ai_gen_id }}">
+                  {% if custom_title != blank %}
+                    {{ custom_title }}
+                  {% else %}
+                    {{ collection.title }}
+                  {% endif %}
+                </h3>
+              </div>
+            </div>
+          </a>
+        {% else %}
+          <div class="modern-collage-card-content-{{ ai_gen_id }}">
+            <div class="modern-collage-image-wrapper-{{ ai_gen_id }}">
+              <div class="modern-collage-placeholder-{{ ai_gen_id }}">
+                {{ 'collection-apparel-1' | placeholder_svg_tag }}
+              </div>
+            </div>
+            
+            <div class="modern-collage-text-overlay-{{ ai_gen_id }}">
+              <h3 class="modern-collage-title-{{ ai_gen_id }}">
+                {% if custom_title != blank %}
+                  {{ custom_title }}
+                {% else %}
+                  Colección {{ i }}
+                {% endif %}
+              </h3>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</modern-collage-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ModernCollage{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.style.display = 'block';
+      }
+    }
+
+    customElements.define('modern-collage-{{ ai_gen_id }}', ModernCollage{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Masonry grid collage",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colección 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Colección"
+    },
+    {
+      "type": "text",
+      "id": "title_1",
+      "label": "Título personalizado",
+      "default": "BOLSAS"
+    },
+    {
+      "type": "header",
+      "content": "Colección 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Colección"
+    },
+    {
+      "type": "text",
+      "id": "title_2",
+      "label": "Título personalizado",
+      "default": "CARTERAS"
+    },
+    {
+      "type": "header",
+      "content": "Colección 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Colección"
+    },
+    {
+      "type": "text",
+      "id": "title_3",
+      "label": "Título personalizado",
+      "default": "RELOJES"
+    },
+    {
+      "type": "header",
+      "content": "Colección 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Colección"
+    },
+    {
+      "type": "text",
+      "id": "title_4",
+      "label": "Título personalizado",
+      "default": "ACCESORIOS"
+    },
+    {
+      "type": "header",
+      "content": "Colección 5"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Colección"
+    },
+    {
+      "type": "text",
+      "id": "title_5",
+      "label": "Título personalizado",
+      "default": "NOVEDADES"
+    },
+    {
+      "type": "header",
+      "content": "Colección 6"
+    },
+    {
+      "type": "collection",
+      "id": "collection_6",
+      "label": "Colección"
+    },
+    {
+      "type": "text",
+      "id": "title_6",
+      "label": "Título personalizado",
+      "default": "MAYOREO"
+    },
+    {
+      "type": "header",
+      "content": "Estilo de texto"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Fuente del título",
+      "default": "serif"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Tamaño del título (escritorio)",
+      "min": 14,
+      "max": 36,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "title_size_mobile",
+      "label": "Tamaño del título (móvil)",
+      "min": 12,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color del título",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_padding",
+      "label": "Altura del overlay",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "title_bottom_spacing",
+      "label": "Espacio inferior del título",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Diseño"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Radio de borde",
+      "min": 8,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Espacio entre columnas",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "row_gap",
+      "label": "Espacio entre filas",
+      "min": 12,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_height_mobile",
+      "label": "Altura de tarjeta (móvil)",
+      "min": 120,
+      "max": 250,
+      "step": 10,
+      "unit": "px",
+      "default": 160
+    },
+    {
+      "type": "range",
+      "id": "card_height_desktop",
+      "label": "Altura de tarjeta (escritorio)",
+      "min": 150,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Ancho en escritorio",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Masonry grid collage"
+    }
+  ]
+}
+{% endschema %}

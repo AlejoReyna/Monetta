@@ -1,0 +1,428 @@
+{% doc %}
+  @prompt
+    Create a custom button block for a hero section with the following specifications:
+    
+    Button label: [tu texto aquí, ej. "Shop Now"]
+    Button link: [tu URL aquí]
+    Style: Outlined / Filled / Ghost (elige uno)
+    Position: Absolute positioning within the hero section, with full vertical freedom — allow negative top values and values beyond 100% so the button can be placed anywhere vertically, including above the natural anchor point
+    Settings to expose:
+    vertical_position_top (range: -200 to 200, in px)
+    vertical_position_top_mobile (range: -200 to 200, in px)
+    horizontal_alignment (left / center / right)
+    desktop_width_percent (10–100%)
+    mobile_width_percent (10–100%)
+    No min/max clamp on vertical offset — the merchant needs total freedom to push the button above or below its default position
+    
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-hero-button-container-{{ ai_gen_id }} {
+    position: absolute;
+    top: {{ block.settings.vertical_position_top }}px;
+    width: 100%;
+    display: flex;
+    {% if block.settings.horizontal_alignment == 'left' %}
+      justify-content: flex-start;
+    {% elsif block.settings.horizontal_alignment == 'center' %}
+      justify-content: center;
+    {% else %}
+      justify-content: flex-end;
+    {% endif %}
+    z-index: 10;
+  }
+
+  .ai-hero-button-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    font-family: {{ block.settings.button_font.family }}, {{ block.settings.button_font.fallback_families }};
+    font-weight: {{ block.settings.button_font.weight }};
+    font-size: {{ block.settings.font_size }}px;
+    text-decoration: none;
+    border-radius: {{ block.settings.border_radius }}px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    text-transform: {{ block.settings.text_transform }};
+  }
+
+  {% if block.settings.button_style == 'filled' %}
+    .ai-hero-button-{{ ai_gen_id }} {
+      background-color: {{ block.settings.filled_bg_color }};
+      color: {{ block.settings.filled_text_color }};
+      border: {{ block.settings.border_width }}px solid {{ block.settings.filled_border_color }};
+    }
+
+    .ai-hero-button-{{ ai_gen_id }}:hover {
+      background-color: {{ block.settings.filled_hover_bg_color }};
+      color: {{ block.settings.filled_hover_text_color }};
+      border-color: {{ block.settings.filled_hover_border_color }};
+    }
+  {% elsif block.settings.button_style == 'outlined' %}
+    .ai-hero-button-{{ ai_gen_id }} {
+      background-color: transparent;
+      color: {{ block.settings.outlined_text_color }};
+      border: {{ block.settings.border_width }}px solid {{ block.settings.outlined_border_color }};
+    }
+
+    .ai-hero-button-{{ ai_gen_id }}:hover {
+      background-color: {{ block.settings.outlined_hover_bg_color }};
+      color: {{ block.settings.outlined_hover_text_color }};
+      border-color: {{ block.settings.outlined_hover_border_color }};
+    }
+  {% else %}
+    .ai-hero-button-{{ ai_gen_id }} {
+      background-color: transparent;
+      color: {{ block.settings.ghost_text_color }};
+      border: none;
+    }
+
+    .ai-hero-button-{{ ai_gen_id }}:hover {
+      background-color: {{ block.settings.ghost_hover_bg_color }};
+      color: {{ block.settings.ghost_hover_text_color }};
+    }
+  {% endif %}
+
+  @media screen and (max-width: 749px) {
+    .ai-hero-button-container-{{ ai_gen_id }} {
+      top: {{ block.settings.vertical_position_top_mobile }}px;
+    }
+
+    .ai-hero-button-{{ ai_gen_id }} {
+      width: {{ block.settings.mobile_width_percent }}%;
+      font-size: {{ block.settings.font_size_mobile }}px;
+      padding: {{ block.settings.button_padding_vertical_mobile }}px {{ block.settings.button_padding_horizontal_mobile }}px;
+    }
+  }
+{% endstyle %}
+
+<div
+  class="ai-hero-button-container-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <a
+    href="{{ block.settings.button_link }}"
+    class="ai-hero-button-{{ ai_gen_id }}"
+  >
+    {{ block.settings.button_label }}
+  </a>
+</div>
+
+{% schema %}
+{
+  "name": "Hero button",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Button content"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Button style"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Style",
+      "options": [
+        {
+          "value": "filled",
+          "label": "Filled"
+        },
+        {
+          "value": "outlined",
+          "label": "Outlined"
+        },
+        {
+          "value": "ghost",
+          "label": "Ghost"
+        }
+      ],
+      "default": "filled"
+    },
+    {
+      "type": "font_picker",
+      "id": "button_font",
+      "label": "Font",
+      "default": "inknut_antiqua_n5"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size (desktop)",
+      "min": 10,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "font_size_mobile",
+      "label": "Font size (mobile)",
+      "min": 10,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "text_transform",
+      "label": "Text case",
+      "options": [
+        {
+          "value": "none",
+          "label": "Default"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "label": "Padding vertical (desktop)",
+      "min": 5,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "label": "Padding horizontal (desktop)",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical_mobile",
+      "label": "Padding vertical (mobile)",
+      "min": 5,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal_mobile",
+      "label": "Padding horizontal (mobile)",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 25
+    },
+    {
+      "type": "header",
+      "content": "Filled style colors"
+    },
+    {
+      "type": "color",
+      "id": "filled_bg_color",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "filled_text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "filled_border_color",
+      "label": "Border",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "filled_hover_bg_color",
+      "label": "Hover background",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "filled_hover_text_color",
+      "label": "Hover text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "filled_hover_border_color",
+      "label": "Hover border",
+      "default": "#383838"
+    },
+    {
+      "type": "header",
+      "content": "Outlined style colors"
+    },
+    {
+      "type": "color",
+      "id": "outlined_text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "outlined_border_color",
+      "label": "Border",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "outlined_hover_bg_color",
+      "label": "Hover background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "outlined_hover_text_color",
+      "label": "Hover text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "outlined_hover_border_color",
+      "label": "Hover border",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Ghost style colors"
+    },
+    {
+      "type": "color",
+      "id": "ghost_text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "ghost_hover_bg_color",
+      "label": "Hover background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "ghost_hover_text_color",
+      "label": "Hover text",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Position"
+    },
+    {
+      "type": "range",
+      "id": "vertical_position_top",
+      "label": "Vertical position (desktop)",
+      "min": -200,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "vertical_position_top_mobile",
+      "label": "Vertical position (mobile)",
+      "min": -200,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "horizontal_alignment",
+      "label": "Horizontal alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "mobile_width_percent",
+      "label": "Mobile width",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero button"
+    }
+  ]
+}
+{% endschema %}

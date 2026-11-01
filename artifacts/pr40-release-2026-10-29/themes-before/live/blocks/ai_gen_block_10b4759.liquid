@@ -1,0 +1,654 @@
+{% doc %}
+  @prompt
+    Crea un bloque de Shopify OS 2.0 llamado expandable-text como archivo .liquid en /blocks/. El bloque debe ser completamente autocontenido (CSS y JS dentro del mismo archivo), compatible con múltiples instancias en la misma página usando block.id como identificador único.
+    
+    COMPORTAMIENTO:
+    
+    El primer párrafo del rich text es siempre visible
+    El resto del contenido está completamente oculto desde el inicio (max-height: 0, opacity: 0, overflow: hidden) — nunca visible hasta que el usuario interactúe
+    Al hacer clic en el botón, el contenido se expande midiendo la altura real con element.scrollHeight y asignándola como max-height dinámicamente
+    Al terminar la transición de expansión (transitionend), cambiar max-height a none para evitar cortes si el contenido cambia de tamaño
+    Al colapsar, primero reasignar scrollHeight explícitamente antes de poner 0, para que el navegador calcule bien la transición inversa
+    El botón alterna entre dos labels editables ("Ver más" / "Ver menos")
+    La flecha es un SVG chevron minimalista que rota 180° al expandirse
+    Usar aria-expanded para accesibilidad
+    ANIMACIÓN PREMIUM:
+    
+    Contenido: transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    Flecha SVG: transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    Sin max-height fijo ni arbitrariamente grande — siempre usar scrollHeight real
+    SETTINGS DEL SCHEMA — Texto principal:
+    
+    text — Richtext
+    font_family — Select: Body, Heading, Monospace
+    font_size — Range 12–36px
+    font_weight — Select: 300, 400, 500, 600, 700
+    line_height — Select: tight, normal, relaxed, loose
+    letter_spacing — Range -1 a 4px
+    text_color — Color picker
+    text_align — Select: left, center, right
+    max_width — Range 30–100%, paso 5
+    horizontal_position — Select: left, center, right
+    padding_top, padding_bottom — Range 0–80px
+    SETTINGS DEL SCHEMA — Botón "Ver más":
+    
+    button_label_more — Text, default "Ver más"
+    button_label_less — Text, default "Ver menos"
+    button_mode — Select: link (solo texto + flecha), outline (borde), solid (fondo sólido)
+    button_font_size — Range 11–24px
+    button_font_weight — Select: 400, 500, 600, 700
+    button_color — Color picker (texto y flecha)
+    button_bg_color — Color picker (solo aplica en solid/outline)
+    button_border_radius — Range 0–50px
+    button_padding_x — Range 0–48px
+    button_padding_y — Range 0–32px
+    button_align — Select: left, center, right
+    button_margin_top — Range 0–60px
+    show_arrow — Checkbox, default true
+    arrow_size — Range 12–32px
+    arrow_position — Select: right of text, left of text, below text
+    El CSS debe usar variables CSS internas (--et-*) derivadas de los settings de Liquid para mantener consistencia. El JS debe ser vanilla puro, sin dependencias externas. No uses setTimeout para las animaciones — confía únicamente en transitionend y scrollHeight.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .et-container-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding-top: {{ block.settings.padding_top }}px;
+    padding-bottom: {{ block.settings.padding_bottom }}px;
+  }
+
+  .et-wrapper-{{ ai_gen_id }} {
+    width: {{ block.settings.max_width }}%;
+    margin: 0 auto;
+    {% if block.settings.horizontal_position == 'left' %}
+      margin-left: 0;
+      margin-right: auto;
+    {% elsif block.settings.horizontal_position == 'right' %}
+      margin-left: auto;
+      margin-right: 0;
+    {% endif %}
+  }
+
+  .et-content-{{ ai_gen_id }} {
+    --et-font-family: {% if block.settings.font_family == 'body' %}{{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }}{% elsif block.settings.font_family == 'heading' %}{{ settings.type_heading_font.family }}, {{ settings.type_heading_font.fallback_families }}{% else %}monospace{% endif %};
+    --et-font-size: {{ block.settings.font_size }}px;
+    --et-font-weight: {{ block.settings.font_weight }};
+    --et-line-height: {% if block.settings.line_height == 'tight' %}1.2{% elsif block.settings.line_height == 'normal' %}1.5{% elsif block.settings.line_height == 'relaxed' %}1.75{% else %}2{% endif %};
+    --et-letter-spacing: {{ block.settings.letter_spacing }}px;
+    --et-text-color: {{ block.settings.text_color }};
+    --et-text-align: {{ block.settings.text_align }};
+
+    font-family: var(--et-font-family);
+    font-size: var(--et-font-size);
+    font-weight: var(--et-font-weight);
+    line-height: var(--et-line-height);
+    letter-spacing: var(--et-letter-spacing);
+    color: var(--et-text-color);
+    text-align: var(--et-text-align);
+  }
+
+  .et-content-{{ ai_gen_id }} > *:first-child {
+    margin-top: 0;
+  }
+
+  .et-content-{{ ai_gen_id }} > *:last-child {
+    margin-bottom: 0;
+  }
+
+  .et-expandable-{{ ai_gen_id }} {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .et-expandable-{{ ai_gen_id }}.et-expanded-{{ ai_gen_id }} {
+    opacity: 1;
+  }
+
+  .et-button-wrapper-{{ ai_gen_id }} {
+    margin-top: {{ block.settings.button_margin_top }}px;
+    text-align: {{ block.settings.button_align }};
+  }
+
+  .et-button-{{ ai_gen_id }} {
+    --et-btn-font-size: {{ block.settings.button_font_size }}px;
+    --et-btn-font-weight: {{ block.settings.button_font_weight }};
+    --et-btn-color: {{ block.settings.button_color }};
+    --et-btn-bg-color: {{ block.settings.button_bg_color }};
+    --et-btn-border-radius: {{ block.settings.button_border_radius }}px;
+    --et-btn-padding-x: {{ block.settings.button_padding_x }}px;
+    --et-btn-padding-y: {{ block.settings.button_padding_y }}px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--et-btn-font-size);
+    font-weight: var(--et-btn-font-weight);
+    color: var(--et-btn-color);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    transition: opacity 0.3s ease;
+
+    {% if block.settings.button_mode == 'outline' %}
+      border: 1px solid var(--et-btn-color);
+      border-radius: var(--et-btn-border-radius);
+      padding: var(--et-btn-padding-y) var(--et-btn-padding-x);
+    {% elsif block.settings.button_mode == 'solid' %}
+      background-color: var(--et-btn-bg-color);
+      border-radius: var(--et-btn-border-radius);
+      padding: var(--et-btn-padding-y) var(--et-btn-padding-x);
+    {% endif %}
+
+    {% if block.settings.arrow_position == 'below' %}
+      flex-direction: column;
+      gap: 4px;
+    {% elsif block.settings.arrow_position == 'left' %}
+      flex-direction: row-reverse;
+    {% endif %}
+  }
+
+  .et-button-{{ ai_gen_id }}:hover {
+    opacity: 0.7;
+  }
+
+  .et-arrow-{{ ai_gen_id }} {
+    width: {{ block.settings.arrow_size }}px;
+    height: {{ block.settings.arrow_size }}px;
+    flex-shrink: 0;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .et-button-{{ ai_gen_id }}[aria-expanded="true"] .et-arrow-{{ ai_gen_id }} {
+    transform: rotate(180deg);
+  }
+{% endstyle %}
+
+<expandable-text-{{ ai_gen_id }} class="et-container-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="et-wrapper-{{ ai_gen_id }}">
+    <div class="et-content-{{ ai_gen_id }}">
+      {% if block.settings.text != blank %}
+        {% assign paragraphs = block.settings.text | split: '</p>' %}
+        {% if paragraphs.size > 0 %}
+          {{ paragraphs[0] }}</p>
+        {% endif %}
+
+        {% if paragraphs.size > 1 %}
+          <div class="et-expandable-{{ ai_gen_id }}" data-expandable>
+            {% for i in (1..paragraphs.size) %}
+              {% assign index = i | minus: 1 %}
+              {% if index > 0 and paragraphs[index] != blank %}
+                {{ paragraphs[index] }}</p>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% else %}
+        <p>Agrega tu contenido aquí. El primer párrafo será visible, el resto se expandirá al hacer clic.</p>
+      {% endif %}
+    </div>
+
+    {% if paragraphs.size > 1 %}
+      <div class="et-button-wrapper-{{ ai_gen_id }}">
+        <button
+          class="et-button-{{ ai_gen_id }}"
+          aria-expanded="false"
+          data-toggle-button
+        >
+          <span data-label-more>{{ block.settings.button_label_more }}</span>
+          <span data-label-less style="display: none;">{{ block.settings.button_label_less }}</span>
+          {% if block.settings.show_arrow %}
+            <svg class="et-arrow-{{ ai_gen_id }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          {% endif %}
+        </button>
+      </div>
+    {% endif %}
+  </div>
+</expandable-text-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ExpandableText{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.expandable = this.querySelector('[data-expandable]');
+        this.toggleButton = this.querySelector('[data-toggle-button]');
+        this.labelMore = this.querySelector('[data-label-more]');
+        this.labelLess = this.querySelector('[data-label-less]');
+        this.isExpanded = false;
+      }
+
+      connectedCallback() {
+        if (!this.toggleButton || !this.expandable) return;
+
+        this.toggleButton.addEventListener('click', () => this.toggle());
+        this.expandable.addEventListener('transitionend', (e) => {
+          if (e.propertyName === 'max-height' && this.isExpanded) {
+            this.expandable.style.maxHeight = 'none';
+          }
+        });
+      }
+
+      toggle() {
+        if (this.isExpanded) {
+          this.collapse();
+        } else {
+          this.expand();
+        }
+      }
+
+      expand() {
+        this.isExpanded = true;
+        this.expandable.style.maxHeight = this.expandable.scrollHeight + 'px';
+        this.expandable.classList.add('et-expanded-{{ ai_gen_id }}');
+        this.toggleButton.setAttribute('aria-expanded', 'true');
+        this.labelMore.style.display = 'none';
+        this.labelLess.style.display = 'inline';
+      }
+
+      collapse() {
+        this.isExpanded = false;
+        this.expandable.style.maxHeight = this.expandable.scrollHeight + 'px';
+        
+        requestAnimationFrame(() => {
+          this.expandable.style.maxHeight = '0';
+          this.expandable.classList.remove('et-expanded-{{ ai_gen_id }}');
+        });
+
+        this.toggleButton.setAttribute('aria-expanded', 'false');
+        this.labelMore.style.display = 'inline';
+        this.labelLess.style.display = 'none';
+      }
+    }
+
+    customElements.define('expandable-text-{{ ai_gen_id }}', ExpandableText{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Expandable text",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Contenido"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Texto",
+      "default": "<p>Este es el primer párrafo que siempre será visible.</p><p>Este contenido estará oculto inicialmente y se expandirá al hacer clic en el botón.</p><p>Puedes agregar múltiples párrafos que se mostrarán al expandir.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Tipografía"
+    },
+    {
+      "type": "select",
+      "id": "font_family",
+      "label": "Fuente",
+      "options": [
+        {
+          "value": "body",
+          "label": "Body"
+        },
+        {
+          "value": "heading",
+          "label": "Heading"
+        },
+        {
+          "value": "monospace",
+          "label": "Monospace"
+        }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Tamaño de fuente",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Peso de fuente",
+      "options": [
+        {
+          "value": "300",
+          "label": "300"
+        },
+        {
+          "value": "400",
+          "label": "400"
+        },
+        {
+          "value": "500",
+          "label": "500"
+        },
+        {
+          "value": "600",
+          "label": "600"
+        },
+        {
+          "value": "700",
+          "label": "700"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "line_height",
+      "label": "Altura de línea",
+      "options": [
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "relaxed",
+          "label": "Relaxed"
+        },
+        {
+          "value": "loose",
+          "label": "Loose"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Espaciado de letras",
+      "min": -1,
+      "max": 4,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color de texto",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Alineación de texto",
+      "options": [
+        {
+          "value": "left",
+          "label": "Izquierda"
+        },
+        {
+          "value": "center",
+          "label": "Centro"
+        },
+        {
+          "value": "right",
+          "label": "Derecha"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Diseño"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Ancho máximo",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "horizontal_position",
+      "label": "Posición horizontal",
+      "options": [
+        {
+          "value": "left",
+          "label": "Izquierda"
+        },
+        {
+          "value": "center",
+          "label": "Centro"
+        },
+        {
+          "value": "right",
+          "label": "Derecha"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Botón"
+    },
+    {
+      "type": "text",
+      "id": "button_label_more",
+      "label": "Etiqueta Ver más",
+      "default": "Ver más"
+    },
+    {
+      "type": "text",
+      "id": "button_label_less",
+      "label": "Etiqueta Ver menos",
+      "default": "Ver menos"
+    },
+    {
+      "type": "select",
+      "id": "button_mode",
+      "label": "Estilo de botón",
+      "options": [
+        {
+          "value": "link",
+          "label": "Link"
+        },
+        {
+          "value": "outline",
+          "label": "Outline"
+        },
+        {
+          "value": "solid",
+          "label": "Solid"
+        }
+      ],
+      "default": "link"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Tamaño de fuente",
+      "min": 11,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "button_font_weight",
+      "label": "Peso de fuente",
+      "options": [
+        {
+          "value": "400",
+          "label": "400"
+        },
+        {
+          "value": "500",
+          "label": "500"
+        },
+        {
+          "value": "600",
+          "label": "600"
+        },
+        {
+          "value": "700",
+          "label": "700"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Color de fondo",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "button_padding_x",
+      "label": "Padding horizontal",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_padding_y",
+      "label": "Padding vertical",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "select",
+      "id": "button_align",
+      "label": "Alineación",
+      "options": [
+        {
+          "value": "left",
+          "label": "Izquierda"
+        },
+        {
+          "value": "center",
+          "label": "Centro"
+        },
+        {
+          "value": "right",
+          "label": "Derecha"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "button_margin_top",
+      "label": "Margen superior",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Flecha"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrow",
+      "label": "Mostrar flecha",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "arrow_size",
+      "label": "Tamaño de flecha",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "arrow_position",
+      "label": "Posición de flecha",
+      "options": [
+        {
+          "value": "right",
+          "label": "Derecha del texto"
+        },
+        {
+          "value": "left",
+          "label": "Izquierda del texto"
+        },
+        {
+          "value": "below",
+          "label": "Debajo del texto"
+        }
+      ],
+      "default": "right"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Expandable text"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,371 @@
+{% doc %}
+  @prompt
+    Task: Create a Premium 3-Row "Collection List" Carousel (Strictly 9 Linked Cards).
+    
+    1. Structural Architecture (The 3x3 Collection Grid):
+    
+    Generate a custom section containing exactly 9 Collection Cards.
+    
+    Layout: Arrange these 9 cards into a grid of 3 horizontal rows.
+    
+    Interaction: The entire grid must scroll horizontally. On the initial view, show 2 full columns and a 15% peek of the 3rd column on the right to invite swiping.
+    
+    Background: Use a Pure White (#FFFFFF) background for the section with exactly 60px of vertical padding at the top and bottom.
+    
+    2. Collection Card Specification:
+    
+    Functional Links: Each card must be a Collection Link. When clicked, it must redirect the user to the corresponding collection page.
+    
+    Visuals: Cards should display the Collection's Featured Image. No text or titles should be visible inside the cards to maintain a minimalist look.
+    
+    Geometry: 36px border-radius, pure white base, and a very thin, elegant drop shadow at the bottom of each card.
+    
+    3. Premium Motion (The Pop-Up Effect):
+    
+    Magnetic Snap: Use a snappy, fluid horizontal scroll snap (Apple-style).
+    
+    Interactive Scaling: As the user swipes, the cards passing through the center of the screen should smoothly scale to 1.0, while cards at the edges shrink to 0.85 with a subtle fade.
+    
+    No Scrollbars: Hide all scrollbars and UI indicators for a clean, app-like experience.
+    
+    4. Mobile-First Optimization:
+    
+    Ensure the 3-row layout is strictly maintained on mobile (Disable "Stack on mobile").
+    
+    Apply strict clipping (overflow: hidden) to the section to prevent any horizontal page stretching or "shaking"., haz las colecciones ordenadas, de arriba hacia abajo, tambien que todas tengan el mismo tamaño , por que las otras tarjetas no se modifican cuando muevo el layout
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-carousel-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: #FFFFFF;
+    padding: 60px 0;
+    overflow: hidden;
+  }
+
+  .ai-collection-carousel__wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .ai-collection-carousel__scroll-container-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.row_gap }}px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 {{ block.settings.side_padding }}px;
+  }
+
+  .ai-collection-carousel__scroll-container-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-collection-carousel__row-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    flex-shrink: 0;
+  }
+
+  .ai-collection-carousel__card-{{ ai_gen_id }} {
+    position: relative;
+    flex-shrink: 0;
+    width: {{ block.settings.card_width }}px;
+    height: {{ block.settings.card_height }}px;
+    border-radius: 36px;
+    background-color: #FFFFFF;
+    overflow: hidden;
+    scroll-snap-align: start;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .ai-collection-carousel__card-link-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .ai-collection-carousel__card-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-collection-carousel__placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-collection-carousel__placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-collection-carousel-{{ ai_gen_id }} {
+      padding: 40px 0;
+    }
+
+    .ai-collection-carousel__card-{{ ai_gen_id }} {
+      width: {{ block.settings.card_width_mobile }}px;
+      height: {{ block.settings.card_height_mobile }}px;
+    }
+  }
+{% endstyle %}
+
+<collection-carousel-{{ ai_gen_id }}
+  class="ai-collection-carousel-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-collection-carousel__wrapper-{{ ai_gen_id }}">
+    <div class="ai-collection-carousel__scroll-container-{{ ai_gen_id }}">
+      {% for row in (1..3) %}
+        <div class="ai-collection-carousel__row-{{ ai_gen_id }}">
+          {% for col in (1..3) %}
+            {% assign card_index = row | minus: 1 | times: 3 | plus: col %}
+            {% liquid
+              assign collection_key = 'collection_' | append: card_index
+              assign collection = block.settings[collection_key]
+            %}
+            
+            <div class="ai-collection-carousel__card-{{ ai_gen_id }}" data-card-index="{{ card_index }}">
+              {% if collection != blank %}
+                <a href="{{ collection.url }}" class="ai-collection-carousel__card-link-{{ ai_gen_id }}">
+                  {% if collection.featured_image %}
+                    <img
+                      src="{{ collection.featured_image | image_url: width: 800 }}"
+                      alt="{{ collection.title | escape }}"
+                      class="ai-collection-carousel__card-image-{{ ai_gen_id }}"
+                      loading="lazy"
+                      width="800"
+                      height="800"
+                    >
+                  {% else %}
+                    <div class="ai-collection-carousel__placeholder-{{ ai_gen_id }}">
+                      {{ 'collection-1' | placeholder_svg_tag }}
+                    </div>
+                  {% endif %}
+                </a>
+              {% else %}
+                <div class="ai-collection-carousel__placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</collection-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CollectionCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.scrollContainer = this.querySelector('.ai-collection-carousel__scroll-container-{{ ai_gen_id }}');
+        this.cards = this.querySelectorAll('.ai-collection-carousel__card-{{ ai_gen_id }}');
+        this.isScrolling = false;
+        this.scrollTimeout = null;
+      }
+
+      connectedCallback() {
+        this.setupScrollEffects();
+        this.updateCardScales();
+      }
+
+      setupScrollEffects() {
+        this.scrollContainer.addEventListener('scroll', () => {
+          if (this.scrollTimeout) {
+            clearTimeout(this.scrollTimeout);
+          }
+          
+          this.isScrolling = true;
+          this.updateCardScales();
+          
+          this.scrollTimeout = setTimeout(() => {
+            this.isScrolling = false;
+          }, 150);
+        });
+
+        window.addEventListener('resize', () => {
+          this.updateCardScales();
+        });
+      }
+
+      updateCardScales() {
+        const containerRect = this.scrollContainer.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+
+        this.cards.forEach((card) => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const distanceFromCenter = Math.abs(containerCenter - cardCenter);
+          const maxDistance = containerRect.width / 2;
+          const normalizedDistance = Math.min(distanceFromCenter / maxDistance, 1);
+          
+          const scale = 1 - (normalizedDistance * 0.15);
+          const opacity = 1 - (normalizedDistance * 0.15);
+          
+          card.style.transform = `scale(${scale})`;
+          card.style.opacity = opacity;
+        });
+      }
+    }
+
+    customElements.define('collection-carousel-{{ ai_gen_id }}', CollectionCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1 (Row 1, Col 1)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2 (Row 1, Col 2)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3 (Row 1, Col 3)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4 (Row 2, Col 1)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5 (Row 2, Col 2)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_6",
+      "label": "Collection 6 (Row 2, Col 3)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_7",
+      "label": "Collection 7 (Row 3, Col 1)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_8",
+      "label": "Collection 8 (Row 3, Col 2)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_9",
+      "label": "Collection 9 (Row 3, Col 3)"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Card width (desktop)",
+      "min": 200,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 320
+    },
+    {
+      "type": "range",
+      "id": "card_height",
+      "label": "Card height (desktop)",
+      "min": 200,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 320
+    },
+    {
+      "type": "range",
+      "id": "card_width_mobile",
+      "label": "Card width (mobile)",
+      "min": 150,
+      "max": 350,
+      "step": 10,
+      "unit": "px",
+      "default": 240
+    },
+    {
+      "type": "range",
+      "id": "card_height_mobile",
+      "label": "Card height (mobile)",
+      "min": 150,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 240
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "row_gap",
+      "label": "Gap between rows",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "side_padding",
+      "label": "Side padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection carousel"
+    }
+  ]
+}
+{% endschema %}

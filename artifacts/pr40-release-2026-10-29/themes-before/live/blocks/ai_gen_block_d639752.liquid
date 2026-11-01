@@ -1,0 +1,560 @@
+{% doc %}
+  @prompt
+    Act as a Senior Frontend Developer specializing in luxury e-commerce UI/UX. Generate the HTML and embedded CSS for a Shopify "Custom Liquid" section. This section must ONLY contain a Collections Carousel. Do not include headers, footers, or extra page layouts.
+    
+    Design & Aesthetic:
+    
+    Pure white background (#FFFFFF) for the entire section.
+    
+    Ultra-minimalist, clean, and elegant.
+    
+    Minimal typography (use a clean sans-serif like Montserrat).
+    
+    CRITICAL - Transparent Images: The user will upload transparent PNG images of the products. The image containers must NOT have solid dark backgrounds or harsh borders. Let the transparent images "float" elegantly on the white background. You may add a virtually invisible, soft radial shadow at the bottom to ground them, but keep it ultra-luxurious.
+    
+    Content (Collection Cards):
+    
+    The carousel must have 3 cards, each representing a collection.
+    
+    Card 1: Title "BOLSAS". Link to /collections/bolsas. Placeholder transparent PNG of a bag.
+    
+    Card 2: Title "CARTERAS". Link to /collections/carteras. Placeholder transparent PNG of a wallet.
+    
+    Card 3: Title "RELOJES". Link to /collections/relojes. Placeholder transparent PNG of a watch.
+    
+    Each card must include an elegant, minimalist button that says "EXPLORAR COLECCIÓN". The button or the entire card must be an <a> tag linking to the respective collection.
+    
+    The Carousel (Premium Smooth Transitions):
+    
+    I need a horizontal scrolling carousel that feels incredibly smooth, fluid, and expensive on mobile devices.
+    
+    Use scroll-snap-type: x mandatory for snapping, but hide the scrollbar completely (::-webkit-scrollbar { display: none; }).
+    
+    The Smooth Effect: Implement a CSS-only coverflow-style effect. As the user scrolls, the active card in the center should be fully visible (opacity: 1, transform: scale(1)). The adjacent cards should smoothly scale down (e.g., scale(0.85)) and fade slightly (opacity: 0.4).
+    
+    Hardware Acceleration: Use will-change: transform, opacity; and transform: translateZ(0); to ensure the scrolling does not drop frames on mobile touchscreens.
+    
+    Easing: Use a premium easing curve (e.g., transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease;) so the change from one collection to the next feels buttery smooth and frictionless.
+    
+    Technical restrictions:
+    
+    100% pure HTML and CSS. Do NOT use JavaScript libraries like Swiper.js.
+    
+    All CSS must be scoped within a <style> tag using unique classes (e.g., .premium-collection-slider-).
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap');
+
+  .premium-collection-slider-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: #FFFFFF;
+    padding: {{ block.settings.section_padding_top }}px 0 {{ block.settings.section_padding_bottom }}px;
+    overflow: hidden;
+  }
+
+  .premium-collection-slider-container-{{ ai_gen_id }} {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    padding: 0 20px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .premium-collection-slider-container-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .premium-collection-card-{{ ai_gen_id }} {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 30px;
+    text-align: center;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease;
+    will-change: transform, opacity;
+    transform: translateZ(0) scale(0.85);
+    opacity: 0.4;
+  }
+
+  .premium-collection-card-{{ ai_gen_id }}.active {
+    transform: translateZ(0) scale(1);
+    opacity: 1;
+  }
+
+  .premium-collection-image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: 280px;
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    position: relative;
+  }
+
+  .premium-collection-image-wrapper-{{ ai_gen_id }}::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 20px;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0) 70%);
+    filter: blur(8px);
+    z-index: -1;
+  }
+
+  .premium-collection-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .premium-collection-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+  }
+
+  .premium-collection-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    opacity: 0.15;
+  }
+
+  .premium-collection-title-{{ ai_gen_id }} {
+    font-family: 'Montserrat', {{ block.settings.title_font.family }}, sans-serif;
+    font-weight: 600;
+    font-size: {{ block.settings.title_size }}px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: {{ block.settings.title_color }};
+    margin: 0 0 25px;
+  }
+
+  .premium-collection-button-{{ ai_gen_id }} {
+    display: inline-block;
+    font-family: 'Montserrat', {{ block.settings.button_font.family }}, sans-serif;
+    font-weight: 400;
+    font-size: {{ block.settings.button_size }}px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: {{ block.settings.button_text_color }};
+    background-color: {{ block.settings.button_bg_color }};
+    border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border_color }};
+    padding: 14px 32px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    border-radius: {{ block.settings.button_border_radius }}px;
+  }
+
+  .premium-collection-button-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.button_hover_text_color }};
+    background-color: {{ block.settings.button_hover_bg_color }};
+    border-color: {{ block.settings.button_hover_border_color }};
+    transform: translateY(-2px);
+  }
+
+  @media screen and (min-width: 750px) {
+    .premium-collection-slider-container-{{ ai_gen_id }} {
+      padding: 0 60px;
+    }
+
+    .premium-collection-card-{{ ai_gen_id }} {
+      flex: 0 0 45%;
+      padding: 80px 40px;
+    }
+
+    .premium-collection-image-wrapper-{{ ai_gen_id }} {
+      max-width: 350px;
+      height: 350px;
+      margin-bottom: 40px;
+    }
+
+    .premium-collection-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 1.2 }}px;
+      margin-bottom: 30px;
+    }
+
+    .premium-collection-button-{{ ai_gen_id }} {
+      font-size: {{ block.settings.button_size | times: 1.1 }}px;
+      padding: 16px 40px;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .premium-collection-card-{{ ai_gen_id }} {
+      flex: 0 0 33.333%;
+    }
+  }
+{% endstyle %}
+
+<premium-collection-carousel-{{ ai_gen_id }}
+  class="premium-collection-slider-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="premium-collection-slider-container-{{ ai_gen_id }}">
+    <div class="premium-collection-card-{{ ai_gen_id }}" data-card="1">
+      <div class="premium-collection-image-wrapper-{{ ai_gen_id }}">
+        {% if block.settings.collection_1_image %}
+          <img
+            src="{{ block.settings.collection_1_image | image_url: width: 700 }}"
+            alt="{{ block.settings.collection_1_image.alt | default: 'BOLSAS' | escape }}"
+            class="premium-collection-image-{{ ai_gen_id }}"
+            loading="lazy"
+            width="350"
+            height="350"
+          >
+        {% else %}
+          <div class="premium-collection-placeholder-{{ ai_gen_id }}">
+            {{ 'product-1' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+      <h2 class="premium-collection-title-{{ ai_gen_id }}">{{ block.settings.collection_1_title }}</h2>
+      <a
+        href="{{ block.settings.collection_1_link }}"
+        class="premium-collection-button-{{ ai_gen_id }}"
+      >
+        {{ block.settings.button_text }}
+      </a>
+    </div>
+
+    <div class="premium-collection-card-{{ ai_gen_id }}" data-card="2">
+      <div class="premium-collection-image-wrapper-{{ ai_gen_id }}">
+        {% if block.settings.collection_2_image %}
+          <img
+            src="{{ block.settings.collection_2_image | image_url: width: 700 }}"
+            alt="{{ block.settings.collection_2_image.alt | default: 'CARTERAS' | escape }}"
+            class="premium-collection-image-{{ ai_gen_id }}"
+            loading="lazy"
+            width="350"
+            height="350"
+          >
+        {% else %}
+          <div class="premium-collection-placeholder-{{ ai_gen_id }}">
+            {{ 'product-2' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+      <h2 class="premium-collection-title-{{ ai_gen_id }}">{{ block.settings.collection_2_title }}</h2>
+      <a
+        href="{{ block.settings.collection_2_link }}"
+        class="premium-collection-button-{{ ai_gen_id }}"
+      >
+        {{ block.settings.button_text }}
+      </a>
+    </div>
+
+    <div class="premium-collection-card-{{ ai_gen_id }}" data-card="3">
+      <div class="premium-collection-image-wrapper-{{ ai_gen_id }}">
+        {% if block.settings.collection_3_image %}
+          <img
+            src="{{ block.settings.collection_3_image | image_url: width: 700 }}"
+            alt="{{ block.settings.collection_3_image.alt | default: 'RELOJES' | escape }}"
+            class="premium-collection-image-{{ ai_gen_id }}"
+            loading="lazy"
+            width="350"
+            height="350"
+          >
+        {% else %}
+          <div class="premium-collection-placeholder-{{ ai_gen_id }}">
+            {{ 'product-3' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+      <h2 class="premium-collection-title-{{ ai_gen_id }}">{{ block.settings.collection_3_title }}</h2>
+      <a
+        href="{{ block.settings.collection_3_link }}"
+        class="premium-collection-button-{{ ai_gen_id }}"
+      >
+        {{ block.settings.button_text }}
+      </a>
+    </div>
+  </div>
+</premium-collection-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class PremiumCollectionCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.container = this.querySelector('.premium-collection-slider-container-{{ ai_gen_id }}');
+        this.cards = this.querySelectorAll('.premium-collection-card-{{ ai_gen_id }}');
+        
+        if (!this.container || !this.cards.length) return;
+
+        this.setupIntersectionObserver();
+        this.updateActiveCard();
+      }
+
+      setupIntersectionObserver() {
+        const options = {
+          root: this.container,
+          threshold: 0.6
+        };
+
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              this.cards.forEach(card => card.classList.remove('active'));
+              entry.target.classList.add('active');
+            }
+          });
+        }, options);
+
+        this.cards.forEach(card => this.observer.observe(card));
+      }
+
+      updateActiveCard() {
+        const containerRect = this.container.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+
+        let closestCard = null;
+        let closestDistance = Infinity;
+
+        this.cards.forEach(card => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const distance = Math.abs(containerCenter - cardCenter);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        if (closestCard) {
+          this.cards.forEach(card => card.classList.remove('active'));
+          closestCard.classList.add('active');
+        }
+      }
+    }
+
+    customElements.define('premium-collection-carousel-{{ ai_gen_id }}', PremiumCollectionCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colección 1 - BOLSAS"
+    },
+    {
+      "type": "text",
+      "id": "collection_1_title",
+      "label": "Título",
+      "default": "BOLSAS"
+    },
+    {
+      "type": "url",
+      "id": "collection_1_link",
+      "label": "Enlace"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_1_image",
+      "label": "Imagen PNG transparente"
+    },
+    {
+      "type": "header",
+      "content": "Colección 2 - CARTERAS"
+    },
+    {
+      "type": "text",
+      "id": "collection_2_title",
+      "label": "Título",
+      "default": "CARTERAS"
+    },
+    {
+      "type": "url",
+      "id": "collection_2_link",
+      "label": "Enlace"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_2_image",
+      "label": "Imagen PNG transparente"
+    },
+    {
+      "type": "header",
+      "content": "Colección 3 - RELOJES"
+    },
+    {
+      "type": "text",
+      "id": "collection_3_title",
+      "label": "Título",
+      "default": "RELOJES"
+    },
+    {
+      "type": "url",
+      "id": "collection_3_link",
+      "label": "Enlace"
+    },
+    {
+      "type": "image_picker",
+      "id": "collection_3_image",
+      "label": "Imagen PNG transparente"
+    },
+    {
+      "type": "header",
+      "content": "Botón"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Texto del botón",
+      "default": "EXPLORAR COLECCIÓN"
+    },
+    {
+      "type": "range",
+      "id": "button_size",
+      "label": "Tamaño de fuente",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 11
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Color de texto",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Color de fondo",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Color de borde",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "label": "Ancho de borde",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Radio de borde",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Color de texto (hover)",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg_color",
+      "label": "Color de fondo (hover)",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border_color",
+      "label": "Color de borde (hover)",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Tipografía"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Fuente del título",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Tamaño del título",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color del título",
+      "default": "#000000"
+    },
+    {
+      "type": "font_picker",
+      "id": "button_font",
+      "label": "Fuente del botón",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "header",
+      "content": "Espaciado"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Padding superior",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Padding inferior",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection carousel"
+    }
+  ]
+}
+{% endschema %}

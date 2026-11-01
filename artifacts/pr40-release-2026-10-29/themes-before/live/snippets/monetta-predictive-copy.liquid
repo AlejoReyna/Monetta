@@ -1,0 +1,50 @@
+{%- doc -%}
+  Private UI copy for the predictive component. English and Spanish are supported;
+  other locales use explicitly marked Spanish UI while Shopify keeps its locale.
+
+  @param {string} key - Copy identifier.
+{%- enddoc -%}
+{%- assign predictive_language = request.locale.iso_code | slice: 0, 2 -%}
+{%- if predictive_language == 'en' -%}
+  {%- case key -%}
+    {%- when 'label' -%}Search products
+    {%- when 'placeholder' -%}Find a piece, brand or style
+    {%- when 'submit' -%}Search
+    {%- when 'clear' -%}Clear search
+    {%- when 'close' -%}Close suggestions
+    {%- when 'heading' -%}Suggested products
+    {%- when 'loading' -%}Searching for products…
+    {%- when 'empty' -%}No product suggestions. Try another term or view all results.
+    {%- when 'error' -%}Suggestions are unavailable. You can still search or view all results.
+    {%- when 'count' -%}Product suggestions: {count}.
+    {%- when 'all' -%}View all results
+    {%- when 'recent' -%}Recent searches
+    {%- when 'recent_count' -%}Recent searches: {count}.
+    {%- when 'forget' -%}Clear history
+    {%- when 'forgotten' -%}Search history cleared.
+    {%- when 'help' -%}Use the up and down arrow keys to choose a suggestion, Enter to open it and Escape to close. Tab moves to the other controls.
+    {%- when 'section' -%}Find something for you
+    {%- when 'from' -%}From
+  {%- endcase -%}
+{%- else -%}
+  {%- case key -%}
+    {%- when 'label' -%}Buscar productos
+    {%- when 'placeholder' -%}Encuentra una pieza, marca o estilo
+    {%- when 'submit' -%}Buscar
+    {%- when 'clear' -%}Borrar búsqueda
+    {%- when 'close' -%}Cerrar sugerencias
+    {%- when 'heading' -%}Productos sugeridos
+    {%- when 'loading' -%}Buscando productos…
+    {%- when 'empty' -%}Sin productos sugeridos. Prueba otra palabra o consulta todos los resultados.
+    {%- when 'error' -%}Las sugerencias no están disponibles. Puedes buscar o consultar todos los resultados.
+    {%- when 'count' -%}Sugerencias de productos: {count}.
+    {%- when 'all' -%}Ver todos los resultados
+    {%- when 'recent' -%}Búsquedas recientes
+    {%- when 'recent_count' -%}Búsquedas recientes: {count}.
+    {%- when 'forget' -%}Borrar historial
+    {%- when 'forgotten' -%}Historial de búsquedas borrado.
+    {%- when 'help' -%}Usa las flechas arriba y abajo para elegir una sugerencia, Enter para abrirla y Escape para cerrar. Tab lleva a los demás controles.
+    {%- when 'section' -%}Encuentra algo muy tú
+    {%- when 'from' -%}Desde
+  {%- endcase -%}
+{%- endif -%}

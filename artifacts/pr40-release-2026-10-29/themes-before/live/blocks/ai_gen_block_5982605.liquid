@@ -1,0 +1,396 @@
+{% doc %}
+  @prompt
+    Task: Create a Premium 3-Row "Collection List" Carousel (Strictly 9 Linked Cards).
+    
+    1. Structural Architecture (The 3x3 Collection Grid):
+    
+    Generate a custom section containing exactly 9 Collection Cards.
+    
+    Layout: Arrange these 9 cards into a grid of 3 horizontal rows.
+    
+    Interaction: The entire grid must scroll horizontally. On the initial view, show 2 full columns and a 15% peek of the 3rd column on the right to invite swiping.
+    
+    Background: Use a Pure White (#FFFFFF) background for the section with exactly 60px of vertical padding at the top and bottom.
+    
+    2. Collection Card Specification:
+    
+    Functional Links: Each card must be a Collection Link. When clicked, it must redirect the user to the corresponding collection page.
+    
+    Visuals: Cards should display the Collection's Featured Image. No text or titles should be visible inside the cards to maintain a minimalist look.
+    
+    Geometry: 36px border-radius, pure white base, and a very thin, elegant drop shadow at the bottom of each card.
+    
+    3. Premium Motion (The Pop-Up Effect):
+    
+    Magnetic Snap: Use a snappy, fluid horizontal scroll snap (Apple-style).
+    
+    Interactive Scaling: As the user swipes, the cards passing through the center of the screen should smoothly scale to 1.0, while cards at the edges shrink to 0.85 with a subtle fade.
+    
+    No Scrollbars: Hide all scrollbars and UI indicators for a clean, app-like experience.
+    
+    4. Mobile-First Optimization:
+    
+    Ensure the 3-row layout is strictly maintained on mobile (Disable "Stack on mobile").
+    
+    Apply strict clipping (overflow: hidden) to the section to prevent any horizontal page stretching or "shaking".
+    
+    Importante y vital, no dejes que los margenes salgan del conjunto optimo de una vista de version de un sitio web
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+.ai-collection-carousel-{{ ai_gen_id }} {
+  display: block;
+  width: 100%;
+  background-color: transparent;
+  padding: 20px 0;
+  overflow: visible;
+}
+
+.ai-collection-carousel-container-{{ ai_gen_id }} {
+  width: 100%;
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0;
+}
+
+..ai-collection-carousel-grid-{{ ai_gen_id }} {
+  display: grid;
+  grid-template-columns: 40px repeat(3, calc((100vw - 40px) * 0.605)) 40px;
+  grid-template-rows: repeat(3, auto);
+  gap: 24px;
+  grid-auto-flow: column;
+  padding: 20px 0 28px;
+}
+
+.ai-collection-card-{{ ai_gen_id }} {
+  position: relative;
+  scroll-snap-align: start;
+  border-radius: 20px;
+  background-color: #FFFFFF;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 4px 10px rgba(0, 0, 0, 0.05);
+  transform: scale(0.88);
+  opacity: 0.75;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+              opacity 0.4s ease,
+              box-shadow 0.4s ease;
+  will-change: transform, opacity;
+}
+
+.ai-collection-card-{{ ai_gen_id }}:hover,
+.ai-collection-card-{{ ai_gen_id }}.is-active {
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    0 8px 16px rgba(0, 0, 0, 0.07);
+  transform: scale(1) translateY(-4px);
+  opacity: 1;
+}
+
+.ai-collection-card-link-{{ ai_gen_id }} {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+}
+
+.ai-collection-card-image-{{ ai_gen_id }} {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ai-collection-card-placeholder-{{ ai_gen_id }} {
+  width: 100%;
+  height: 100%;
+  background-color: #f4f4f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-collection-card-placeholder-{{ ai_gen_id }} svg {
+  width: 60%;
+  height: 60%;
+  opacity: 0.3;
+}
+
+@media screen and (min-width: 750px) {
+  .ai-collection-carousel-grid-{{ ai_gen_id }} {
+    grid-template-columns: repeat(3, calc((100vw - 80px) * 0.35));
+    padding: 20px 40px 28px;
+  }
+}
+
+{% endstyle %}
+
+<collection-carousel-{{ ai_gen_id }} class="ai-collection-carousel-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-collection-carousel-container-{{ ai_gen_id }}">
+    <div class="ai-collection-carousel-grid-{{ ai_gen_id }}">
+      {% for i in (1..9) %}
+        {% liquid
+          assign collection_key = 'collection_' | append: i
+          assign collection = block.settings[collection_key]
+        %}
+        <div class="ai-collection-card-{{ ai_gen_id }}" data-card-index="{{ i }}">
+          {% if collection != blank %}
+            <a href="{{ collection.url }}" class="ai-collection-card-link-{{ ai_gen_id }}">
+              {% if collection.featured_image %}
+                <img
+                  src="{{ collection.featured_image | image_url: width: 800 }}"
+                  alt="{{ collection.featured_image.alt | escape }}"
+                  class="ai-collection-card-image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="800"
+                  height="800"
+                >
+              {% else %}
+                <div class="ai-collection-card-placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-apparel-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </a>
+          {% else %}
+            <div class="ai-collection-card-placeholder-{{ ai_gen_id }}">
+              {{ 'collection-apparel-1' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</collection-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CollectionCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.container = this.querySelector('.ai-collection-carousel-container-{{ ai_gen_id }}');
+        this.cards = this.querySelectorAll('.ai-collection-card-{{ ai_gen_id }}');
+        this.isScrolling = false;
+        this.scrollTimeout = null;
+        this.velocity = 0;
+        this.lastScrollLeft = 0;
+        this.lastTimestamp = 0;
+      }
+
+      connectedCallback() {
+        // Iniciar desde la izquierda
+        this.container.scrollLeft = 0;
+        this.setupScrollEffect();
+        this.setupMomentumScroll();
+        this.updateCardScales();
+      }
+
+      setupScrollEffect() {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              const card = entry.target;
+              const ratio = entry.intersectionRatio;
+
+              if (ratio > 0.2) {
+                const scale = 0.88 + (ratio * 0.12);
+                const opacity = 0.70 + (ratio * 0.30);
+                card.style.transform = `scale(${scale}) translateY(${(1 - ratio) * 6}px)`;
+                card.style.opacity = opacity;
+                card.classList.add('is-active');
+              } else {
+                card.style.transform = 'scale(0.88) translateY(6px)';
+                card.style.opacity = '0.70';
+                card.classList.remove('is-active');
+              }
+            });
+          },
+          {
+            root: this.container,
+            threshold: Array.from({ length: 21 }, (_, i) => i * 0.05)
+          }
+        );
+
+        this.cards.forEach((card) => observer.observe(card));
+      }
+
+      setupMomentumScroll() {
+        let startX = 0;
+        let startScrollLeft = 0;
+        let isDragging = false;
+        let rafId = null;
+
+        const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+
+        this.container.addEventListener('touchstart', (e) => {
+          startX = e.touches[0].clientX;
+          startScrollLeft = this.container.scrollLeft;
+          this.velocity = 0;
+          this.lastScrollLeft = startScrollLeft;
+          this.lastTimestamp = performance.now();
+          if (rafId) cancelAnimationFrame(rafId);
+        }, { passive: true });
+
+        this.container.addEventListener('touchmove', (e) => {
+          const now = performance.now();
+          const dt = now - this.lastTimestamp;
+          const dx = this.container.scrollLeft - this.lastScrollLeft;
+          this.velocity = dt > 0 ? dx / dt : 0;
+          this.lastScrollLeft = this.container.scrollLeft;
+          this.lastTimestamp = now;
+        }, { passive: true });
+
+        this.container.addEventListener('touchend', () => {
+          const decelerate = () => {
+            if (Math.abs(this.velocity) < 0.1) {
+              this.snapToNearestCard();
+              return;
+            }
+            this.container.scrollLeft += this.velocity * 16;
+            this.velocity *= 0.92;
+            rafId = requestAnimationFrame(decelerate);
+          };
+          rafId = requestAnimationFrame(decelerate);
+        });
+
+        this.container.addEventListener('scroll', () => {
+          clearTimeout(this.scrollTimeout);
+          this.scrollTimeout = setTimeout(() => {
+            this.snapToNearestCard();
+          }, 120);
+        });
+      }
+
+      snapToNearestCard() {
+        const containerRect = this.container.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+
+        let closestCard = null;
+        let closestDistance = Infinity;
+
+        this.cards.forEach((card) => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const distance = Math.abs(containerCenter - cardCenter);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        if (closestCard) {
+          closestCard.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center'
+          });
+        }
+      }
+
+      updateCardScales() {
+        this.cards.forEach((card, index) => {
+          if (index < 3) {
+            card.style.transform = 'scale(1) translateY(0px)';
+            card.style.opacity = '1';
+            card.classList.add('is-active');
+          } else {
+            card.style.transform = 'scale(0.88) translateY(6px)';
+            card.style.opacity = '0.70';
+          }
+        });
+      }
+    }
+
+    if (!customElements.get('collection-carousel-{{ ai_gen_id }}')) {
+      customElements.define(
+        'collection-carousel-{{ ai_gen_id }}',
+        CollectionCarousel{{ ai_gen_id }}
+      );
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "collection",
+      "id": "collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "collection",
+      "id": "collection_7",
+      "label": "Collection 7"
+    },
+    {
+      "type": "collection",
+      "id": "collection_8",
+      "label": "Collection 8"
+    },
+    {
+      "type": "collection",
+      "id": "collection_9",
+      "label": "Collection 9"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 8,
+      "max": 32,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection carousel"
+    }
+  ]
+}
+{% endschema %}

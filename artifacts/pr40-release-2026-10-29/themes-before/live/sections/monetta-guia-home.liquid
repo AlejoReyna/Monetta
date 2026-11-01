@@ -1,0 +1,160 @@
+{%- comment -%}
+  Home of the client guide «BORRADOR DE APP» (slides 03–04), as the app of PR #33 builds it (home_screen.dart,
+  home_boutique_sections.dart, client_guide_sections.dart): one section per module so the theme editor can reorder them.
+  Product rails (Nueva colección, Lo más buscado) are monetta-product-rail sections. Copy is the app's.
+{%- endcomment -%}
+{%- liquid
+  assign mode = section.settings.mode
+  assign heading_id = section.id | append: '-heading'
+-%}
+{%- case mode -%}
+  {%- when 'carousel' -%}
+    {%- capture catalog_url -%}{% render 'monetta-guia-url', key: 'catalogo' %}{%- endcapture -%}
+    {%- capture perfumes_url -%}{% render 'monetta-guia-url', key: 'perfumes' %}{%- endcapture -%}
+    {%- assign track_id = 'guia-carousel-' | append: section.id -%}
+    <section class="guia-carousel" aria-roledescription="carrusel" aria-labelledby="{{ heading_id }}" data-guia-carousel {{ section.shopify_attributes }}>
+      <h1 class="visually-hidden" id="{{ heading_id }}">{{ shop.name | escape }}: boutique online de productos originales</h1>
+      <div class="guia-carousel__track" id="{{ track_id }}">
+        <div class="guia-carousel__slide" role="group" aria-roledescription="diapositiva" aria-label="1 de 3">
+          <a class="guia-slide guia-slide--right" href="{{ catalog_url | strip }}" style="--hero-focus: 20% 50%">
+            {% render 'monetta-guia-photo', name: 'home-banner-compra-facil', class: 'guia-slide__photo', eager: true %}
+            <span class="guide-hero__scrim" aria-hidden="true"></span>
+            <span class="guia-slide__copy">
+              <span class="guia-slide__line"><span class="guia-slide__italic">Compra </span><span class="guia-slide__script">fácil</span></span>
+              <span class="guia-slide__line guia-slide__italic">desde México</span>
+            </span>
+          </a>
+        </div>
+        <div class="guia-carousel__slide" role="group" aria-roledescription="diapositiva" aria-label="2 de 3">
+          <a class="guia-slide guia-slide--left" href="{{ catalog_url | strip }}" style="--hero-focus: 70% 50%">
+            {% render 'monetta-guia-photo', name: 'home-banner-nueva-coleccion', class: 'guia-slide__photo' %}
+            <span class="guide-hero__scrim" aria-hidden="true"></span>
+            <span class="guia-slide__copy">
+              <span class="guia-slide__eyebrow">Nueva</span>
+              <span class="guia-slide__title">Colección</span>
+              <span class="guia-slide__body">Un paraíso de marcas <br>por descubrir.</span>
+            </span>
+          </a>
+        </div>
+        <div class="guia-carousel__slide" role="group" aria-roledescription="diapositiva" aria-label="3 de 3">
+          <a class="guia-slide guia-slide--right" href="{{ perfumes_url | strip }}" style="--hero-focus: 35% 50%">
+            {% render 'monetta-guia-photo', name: 'home-banner-perfumes', class: 'guia-slide__photo' %}
+            <span class="guide-hero__scrim" aria-hidden="true"></span>
+            <span class="guia-slide__copy">
+              <span class="guia-slide__title">Perfumes</span>
+              <span class="guia-slide__body">Descubre nuestra selección de fragancias originales</span>
+            </span>
+          </a>
+        </div>
+      </div>
+      <div class="guia-carousel__dots" aria-hidden="true"><span class="is-active"></span><span></span><span></span></div>
+      <button type="button" class="icon-button guia-carousel__arrow guia-carousel__arrow--prev" data-guia-prev aria-controls="{{ track_id }}" aria-label="Diapositiva anterior">{% render 'monetta-icon', name: 'chevronLeft', size: 22 %}</button>
+      <button type="button" class="icon-button guia-carousel__arrow guia-carousel__arrow--next" data-guia-next aria-controls="{{ track_id }}" aria-label="Diapositiva siguiente">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</button>
+    </section>
+
+  {%- when 'styles' -%}
+    {%- capture all_url -%}{% render 'monetta-guia-url', key: 'categorias' %}{%- endcapture -%}
+    <section class="section container guia-styles" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
+      {% render 'monetta-section-header', id: heading_id, title: 'Compra por estilo', link_url: all_url, link_label: 'Ver todo' %}
+      <ul class="guia-styles__list" role="list">
+        {%- assign style_entries = 'crossbody:Crossbody,tote:Tote,shoulder:Shoulder,satchel:Satchel,perfumes:Perfumes' | split: ',' -%}
+        {%- for entry in style_entries -%}
+          {%- assign key = entry | split: ':' | first -%}
+          {%- assign label = entry | split: ':' | last -%}
+          {%- assign icon = 'estilo-' | append: key -%}
+          {%- capture url -%}{% render 'monetta-guia-url', key: key %}{%- endcapture -%}
+          <li>
+            <a class="guia-styles__tile" href="{{ url | strip }}" aria-label="Ver {{ label }}">
+              {% render 'monetta-guia-icon', name: icon, size: 64, class: 'guia-styles__icon' %}
+              <span class="guia-styles__label">{{ label }}</span>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </section>
+
+  {%- when 'brands' -%}
+    {%- capture all_url -%}{% render 'monetta-guia-url', key: 'categorias' %}{%- endcapture -%}
+    {%- comment -%}The guide's eight brands in its order, shown when the store sells them, so no tile leads to an empty page.{%- endcomment -%}
+    <section class="section container guia-brands" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
+      {% render 'monetta-section-header', id: heading_id, title: 'Tus marcas favoritas', link_url: all_url, link_label: 'Ver todas' %}
+      <ul class="guia-brands__grid" role="list">
+        {%- assign brand_entries = 'Coach:coach,Guess:guess,Michael Kors:michael_kors,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Tory Burch:,Kate Spade:,Marc Jacobs:' | split: ',' -%}
+        {%- for entry in brand_entries -%}
+          {%- assign name = entry | split: ':' | first -%}
+          {%- assign art = entry | split: ':' | last -%}
+          {%- if art == name -%}{%- assign art = '' -%}{%- endif -%}
+          {%- if shop.vendors contains name -%}
+            {%- capture url -%}{% render 'monetta-guia-url', key: 'brand', brand: name %}{%- endcapture -%}
+            <li>
+              <a class="guia-brand" href="{{ url | strip }}" aria-label="Ver {{ name }}">
+                {%- if art != blank -%}
+                  <img src="{{ 'monetta-app-brand-' | append: art | append: '.webp' | asset_url }}" width="600" height="600" alt="" loading="lazy" decoding="async">
+                {%- else -%}
+                  <span class="guia-brand__name">{{ name }}</span>
+                {%- endif -%}
+              </a>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </section>
+
+  {%- when 'offers' -%}
+    {%- capture mayoreo_url -%}{% render 'monetta-guia-url', key: 'mayoreo' %}{%- endcapture -%}
+    {%- comment -%}ClientGuideEditorial in overlay mode (_HomeOffersSection): owner photograph, copy centred on its right half.{%- endcomment -%}
+    <section class="guia-offer guia-offer--right" aria-labelledby="{{ heading_id }}" style="--hero-focus: 0% 50%" {{ section.shopify_attributes }}>
+      {% render 'monetta-guia-photo', name: 'home-precios-mayoreo', class: 'guia-offer__photo' %}
+      <span class="guide-hero__scrim" aria-hidden="true"></span>
+      <div class="guia-offer__copy">
+        <h2 class="guia-offer__title" id="{{ heading_id }}">Precios de <span class="guia-offer__accent guide-script guide-script--underlined">mayoreo</span></h2>
+        <p class="guia-offer__body">A partir de 3 piezas</p>
+        <a class="guide-pill" href="{{ mayoreo_url | strip }}" aria-label="Conoce más: precios de mayoreo"><span class="guide-pill__label">Conoce más</span></a>
+      </div>
+    </section>
+
+  {%- when 'services' -%}
+    <section class="guia-services-section" aria-label="Nuestros servicios" {{ section.shopify_attributes }}>
+      {% render 'monetta-guia-services' %}
+    </section>
+
+  {%- when 'register' -%}
+    {%- comment -%}HomeAccountInvitation: «REGÍSTRATE» for guests, «TU CUENTA» once signed in; Shopify's own account pages.{%- endcomment -%}
+    <section class="guia-register" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
+      <div class="guia-register__inner">
+        {%- if customer -%}
+          <h2 class="guia-register__title" id="{{ heading_id }}">Tu cuenta</h2>
+          <p class="guia-register__body">Consulta tus pedidos y datos de compra</p>
+          <a class="btn btn--primary btn--block guia-register__action" href="{{ routes.account_url }}">Ver mi cuenta</a>
+        {%- else -%}
+          <h2 class="guia-register__title" id="{{ heading_id }}">Regístrate</h2>
+          <p class="guia-register__body">Consulta tus pedidos y datos de compra</p>
+          <a class="btn btn--primary btn--block guia-register__action" href="{{ routes.account_login_url }}">Registrarme ahora</a>
+        {%- endif -%}
+        <p class="guia-register__payments">Pagos seguros con Shopify.</p>
+      </div>
+    </section>
+{%- endcase -%}
+
+{% schema %}
+{
+  "name": "Monetta · Guía (inicio)",
+  "settings": [
+    {
+      "type": "select",
+      "id": "mode",
+      "label": "Módulo",
+      "default": "carousel",
+      "options": [
+        { "value": "carousel", "label": "Carrusel de 3 fotos" },
+        { "value": "styles", "label": "Compra por estilo" },
+        { "value": "brands", "label": "Tus marcas favoritas" },
+        { "value": "offers", "label": "Precios de mayoreo" },
+        { "value": "services", "label": "Servicios" },
+        { "value": "register", "label": "Regístrate" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Monetta · Guía (inicio)" }]
+}
+{% endschema %}

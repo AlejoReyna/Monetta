@@ -1,0 +1,53 @@
+{%- comment -%}
+  Page not found (404) inside the Monetta shell: the empty-state anatomy of the bag and search (mark, serif title, calm copy,
+  primary and secondary actions), a search field, and an optional rail of real products from a collection the merchant picks.
+{%- endcomment -%}
+{%- liquid
+  assign rail_source = section.settings.collection | default: collections.all
+  assign rail_heading_id = section.id | append: '-rail-heading'
+  assign rail_id = 'rail-' | append: section.id
+-%}
+<div class="container not-found" {{ section.shopify_attributes }}>
+  <div class="empty empty--page">
+    <span class="empty__mark" aria-hidden="true">{% render 'monetta-icon', name: 'search', size: 28 %}</span>
+    <h1 class="empty__title" tabindex="-1">{{ section.settings.heading | escape }}</h1>
+    <p class="body-copy">{{ section.settings.text | escape }}</p>
+    <form class="not-found__search" role="search" action="{{ routes.search_url }}" method="get">
+      <div class="search-field">
+        {% render 'monetta-icon', name: 'search', size: 20 %}
+        <label class="visually-hidden" for="not-found-search">Buscar productos</label>
+        <input id="not-found-search" type="search" name="q" placeholder="Buscar bolsas, carteras y relojes" autocomplete="off" spellcheck="false" enterkeyhint="search">
+        <input type="hidden" name="type" value="product">
+      </div>
+    </form>
+    <div class="empty__actions">
+      <a class="btn btn--primary" href="{{ routes.all_products_collection_url }}">Ver catálogo</a>
+      <a class="btn btn--outline" href="{{ routes.root_url }}">Ir al inicio</a>
+    </div>
+  </div>
+</div>
+{%- if section.settings.show_rail and rail_source.products.size > 0 -%}
+  <section class="section container" aria-labelledby="{{ rail_heading_id }}">
+    {% render 'monetta-section-header', id: rail_heading_id, title: section.settings.rail_heading, link_url: rail_source.url, link_label: 'Ver todo', rail_id: rail_id %}
+    <div class="rail">
+      <ul class="rail__track" id="{{ rail_id }}" role="list" aria-label="{{ section.settings.rail_heading | escape }}">
+        {%- for product in rail_source.products limit: 8 -%}
+          <li>{% render 'monetta-card', product: product, density: 'compact', sizes: '(min-width: 1024px) 25vw, 36vw' %}</li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Monetta · No encontrada",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Título", "default": "No encontramos esta página" },
+    { "type": "textarea", "id": "text", "label": "Texto", "default": "Puede que el enlace esté incompleto o que la página ya no exista. Busca una pieza o vuelve al catálogo." },
+    { "type": "checkbox", "id": "show_rail", "label": "Mostrar productos", "default": true },
+    { "type": "text", "id": "rail_heading", "label": "Título de los productos", "default": "Te puede interesar" },
+    { "type": "collection", "id": "collection", "label": "Colección", "info": "Sin elegir, se usan todos los productos." }
+  ]
+}
+{% endschema %}

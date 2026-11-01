@@ -1,0 +1,292 @@
+{% doc %}
+  @prompt
+    Directives for Shopify UI Generation - Ultra-Compact Hero Banner:
+    
+    Goal: Create a 100vh Hero Banner where the vertical spacing (top and bottom) is reduced to near zero. The product image must be the absolute protagonist without any background text.
+    
+    1. Strict Vertical Spacing (Anti-Margin):
+    
+    Zero Padding: Set padding-top: 0 and padding-bottom: 0 for the main section.
+    
+    Vertical Center: Use display: flex; justify-content: center; align-items: center; so the image stays centered despite the lack of margins.
+    
+    Height: Force height: 100vh and overflow: hidden.
+    
+    2. Main Visual (Floating Product):
+    
+    Transparent Image: Use a high-quality product image with a transparent background.
+    
+    Scale: Set the image height to 90% of the viewport height (90vh) for a truly immersive and "over-the-top" visual effect.
+    
+    No Background Text: Ensure there is NO background text, overlays, or decorative typography behind the image.
+    
+    3. Scroll Indicator (Minimalist Footer):
+    
+    Position: Place the scroll indicator at the absolute bottom edge of the screen (bottom: 15px).
+    
+    Label: Use the text "VER MÁS" in a small, clean Sans-Serif font with a letter-spacing of 4px.
+    
+    Arrow Animation: Include a sleek, thin downward arrow with a smooth, infinite "up-and-down" pulse effect.
+    
+    4. High-End Styling:
+    
+    Background: Pure white (#FFFFFF) to contrast with the transparent product.
+    
+    Transitions: Ensure the image has a soft opacity: 0 to opacity: 1 fade-in upon loading.
+    
+    Constraint: DO NOT add any buttons or additional descriptive text.
+    
+    5. Technical: Use the CSS prefix .ultra-compact-hero-. Ensure 100% responsiveness without creating any page overflow.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ultra-compact-hero-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    background-color: {{ block.settings.background_color }};
+    position: relative;
+  }
+
+  .ultra-compact-hero__image-wrapper-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ultra-compact-hero__image-{{ ai_gen_id }} {
+    height: {{ block.settings.image_height }}vh;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    opacity: 0;
+    animation: ultra-compact-hero-fade-in-{{ ai_gen_id }} 1s ease-in-out forwards;
+  }
+
+  .ultra-compact-hero__image-placeholder-{{ ai_gen_id }} {
+    height: {{ block.settings.image_height }}vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4;
+    position: relative;
+  }
+
+  .ultra-compact-hero__image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    max-height: 500px;
+    opacity: 0.3;
+  }
+
+  .ultra-compact-hero__empty-state-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .ultra-compact-hero__scroll-indicator-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+  }
+
+  .ultra-compact-hero__scroll-text-{{ ai_gen_id }} {
+    font-family: {{ block.settings.scroll_font.family }}, {{ block.settings.scroll_font.fallback_families }};
+    font-size: {{ block.settings.scroll_text_size }}px;
+    letter-spacing: 4px;
+    color: {{ block.settings.scroll_text_color }};
+    font-weight: 400;
+    text-transform: uppercase;
+  }
+
+  .ultra-compact-hero__scroll-arrow-{{ ai_gen_id }} {
+    width: 20px;
+    height: 20px;
+    animation: ultra-compact-hero-pulse-{{ ai_gen_id }} 1.5s ease-in-out infinite;
+  }
+
+  .ultra-compact-hero__scroll-arrow-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    stroke: {{ block.settings.scroll_text_color }};
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  @keyframes ultra-compact-hero-fade-in-{{ ai_gen_id }} {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes ultra-compact-hero-pulse-{{ ai_gen_id }} {
+    0%, 100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(8px);
+      opacity: 0.6;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ultra-compact-hero__image-{{ ai_gen_id }} {
+      height: {{ block.settings.image_height_mobile }}vh;
+    }
+
+    .ultra-compact-hero__image-placeholder-{{ ai_gen_id }} {
+      height: {{ block.settings.image_height_mobile }}vh;
+    }
+
+    .ultra-compact-hero__scroll-text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.scroll_text_size | times: 0.8 }}px;
+      letter-spacing: 3px;
+    }
+  }
+{% endstyle %}
+
+<div class="ultra-compact-hero-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ultra-compact-hero__image-wrapper-{{ ai_gen_id }}">
+    {% if block.settings.product_image %}
+      <img
+        src="{{ block.settings.product_image | image_url: width: 2000 }}"
+        alt="{{ block.settings.product_image.alt | escape }}"
+        loading="eager"
+        width="{{ block.settings.product_image.width }}"
+        height="{{ block.settings.product_image.height }}"
+        class="ultra-compact-hero__image-{{ ai_gen_id }}"
+      >
+    {% else %}
+      <div class="ultra-compact-hero__image-placeholder-{{ ai_gen_id }}">
+        {{ 'product-apparel-1' | placeholder_svg_tag }}
+        <div class="ultra-compact-hero__empty-state-{{ ai_gen_id }}">
+          Agrega una imagen de producto con fondo transparente
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if block.settings.show_scroll_indicator %}
+    <div class="ultra-compact-hero__scroll-indicator-{{ ai_gen_id }}">
+      <span class="ultra-compact-hero__scroll-text-{{ ai_gen_id }}">{{ block.settings.scroll_text }}</span>
+      <div class="ultra-compact-hero__scroll-arrow-{{ ai_gen_id }}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Hero ultra compacto",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Imagen de producto"
+    },
+    {
+      "type": "image_picker",
+      "id": "product_image",
+      "label": "Imagen"
+    },
+    {
+      "type": "range",
+      "id": "image_height",
+      "label": "Altura de imagen (escritorio)",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "default": 90
+    },
+    {
+      "type": "range",
+      "id": "image_height_mobile",
+      "label": "Altura de imagen (móvil)",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "default": 80
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Color de fondo",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Indicador de scroll"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_scroll_indicator",
+      "label": "Mostrar indicador",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "scroll_text",
+      "label": "Texto",
+      "default": "VER MÁS"
+    },
+    {
+      "type": "range",
+      "id": "scroll_text_size",
+      "label": "Tamaño de texto",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "color",
+      "id": "scroll_text_color",
+      "label": "Color de texto",
+      "default": "#000000"
+    },
+    {
+      "type": "font_picker",
+      "id": "scroll_font",
+      "label": "Fuente",
+      "default": "sans-serif"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero ultra compacto"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,516 @@
+{% doc %}
+  @prompt
+    Create a custom Liquid block for Shopify with the following layout:
+    
+    Display 3 circular collection cards in a single horizontal row, all aligned side by side (using flexbox with flex-direction: row, justify-content: center). Each card contains only:
+    
+    A circular image (aspect ratio 1:1, border-radius: 50%) with a premium floating shadow directly behind the circle: box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06)
+    Collection name centered below the circle, clean minimal typography
+    No card container background, no border-radius wrapper, no padding box — just the bare circle image + label + shadow on the image itself
+    Hover effect: slight scale-up (transform: scale(1.04)) on the circle
+    The 3 cards must always appear on the same horizontal line, never stacked vertically on the initial view.
+    
+    Below the 3 cards, show a centered chevron arrow (▼). When clicked:
+    
+    Smoothly reveals 2 additional circular collection cards in the same style, arranged horizontally and centered
+    The arrow moves to the bottom of the revealed cards (always floats below all visible content)
+    Clicking again collapses the 2 extra cards and the arrow returns to its position below the first 3
+    Expand/collapse animation: smooth max-height transition, ~300ms ease.
+    
+    Total of 5 collection slots, each configurable in the theme editor via collection picker.
+    
+    On mobile: the first 3 cards stay in a horizontal row (scale down to fit), wrap only if absolutely necessary. The 2 extra cards also appear in a horizontal row when expanded.
+    
+    Clean minimal CSS, no external dependencies, all logic in vanilla JS within the Liquid block.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-circles-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .ai-collection-circles-container-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: {{ block.settings.spacing_between_rows }}px;
+  }
+
+  .ai-collection-circles-row-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: {{ block.settings.spacing_between_cards }}px;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .ai-collection-circles-card-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: {{ block.settings.label_spacing }}px;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+  }
+
+  .ai-collection-circles-card-{{ ai_gen_id }}:hover .ai-collection-circles-image-{{ ai_gen_id }} {
+    transform: scale(1.04);
+  }
+
+  .ai-collection-circles-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: {{ block.settings.circle_size }}px;
+    height: {{ block.settings.circle_size }}px;
+    flex-shrink: 0;
+  }
+
+  .ai-collection-circles-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s ease;
+  }
+
+  .ai-collection-circles-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+  }
+
+  .ai-collection-circles-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-collection-circles-label-{{ ai_gen_id }} {
+    font-size: {{ block.settings.label_font_size }}px;
+    color: {{ block.settings.label_color }};
+    text-align: center;
+    font-weight: {{ block.settings.label_font_weight }};
+    max-width: {{ block.settings.circle_size }}px;
+  }
+
+  .ai-collection-circles-extra-{{ ai_gen_id }} {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    width: 100%;
+  }
+
+  .ai-collection-circles-extra-{{ ai_gen_id }}.active {
+    max-height: 500px;
+  }
+
+  .ai-collection-circles-chevron-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: {{ block.settings.chevron_padding }}px;
+    font-size: {{ block.settings.chevron_size }}px;
+    color: {{ block.settings.chevron_color }};
+    transition: transform 0.3s ease;
+    margin-top: {{ block.settings.chevron_top_spacing }}px;
+  }
+
+  .ai-collection-circles-chevron-{{ ai_gen_id }}:hover {
+    transform: scale(1.1);
+  }
+
+  .ai-collection-circles-chevron-{{ ai_gen_id }}.rotated {
+    transform: rotate(180deg);
+  }
+
+  .ai-collection-circles-chevron-{{ ai_gen_id }}.rotated:hover {
+    transform: rotate(180deg) scale(1.1);
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-collection-circles-image-wrapper-{{ ai_gen_id }} {
+      width: {{ block.settings.circle_size_mobile }}px;
+      height: {{ block.settings.circle_size_mobile }}px;
+    }
+
+    .ai-collection-circles-label-{{ ai_gen_id }} {
+      font-size: {{ block.settings.label_font_size_mobile }}px;
+      max-width: {{ block.settings.circle_size_mobile }}px;
+    }
+
+    .ai-collection-circles-row-{{ ai_gen_id }} {
+      gap: {{ block.settings.spacing_between_cards_mobile }}px;
+    }
+  }
+{% endstyle %}
+
+<collection-circles-{{ ai_gen_id }}
+  class="ai-collection-circles-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-collection-circles-container-{{ ai_gen_id }}">
+    <div class="ai-collection-circles-row-{{ ai_gen_id }}">
+      {% for i in (1..3) %}
+        {% liquid
+          assign collection_key = 'collection_' | append: i
+          assign collection = block.settings[collection_key]
+        %}
+        {% if collection != blank %}
+          <a
+            href="{{ collection.url }}"
+            class="ai-collection-circles-card-{{ ai_gen_id }}"
+          >
+            <div class="ai-collection-circles-image-wrapper-{{ ai_gen_id }}">
+              {% if collection.featured_image %}
+                <img
+                  src="{{ collection.featured_image | image_url: width: 600 }}"
+                  alt="{{ collection.featured_image.alt | escape }}"
+                  class="ai-collection-circles-image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="600"
+                  height="600"
+                >
+              {% else %}
+                <div class="ai-collection-circles-placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="ai-collection-circles-label-{{ ai_gen_id }}">
+              {{ collection.title }}
+            </div>
+          </a>
+        {% else %}
+          <div class="ai-collection-circles-card-{{ ai_gen_id }}">
+            <div class="ai-collection-circles-image-wrapper-{{ ai_gen_id }}">
+              <div class="ai-collection-circles-placeholder-{{ ai_gen_id }}">
+                {{ 'collection-1' | placeholder_svg_tag }}
+              </div>
+            </div>
+            <div class="ai-collection-circles-label-{{ ai_gen_id }}">
+              Collection {{ i }}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="ai-collection-circles-extra-{{ ai_gen_id }}">
+      <div class="ai-collection-circles-row-{{ ai_gen_id }}">
+        {% for i in (4..5) %}
+          {% liquid
+            assign collection_key = 'collection_' | append: i
+            assign collection = block.settings[collection_key]
+          %}
+          {% if collection != blank %}
+            <a
+              href="{{ collection.url }}"
+              class="ai-collection-circles-card-{{ ai_gen_id }}"
+            >
+              <div class="ai-collection-circles-image-wrapper-{{ ai_gen_id }}">
+                {% if collection.featured_image %}
+                  <img
+                    src="{{ collection.featured_image | image_url: width: 600 }}"
+                    alt="{{ collection.featured_image.alt | escape }}"
+                    class="ai-collection-circles-image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="600"
+                    height="600"
+                  >
+                {% else %}
+                  <div class="ai-collection-circles-placeholder-{{ ai_gen_id }}">
+                    {{ 'collection-1' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="ai-collection-circles-label-{{ ai_gen_id }}">
+                {{ collection.title }}
+              </div>
+            </a>
+          {% else %}
+            <div class="ai-collection-circles-card-{{ ai_gen_id }}">
+              <div class="ai-collection-circles-image-wrapper-{{ ai_gen_id }}">
+                <div class="ai-collection-circles-placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+              </div>
+              <div class="ai-collection-circles-label-{{ ai_gen_id }}">
+                Collection {{ i }}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <button
+      class="ai-collection-circles-chevron-{{ ai_gen_id }}"
+      aria-label="Toggle additional collections"
+      aria-expanded="false"
+    >
+      ▼
+    </button>
+  </div>
+</collection-circles-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CollectionCircles{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.chevron = this.querySelector('.ai-collection-circles-chevron-{{ ai_gen_id }}');
+        this.extraSection = this.querySelector('.ai-collection-circles-extra-{{ ai_gen_id }}');
+        
+        if (this.chevron && this.extraSection) {
+          this.chevron.addEventListener('click', this.toggleExtra.bind(this));
+        }
+      }
+
+      toggleExtra() {
+        const isExpanded = this.extraSection.classList.contains('active');
+        
+        if (isExpanded) {
+          this.extraSection.classList.remove('active');
+          this.chevron.classList.remove('rotated');
+          this.chevron.setAttribute('aria-expanded', 'false');
+        } else {
+          this.extraSection.classList.add('active');
+          this.chevron.classList.add('rotated');
+          this.chevron.setAttribute('aria-expanded', 'true');
+        }
+      }
+    }
+
+    customElements.define('collection-circles-{{ ai_gen_id }}', CollectionCircles{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection circles",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "header",
+      "content": "Circle style"
+    },
+    {
+      "type": "range",
+      "id": "circle_size",
+      "label": "Desktop circle size",
+      "min": 80,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 180
+    },
+    {
+      "type": "range",
+      "id": "circle_size_mobile",
+      "label": "Mobile circle size",
+      "min": 60,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Label style"
+    },
+    {
+      "type": "range",
+      "id": "label_font_size",
+      "label": "Desktop font size",
+      "min": 10,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "label_font_size_mobile",
+      "label": "Mobile font size",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "label_font_weight",
+      "label": "Font weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "label_spacing",
+      "label": "Space between circle and label",
+      "min": 4,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "spacing_between_cards",
+      "label": "Desktop spacing between cards",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "spacing_between_cards_mobile",
+      "label": "Mobile spacing between cards",
+      "min": 5,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "spacing_between_rows",
+      "label": "Spacing between rows",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Chevron"
+    },
+    {
+      "type": "range",
+      "id": "chevron_size",
+      "label": "Chevron size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "chevron_color",
+      "label": "Chevron color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "chevron_padding",
+      "label": "Chevron padding",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "chevron_top_spacing",
+      "label": "Chevron top spacing",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection circles"
+    }
+  ]
+}
+{% endschema %}

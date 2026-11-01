@@ -1,0 +1,200 @@
+{% doc %}
+  @prompt
+    Create a horizontally scrollable collection grid block with 3 rows × 3 columns = 9 cards total. CRITICAL padding fix: The outer wrapper must have padding: 0 24px so the grid never touches the screen edges, and box-sizing: border-box so the padding no rompe el ancho. The scroll container inside must have padding: 16px 0 so the shadows on top and bottom no se corten. Scroll must ALWAYS start from the left: scroll-snap-type: x mandatory on container, scroll-snap-align: start on each card column, and JS on load: el.scrollLeft = 0. Outer wrapper: width: 100%, max-width: 100vw, overflow-x: hidden, box-sizing: border-box, padding: 0 24px. Scroll container: overflow-x: auto, padding: 16px 0, -webkit-overflow-scrolling: touch, no visible scrollbar. Each card: aspect-ratio: 2.3/1, width: 180px mobile / 220px desktop, border-radius: 12px, shows ONLY collection image (object-fit: cover), no text, no title, no overlay. Card shadow: box-shadow: 0 4px 16px rgba(0,0,0,0.10). Gap: 20px. Background transparent. Bug-free on iPhone SE, iPhone 14, iPad, and desktop.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-grid-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    padding: 0 24px;
+    background-color: transparent;
+  }
+
+  .ai-collection-grid-scroll-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: 180px;
+    gap: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 16px 0;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .ai-collection-grid-scroll-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-collection-grid-card-{{ ai_gen_id }} {
+    width: 180px;
+    aspect-ratio: 2.3 / 1;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+    scroll-snap-align: start;
+    position: relative;
+  }
+
+  .ai-collection-grid-card-{{ ai_gen_id }} a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+  }
+
+  .ai-collection-grid-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-collection-grid-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-collection-grid-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-collection-grid-scroll-{{ ai_gen_id }} {
+      grid-auto-columns: 220px;
+    }
+
+    .ai-collection-grid-card-{{ ai_gen_id }} {
+      width: 220px;
+    }
+  }
+{% endstyle %}
+
+<collection-grid-{{ ai_gen_id }} class="ai-collection-grid-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-collection-grid-scroll-{{ ai_gen_id }}">
+    {% for i in (1..9) %}
+      {% liquid
+        assign collection_key = 'collection_' | append: i
+        assign collection = block.settings[collection_key]
+      %}
+      <div class="ai-collection-grid-card-{{ ai_gen_id }}">
+        {% if collection != blank %}
+          <a href="{{ collection.url }}">
+            {% if collection.featured_image %}
+              <img
+                src="{{ collection.featured_image | image_url: width: 440 }}"
+                alt="{{ collection.featured_image.alt | escape }}"
+                width="440"
+                height="{{ 440 | divided_by: 2.3 | round }}"
+                loading="lazy"
+                class="ai-collection-grid-image-{{ ai_gen_id }}"
+              >
+            {% else %}
+              <div class="ai-collection-grid-placeholder-{{ ai_gen_id }}">
+                {{ 'collection-apparel-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </a>
+        {% else %}
+          <div class="ai-collection-grid-placeholder-{{ ai_gen_id }}">
+            {{ 'collection-apparel-1' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</collection-grid-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CollectionGrid{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.scrollContainer = this.querySelector('.ai-collection-grid-scroll-{{ ai_gen_id }}');
+        if (this.scrollContainer) {
+          this.scrollContainer.scrollLeft = 0;
+        }
+      }
+    }
+
+    customElements.define('collection-grid-{{ ai_gen_id }}', CollectionGrid{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection grid",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "collection",
+      "id": "collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "collection",
+      "id": "collection_7",
+      "label": "Collection 7"
+    },
+    {
+      "type": "collection",
+      "id": "collection_8",
+      "label": "Collection 8"
+    },
+    {
+      "type": "collection",
+      "id": "collection_9",
+      "label": "Collection 9"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection grid"
+    }
+  ]
+}
+{% endschema %}

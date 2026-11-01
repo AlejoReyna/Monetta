@@ -1,0 +1,251 @@
+{% doc %}
+  @prompt
+    Tengo un tema de Shopify OS 2.0 y quiero modificar un bloque de tipo "Texto" (rich text) para que muestre solo el primer párrafo por defecto, y el resto del contenido se oculte. Debajo del primer párrafo debe aparecer un botón de "Ver más" con una flecha apuntando hacia abajo (↓). Al hacer clic, se expande el contenido oculto con una animación suave, la flecha rota hacia arriba (↑) y el texto del botón cambia a "Ver menos". Al hacer clic de nuevo, se colapsa.
+    
+    El bloque usa un campo richtext en Liquid renderizado con {{ block.settings.text }}. El HTML resultante contiene etiquetas <p>. Necesito:
+    
+    El snippet Liquid modificado que envuelva los párrafos correctamente
+    El CSS para la animación de expansión y la flecha
+    El JavaScript vanilla para el toggle
+    El tema es OS 2.0, sin frameworks externos. El botón debe heredar los estilos del tema y ser accesible (usar aria-expanded).
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-expandable-text-{{ ai_gen_id }} {
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    display: block;
+  }
+
+  .ai-expandable-text__content-{{ ai_gen_id }} {
+    overflow: hidden;
+    transition: max-height {{ block.settings.animation_duration }}s ease;
+  }
+
+  .ai-expandable-text__content-{{ ai_gen_id }}.collapsed {
+    max-height: {{ block.settings.collapsed_height }}px;
+  }
+
+  .ai-expandable-text__content-{{ ai_gen_id }}.expanded {
+    max-height: 5000px;
+  }
+
+  .ai-expandable-text__toggle-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: {{ block.settings.button_font.family }}, {{ block.settings.button_font.fallback_families }};
+    font-size: {{ block.settings.button_font_size }}px;
+    color: {{ block.settings.button_color }};
+    text-decoration: underline;
+    transition: color 0.2s ease;
+  }
+
+  .ai-expandable-text__toggle-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.button_hover_color }};
+  }
+
+  .ai-expandable-text__arrow-{{ ai_gen_id }} {
+    display: inline-block;
+    transition: transform {{ block.settings.animation_duration }}s ease;
+    font-size: {{ block.settings.arrow_size }}px;
+    line-height: 1;
+  }
+
+  .ai-expandable-text__arrow-{{ ai_gen_id }}.rotated {
+    transform: rotate(180deg);
+  }
+
+  .ai-expandable-text__content-{{ ai_gen_id }} p {
+    margin-bottom: 1em;
+  }
+
+  .ai-expandable-text__content-{{ ai_gen_id }} p:last-child {
+    margin-bottom: 0;
+  }
+{% endstyle %}
+
+<expandable-text-{{ ai_gen_id }} class="ai-expandable-text-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-expandable-text__content-{{ ai_gen_id }} collapsed">
+    {{ block.settings.text }}
+  </div>
+  
+  <button 
+    class="ai-expandable-text__toggle-{{ ai_gen_id }}"
+    aria-expanded="false"
+    type="button"
+  >
+    <span class="ai-expandable-text__label-{{ ai_gen_id }}">{{ block.settings.show_more_text }}</span>
+    <span class="ai-expandable-text__arrow-{{ ai_gen_id }}">↓</span>
+  </button>
+</expandable-text-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ExpandableText{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.content = this.querySelector('.ai-expandable-text__content-{{ ai_gen_id }}');
+        this.button = this.querySelector('.ai-expandable-text__toggle-{{ ai_gen_id }}');
+        this.label = this.querySelector('.ai-expandable-text__label-{{ ai_gen_id }}');
+        this.arrow = this.querySelector('.ai-expandable-text__arrow-{{ ai_gen_id }}');
+        
+        this.showMoreText = '{{ block.settings.show_more_text }}';
+        this.showLessText = '{{ block.settings.show_less_text }}';
+        
+        this.isExpanded = false;
+        
+        this.button.addEventListener('click', () => this.toggle());
+        
+        this.checkIfNeedsToggle();
+      }
+
+      checkIfNeedsToggle() {
+        const collapsedHeight = {{ block.settings.collapsed_height }};
+        const actualHeight = this.content.scrollHeight;
+        
+        if (actualHeight <= collapsedHeight) {
+          this.button.style.display = 'none';
+        }
+      }
+
+      toggle() {
+        this.isExpanded = !this.isExpanded;
+        
+        if (this.isExpanded) {
+          this.content.classList.remove('collapsed');
+          this.content.classList.add('expanded');
+          this.label.textContent = this.showLessText;
+          this.arrow.textContent = '↑';
+          this.arrow.classList.add('rotated');
+          this.button.setAttribute('aria-expanded', 'true');
+        } else {
+          this.content.classList.remove('expanded');
+          this.content.classList.add('collapsed');
+          this.label.textContent = this.showMoreText;
+          this.arrow.textContent = '↓';
+          this.arrow.classList.remove('rotated');
+          this.button.setAttribute('aria-expanded', 'false');
+        }
+      }
+    }
+
+    customElements.define('expandable-text-{{ ai_gen_id }}', ExpandableText{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Expandable text",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Este es el primer párrafo que siempre será visible para el usuario.</p><p>Este es el segundo párrafo que estará oculto inicialmente y se mostrará al hacer clic en el botón.</p><p>Este es el tercer párrafo que también estará oculto y se revelará con la expansión del contenido.</p>"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Collapse settings"
+    },
+    {
+      "type": "range",
+      "id": "collapsed_height",
+      "label": "Collapsed height",
+      "min": 50,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "label": "Animation duration",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "unit": "s",
+      "default": 0.3
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "show_more_text",
+      "label": "Show more text",
+      "default": "Ver más"
+    },
+    {
+      "type": "text",
+      "id": "show_less_text",
+      "label": "Show less text",
+      "default": "Ver menos"
+    },
+    {
+      "type": "font_picker",
+      "id": "button_font",
+      "label": "Button font",
+      "default": "serif"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Button font size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_color",
+      "label": "Button hover color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "arrow_size",
+      "label": "Arrow size",
+      "min": 12,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Expandable text"
+    }
+  ]
+}
+{% endschema %}

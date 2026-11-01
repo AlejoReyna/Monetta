@@ -1,0 +1,12 @@
+HTTP/2 200 
+x-request-id: req_1d358336-c1c9-4f2f-bb8d-4780353011d1
+content-security-policy: frame-ancestors https://monetta-staging.myshopify.com https://admin.shopify.com
+cache-control: no-store
+content-type: text/html; charset=utf-8
+content-length: 8076
+etag: W/"1f8c-SFQOJjPO6iRur8bbhKxXtkHucs8"
+date: Thu, 29 Oct 2026 21:02:13 GMT
+server: Fly/366e4bf88 (2026-10-27)
+via: 2 fly.io
+fly-request-id: 01M64QGV2RRVXG68D7JFCDTRJV-dfw
+

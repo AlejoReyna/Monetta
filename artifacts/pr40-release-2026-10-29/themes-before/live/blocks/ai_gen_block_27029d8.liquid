@@ -1,0 +1,1185 @@
+{% doc %}
+  @prompt
+    Content (30%) LEFT with padding, Premium Carousel (70%) RIGHT.
+    3 images. Full customization control over all visual properties.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% assign carousel_keys = '' %}
+{% if block.settings.image_1 != blank %}{% assign carousel_keys = carousel_keys | append: 'image_1|' %}{% endif %}
+{% if block.settings.image_2 != blank %}{% assign carousel_keys = carousel_keys | append: 'image_2|' %}{% endif %}
+{% if block.settings.image_3 != blank %}{% assign carousel_keys = carousel_keys | append: 'image_3|' %}{% endif %}
+{% assign carousel_images = carousel_keys | split: '|' | compact %}
+{% assign slide_count = carousel_images | size %}
+
+{% style %}
+  .ai-iwt-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding-top: {{ block.settings.section_padding_top }}px;
+    padding-bottom: {{ block.settings.section_padding_bottom }}px;
+  }
+
+  .ai-iwt-row-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    align-items: {{ block.settings.vertical_alignment }};
+    width: 100%;
+    min-height: {{ block.settings.section_min_height }}px;
+  }
+
+  /* ── CONTENT COLUMN ── */
+  .ai-iwt-content-{{ ai_gen_id }} {
+    width: {{ block.settings.content_width }}%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: {{ block.settings.content_alignment }};
+    justify-content: center;
+    padding-top: {{ block.settings.content_padding_top }}px;
+    padding-bottom: {{ block.settings.content_padding_bottom }}px;
+    padding-left: {{ block.settings.content_padding_left }}px;
+    padding-right: {{ block.settings.content_padding_right }}px;
+    text-align: {{ block.settings.text_alignment }};
+    box-sizing: border-box;
+  }
+
+  /* ── CAROUSEL COLUMN ── */
+  .ai-iwt-carousel-col-{{ ai_gen_id }} {
+    width: {{ 100 | minus: block.settings.content_width }}%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: {{ block.settings.carousel_padding_v }}px;
+    padding-bottom: {{ block.settings.carousel_padding_v }}px;
+    padding-left: {{ block.settings.carousel_padding_h }}px;
+    padding-right: {{ block.settings.carousel_padding_h }}px;
+    box-sizing: border-box;
+  }
+
+  /* ── VIEWPORT ── */
+  .ai-iwt-viewport-{{ ai_gen_id }} {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── TRACK ── */
+  .ai-iwt-track-{{ ai_gen_id }} {
+    display: flex;
+    align-items: stretch;
+    transition: transform {{ block.settings.transition_speed }}ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+  }
+
+  /* ── SLIDE ── */
+  .ai-iwt-slide-{{ ai_gen_id }} {
+    min-width: 100%;
+    max-width: 100%;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    padding: {{ block.settings.slide_padding }}px;
+    transition: opacity {{ block.settings.transition_speed }}ms ease;
+    opacity: {{ block.settings.inactive_opacity | divided_by: 100.0 }};
+  }
+
+  .ai-iwt-slide-{{ ai_gen_id }}.active {
+    opacity: 1;
+  }
+
+  /* ── CARD ── */
+  .ai-iwt-card-{{ ai_gen_id }} {
+    width: 100%;
+    border-radius: {{ block.settings.card_border_radius }}px;
+    overflow: hidden;
+    background-color: {{ block.settings.card_bg_color }};
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: box-shadow {{ block.settings.transition_speed }}ms ease,
+                transform {{ block.settings.transition_speed }}ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: scale({{ block.settings.inactive_scale | divided_by: 100.0 }});
+  }
+
+  .ai-iwt-slide-{{ ai_gen_id }}.active .ai-iwt-card-{{ ai_gen_id }} {
+    box-shadow: {{ block.settings.shadow_x }}px {{ block.settings.shadow_y }}px {{ block.settings.shadow_blur }}px {{ block.settings.shadow_spread }}px {{ block.settings.shadow_color }};
+    transform: scale(1);
+  }
+
+  /* ── IMAGE ── */
+  .ai-iwt-img-wrap-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: {{ block.settings.card_aspect_ratio }};
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-iwt-img-wrap-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: {{ block.settings.image_fit }};
+    object-position: {{ block.settings.image_position }};
+    display: block;
+  }
+
+  /* ── PLACEHOLDER ── */
+  .ai-iwt-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 9/16;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: {{ block.settings.card_border_radius }}px;
+  }
+  .ai-iwt-placeholder-{{ ai_gen_id }} svg { width: 30%; opacity: 0.15; }
+
+  /* ── DOTS ── */
+  .ai-iwt-dots-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    gap: {{ block.settings.dot_gap }}px;
+    margin-top: {{ block.settings.dot_margin_top }}px;
+  }
+
+  .ai-iwt-dot-{{ ai_gen_id }} {
+    height: {{ block.settings.dot_size }}px;
+    width: {{ block.settings.dot_size }}px;
+    border-radius: 100px;
+    background: {{ block.settings.dot_color }};
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: width 0.35s ease, background 0.35s ease;
+  }
+
+  .ai-iwt-dot-{{ ai_gen_id }}.active {
+    width: {{ block.settings.dot_active_width }}px;
+    background: {{ block.settings.dot_active_color }};
+  }
+
+  /* ── SUBHEADING ── */
+  .ai-iwt-subheading-{{ ai_gen_id }} {
+    font-family: {{ block.settings.subheading_font.family }}, {{ block.settings.subheading_font.fallback_families }};
+    font-weight: {{ block.settings.subheading_font.weight }};
+    font-size: {{ block.settings.subheading_size }}px;
+    color: {{ block.settings.subheading_color }};
+    text-transform: uppercase;
+    letter-spacing: {{ block.settings.subheading_letter_spacing }}px;
+    margin: 0 0 {{ block.settings.subheading_margin_bottom }}px 0;
+    line-height: 1.4;
+  }
+
+  /* ── HEADING ── */
+  .ai-iwt-heading-{{ ai_gen_id }} {
+    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-weight: {{ block.settings.heading_font.weight }};
+    font-size: {{ block.settings.heading_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 {{ block.settings.heading_margin_bottom }}px 0;
+    line-height: {{ block.settings.heading_line_height | divided_by: 10.0 }};
+    letter-spacing: {{ block.settings.heading_letter_spacing }}px;
+  }
+
+  /* ── BODY ── */
+  .ai-iwt-body-{{ ai_gen_id }} {
+    font-size: {{ block.settings.body_size }}px;
+    color: {{ block.settings.body_color }};
+    margin: 0 0 {{ block.settings.body_margin_bottom }}px 0;
+    line-height: {{ block.settings.body_line_height | divided_by: 10.0 }};
+    max-width: 100%;
+  }
+
+  /* ── BUTTONS ── */
+  .ai-iwt-buttons-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.button_gap }}px;
+    align-items: {{ block.settings.content_alignment }};
+    width: 100%;
+  }
+
+  .ai-iwt-btn-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: {{ block.settings.btn_padding_v }}px {{ block.settings.btn_padding_h }}px;
+    background-color: {{ block.settings.btn_bg }};
+    color: {{ block.settings.btn_color }};
+    border: {{ block.settings.btn_border_width }}px solid {{ block.settings.btn_border_color }};
+    border-radius: {{ block.settings.btn_border_radius }}px;
+    text-decoration: none;
+    font-size: {{ block.settings.btn_font_size }}px;
+    font-weight: {{ block.settings.btn_font_weight }};
+    letter-spacing: {{ block.settings.btn_letter_spacing }}px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .ai-iwt-btn-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.btn_hover_bg }};
+    color: {{ block.settings.btn_hover_color }};
+    border-color: {{ block.settings.btn_hover_border_color }};
+  }
+
+  /* ── DIVIDER between text and buttons ── */
+  .ai-iwt-divider-{{ ai_gen_id }} {
+    width: {{ block.settings.divider_width }}%;
+    height: {{ block.settings.divider_height }}px;
+    background-color: {{ block.settings.divider_color }};
+    margin: {{ block.settings.divider_margin }}px 0;
+    {% unless block.settings.show_divider %}display: none;{% endunless %}
+  }
+
+  /* ── MOBILE ── */
+  @media screen and (max-width: 749px) {
+    {% if block.settings.stack_on_mobile %}
+      .ai-iwt-row-{{ ai_gen_id }} {
+        flex-direction: column;
+      }
+      .ai-iwt-content-{{ ai_gen_id }},
+      .ai-iwt-carousel-col-{{ ai_gen_id }} {
+        width: 100%;
+      }
+      .ai-iwt-content-{{ ai_gen_id }} {
+        padding-left: {{ block.settings.mobile_content_padding_h }}px;
+        padding-right: {{ block.settings.mobile_content_padding_h }}px;
+        padding-top: {{ block.settings.mobile_content_padding_v }}px;
+        padding-bottom: {{ block.settings.mobile_content_padding_v }}px;
+        align-items: center;
+        text-align: center;
+      }
+      .ai-iwt-buttons-{{ ai_gen_id }} {
+        align-items: center;
+      }
+    {% endif %}
+    .ai-iwt-heading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.heading_size | times: block.settings.mobile_heading_scale | divided_by: 100.0 }}px;
+    }
+    .ai-iwt-subheading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.subheading_size | times: block.settings.mobile_heading_scale | divided_by: 100.0 }}px;
+    }
+    .ai-iwt-body-{{ ai_gen_id }} {
+      font-size: {{ block.settings.body_size | times: block.settings.mobile_heading_scale | divided_by: 100.0 }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-iwt-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-iwt-row-{{ ai_gen_id }}">
+
+    <!-- LEFT: Content -->
+    <div class="ai-iwt-content-{{ ai_gen_id }}">
+      {% if block.settings.subheading != blank %}
+        <div class="ai-iwt-subheading-{{ ai_gen_id }}">{{ block.settings.subheading }}</div>
+      {% endif %}
+
+      {% if block.settings.heading != blank %}
+        <h2 class="ai-iwt-heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h2>
+      {% endif %}
+
+      {% if block.settings.body_text != blank %}
+        <div class="ai-iwt-body-{{ ai_gen_id }}">{{ block.settings.body_text }}</div>
+      {% endif %}
+
+      {% if block.settings.show_divider %}
+        <div class="ai-iwt-divider-{{ ai_gen_id }}"></div>
+      {% endif %}
+
+      {% if block.settings.button_1_text != blank or block.settings.button_2_text != blank %}
+        <div class="ai-iwt-buttons-{{ ai_gen_id }}">
+          {% if block.settings.button_1_text != blank %}
+            <a href="{{ block.settings.button_1_link }}" class="ai-iwt-btn-{{ ai_gen_id }}">{{ block.settings.button_1_text }}</a>
+          {% endif %}
+          {% if block.settings.button_2_text != blank %}
+            <a href="{{ block.settings.button_2_link }}" class="ai-iwt-btn-{{ ai_gen_id }}">{{ block.settings.button_2_text }}</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- RIGHT: Carousel -->
+    <div class="ai-iwt-carousel-col-{{ ai_gen_id }}">
+      {% if slide_count > 0 %}
+        <div class="ai-iwt-viewport-{{ ai_gen_id }}" id="vp-{{ ai_gen_id }}">
+          <div class="ai-iwt-track-{{ ai_gen_id }}" id="track-{{ ai_gen_id }}">
+            {% for key in carousel_images %}
+              <div class="ai-iwt-slide-{{ ai_gen_id }}{% if forloop.first %} active{% endif %}" data-index="{{ forloop.index0 }}">
+                <div class="ai-iwt-card-{{ ai_gen_id }}">
+                  <div class="ai-iwt-img-wrap-{{ ai_gen_id }}">
+                    <img
+                      src="{{ block.settings[key] | image_url: width: 1200 }}"
+                      alt="{{ block.settings[key].alt | escape }}"
+                      loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                    >
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        {% if slide_count > 1 %}
+          <div class="ai-iwt-dots-{{ ai_gen_id }}" id="dots-{{ ai_gen_id }}">
+            {% for key in carousel_images %}
+              <button
+                class="ai-iwt-dot-{{ ai_gen_id }}{% if forloop.first %} active{% endif %}"
+                data-index="{{ forloop.index0 }}"
+                aria-label="Slide {{ forloop.index }}"
+              ></button>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+      {% else %}
+        <div class="ai-iwt-placeholder-{{ ai_gen_id }}">
+          {{ 'image' | placeholder_svg_tag }}
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  var id = '{{ ai_gen_id }}';
+  var autoMs = {{ block.settings.carousel_interval }};
+  var track  = document.getElementById('track-' + id);
+  if (!track) return;
+
+  var slides  = Array.prototype.slice.call(track.querySelectorAll('.ai-iwt-slide-' + id));
+  var dots    = Array.prototype.slice.call(document.querySelectorAll('.ai-iwt-dot-' + id));
+  var total   = slides.length;
+  var current = 0;
+  var timer   = null;
+
+  function goTo(index) {
+    slides[current].classList.remove('active');
+    if (dots[current]) dots[current].classList.remove('active');
+    current = (index + total) % total;
+    var vp = document.getElementById('vp-' + id);
+    track.style.transform = 'translateX(-' + (current * vp.offsetWidth) + 'px)';
+    slides[current].classList.add('active');
+    if (dots[current]) dots[current].classList.add('active');
+  }
+
+  function startAuto() {
+    if (total < 2) return;
+    timer = setInterval(function() { goTo(current + 1); }, autoMs);
+  }
+  function stopAuto() { clearInterval(timer); }
+
+  var vp = document.getElementById('vp-' + id);
+  vp.addEventListener('mouseenter', stopAuto);
+  vp.addEventListener('mouseleave', startAuto);
+
+  dots.forEach(function(d) {
+    d.addEventListener('click', function() {
+      stopAuto(); goTo(parseInt(this.dataset.index)); startAuto();
+    });
+  });
+
+  var sx = 0;
+  track.addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', function(e) {
+    var diff = sx - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) { stopAuto(); goTo(diff > 0 ? current + 1 : current - 1); startAuto(); }
+  }, { passive: true });
+
+  window.addEventListener('resize', function() { goTo(current); });
+  startAuto();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Image with text",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "── SECTION ──"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "section_min_height",
+      "label": "Min height",
+      "min": 200,
+      "max": 900,
+      "step": 50,
+      "unit": "px",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Section padding top",
+      "min": 0,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Section padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "vertical_alignment",
+      "label": "Vertical alignment",
+      "options": [
+        { "value": "flex-start", "label": "Top" },
+        { "value": "center",     "label": "Center" },
+        { "value": "flex-end",   "label": "Bottom" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "stack_on_mobile",
+      "label": "Stack on mobile",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "── CONTENT COLUMN ──"
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Content column width",
+      "min": 20,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "Content alignment",
+      "options": [
+        { "value": "flex-start", "label": "Left" },
+        { "value": "center",     "label": "Center" },
+        { "value": "flex-end",   "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left",   "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right",  "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "content_padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "content_padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "content_padding_left",
+      "label": "Padding left",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "content_padding_right",
+      "label": "Padding right",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "── MOBILE CONTENT ──"
+    },
+    {
+      "type": "range",
+      "id": "mobile_content_padding_h",
+      "label": "Mobile horizontal padding",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "mobile_content_padding_v",
+      "label": "Mobile vertical padding",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "mobile_heading_scale",
+      "label": "Mobile font scale",
+      "min": 60,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "── SUBHEADING ──"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading text",
+      "default": "SOBRE MONETTA"
+    },
+    {
+      "type": "font_picker",
+      "id": "subheading_font",
+      "label": "Font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "range",
+      "id": "subheading_size",
+      "label": "Font size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 11
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Color",
+      "default": "#999999"
+    },
+    {
+      "type": "range",
+      "id": "subheading_letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "subheading_margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "── HEADING ──"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading text",
+      "default": "TEXTO"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Font",
+      "default": "playfair_display_n4"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Font size",
+      "min": 16,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "label": "Line height (×10)",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "heading_letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 6,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "heading_margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "── BODY TEXT ──"
+    },
+    {
+      "type": "textarea",
+      "id": "body_text",
+      "label": "Body text",
+      "default": "Somos una marca comprometida con la excelencia y la autenticidad. Cada producto que creamos cuenta una historia de pasión, dedicación y atención al detalle."
+    },
+    {
+      "type": "range",
+      "id": "body_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "color",
+      "id": "body_color",
+      "label": "Color",
+      "default": "#555555"
+    },
+    {
+      "type": "range",
+      "id": "body_line_height",
+      "label": "Line height (×10)",
+      "min": 10,
+      "max": 22,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "body_margin_bottom",
+      "label": "Margin bottom",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 25
+    },
+    {
+      "type": "header",
+      "content": "── DIVIDER ──"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_divider",
+      "label": "Show divider",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "divider_width",
+      "label": "Width",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "divider_height",
+      "label": "Height",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Color",
+      "default": "#DDDDDD"
+    },
+    {
+      "type": "range",
+      "id": "divider_margin",
+      "label": "Vertical margin",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "── BUTTON 1 ──"
+    },
+    {
+      "type": "text",
+      "id": "button_1_text",
+      "label": "Text",
+      "default": "MAS INFORMACIÓN"
+    },
+    {
+      "type": "url",
+      "id": "button_1_link",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "── BUTTON 2 ──"
+    },
+    {
+      "type": "text",
+      "id": "button_2_text",
+      "label": "Text",
+      "default": "GRUPOS Y REFERENCIAS"
+    },
+    {
+      "type": "url",
+      "id": "button_2_link",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "── BUTTON STYLE ──"
+    },
+    {
+      "type": "range",
+      "id": "button_gap",
+      "label": "Gap between buttons",
+      "min": 5,
+      "max": 30,
+      "step": 5,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "btn_padding_v",
+      "label": "Vertical padding",
+      "min": 6,
+      "max": 28,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "btn_padding_h",
+      "label": "Horizontal padding",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "btn_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "btn_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "btn_font_size",
+      "label": "Font size",
+      "min": 9,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 11
+    },
+    {
+      "type": "select",
+      "id": "btn_font_weight",
+      "label": "Font weight",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "range",
+      "id": "btn_letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "btn_bg",
+      "label": "Background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "btn_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "btn_border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_bg",
+      "label": "Hover background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_color",
+      "label": "Hover text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_border_color",
+      "label": "Hover border color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "── CAROUSEL ──"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Image 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Image 3"
+    },
+    {
+      "type": "select",
+      "id": "card_aspect_ratio",
+      "label": "Aspect ratio",
+      "options": [
+        { "value": "16/9", "label": "16:9 — Landscape" },
+        { "value": "4/3",  "label": "4:3 — Standard" },
+        { "value": "1/1",  "label": "1:1 — Square" },
+        { "value": "3/4",  "label": "3:4 — Portrait" },
+        { "value": "9/16", "label": "9:16 — Vertical" }
+      ],
+      "default": "9/16"
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "Image fit",
+      "options": [
+        { "value": "cover",   "label": "Cover (fill)" },
+        { "value": "contain", "label": "Contain (full image)" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image focus",
+      "options": [
+        { "value": "top center",    "label": "Top" },
+        { "value": "center center", "label": "Center" },
+        { "value": "bottom center", "label": "Bottom" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "range",
+      "id": "carousel_padding_v",
+      "label": "Carousel vertical padding",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "carousel_padding_h",
+      "label": "Carousel horizontal padding",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "slide_padding",
+      "label": "Slide inner padding",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "carousel_interval",
+      "label": "Auto-play interval",
+      "min": 2000,
+      "max": 9000,
+      "step": 500,
+      "unit": "ms",
+      "default": 4000
+    },
+    {
+      "type": "range",
+      "id": "transition_speed",
+      "label": "Transition speed",
+      "min": 300,
+      "max": 1000,
+      "step": 50,
+      "unit": "ms",
+      "default": 650
+    },
+    {
+      "type": "range",
+      "id": "inactive_opacity",
+      "label": "Inactive slide opacity",
+      "min": 10,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 35
+    },
+    {
+      "type": "range",
+      "id": "inactive_scale",
+      "label": "Inactive slide scale",
+      "min": 80,
+      "max": 99,
+      "step": 1,
+      "unit": "%",
+      "default": 95
+    },
+    {
+      "type": "header",
+      "content": "── CARD STYLE ──"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Card background",
+      "default": "#F5F5F5"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "── CARD SHADOW ──"
+    },
+    {
+      "type": "color",
+      "id": "shadow_color",
+      "label": "Shadow color",
+      "default": "#00000030"
+    },
+    {
+      "type": "range",
+      "id": "shadow_x",
+      "label": "Horizontal offset",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "shadow_y",
+      "label": "Vertical offset",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "shadow_blur",
+      "label": "Blur radius",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "shadow_spread",
+      "label": "Spread",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "── DOTS ──"
+    },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "label": "Dot size",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "dot_active_width",
+      "label": "Active dot width",
+      "min": 12,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "dot_gap",
+      "label": "Gap between dots",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "dot_margin_top",
+      "label": "Margin top",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "Dot color",
+      "default": "#CCCCCC"
+    },
+    {
+      "type": "color",
+      "id": "dot_active_color",
+      "label": "Active dot color",
+      "default": "#111111"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image with text"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,1120 @@
+/* Ported from design-prototype/src/styles/pages.css; prototype-only surfaces dropped (tools/style-guideline-theme/port-css.mjs). */
+/* Page compositions. */
+
+:where(.mw) main {
+  display: block;
+  min-height: 60vh;
+}
+
+:where(.mw) main:focus {
+  outline: none;
+}
+
+.page-head {
+  display: grid;
+  gap: 6px;
+  padding-top: 16px;
+}
+
+.page-head__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+
+.page-head__count {
+  font-size: 14px;
+  color: var(--color-ink-muted);
+}
+
+.page-intro {
+  max-width: 62ch;
+  margin-top: 6px;
+}
+
+@media (min-width: 1024px) {
+  .page-head {
+    padding-top: 24px;
+  }
+}
+
+/* Phones: the pinned page bar replaces breadcrumbs and the title row. The wrapper
+   gives up its box so the bar's sticky boundary is the whole page, not the header. */
+@media (max-width: 767.98px) {
+  .page-head.page-head--bar {
+    display: contents;
+  }
+
+  .page-head--bar > .breadcrumbs {
+    display: none;
+  }
+}
+
+/* ================================================================ Home */
+/* HomeEditorialBanner: light photograph, search pill on its lower edge. */
+.home-hero {
+  position: relative;
+  height: clamp(220px, 30vh, 280px);
+  overflow: hidden;
+  background: var(--color-surface-deep);
+}
+
+.home-hero__photo {
+  position: absolute;
+  inset: 0;
+}
+
+.home-hero__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 72.5%;
+}
+
+.home-hero__search {
+  position: absolute;
+  left: var(--edge-l);
+  right: var(--edge-r);
+  bottom: 12px;
+}
+
+.home-hero__panel {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .home-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 16px;
+    height: auto;
+    max-width: var(--content-max);
+    margin: 16px auto 0;
+    padding-inline: var(--edge-l) var(--edge-r);
+    overflow: visible;
+    background: none;
+  }
+
+  .home-hero__photo {
+    position: relative;
+    height: clamp(340px, 42vw, 460px);
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    background: var(--color-surface-deep);
+  }
+
+  .home-hero__photo img {
+    object-position: 50% 64%;
+  }
+
+  .home-hero__search {
+    display: none;
+  }
+
+  .home-hero__panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+    padding: 32px;
+    border-radius: var(--radius-card);
+    background: var(--color-surface-warm);
+  }
+
+  .home-hero__panel .body-copy {
+    max-width: 40ch;
+  }
+
+  .home-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .home-hero__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin-top: 8px;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    color: var(--color-ink-muted);
+  }
+
+  .home-hero__facts li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .home-hero__facts .icon {
+    color: var(--color-gold-text);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .home-hero__panel {
+    gap: 12px;
+    padding: 28px 24px;
+  }
+
+  .home-hero__panel .display--hero {
+    font-size: 28px;
+  }
+
+  .home-hero__panel .body-copy {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-hero {
+    grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
+    gap: 24px;
+    margin-top: 24px;
+  }
+
+  .home-hero__panel {
+    padding: 48px;
+  }
+}
+
+/* Compra por estilo — _StyleTile: contained silhouette, centred label */
+.style-tile {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  color: var(--color-ink);
+  font-size: 13px;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  border-radius: var(--radius-card);
+}
+
+.style-tile__art {
+  width: 100%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  transition: transform var(--dur-snap) var(--ease);
+}
+
+.style-tile__art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (hover: hover) {
+  .style-tile:hover .style-tile__art {
+    transform: translateY(-3px);
+  }
+}
+
+.style-tile__circle {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1px solid var(--color-hairline-strong);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  transition: background-color var(--dur-snap) var(--ease);
+}
+
+.style-tile--all:hover .style-tile__circle {
+  background: var(--color-surface-deep);
+}
+
+.style-grid {
+  --rail-item: clamp(112px, 32vw, 172px);
+}
+
+@media (min-width: 1024px) {
+  .style-grid .rail__track {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: visible;
+    gap: 24px;
+  }
+
+  .style-tile {
+    font-size: 15px;
+  }
+
+  .style-tile__art {
+    padding: 8px 16%;
+    border-radius: var(--radius-card);
+    background: var(--color-canvas);
+  }
+}
+
+/* Colecciones — _CollectionEditorialCard: cover photo, legibility scrim, serif title */
+.collection-card {
+  position: relative;
+  display: block;
+  aspect-ratio: 0.7;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--color-surface-deep);
+  color: var(--color-on-dark);
+  text-decoration: none;
+  transition: transform var(--dur-snap) var(--ease);
+}
+
+.collection-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.collection-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.03) 64%, rgba(0, 0, 0, 0.72) 100%);
+}
+
+.collection-card__label {
+  position: absolute;
+  left: 20px;
+  right: 16px;
+  bottom: 18px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.collection-card__title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.012em;
+}
+
+@media (hover: hover) {
+  .collection-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.collections-rail {
+  --rail-item: clamp(260px, 73vw, 460px);
+}
+
+@media (min-width: 768px) {
+  .collections-rail .rail__track {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-inline: 0;
+    padding-inline: 0;
+    overflow: visible;
+  }
+
+  .collections-rail .collection-card {
+    aspect-ratio: 4 / 5;
+  }
+}
+
+@media (min-width: 1024px) {
+  .collection-card__title {
+    font-size: 30px;
+  }
+
+  .collection-card__label {
+    left: 28px;
+    right: 24px;
+    bottom: 26px;
+  }
+}
+
+/* Marcas — gold logos cropped to their artwork bounds */
+
+/* Más sobre Monetta — _AboutMonettaSection */
+
+@media (min-width: 768px) {
+
+  /* The artwork is an oval cut-out on white: show it whole, not cropped. */
+}
+
+/* Nuestras redes — _SocialTile */
+
+/* Experiencias de clientes — Loox stand-in, labelled as a sample */
+
+/* ===================================================== Collection page */
+.collection-shortcuts {
+  margin-top: 16px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-hairline);
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.toolbar__start,
+.toolbar__end {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.toolbar__count {
+  font-size: 14px;
+  color: var(--color-ink-muted);
+  white-space: nowrap;
+}
+
+.toolbar .select {
+  min-height: 44px;
+  font-size: 14px;
+}
+
+.toolbar__sort {
+  display: none;
+}
+
+.filters-button {
+  gap: 8px;
+}
+
+.filters-button__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  font-size: 12px;
+}
+
+.active-chips {
+  margin-top: 14px;
+}
+
+.collection-layout {
+  display: grid;
+  gap: 32px;
+  margin-top: 20px;
+}
+
+.filter-sidebar {
+  display: none;
+}
+
+.results-status {
+  min-height: 1px;
+}
+
+.load-more {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin-top: 32px;
+  text-align: center;
+}
+
+.load-more__progress {
+  width: min(240px, 60%);
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-hairline);
+  overflow: hidden;
+}
+
+.load-more__progress span {
+  display: block;
+  height: 100%;
+  background: var(--color-ink);
+}
+
+@media (min-width: 768px) {
+  .toolbar__sort {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--color-ink-muted);
+  }
+}
+
+/* Phones: filters and sort are the page bar's icon (collection_screen.dart keeps them
+   in the bar too), so the toolbar row, breadcrumbs and extra spacing give way and the
+   first row of products follows the bar and the style shortcuts. */
+@media (max-width: 767.98px) {
+  .listing .toolbar {
+    display: none;
+  }
+
+  .collection-shortcuts {
+    margin-top: 0;
+  }
+
+  .collection-layout {
+    margin-top: 12px;
+  }
+
+  .listing--search .breadcrumbs {
+    display: none;
+  }
+
+  /* search_screen.dart _Results: the query is an Inter heading with the count at its right. */
+  .listing--search .page-head .display--page {
+    font-family: var(--font-sans);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.006em;
+    line-height: 1.25;
+  }
+
+  .listing--search .page-head__count {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .collection-layout--filters {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 40px;
+  }
+
+  .collection-layout--filters .filter-sidebar {
+    display: block;
+    position: sticky;
+    top: calc(var(--strip-h) + var(--header-h) + 45px + 16px);
+    align-self: start;
+    max-height: calc(100vh - var(--strip-h) - var(--header-h) - 45px - 32px);
+    overflow: auto;
+    padding-right: 4px;
+  }
+
+  [data-listing] .filters-button {
+    display: none;
+  }
+}
+
+/* ========================================================= Product page */
+.product-page {
+  padding-bottom: 8px;
+}
+
+.product-breadcrumbs {
+  display: none;
+}
+
+.gallery {
+  position: relative;
+}
+
+.gallery__main {
+  position: relative;
+  background: var(--color-canvas);
+}
+
+.gallery__track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.gallery__track::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery__slide {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  scroll-snap-align: start;
+  background: var(--color-surface);
+}
+
+.gallery__slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.gallery__tools {
+  position: absolute;
+  top: 8px;
+  right: max(8px, var(--safe-right));
+  display: grid;
+  gap: 8px;
+}
+
+.round-button {
+  display: grid;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.round-button__circle {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-canvas);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  color: var(--color-ink);
+}
+
+.round-button[aria-pressed='true'] .round-button__circle {
+  color: var(--color-gold-text);
+}
+
+.round-button:focus-visible {
+  outline: none;
+}
+
+.round-button:focus-visible .round-button__circle {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.gallery__seal {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.gallery__seal .badge {
+  font-size: 11px;
+  padding: 8px 16px;
+}
+
+.gallery__rules {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.gallery__rules span {
+  width: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(17, 17, 17, 0.25);
+  transition: width var(--dur-snap) var(--ease);
+}
+
+.gallery__rules span[data-active='true'] {
+  width: 22px;
+  background: var(--color-ink);
+}
+
+.gallery__thumbs {
+  display: flex;
+  gap: 8px;
+  padding: 8px var(--edge-r) 12px var(--edge-l);
+  scroll-padding-inline: var(--edge-l) var(--edge-r);
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--color-canvas);
+}
+
+.gallery__thumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.thumb {
+  flex: none;
+  width: 56px;
+  height: 68px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-tile);
+  background: var(--color-surface);
+}
+
+.thumb[aria-current='true'] {
+  border: 1.5px solid var(--color-ink);
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.product-panel {
+  display: grid;
+  gap: 0;
+  padding: 24px var(--edge-r) 0 var(--edge-l);
+}
+
+.product-panel__brand {
+  color: var(--color-ink-muted);
+}
+
+.product-panel__name {
+  margin-top: 12px;
+  font-family: var(--font-serif);
+  font-size: var(--type-product-name-size);
+  font-weight: 400;
+  line-height: var(--type-product-name-lh);
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.product-panel__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-top: 16px;
+}
+
+.product-panel__price .price {
+  font-size: 20px;
+}
+
+.product-panel__price .price-compare {
+  font-size: 16px;
+}
+
+.product-panel__tax {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.availability {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.availability__dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: #2f6b4f;
+}
+
+.availability--soldout .availability__dot {
+  background: var(--color-sale);
+}
+
+.availability--pedido .availability__dot {
+  background: var(--color-gold);
+}
+
+.product-panel__options {
+  margin-top: 24px;
+}
+
+.product-panel__buy {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.buy-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.buy-row .stepper {
+  flex: none;
+}
+
+.buy-row .btn {
+  flex: 1;
+  padding-inline: 16px;
+  letter-spacing: 0.03em;
+}
+
+.buy-inline {
+  display: none;
+}
+
+.form-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--color-sale);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.form-error[hidden] {
+  display: none;
+}
+
+.form-error .icon {
+  flex: none;
+  margin-top: 1px;
+}
+
+.choice-hint {
+  font-size: 14px;
+  color: var(--color-ink-muted);
+}
+
+.other-ways {
+  display: grid;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.other-ways__title {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.other-ways__apartado {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: var(--radius-control);
+  border: 1px dashed var(--color-hairline-strong);
+  background: var(--color-canvas);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.other-ways__apartado strong {
+  font-size: 15px;
+}
+
+.service-rows {
+  display: grid;
+  gap: 10px;
+  margin: 24px 0 8px;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--color-hairline);
+  list-style: none;
+}
+
+.service-rows li {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.service-rows .icon {
+  flex: none;
+  color: var(--color-ink);
+}
+
+.product-panel__accordions {
+  margin-top: 12px;
+}
+
+.whatsapp-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap);
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (min-width: 768px) {
+  .product-breadcrumbs {
+    display: block;
+    padding-top: 12px;
+  }
+
+  .product-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 32px;
+    max-width: var(--content-max);
+    margin: 12px auto 0;
+    padding-inline: var(--edge-l) var(--edge-r);
+  }
+
+  .gallery__slide {
+    border-radius: var(--radius-card);
+  }
+
+  .gallery__track {
+    border-radius: var(--radius-card);
+  }
+
+  .gallery__thumbs {
+    padding: 12px 0 0;
+  }
+
+  .product-panel {
+    padding: 4px 0 0;
+    align-self: start;
+  }
+
+  .product-panel__name {
+    font-size: 26px;
+  }
+
+  .product-panel__price .price {
+    font-size: 22px;
+  }
+
+  .buy-inline {
+    display: flex;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-layout {
+    grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
+    gap: 48px;
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  .gallery__thumbs {
+    order: -1;
+    flex-direction: column;
+    max-height: calc(100vh - var(--strip-h) - var(--header-h) - 45px - 48px);
+    padding: 0;
+    overflow-y: auto;
+  }
+
+  .thumb {
+    width: 72px;
+    height: 88px;
+  }
+
+  .gallery__main {
+    width: 100%;
+    max-width: calc((100vh - var(--strip-h) - var(--header-h) - 45px - 90px) * 0.8);
+    margin: 0 auto;
+  }
+
+  .product-panel {
+    position: sticky;
+    top: calc(var(--strip-h) + var(--header-h) + 45px + 24px);
+    max-height: none;
+  }
+
+  .product-panel__name {
+    font-size: 30px;
+  }
+
+  .product-panel__price .price {
+    font-size: 24px;
+  }
+}
+
+/* ========================================================== Search page */
+.search-page__field {
+  margin-top: 12px;
+}
+
+.search-page__field .search-field {
+  height: var(--control);
+}
+
+/* Phones: the field sits right under the bar and a full-width hairline closes it,
+   like the app's divider under the search field. */
+@media (max-width: 767.98px) {
+  .search-page__field {
+    margin: 0 calc(-1 * var(--edge-r)) 0 calc(-1 * var(--edge-l));
+    padding: 12px var(--edge-r) 12px var(--edge-l);
+    border-bottom: 1px solid var(--color-hairline);
+  }
+}
+
+/* ============================================================ Cart page */
+.cart-layout {
+  display: grid;
+  gap: 32px;
+  margin-top: 16px;
+}
+
+@media (min-width: 1024px) {
+  .cart-layout {
+    grid-template-columns: minmax(0, 7fr) minmax(320px, 4fr);
+    gap: 48px;
+    align-items: start;
+  }
+
+  .cart-layout .summary {
+    position: sticky;
+    top: calc(var(--strip-h) + var(--header-h) + 45px + 24px);
+  }
+
+  .cart-line {
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 20px;
+  }
+}
+
+.cart-drawer__lines {
+  padding: 0 20px;
+}
+
+.cart-drawer__empty {
+  padding: 24px 20px;
+}
+
+.cart-drawer__summary {
+  display: grid;
+  gap: 4px;
+}
+
+.cart-drawer__subtotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.cart-drawer__buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cart-line--highlight {
+  animation: highlight 1.6s var(--ease);
+}
+
+@keyframes highlight {
+  0% {
+    background: rgba(197, 160, 82, 0.18);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+/* ===================================================== Supporting pages */
+
+.step__number {
+  font-family: var(--font-serif);
+  font-size: 30px;
+  line-height: 1;
+  color: var(--color-gold-text);
+}
+
+.step__title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 400;
+}
+
+/* ======================================================== Short viewports */
+/* A phone on its side, a laptop window at 400 % zoom (1280 × 800 reflows to 320 × 200) or a desktop
+   window with its developer tools open leaves a sliver of page between a pinned strip, header, bar
+   and dock. Under 480px of height, at any width, nothing stays pinned: the strip, header and page
+   bar scroll away with the page, the dock joins the end of it, and the purchase and checkout bars give
+   way to the buttons the page already carries (the inline add button, the bag summary).
+
+   The desktop columns that stick under the header, and the gallery sized to fit below it, are
+   computed against a header that stays (strip + header + category row = 146px). With the header gone
+   and 480px or less to work with, those formulas pin a column far from the top of the window or squeeze
+   it to nothing (measured at 1280×200: the gallery viewer 0×0 px, its thumbnails 7px, the filters 23px),
+   so they flow with the page instead. From 481px up they are untouched: the pinned header is a small
+   share of the window and the columns are tuned to it.
+   Must stay below every base rule it overrides. */
+@media (max-height: 480px) {
+  .site-top,
+  .page-bar {
+    position: static;
+  }
+
+  body.has-dock,
+  body.has-purchase-dock,
+  body.has-checkout-bar {
+    --bottom-ui: 0px;
+  }
+
+  .dock {
+    position: static;
+    padding-top: 12px;
+    padding-bottom: calc(12px + var(--safe-bottom));
+    background: var(--color-bar);
+    transform: none;
+    transition: none;
+  }
+
+  body.has-purchase-dock .purchase-dock,
+  body.has-checkout-bar .checkout-bar {
+    display: none;
+  }
+
+  .buy-inline {
+    display: flex;
+  }
+
+  .collection-layout--filters .filter-sidebar {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .gallery__thumbs {
+    max-height: none;
+  }
+
+  .gallery__main {
+    max-width: none;
+  }
+
+  .product-panel,
+  .cart-layout .summary {
+    position: static;
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* Design-review surfaces (/design/cuenta, /design/board). Prototype-only.     */
+/* ------------------------------------------------------------------------- */
+
+/* The dock is fixed in the shell; the board shows it in the flow. */

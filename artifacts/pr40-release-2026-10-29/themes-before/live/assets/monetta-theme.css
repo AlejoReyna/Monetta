@@ -1,0 +1,301 @@
+/*
+ * Monetta theme adapter. The ported prototype stylesheets (monetta-tokens/base/components/pages.css) are untouched; this file
+ * holds only what a server-rendered Shopify theme needs on top of them: native <dialog> overlays, form wrappers and the
+ * pieces that exist only here (cart sheet, listing controls, product form states). Keep it below the ported files.
+ */
+
+/* ------------------------------------------------------------ Overlays on <dialog> */
+/* The ported .overlay rules describe a fixed full-screen flex box; a <dialog> needs its UA box reset and must stay
+   hidden until opened. The panel animates through .is-open, set by monetta-core.js after showModal(). */
+dialog.overlay {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  overflow: hidden;
+}
+
+dialog.overlay:not([open]) {
+  display: none;
+}
+
+dialog.overlay::backdrop {
+  background: transparent;
+}
+
+[data-quick-add],
+.cart-line__controls[data-line-form] {
+  margin: 0;
+}
+
+[data-quick-add] {
+  display: contents;
+}
+
+.noscript-note {
+  padding: 8px var(--edge-r) 8px var(--edge-l);
+  background: var(--color-bar);
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+/* ------------------------------------------------------------ Bag line extras */
+.cart-line__note--discount {
+  color: var(--color-gold-text);
+}
+
+.cart-line__controls .stepper__button:disabled {
+  cursor: not-allowed;
+}
+
+.cart-sheet__lines .cart-line:last-child {
+  border-bottom: 0;
+}
+
+.cart-sheet__lines .cart-line {
+  padding: 14px 0;
+}
+
+.cart-drawer__summary .cart-drawer__subtotal span:last-child {
+  white-space: nowrap;
+}
+
+/* While a bag request is in flight the line is dimmed and its buttons are inert. */
+[data-line][aria-busy='true'] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------ Home: accesos without art */
+/* The prototype's final "Todas las bolsas" tile shares a row with silhouettes; a row of arrow circles alone must not
+   inherit their square art box. */
+.style-grid--plain .style-tile__art {
+  aspect-ratio: auto;
+  height: 88px;
+  padding: 0;
+}
+
+@media (min-width: 1024px) {
+  .style-grid--plain .rail__track {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ------------------------------------------------------------ Search page */
+/* The field sits right under the phone bar and a full-width hairline closes it, like the app's divider under the field. */
+.search-page__field {
+  margin-top: 12px;
+}
+
+.search-page__field .search-field {
+  height: var(--control);
+}
+
+@media (max-width: 767.98px) {
+  .search-page__field {
+    margin: 0 calc(-1 * var(--edge-r)) 0 calc(-1 * var(--edge-l));
+    padding: 12px var(--edge-r) 12px var(--edge-l);
+    border-bottom: 1px solid var(--color-hairline);
+  }
+}
+
+.search-discovery {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.listing--search .page-head {
+  padding-top: 8px;
+}
+
+/* ------------------------------------------------------------ Product form and bag extras */
+.product-panel__brand {
+  text-decoration: none;
+}
+
+.product-form {
+  margin: 0;
+}
+
+/* The quantity box is a real number input so the form posts it; it keeps the stepper's look. */
+.stepper__value {
+  width: 48px;
+  min-width: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.stepper__value::-webkit-outer-spin-button,
+.stepper__value::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stepper__value:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+.product-page[aria-busy='true'] [data-product-dynamic] {
+  opacity: 0.6;
+}
+
+.product-panel__app {
+  margin-top: 24px;
+}
+
+.other-ways .shopify-payment-button {
+  margin: 0;
+}
+
+.cart-additional-checkout {
+  margin-top: 12px;
+}
+
+.btn[disabled],
+.btn[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.btn--primary[disabled] {
+  background: color-mix(in srgb, var(--color-action-primary) 55%, var(--color-canvas));
+}
+
+.cart-lines .cart-line:last-child {
+  border-bottom: 0;
+}
+
+.page-head .page-bar__trailing {
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------ Focus rings that a neighbour would paint over */
+/* The dock's items touch each other and the current one has a gold fill: without a stacking bump the next sibling's fill covers the
+   right side of the focused item's ring (found by the painted-ring check in docs/web-redesign/shopify-staging/scripts/e2e/keyboard.mjs). */
+.dock__item:focus-visible {
+  z-index: 1;
+}
+
+/* ------------------------------------------------------------ Focus rings clipped by their own scroller */
+/* Found by the painted-ring check (docs/web-redesign/shopify-staging/scripts/e2e/keyboard.mjs): an element inside an overflow container
+   loses the sides of an outside ring that the container's box does not leave room for. Each fix gives the ring room, or draws it inside. */
+
+/* Gallery thumbnails sit in a scrolling strip (a column from 1024 px): draw the ring inside the thumbnail. */
+.gallery__thumbs .thumb:focus-visible {
+  outline-offset: -3px;
+}
+
+/* The rails scroll sideways; from 1024 px the ported rule removed their inline padding, which clipped the left side of the first
+   card's ring and the right side of the last visible one (ring = 2px width + 3px offset). Keep the same item width: the track grows by
+   exactly what it is padded. */
+@media (min-width: 1024px) {
+  .rail__track {
+    margin-inline: -6px;
+    padding-inline: 6px;
+    scroll-padding-inline: 6px;
+  }
+}
+
+/* The sticky filter sidebar scrolls on its own: room for the rings of its summaries and checkboxes. */
+@media (min-width: 1200px) {
+  .collection-layout--filters .filter-sidebar {
+    margin: -6px;
+    padding: 6px;
+  }
+}
+
+/* ------------------------------------------------------------ Shopify's unbranded dynamic checkout button */
+/* "Buy it now" is Shopify's own control. Its default blue fill with white text failed axe's colour contrast on the product page, and the
+   prototype's "Comprar ahora" is an outline button. Only the unbranded variant is restyled (Shopify allows it); the wallet buttons
+   (Shop Pay, Apple Pay, PayPal...) keep their brand rendering. */
+.other-ways .shopify-payment-button__button--unbranded {
+  min-height: var(--tap);
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.other-ways .shopify-payment-button__button--unbranded:hover:not([disabled]) {
+  background: var(--color-surface-deep);
+}
+
+/* ------------------------------------------------------------ Variant options: links without JavaScript, radios with it */
+/* Each option is rendered twice with the same look. Without a script the chips are links to ?variant=ID (choosing = navigating, so the
+   form always sends the variant on screen); monetta-product.js sets html.mw-variants-js and takes over with the radio group, which it can
+   confirm without a reload. A control that looked selectable but changed nothing in the request is the defect this avoids. */
+.options__list--radios {
+  display: none;
+}
+
+.mw-variants-js .options__list--radios {
+  display: flex;
+}
+
+.mw-variants-js .options__list--links {
+  display: none;
+}
+
+a.option-chip {
+  color: inherit;
+  text-decoration: none;
+}
+
+a.option-chip[aria-current='true'] {
+  border-color: var(--color-ink);
+  box-shadow: inset 0 0 0 1px var(--color-ink);
+  background: var(--color-surface-deep);
+}
+
+a.option-chip[aria-current='true'] .option-chip__check {
+  display: inline-grid;
+}
+
+a.option-chip:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* "Confirmando disponibilidad de …" under the options while a choice waits for Shopify. */
+.product-panel__options .choice-hint {
+  margin: 12px 0 0;
+}
+
+/* ------------------------------------------------------------ Recovery boxes (load more failed, bag not confirmed) */
+.load-more__error {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  margin-bottom: 12px;
+}
+
+.cart-sync {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 12px;
+}
+
+/* The message shares the row with its icon and the button drops below only when there is no room for both. */
+.cart-sync > span {
+  flex: 1 1 14rem;
+  min-width: 0;
+}

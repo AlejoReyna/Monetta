@@ -1,0 +1,396 @@
+{% doc %}
+  @prompt
+    Carousel behavior (HORIZONTAL only):
+    
+    Cards arranged in a single horizontal row, user swipes LEFT/RIGHT
+    On mobile: show 2 cards side by side
+    On desktop: show 4 cards side by side
+    display: flex; flex-direction: row; overflow-x: auto;
+    scroll-snap-type: x mandatory on container, scroll-snap-align: start on each card
+    Hide scrollbar visually but keep scroll functional
+    Carousel container must have padding: 16px 20px so card shadows have room and never get clipped by the section edges
+    Card design (premium/minimalist):
+    
+    Fixed card width: 45vw on mobile, 22% on desktop
+    Product image square (1:1 ratio, object-fit: cover, border-radius: 12px)
+    Product title centered below image, single line with ellipsis if too long
+    Price below title, clean and simple
+    Card border-radius: 12px, white background, 12px internal padding
+    Shadow and hover transition controlled by theme settings (see below)
+    Theme editor settings (ALL must be editable in sidebar):
+    
+    heading_text — Section title (text field, default: "Nuevos productos")
+    heading_color — Title color (color picker)
+    heading_size — Title font size in px (range: 16–48, default 24)
+    card_background — Card background color (color picker, default white)
+    card_text_color — Product title and price color (color picker)
+    card_shadow_color — Shadow color (color picker, default #000000)
+    card_shadow_opacity — Shadow opacity (range 0–20, default 8, used as percentage)
+    card_shadow_blur — Shadow blur radius in px (range 4–40, default 12)
+    card_border_radius — Card corner radius in px (range 0–24, default 12)
+    card_padding — Internal card padding in px (range 8–32, default 12)
+    carousel_padding — Outer carousel padding in px (range 8–32, default 20) — controls space so shadows don't get clipped
+    products_to_show — Number of products to display (range 4–24, default 8)
+    show_price — Toggle to show/hide price (checkbox, default true)
+    show_vendor — Toggle to show/hide brand/vendor (checkbox, default false)
+    Products source:
+    
+    Use collections.all.products sorted by newest (sort_by: 'created-descending')
+    This automatically includes all store products and updates as new ones are added
+    Respect the products_to_show setting as the limit
+    Important:
+    
+    Layout must be strictly horizontal, never vertical
+    All visual properties (colors, shadows, radius, padding) must come from the theme settings defined above
+    Do NOT hardcode any colors or shadow values in CSS
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% assign all_products = collections.all.products | sort: 'created-descending' %}
+
+{% style %}
+  .ai-product-carousel-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: 40px 0;
+  }
+
+  .ai-product-carousel__heading-{{ ai_gen_id }} {
+    text-align: center;
+    margin: 0 0 32px;
+    color: {{ block.settings.heading_color }};
+    font-size: {{ block.settings.heading_size }}px;
+  }
+
+  .ai-product-carousel__container-{{ ai_gen_id }} {
+    padding: {{ block.settings.carousel_padding }}px;
+    overflow: hidden;
+  }
+
+  .ai-product-carousel__track-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 16px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ai-product-carousel__track-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-product-carousel__card-{{ ai_gen_id }} {
+    flex: 0 0 45vw;
+    scroll-snap-align: start;
+    background-color: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    padding: {{ block.settings.card_padding }}px;
+    box-shadow: 0 0 {{ block.settings.card_shadow_blur }}px rgba({{ block.settings.card_shadow_color | color_extract: 'red' }}, {{ block.settings.card_shadow_color | color_extract: 'green' }}, {{ block.settings.card_shadow_color | color_extract: 'blue' }}, {{ block.settings.card_shadow_opacity | divided_by: 100.0 }});
+    transition: transform 0.3s ease;
+    text-decoration: none;
+    display: block;
+  }
+
+  .ai-product-carousel__card-{{ ai_gen_id }}:hover {
+    transform: translateY(-4px);
+  }
+
+  .ai-product-carousel__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    overflow: hidden;
+    border-radius: {{ block.settings.card_border_radius }}px;
+    margin-bottom: 12px;
+  }
+
+  .ai-product-carousel__image-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-product-carousel__title-{{ ai_gen_id }} {
+    text-align: center;
+    color: {{ block.settings.card_text_color }};
+    font-size: 14px;
+    margin: 0 0 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ai-product-carousel__price-{{ ai_gen_id }} {
+    text-align: center;
+    color: {{ block.settings.card_text_color }};
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .ai-product-carousel__vendor-{{ ai_gen_id }} {
+    text-align: center;
+    color: {{ block.settings.card_text_color }};
+    font-size: 12px;
+    margin: 0 0 8px;
+    opacity: 0.7;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-product-carousel__card-{{ ai_gen_id }} {
+      flex: 0 0 22%;
+    }
+
+    .ai-product-carousel__title-{{ ai_gen_id }} {
+      font-size: 16px;
+    }
+
+    .ai-product-carousel__price-{{ ai_gen_id }} {
+      font-size: 16px;
+    }
+
+    .ai-product-carousel__vendor-{{ ai_gen_id }} {
+      font-size: 14px;
+    }
+  }
+{% endstyle %}
+
+<product-carousel-{{ ai_gen_id }} class="ai-product-carousel-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  {% if block.settings.heading_text != blank %}
+    <h2 class="ai-product-carousel__heading-{{ ai_gen_id }}">{{ block.settings.heading_text }}</h2>
+  {% endif %}
+
+  <div class="ai-product-carousel__container-{{ ai_gen_id }}">
+    <div class="ai-product-carousel__track-{{ ai_gen_id }}">
+      {% for product in all_products limit: block.settings.products_to_show %}
+        <a href="{{ product.url }}" class="ai-product-carousel__card-{{ ai_gen_id }}">
+          <div class="ai-product-carousel__image-wrapper-{{ ai_gen_id }}">
+            {% if product.featured_image %}
+              <img
+                src="{{ product.featured_image | image_url: width: 600 }}"
+                alt="{{ product.featured_image.alt | escape }}"
+                class="ai-product-carousel__image-{{ ai_gen_id }}"
+                loading="lazy"
+                width="600"
+                height="600"
+              >
+            {% else %}
+              <div class="ai-product-carousel__image-placeholder-{{ ai_gen_id }}">
+                {{ 'product-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+
+          {% if block.settings.show_vendor and product.vendor != blank %}
+            <p class="ai-product-carousel__vendor-{{ ai_gen_id }}">{{ product.vendor }}</p>
+          {% endif %}
+
+          <h3 class="ai-product-carousel__title-{{ ai_gen_id }}">{{ product.title }}</h3>
+
+          {% if block.settings.show_price %}
+            <p class="ai-product-carousel__price-{{ ai_gen_id }}">{{ product.price | money }}</p>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</product-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ProductCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('.ai-product-carousel__track-{{ ai_gen_id }}');
+        this.setupTouchScroll();
+      }
+
+      setupTouchScroll() {
+        if (!this.track) return;
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        this.track.addEventListener('mousedown', (e) => {
+          isDown = true;
+          this.track.style.cursor = 'grabbing';
+          startX = e.pageX - this.track.offsetLeft;
+          scrollLeft = this.track.scrollLeft;
+        });
+
+        this.track.addEventListener('mouseleave', () => {
+          isDown = false;
+          this.track.style.cursor = 'grab';
+        });
+
+        this.track.addEventListener('mouseup', () => {
+          isDown = false;
+          this.track.style.cursor = 'grab';
+        });
+
+        this.track.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - this.track.offsetLeft;
+          const walk = (x - startX) * 2;
+          this.track.scrollLeft = scrollLeft - walk;
+        });
+      }
+    }
+
+    customElements.define('product-carousel-{{ ai_gen_id }}', ProductCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "New products carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading_text",
+      "label": "Heading text",
+      "default": "Nuevos productos"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Number of products",
+      "min": 4,
+      "max": 24,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show price",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Internal padding",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Card shadow"
+    },
+    {
+      "type": "color",
+      "id": "card_shadow_color",
+      "label": "Shadow color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "card_shadow_opacity",
+      "label": "Shadow opacity",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "%",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card_shadow_blur",
+      "label": "Shadow blur",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Carousel layout"
+    },
+    {
+      "type": "range",
+      "id": "carousel_padding",
+      "label": "Outer padding",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "New products carousel"
+    }
+  ]
+}
+{% endschema %}

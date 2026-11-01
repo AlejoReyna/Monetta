@@ -1,0 +1,435 @@
+{% doc %}
+  @prompt
+    Create a Shopify OS 2.0 liquid block called "Collection carousel with static cards". It must be a pixel-perfect replica of an existing carousel block in design, with the following exact specifications:
+    
+    CAROUSEL LAYOUT:
+    
+    Horizontal scrollable carousel, scroll-snap enabled (scroll-snap-type: x mandatory)
+    Scrollbar hidden
+    Gap between cards: 10px
+    Card width on desktop: 90%
+    Smooth scroll behavior
+    CARD DESIGN (identical for ALL 5 cards):
+    
+    Background color: #ffffff
+    Card border radius: 50px
+    Box shadow: soft drop shadow with opacity 0.2 (rgba(0,0,0,0.2)), blur ~20px, offset y: 8px, spread: 0
+    Image border radius: 50px
+    Image aspect ratio: 4:5 (portrait), object-fit: cover, full width of card
+    Internal card padding: 16px
+    Content alignment: centered
+    CARDS 1–3: Dynamic collection cards Each card has a Shopify collection picker. Displays:
+    
+    Collection featured image (aspect-ratio 4:5, border-radius 50px, object-fit: cover)
+    Collection title as heading
+    Collection description (optional, show/hide toggle)
+    Button linking to the collection URL
+    CARDS 4–5: Static custom cards (same visual design as collection cards) Each card has independent fields:
+    
+    Image picker (custom image upload)
+    Text field: custom heading
+    Text field: button label
+    URL field: custom link for the button No description field needed.
+    TYPOGRAPHY — Title:
+    
+    Font picker (default: Aleo)
+    Size: 26px
+    Color: #000000
+    TYPOGRAPHY — Description (collection cards only):
+    
+    Font picker (default: System UI)
+    Size: 15px
+    Color: #666666
+    Show/hide checkbox toggle
+    BUTTON (shared settings for all cards):
+    
+    Font picker (default: Andada Pro)
+    Size: 14px
+    Background: #dedede
+    Text color: #000000
+    Hover background: #dedede
+    Hover text color: #aa7d44
+    Border radius: 50px
+    Padding: 10px 24px
+    All 5 cards must look visually identical in structure, height, proportions, shadows, and spacing. The static cards (4–5) must match the collection cards exactly in layout — only the data source changes (manual fields instead of a collection picker).
+    
+    The block must be fully compatible with Shopify OS 2.0 theme architecture and work correctly in the theme editor.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-carousel-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .ai-collection-carousel__wrapper-{{ ai_gen_id }} {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ai-collection-carousel__wrapper-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-collection-carousel__card-{{ ai_gen_id }} {
+    flex: 0 0 90%;
+    scroll-snap-align: start;
+    background-color: #ffffff;
+    border-radius: 50px;
+    padding: 16px;
+    box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .ai-collection-carousel__image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: 50px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .ai-collection-carousel__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-collection-carousel__image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-collection-carousel__image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-collection-carousel__title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }};
+    font-weight: {{ block.settings.title_font.weight }};
+    font-style: {{ block.settings.title_font.style }};
+    font-size: 26px;
+    color: {{ block.settings.title_color }};
+    margin: 0 0 12px 0;
+  }
+
+  .ai-collection-carousel__description-{{ ai_gen_id }} {
+    font-family: {{ block.settings.description_font.family }}, {{ block.settings.description_font.fallback_families }};
+    font-weight: {{ block.settings.description_font.weight }};
+    font-style: {{ block.settings.description_font.style }};
+    font-size: 15px;
+    color: {{ block.settings.description_color }};
+    margin: 0 0 16px 0;
+  }
+
+  .ai-collection-carousel__button-{{ ai_gen_id }} {
+    font-family: {{ block.settings.button_font.family }}, {{ block.settings.button_font.fallback_families }};
+    font-weight: {{ block.settings.button_font.weight }};
+    font-style: {{ block.settings.button_font.style }};
+    font-size: 14px;
+    background-color: {{ block.settings.button_bg_color }};
+    color: {{ block.settings.button_text_color }};
+    border: none;
+    border-radius: 50px;
+    padding: 10px 24px;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    margin-top: auto;
+  }
+
+  .ai-collection-carousel__button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_bg_color }};
+    color: {{ block.settings.button_hover_text_color }};
+  }
+{% endstyle %}
+
+<collection-carousel-{{ ai_gen_id }}
+  class="ai-collection-carousel-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-collection-carousel__wrapper-{{ ai_gen_id }}">
+    {% for i in (1..3) %}
+      {% liquid
+        assign collection_key = 'collection_' | append: i
+        assign collection = block.settings[collection_key]
+      %}
+      
+      <div class="ai-collection-carousel__card-{{ ai_gen_id }}">
+        <div class="ai-collection-carousel__image-wrapper-{{ ai_gen_id }}">
+          {% if collection != blank and collection.featured_image %}
+            <img
+              src="{{ collection.featured_image | image_url: width: 800 }}"
+              alt="{{ collection.featured_image.alt | escape }}"
+              class="ai-collection-carousel__image-{{ ai_gen_id }}"
+              loading="lazy"
+              width="800"
+              height="1000"
+            >
+          {% else %}
+            <div class="ai-collection-carousel__image-placeholder-{{ ai_gen_id }}">
+              {{ 'collection-1' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+
+        {% if collection != blank %}
+          <h3 class="ai-collection-carousel__title-{{ ai_gen_id }}">
+            {{ collection.title }}
+          </h3>
+
+          {% if block.settings.show_description and collection.description != blank %}
+            <div class="ai-collection-carousel__description-{{ ai_gen_id }}">
+              {{ collection.description }}
+            </div>
+          {% endif %}
+
+          <a
+            href="{{ collection.url }}"
+            class="ai-collection-carousel__button-{{ ai_gen_id }}"
+          >
+            {{ block.settings.button_label }}
+          </a>
+        {% else %}
+          <h3 class="ai-collection-carousel__title-{{ ai_gen_id }}">
+            Collection {{ i }}
+          </h3>
+          <a
+            href="#"
+            class="ai-collection-carousel__button-{{ ai_gen_id }}"
+          >
+            {{ block.settings.button_label }}
+          </a>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    {% for i in (4..5) %}
+      {% liquid
+        assign image_key = 'card_' | append: i | append: '_image'
+        assign heading_key = 'card_' | append: i | append: '_heading'
+        assign button_label_key = 'card_' | append: i | append: '_button_label'
+        assign url_key = 'card_' | append: i | append: '_url'
+        
+        assign card_image = block.settings[image_key]
+        assign card_heading = block.settings[heading_key]
+        assign card_button_label = block.settings[button_label_key]
+        assign card_url = block.settings[url_key]
+      %}
+      
+      <div class="ai-collection-carousel__card-{{ ai_gen_id }}">
+        <div class="ai-collection-carousel__image-wrapper-{{ ai_gen_id }}">
+          {% if card_image %}
+            <img
+              src="{{ card_image | image_url: width: 800 }}"
+              alt="{{ card_image.alt | escape }}"
+              class="ai-collection-carousel__image-{{ ai_gen_id }}"
+              loading="lazy"
+              width="800"
+              height="1000"
+            >
+          {% else %}
+            <div class="ai-collection-carousel__image-placeholder-{{ ai_gen_id }}">
+              {{ 'collection-1' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+
+        <h3 class="ai-collection-carousel__title-{{ ai_gen_id }}">
+          {% if card_heading != blank %}
+            {{ card_heading }}
+          {% else %}
+            Custom card {{ i }}
+          {% endif %}
+        </h3>
+
+        <a
+          href="{% if card_url != blank %}{{ card_url }}{% else %}#{% endif %}"
+          class="ai-collection-carousel__button-{{ ai_gen_id }}"
+        >
+          {% if card_button_label != blank %}
+            {{ card_button_label }}
+          {% else %}
+            {{ block.settings.button_label }}
+          {% endif %}
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</collection-carousel-{{ ai_gen_id }}>
+
+{% schema %}
+{
+  "name": "Collection carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collection cards"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show collection description",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Static card 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_4_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "card_4_heading",
+      "label": "Heading",
+      "default": "Custom card 4"
+    },
+    {
+      "type": "text",
+      "id": "card_4_button_label",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "card_4_url",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Static card 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_5_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "card_5_heading",
+      "label": "Heading",
+      "default": "Custom card 5"
+    },
+    {
+      "type": "text",
+      "id": "card_5_button_label",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "card_5_url",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Title font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#000000"
+    },
+    {
+      "type": "font_picker",
+      "id": "description_font",
+      "label": "Description font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Default button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "font_picker",
+      "id": "button_font",
+      "label": "Button font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Background color",
+      "default": "#dedede"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg_color",
+      "label": "Hover background color",
+      "default": "#dedede"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text color",
+      "default": "#aa7d44"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection carousel"
+    }
+  ]
+}
+{% endschema %}

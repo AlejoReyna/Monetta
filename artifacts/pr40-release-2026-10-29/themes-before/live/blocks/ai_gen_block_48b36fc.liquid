@@ -1,0 +1,711 @@
+{% doc %}
+  @prompt
+    Act as a Lead UI/UX Designer for a luxury fashion e-commerce brand. Generate the complete HTML and embedded CSS code for a 'Custom Liquid' section for a high-end Collection Carousel.
+    
+    Design & Aesthetic Guidelines (Luxury & Clean):
+    
+    Background: Solid, pure white (#FFFFFF).
+    
+    Container Borders: Apply a generous border-radius: 30px to the main image containers to create that soft, modern, and rounded look.
+    
+    Proportions: The image area must be tall and wide (Aspect Ratio 4:5). This prevents the design from looking cramped and ensures a premium, full-screen presence.
+    
+    Micro-Shadows (Glassmorphism): Instead of harsh borders, add a very subtle, large-spread soft shadow (box-shadow: 0 20px 60px rgba(0,0,0,0.03)) to the rounded containers to make them feel tactile and dimensional.
+    
+    Typography & Concise Info:
+    
+    Titles: Use an elegant, traditional Serif font (e.g., Playfair Display) for the collection titles.
+    
+    Concise Info: Keep text to a minimum. Only include: Title (e.g., "BOLSAS") and a minimalist button.
+    
+    Button: Create a minimalist button with a thin, pale gold (#D4AF37) border. The text should be small, all-caps (e.g., "EXPLORAR"), with wide letter-spacing.
+    
+    The Animated Carousel (Premium & Smooth):
+    
+    Mobile "Next-In-Line" View: Ensure the active centered card is perfectly centered, but the next card is at least 20% visible on the right side. This visual cue makes swiping intuitive and frictionless.
+    
+    Active/Inactive State: Use CSS transitions to make the active centered card scale(1.0) and opacity: 1, while the adjacent cards smoothly scale down to scale(0.85) and opacity: 0.5.
+    
+    Easing Curve: Use transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1) for a buttery-smooth, expensive-feeling deceleration at the end of each swipe.
+    
+    Hardware Acceleration: Use will-change: transform; for maximum smoothness.
+    
+    Content & Links:
+    
+    Three cards: "BOLSAS" (Link: /collections/bolsas), "CARTERAS" (Link: /collections/carteras), "RELOJES" (Link: /collections/relojes).
+    
+    Technical:
+    
+    100% Pure HTML/CSS. No external libraries.
+    
+    Scope everything under the class .premium-collections-slider-.
+    
+    Hide scrollbars (::-webkit-scrollbar { display: none; }).
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap');
+
+  .premium-collections-slider-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: #FFFFFF;
+    padding: {{ block.settings.section_padding_top }}px 0 {{ block.settings.section_padding_bottom }}px;
+    overflow: hidden;
+  }
+
+  .premium-collections-slider-{{ ai_gen_id }}__wrapper {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 {{ block.settings.side_padding }}px;
+  }
+
+  .premium-collections-slider-{{ ai_gen_id }}__wrapper::-webkit-scrollbar {
+    display: none;
+  }
+
+  .premium-collections-slider-{{ ai_gen_id }}__wrapper {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .premium-collections-slider-{{ ai_gen_id }}__card {
+    flex: 0 0 {{ block.settings.card_width }}%;
+    scroll-snap-align: center;
+    transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    will-change: transform;
+    opacity: {{ block.settings.inactive_opacity | divided_by: 100.0 }};
+    transform: scale({{ block.settings.inactive_scale | divided_by: 100.0 }});
+  }
+
+  .premium-collections-slider-{{ ai_gen_id }}__card.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .premium-collections-slider-{{ ai_gen_id }}__card-inner {
+    position: relative;
+    border-radius: {{ block.settings.border_radius }}px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, {{ block.settings.shadow_opacity | divided_by: 100.0 }});
+    background-color: {{ block.settings.card_background }};
+  }
+
+  .premium-collections-slider-{{ ai_gen_id }}__image-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 125%;
+    overflow: hidden;
+  }
+
+  .premium-collections-slider-{{ ai_gen_id }}__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .premium-collections-slider-{{ ai_gen_id }}__content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: {{ block.settings.content_padding }}px;
+    text-align: center;
+    background: linear-gradient(to top, rgba(0, 0, 0, {{ block.settings.overlay_opacity | divided_by: 100.0 }}), transparent);
+  }
+
+  .premium-collections-slider-{{ ai_gen_id }}__title {
+    font-family: 'Playfair Display', serif;
+    font-size: {{ block.settings.title_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.title_color }};
+    margin: 0 0 {{ block.settings.title_margin }}px;
+    letter-spacing: {{ block.settings.letter_spacing }}px;
+    text-transform: uppercase;
+  }
+
+  .premium-collections-slider-{{ ai_gen_id }}__button {
+    display: inline-block;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border_color }};
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: {{ block.settings.button_letter_spacing }}px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: {{ block.settings.button_border_radius }}px;
+  }
+
+  .premium-collections-slider-{{ ai_gen_id }}__button:hover {
+    background-color: {{ block.settings.button_hover_background }};
+    color: {{ block.settings.button_hover_text_color }};
+    border-color: {{ block.settings.button_hover_border_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .premium-collections-slider-{{ ai_gen_id }}__card {
+      flex: 0 0 {{ block.settings.mobile_card_width }}%;
+    }
+
+    .premium-collections-slider-{{ ai_gen_id }}__title {
+      font-size: {{ block.settings.mobile_title_size }}px;
+    }
+
+    .premium-collections-slider-{{ ai_gen_id }}__button {
+      font-size: {{ block.settings.mobile_button_font_size }}px;
+      padding: {{ block.settings.mobile_button_padding_vertical }}px {{ block.settings.mobile_button_padding_horizontal }}px;
+    }
+
+    .premium-collections-slider-{{ ai_gen_id }}__content {
+      padding: {{ block.settings.mobile_content_padding }}px;
+    }
+  }
+{% endstyle %}
+
+<premium-collections-slider-{{ ai_gen_id }} class="premium-collections-slider-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="premium-collections-slider-{{ ai_gen_id }}__wrapper" data-slider-wrapper>
+    {% if block.settings.collection_1 != blank %}
+      <div class="premium-collections-slider-{{ ai_gen_id }}__card" data-card>
+        <div class="premium-collections-slider-{{ ai_gen_id }}__card-inner">
+          <div class="premium-collections-slider-{{ ai_gen_id }}__image-container">
+            {% if block.settings.collection_1.featured_image %}
+              <img
+                src="{{ block.settings.collection_1.featured_image | image_url: width: 1000 }}"
+                alt="{{ block.settings.collection_1.title | escape }}"
+                class="premium-collections-slider-{{ ai_gen_id }}__image"
+                loading="lazy"
+                width="1000"
+                height="1250"
+              >
+            {% else %}
+              <div class="premium-collections-slider-{{ ai_gen_id }}__image-placeholder">
+                {{ 'collection-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+          <div class="premium-collections-slider-{{ ai_gen_id }}__content">
+            <h3 class="premium-collections-slider-{{ ai_gen_id }}__title">{{ block.settings.collection_1.title }}</h3>
+            <a href="{{ block.settings.collection_1.url }}" class="premium-collections-slider-{{ ai_gen_id }}__button">
+              {{ block.settings.button_text }}
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if block.settings.collection_2 != blank %}
+      <div class="premium-collections-slider-{{ ai_gen_id }}__card" data-card>
+        <div class="premium-collections-slider-{{ ai_gen_id }}__card-inner">
+          <div class="premium-collections-slider-{{ ai_gen_id }}__image-container">
+            {% if block.settings.collection_2.featured_image %}
+              <img
+                src="{{ block.settings.collection_2.featured_image | image_url: width: 1000 }}"
+                alt="{{ block.settings.collection_2.title | escape }}"
+                class="premium-collections-slider-{{ ai_gen_id }}__image"
+                loading="lazy"
+                width="1000"
+                height="1250"
+              >
+            {% else %}
+              <div class="premium-collections-slider-{{ ai_gen_id }}__image-placeholder">
+                {{ 'collection-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+          <div class="premium-collections-slider-{{ ai_gen_id }}__content">
+            <h3 class="premium-collections-slider-{{ ai_gen_id }}__title">{{ block.settings.collection_2.title }}</h3>
+            <a href="{{ block.settings.collection_2.url }}" class="premium-collections-slider-{{ ai_gen_id }}__button">
+              {{ block.settings.button_text }}
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if block.settings.collection_3 != blank %}
+      <div class="premium-collections-slider-{{ ai_gen_id }}__card" data-card>
+        <div class="premium-collections-slider-{{ ai_gen_id }}__card-inner">
+          <div class="premium-collections-slider-{{ ai_gen_id }}__image-container">
+            {% if block.settings.collection_3.featured_image %}
+              <img
+                src="{{ block.settings.collection_3.featured_image | image_url: width: 1000 }}"
+                alt="{{ block.settings.collection_3.title | escape }}"
+                class="premium-collections-slider-{{ ai_gen_id }}__image"
+                loading="lazy"
+                width="1000"
+                height="1250"
+              >
+            {% else %}
+              <div class="premium-collections-slider-{{ ai_gen_id }}__image-placeholder">
+                {{ 'collection-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+          <div class="premium-collections-slider-{{ ai_gen_id }}__content">
+            <h3 class="premium-collections-slider-{{ ai_gen_id }}__title">{{ block.settings.collection_3.title }}</h3>
+            <a href="{{ block.settings.collection_3.url }}" class="premium-collections-slider-{{ ai_gen_id }}__button">
+              {{ block.settings.button_text }}
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</premium-collections-slider-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class PremiumCollectionsSlider{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.wrapper = this.querySelector('[data-slider-wrapper]');
+        this.cards = this.querySelectorAll('[data-card]');
+      }
+
+      connectedCallback() {
+        this.setupIntersectionObserver();
+        this.setupScrollListener();
+        this.updateActiveCard();
+      }
+
+      setupIntersectionObserver() {
+        const options = {
+          root: this.wrapper,
+          threshold: 0.6
+        };
+
+        this.observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('active');
+            } else {
+              entry.target.classList.remove('active');
+            }
+          });
+        }, options);
+
+        this.cards.forEach(card => this.observer.observe(card));
+      }
+
+      setupScrollListener() {
+        let scrollTimeout;
+        this.wrapper.addEventListener('scroll', () => {
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            this.updateActiveCard();
+          }, 100);
+        });
+      }
+
+      updateActiveCard() {
+        const wrapperRect = this.wrapper.getBoundingClientRect();
+        const centerX = wrapperRect.left + wrapperRect.width / 2;
+
+        let closestCard = null;
+        let closestDistance = Infinity;
+
+        this.cards.forEach(card => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenterX = cardRect.left + cardRect.width / 2;
+          const distance = Math.abs(centerX - cardCenterX);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        this.cards.forEach(card => {
+          if (card === closestCard) {
+            card.classList.add('active');
+          } else {
+            card.classList.remove('active');
+          }
+        });
+      }
+    }
+
+    customElements.define('premium-collections-slider-{{ ai_gen_id }}', PremiumCollectionsSlider{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Carrusel premium",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colecciones"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Colección 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Colección 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Colección 3"
+    },
+    {
+      "type": "header",
+      "content": "Botón"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Texto del botón",
+      "default": "EXPLORAR"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Color del borde",
+      "default": "#D4AF37"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Fondo",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Color del texto",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Fondo al pasar cursor",
+      "default": "#D4AF37"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Texto al pasar cursor",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border_color",
+      "label": "Borde al pasar cursor",
+      "default": "#D4AF37"
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "label": "Ancho del borde",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Tamaño de fuente",
+      "min": 8,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "button_letter_spacing",
+      "label": "Espaciado de letras",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "label": "Relleno vertical",
+      "min": 6,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "label": "Relleno horizontal",
+      "min": 15,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Radio del borde",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Tarjetas"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Fondo de tarjeta",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Radio del borde",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "label": "Opacidad de sombra",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "%",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Espacio entre tarjetas",
+      "min": 10,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Ancho (escritorio)",
+      "min": 60,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 75
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_width",
+      "label": "Ancho (móvil)",
+      "min": 70,
+      "max": 95,
+      "step": 5,
+      "unit": "%",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Estados de tarjeta"
+    },
+    {
+      "type": "range",
+      "id": "inactive_opacity",
+      "label": "Opacidad inactiva",
+      "min": 30,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "inactive_scale",
+      "label": "Escala inactiva",
+      "min": 75,
+      "max": 95,
+      "step": 5,
+      "unit": "%",
+      "default": 85
+    },
+    {
+      "type": "header",
+      "content": "Contenido"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color del título",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Tamaño del título",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "mobile_title_size",
+      "label": "Tamaño título (móvil)",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Espaciado de letras",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "title_margin",
+      "label": "Margen inferior título",
+      "min": 10,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "label": "Relleno de contenido",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "mobile_content_padding",
+      "label": "Relleno (móvil)",
+      "min": 15,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Opacidad superposición",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Espaciado de sección"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Relleno superior",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Relleno inferior",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "side_padding",
+      "label": "Relleno lateral",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Móvil"
+    },
+    {
+      "type": "range",
+      "id": "mobile_button_font_size",
+      "label": "Tamaño fuente botón",
+      "min": 8,
+      "max": 14,
+      "step": 1,
+      "unit": "px",
+      "default": 9
+    },
+    {
+      "type": "range",
+      "id": "mobile_button_padding_vertical",
+      "label": "Relleno vertical botón",
+      "min": 6,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "mobile_button_padding_horizontal",
+      "label": "Relleno horizontal botón",
+      "min": 15,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 25
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carrusel premium"
+    }
+  ]
+}
+{% endschema %}
