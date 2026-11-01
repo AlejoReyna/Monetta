@@ -15,11 +15,11 @@ void main() {
     LocalCartIntent(variantId: shopifyVariantGid(4), quantity: 1),
   ];
 
-  testWidgets('renders exact Shopify costs and automatic discounts',
-      (tester) async {
-    final controller = CartController(reconciler: _WidgetReconciler());
-    await controller.reconcileLocalBag(scope: scope, localIntent: intent);
-
+  Future<void> pumpSummary(
+    WidgetTester tester, {
+    required CartController controller,
+    VoidCallback? onContinue,
+  }) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: buildTheme(),
@@ -29,103 +29,92 @@ void main() {
               controller: controller,
               scope: scope,
               localIntent: intent,
-              onContinue: () {},
+              onContinue: onContinue ?? () {},
             ),
           ),
         ),
       ),
     );
+  }
 
-    expect(find.text('1250.0000 MXN'), findsOneWidget);
-    expect(find.text('1100.5000 MXN'), findsOneWidget);
-    expect(find.text('−149.5000 MXN'), findsOneWidget);
-    expect(
-      find.text('Incluye descuentos automáticos de Shopify'),
-      findsOneWidget,
+  testWidgets(
+      'CHAR-BAG-01 summary matches the theme cart: item count, formatted '
+      'amounts, discount row and estimated total', (tester) async {
+    final controller = CartController(
+      reconciler: _WidgetReconciler(totalEstimated: true),
     );
+    await controller.reconcileLocalBag(scope: scope, localIntent: intent);
+    await pumpSummary(tester, controller: controller);
+
+    expect(find.text('Resumen de compra'), findsOneWidget);
+    expect(find.text('Subtotal (1 artículo)'), findsOneWidget);
+    expect(find.text(r'$ 4,842.00'), findsOneWidget);
+    expect(find.text('Descuento automático'), findsOneWidget);
+    expect(find.text('−\$ 149.50'), findsOneWidget);
+    expect(find.text('Envío'), findsOneWidget);
     expect(find.text('Se calcula en Shopify'), findsOneWidget);
-    expect(find.textContaining(r'$149'), findsNothing);
+    expect(find.text('Total estimado'), findsOneWidget);
+    expect(find.text(r'$ 4,692.50 MXN'), findsOneWidget);
+
+    // The old Shopify-branded labels and raw decimal strings are gone.
+    expect(find.textContaining('Subtotal de Shopify'), findsNothing);
+    expect(find.textContaining('Total de Shopify'), findsNothing);
+    expect(find.text('4842.0 MXN'), findsNothing);
+    expect(find.text('4692.5000 MXN'), findsNothing);
+    expect(find.text('−149.5000 MXN'), findsNothing);
     expect(find.text('Gratis'), findsNothing);
   });
 
-  testWidgets('discount field exposes applied, non-applicable and removed',
+  testWidgets(
+      'CHAR-BAG-02 summary uses plain "Total" when the total is not '
+      'estimated and pluralises the item count from line quantities',
       (tester) async {
+    final controller = CartController(
+      reconciler: _WidgetReconciler(quantities: const [2, 3]),
+    );
+    await controller.reconcileLocalBag(scope: scope, localIntent: intent);
+    await pumpSummary(tester, controller: controller);
+
+    expect(find.text('Subtotal (5 artículos)'), findsOneWidget);
+    expect(find.text('Total'), findsOneWidget);
+    expect(find.text('Total estimado'), findsNothing);
+    expect(find.text(r'$ 4,692.50 MXN'), findsOneWidget);
+    expect(find.textContaining('Total de Shopify'), findsNothing);
+  });
+
+  testWidgets(
+      'CHAR-BAG-03 the bag summary has no discount code field and still '
+      'continues to checkout', (tester) async {
+    // The person decided the app bag equals the Shopify theme cart, which has
+    // no discount-code field (codes are applied in Shopify's checkout), so the
+    // field, its button and its feedback are retired from the bag summary.
     final controller = CartController(reconciler: _WidgetReconciler());
     await controller.reconcileLocalBag(scope: scope, localIntent: intent);
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: buildTheme(),
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: ShopifyCartSummary(
-              controller: controller,
-              scope: scope,
-              localIntent: intent,
-              onContinue: () {},
-            ),
-          ),
-        ),
-      ),
+    var continued = 0;
+    await pumpSummary(
+      tester,
+      controller: controller,
+      onContinue: () => continued++,
     );
 
-    await tester.enterText(
-      find.byKey(const ValueKey('discount-code-field')),
-      'save',
-    );
-    await tester.tap(find.byKey(const ValueKey('apply-discount-button')));
-    await tester.pump();
-    expect(find.text('Descuento aplicado.'), findsOneWidget);
-    expect(find.text('Aplicado'), findsOneWidget);
+    expect(find.byKey(const ValueKey('discount-code-field')), findsNothing);
+    expect(find.byKey(const ValueKey('apply-discount-button')), findsNothing);
+    expect(find.byType(TextField), findsNothing);
+    expect(find.text('Código de descuento'), findsNothing);
+    expect(find.text('APLICAR CÓDIGO'), findsNothing);
 
-    await tester.enterText(
-      find.byKey(const ValueKey('discount-code-field')),
-      'NOT_APPLICABLE',
-    );
-    await tester.tap(find.byKey(const ValueKey('apply-discount-button')));
+    await tester.tap(find.text('Continuar al checkout'));
     await tester.pump();
-    expect(
-      find.text('El código es válido, pero no aplica a esta bolsa.'),
-      findsOneWidget,
-    );
-    expect(find.text('Válido, no aplicable'), findsOneWidget);
-
-    await tester.tap(find.byTooltip('Eliminar código NOT_APPLICABLE'));
-    await tester.pump();
-    await tester.tap(find.byTooltip('Eliminar código SAVE'));
-    await tester.pump();
-    expect(find.text('Código eliminado.'), findsOneWidget);
-
-    await tester.enterText(
-      find.byKey(const ValueKey('discount-code-field')),
-      'ERROR',
-    );
-    await tester.tap(find.byKey(const ValueKey('apply-discount-button')));
-    await tester.pump();
-    expect(
-      find.text('No se pudo confirmar el descuento. Inténtalo de nuevo.'),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey('apply-discount-button')), findsOneWidget);
-    expect(find.text('No confirmado'), findsOneWidget);
-    await tester.tap(find.byTooltip('Eliminar código ERROR'));
-    await tester.pump();
-    expect(find.text('Código eliminado.'), findsOneWidget);
-
-    await tester.enterText(
-      find.byKey(const ValueKey('discount-code-field')),
-      'INVALID',
-    );
-    await tester.tap(find.byKey(const ValueKey('apply-discount-button')));
-    await tester.pump();
-    expect(
-      find.text('Shopify no reconoció uno de los códigos.'),
-      findsOneWidget,
-    );
-    expect(find.text('Inválido'), findsOneWidget);
+    expect(continued, 1);
   });
 }
 
 final class _WidgetReconciler implements CartReconciler {
+  _WidgetReconciler({this.totalEstimated = false, this.quantities = const [1]});
+
+  final bool totalEstimated;
+  final List<int> quantities;
+
   @override
   Future<CartReconciliation> reconcile({
     required CartSessionScope scope,
@@ -143,7 +132,7 @@ final class _WidgetReconciler implements CartReconciler {
     if (desired.contains('INVALID')) {
       return CartReconciliation(
         status: CartReconciliationStatus.partiallyConfirmed,
-        cart: _cart(const []),
+        cart: _cart(const [], quantities, totalEstimated),
         issues: [
           CartMutationIssue(
             kind: CartMutationIssueKind.userError,
@@ -155,14 +144,14 @@ final class _WidgetReconciler implements CartReconciler {
     }
     return CartReconciliation(
       status: CartReconciliationStatus.authoritative,
-      cart: _cart(desired),
+      cart: _cart(desired, quantities, totalEstimated),
     );
   }
 }
 
-Cart _cart(List<String> codes) {
-  const subtotal = CartMoney(amount: '1250.0000', currencyCode: 'MXN');
-  const total = CartMoney(amount: '1100.5000', currencyCode: 'MXN');
+Cart _cart(List<String> codes, List<int> quantities, bool totalEstimated) {
+  const subtotal = CartMoney(amount: '4842.0', currencyCode: 'MXN');
+  const total = CartMoney(amount: '4692.5000', currencyCode: 'MXN');
   const discounted = CartMoney(amount: '149.5000', currencyCode: 'MXN');
   final timestamp = DateTime.utc(2026, 8, 27);
   return Cart(
@@ -171,29 +160,34 @@ Cart _cart(List<String> codes) {
     createdAt: timestamp,
     updatedAt: timestamp,
     lines: [
-      CartLine(
-        id: _opaque('line'),
-        variantId: shopifyVariantGid(4),
-        productId: shopifyProductGid(3),
-        title: 'Bolsa',
-        variantTitle: 'Única',
-        quantity: 1,
-        cost: const CartLineCost(
-          amountPerQuantity: subtotal,
-          subtotal: subtotal,
-          total: total,
+      for (final (index, quantity) in quantities.indexed)
+        CartLine(
+          id: _opaque('line$index'),
+          variantId: shopifyVariantGid(4 + index),
+          productId: shopifyProductGid(3),
+          title: 'Bolsa',
+          variantTitle: 'Única',
+          quantity: quantity,
+          cost: const CartLineCost(
+            amountPerQuantity: subtotal,
+            subtotal: subtotal,
+            total: total,
+          ),
+          discountAllocations: const [
+            CartDiscountAllocation(discountedAmount: discounted),
+          ],
         ),
-        discountAllocations: const [
-          CartDiscountAllocation(discountedAmount: discounted),
-        ],
-      ),
     ],
-    totalQuantity: 1,
+    totalQuantity: quantities.fold(0, (sum, item) => sum + item),
     buyerIdentity: const CartBuyerSummary(
       countryCode: 'MX',
       isAuthenticated: false,
     ),
-    cost: const CartCost(subtotal: subtotal, total: total),
+    cost: CartCost(
+      subtotal: subtotal,
+      total: total,
+      totalEstimated: totalEstimated,
+    ),
     discountCodes: [
       for (final code in codes)
         CartDiscountCode(

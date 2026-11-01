@@ -35,9 +35,10 @@ class MonettaSideMenu extends StatelessWidget {
   });
 
   // The guide's menu no longer lists search, Categorías, Maquillaje y
-  // skincare, Mayoreo, Contacto or Nuestra historia. Those callbacks stay in
-  // the constructor so call sites keep compiling; Mayoreo and Contacto are
-  // reached from Cuenta.
+  // skincare, Contacto or Nuestra historia. Those callbacks stay in the
+  // constructor so call sites keep compiling; Contacto is reached from
+  // Cuenta. Mayoreo is listed again, below «Todas las marcas», to match the
+  // theme's menu ([onPartner] opens it).
   final VoidCallback onSearch;
   final VoidCallback onCatalog;
   final VoidCallback? onCategories;
@@ -221,6 +222,12 @@ class MonettaSideMenu extends StatelessWidget {
                     icon: Icons.storefront_outlined,
                     label: 'Todas las marcas',
                     onTap: () => _select(context, onCatalog),
+                  ),
+                  _MenuLink(
+                    key: const Key('side-menu-wholesale'),
+                    icon: Icons.inventory_2_outlined,
+                    label: 'Mayoreo',
+                    onTap: () => _select(context, onPartner),
                   ),
                   SizedBox(height: MonettaTokens.space[3]),
                   _ShareCard(
