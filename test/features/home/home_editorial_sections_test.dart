@@ -14,7 +14,7 @@ import 'package:monetta_app/main.dart';
 
 void main() {
   testWidgets(
-      'the brands grid shows the catalog brands with their logo artwork', (
+      'the brands grid shows every configured brand with its logo artwork', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(390, 900));
@@ -50,25 +50,30 @@ void main() {
     );
     await tester.pump();
 
-    // The bundled catalog carries five brands, all with a bundled logo; the
-    // other configured brands (Rhode, Olaplex...) have no product behind them.
+    // All twelve configured brands show, each with a bundled logo — also the
+    // ones the bundled catalog has no product for (Rhode, Olaplex...).
     for (final handle in [
       'coach',
       'guess-1',
       'michael-kors',
       'steve-madden',
       'tommy-hilfiger',
+      'anne-klein',
+      'olalplex',
+      'christian-dior',
+      'the-ordinary',
+      'summer-fridays',
+      'laneige',
+      'rhode',
     ]) {
       expect(find.byKey(ValueKey('home-brand-$handle')), findsOneWidget);
     }
-    expect(find.byKey(const ValueKey('home-brand-rhode')), findsNothing);
-    expect(find.byKey(const ValueKey('home-brand-olalplex')), findsNothing);
     expect(
       find.descendant(
         of: brandsSection,
         matching: find.byType(SlideTransition),
       ),
-      findsNWidgets(5),
+      findsNWidgets(12),
     );
     expect(
       find.byKey(const ValueKey('home-brand-entrance-coach')),
@@ -80,11 +85,12 @@ void main() {
     );
     expect(
       find.descendant(of: brandsSection, matching: find.byType(Image)),
-      findsNWidgets(5),
+      findsNWidgets(12),
     );
   });
 
-  testWidgets('collection cards use full-bleed editorial overlays', (
+  testWidgets(
+      'collection cards are white cards: photo, serif title and grey pill', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(390, 900));
@@ -113,18 +119,31 @@ void main() {
         .first;
     await tester.scrollUntilVisible(card, 500, scrollable: homeScroll);
     await tester.pump();
+    // On a phone the carousel shows 62% of the width per page; this card is
+    // a side neighbour of the focused one, at 90% of its width.
     final cardSize = tester.getSize(card);
-    expect(cardSize.width, inInclusiveRange(280, 460));
-    expect(cardSize.height, closeTo(cardSize.width / .7, .1));
+    expect(cardSize.width, inInclusiveRange(180, 240));
+    expect(cardSize.height, greaterThan(cardSize.width));
 
-    final cardBottom = tester.getBottomLeft(card).dy;
-    final titleBottom = tester
-        .getBottomLeft(find.descendant(of: card, matching: find.text('Bolsas')))
-        .dy;
-    expect(cardBottom - titleBottom, lessThan(52));
+    final photo = find.descendant(of: card, matching: find.byType(Image));
+    expect(photo, findsOneWidget);
+    // Near-square photo on top, then the title, then the pill.
+    final photoSize = tester.getSize(photo);
+    expect(photoSize.width, closeTo(photoSize.height, 1));
+    final title = find.descendant(of: card, matching: find.text('Bolsas'));
+    final pill = find.descendant(
+      of: card,
+      matching: find.text('VER COLECCIÓN'),
+    );
+    expect(title, findsOneWidget);
+    expect(pill, findsOneWidget);
     expect(
-      find.descendant(of: card, matching: find.byType(Image)),
-      findsOneWidget,
+      tester.getTopLeft(title).dy,
+      greaterThanOrEqualTo(tester.getBottomLeft(photo).dy),
+    );
+    expect(
+      tester.getTopLeft(pill).dy,
+      greaterThan(tester.getBottomLeft(title).dy),
     );
   });
 

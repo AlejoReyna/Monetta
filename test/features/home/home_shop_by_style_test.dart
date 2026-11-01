@@ -143,7 +143,7 @@ void main() {
   });
 
   group('Tus marcas favoritas', () {
-    testWidgets('a 4-column grid of real catalog brands with their logos', (
+    testWidgets('a 4-column grid of every configured brand with its logo', (
       tester,
     ) async {
       final catalog = await store();
@@ -180,27 +180,36 @@ void main() {
                 'home-brand-entrance-'.length,
               ),
       ];
-      // Only brands the bundled catalog carries; none invented.
+      // All twelve configured brands: the guide's five first, then the rest
+      // in the configured order. None invented.
       expect(tiles, [
         'coach',
         'guess-1',
         'michael-kors',
         'steve-madden',
         'tommy-hilfiger',
+        'anne-klein',
+        'olalplex',
+        'christian-dior',
+        'the-ordinary',
+        'summer-fridays',
+        'laneige',
+        'rhode',
       ]);
       for (final handle in tiles) {
         final brand = configured[handle]!;
         final tile = find.byKey(ValueKey('home-brand-$handle'));
         // The shared guide tile (tinted rectangle, large wordmark).
         expect(tester.widget(tile), isA<GuideBrandTile>());
-        // Real bundled wordmark, named like `brandLogoAsset`.
+        // Real bundled wordmark, named like `brandLogoAsset` (by the tile's
+        // title: «Christian Dior» is shown, and filed, as «Dior»).
         expect(
           _assetOf(tester, tile),
-          brandLogoAsset(brand.brand.toLowerCase().replaceAll(' ', '_')),
+          brandLogoAsset(brand.title.toLowerCase().replaceAll(' ', '_')),
         );
         expect(File(brand.fallbackAsset).existsSync(), isTrue);
       }
-      // Four across, then the fifth wraps under the first.
+      // Four across, three rows: the fifth wraps under the first.
       final tops = [
         for (final handle in tiles)
           tester.getTopLeft(find.byKey(ValueKey('home-brand-$handle'))),
@@ -210,28 +219,42 @@ void main() {
       expect(tops[2].dy, tops[3].dy);
       expect(tops[4].dy, greaterThan(tops[0].dy));
       expect(tops[4].dx, tops[0].dx);
+      // Three rows of four: the ninth starts the last row.
+      expect(tops[7].dy, tops[4].dy);
+      expect(tops[8].dy, greaterThan(tops[4].dy));
+      expect(tops[8].dx, tops[0].dx);
+      expect(tops[11].dy, tops[8].dy);
       // «Ver todas» is kept.
       expect(find.text('Ver todas'), findsOneWidget);
     });
 
-    test('guideBrandsFor: guide order, only carried brands, at most eight', () {
+    test('guideBrandsFor: every brand, the guide order first, none dropped',
+        () {
       final configured = HomeContent.fallback.brands;
-      // Nothing known about the catalog: the configured list, capped at 8.
-      final cold = guideBrandsFor(configured, const []);
-      expect(cold, hasLength(8));
-      expect(cold.first.handle, 'coach');
-      expect(cold[1].handle, 'guess-1');
-      expect(cold[2].handle, 'michael-kors');
-
-      final carried = guideBrandsFor(configured, const [
-        'tommy_hilfiger',
-        'steve_madden',
+      final ordered = guideBrandsFor(configured);
+      final handles = [for (final brand in ordered) brand.handle];
+      expect(handles, hasLength(12));
+      // The guide's five lead, in the guide's own order.
+      expect(handles.take(5), [
         'coach',
-        'rhode',
-        'unknown_brand',
+        'guess-1',
+        'michael-kors',
+        'steve-madden',
+        'tommy-hilfiger',
       ]);
-      final handles = [for (final brand in carried) brand.handle];
-      expect(handles, ['coach', 'steve-madden', 'tommy-hilfiger', 'rhode']);
+      // The rest keep their configured order (stable tie-break).
+      expect(handles.skip(5), [
+        'anne-klein',
+        'olalplex',
+        'christian-dior',
+        'the-ordinary',
+        'summer-fridays',
+        'laneige',
+        'rhode',
+      ]);
+      expect(handles.toSet(), {
+        for (final brand in configured) brand.handle,
+      });
     });
   });
 

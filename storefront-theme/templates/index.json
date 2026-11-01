@@ -9,6 +9,10 @@
       "type": "monetta-guia-home",
       "settings": { "mode": "styles" }
     },
+    "colecciones": {
+      "type": "monetta-guia-home",
+      "settings": { "mode": "collections" }
+    },
     "marcas": {
       "type": "monetta-guia-home",
       "settings": { "mode": "brands" }
@@ -48,5 +52,5 @@
       "settings": { "mode": "register" }
     }
   },
-  "order": ["carrusel", "estilos", "marcas", "nueva", "buscado", "mayoreo", "servicios", "registro"]
+  "order": ["carrusel", "estilos", "colecciones", "marcas", "nueva", "buscado", "mayoreo", "servicios", "registro"]
 }

@@ -119,12 +119,16 @@ void main() {
     final style = tester.getRect(
       find.byKey(const ValueKey('home-section-bag-types')),
     );
+    final collections = tester.getRect(
+      find.byKey(const ValueKey('home-section-collections')),
+    );
     final brands = tester.getRect(
       find.byKey(const ValueKey('home-section-brands')),
     );
 
     expect(style.top - banner.bottom, inInclusiveRange(24, 40));
     expect(brands.top - style.bottom, inInclusiveRange(24, 40));
+    expect(collections.top - brands.bottom, inInclusiveRange(24, 40));
   });
 
   testWidgets('new arrivals are a rail of the shared product card', (

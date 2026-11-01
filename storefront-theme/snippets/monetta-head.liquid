@@ -75,6 +75,16 @@
 
 <script>
   document.documentElement.classList.add('js');
+  {%- unless request.design_mode %}
+  // The launch reveal (snippets/monetta-intro.liquid) plays on the first page of a browser session only. Without
+  // sessionStorage it never plays, so it cannot replay on every page.
+  try {
+    if (!sessionStorage.getItem('monetta:intro') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      sessionStorage.setItem('monetta:intro', '1');
+      document.documentElement.classList.add('has-intro');
+    }
+  } catch (error) {}
+  {%- endunless %}
   window.MonettaConfig = {
     routes: {
       root: {{ routes.root_url | json }},

@@ -1,0 +1,36 @@
+{%- doc -%}
+  One gold wordmark tile of «Tus marcas favoritas» and «Categorías» (GuideBrandTile in the app). A tile with a logo is always
+  shown, as the app shows its twelve: when the store sells the brand it opens the brand's listing, otherwise the search for its
+  name, because the vendor listing of a brand without products is the store's 404. A text-only tile (no logo) is shown only
+  when the store sells the brand.
+
+  @param {string} entry - 'Name:art' or 'Name:art:Vendor'. art picks assets/monetta-app-brand-<art>.webp and is empty for a
+    text tile; Vendor is the store's vendor name when it differs from Name (Dior is sold as Christian Dior).
+{%- enddoc -%}
+{%- liquid
+  assign parts = entry | split: ':'
+  assign name = parts[0]
+  assign art = parts[1] | default: ''
+  assign vendor = ''
+  if shop.vendors contains name
+    assign vendor = name
+  elsif parts[2] != blank and shop.vendors contains parts[2]
+    assign vendor = parts[2]
+  endif
+-%}
+{%- if art != blank or vendor != blank -%}
+  {%- if vendor != blank -%}
+    {%- capture url -%}{% render 'monetta-guia-url', key: 'brand', brand: vendor %}{%- endcapture -%}
+  {%- else -%}
+    {%- capture url -%}{{ routes.search_url }}?q={{ name | url_encode }}&amp;type=product{%- endcapture -%}
+  {%- endif -%}
+  <li>
+    <a class="guia-brand" href="{{ url | strip }}" aria-label="Ver {{ name }}">
+      {%- if art != blank -%}
+        <img src="{{ 'monetta-app-brand-' | append: art | append: '.webp' | asset_url }}" width="600" height="600" alt="" loading="lazy" decoding="async">
+      {%- else -%}
+        <span class="guia-brand__name">{{ name }}</span>
+      {%- endif -%}
+    </a>
+  </li>
+{%- endif -%}
