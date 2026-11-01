@@ -2,6 +2,8 @@
 library;
 
 import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../app/monetta_tokens.g.dart';
@@ -19,6 +21,21 @@ import '../contact/contact_screen.dart';
 import '../home/home_account_invitation.dart';
 import '../home/home_boutique_sections.dart';
 import 'wholesale_content.dart';
+
+/// Height of the «MAYOREO» banner, mirroring the theme's `monetta-guia.css`:
+/// `clamp(120px, 100vw / 2.667, 204px)` below 768 px and
+/// `clamp(168px, 100vw / 4, 336px)` from 768 px up.
+double _wholesaleHeroHeight(BuildContext context) {
+  final width = MediaQuery.sizeOf(context).width;
+  return width < 768
+      ? (width / 2.667).clamp(120.0, 204.0)
+      : (width / 4).clamp(168.0, 336.0);
+}
+
+/// Theme `@media (min-width: 768px)` breakpoint and the cap of the steps grid.
+const double _wholesaleWideBreakpoint = 768;
+const double _wholesaleStepsMaxWidth = 880;
+const List<String> _wholesaleCategories = ['bolsa', 'perfume'];
 
 class WholesaleScreen extends StatelessWidget {
   const WholesaleScreen({this.openUri, super.key});
@@ -59,11 +76,36 @@ class WholesaleScreen extends StatelessWidget {
         ),
       );
 
+  Widget _banner(
+    BuildContext context,
+    String category,
+    bool hasStore, {
+    double? height,
+  }) =>
+      ClientGuideEditorial(
+        title: category == 'bolsa' ? 'BOLSOS Y CARTERAS' : 'PERFUMES',
+        subtitle: category == 'bolsa'
+            ? 'Explora nuestro catálogo de mayoreo'
+            : 'Descubre nuestra selección de fragancias originales',
+        imageAsset:
+            category == 'bolsa' ? kGuideWholesaleBags : kGuideWholesalePerfumes,
+        overlaySide: GuideTextSide.left,
+        height: height,
+        action: GuidePillButton(
+          key: ValueKey('wholesale-catalog-$category'),
+          label: 'VER CATÁLOGO',
+          onPressed:
+              hasStore ? () => _catalog(context, category: category) : null,
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.maybeOf(context);
     final account = AccountScope.maybeOf(context);
     final palette = context.boutique;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final wide = screenWidth >= _wholesaleWideBreakpoint;
     return ClientGuideScaffold(
       current: null,
       body: ListView(
@@ -74,9 +116,15 @@ class WholesaleScreen extends StatelessWidget {
             asset: kGuideWholesaleHero,
             title: 'MAYOREO',
             titleItalic: true,
-            titleSize: (MediaQuery.sizeOf(context).width * 0.115).clamp(
-              36.0,
+            // Smaller type than the old photo hero: the banner now follows the
+            // theme's shorter clamp, so the title and subtitle must fit it.
+            titleSize: (MediaQuery.sizeOf(context).width * 0.095).clamp(
+              30.0,
               64.0,
+            ),
+            subtitleSize: (MediaQuery.sizeOf(context).width * 0.036).clamp(
+              12.0,
+              20.0,
             ),
             subtitle:
                 'Obtén precios especiales en productos originales importados de tus',
@@ -84,7 +132,7 @@ class WholesaleScreen extends StatelessWidget {
             imageAlignment: const Alignment(0.5, 0),
             textWidthFactor: 0.55,
             subtitleWidthFactor: 0.46,
-            height: guidePhotoHeroHeight(context),
+            height: _wholesaleHeroHeight(context),
           ),
           Padding(
             padding: EdgeInsets.all(MonettaTokens.space[4]),
@@ -101,6 +149,14 @@ class WholesaleScreen extends StatelessWidget {
                     final columns =
                         MediaQuery.textScalerOf(context).scale(1) > 1.3 ? 1 : 3;
                     final gap = MonettaTokens.space[1];
+                    // Theme step type: 15/12 px, 18/14 px from 768 px.
+                    // Theme: the grid is capped at 880 px and left aligned.
+                    final gridWidth = wide
+                        ? math.min(
+                            constraints.maxWidth,
+                            _wholesaleStepsMaxWidth,
+                          )
+                        : constraints.maxWidth;
                     const steps = [
                       (
                         Icons.shopping_bag_outlined,
@@ -108,12 +164,12 @@ class WholesaleScreen extends StatelessWidget {
                         'Bolsas, carteras y perfumes.',
                       ),
                       (
-                        Icons.shopping_cart_outlined,
+                        Icons.add,
                         'Agrega mínimo 3 piezas',
                         WholesalePresentation.minimum,
                       ),
                       (
-                        Icons.credit_card_outlined,
+                        Icons.account_balance_wallet_outlined,
                         'Liquida o aparta',
                         WholesalePresentation.reservation,
                       ),
@@ -124,13 +180,11 @@ class WholesaleScreen extends StatelessWidget {
                       children: [
                         for (var i = 0; i < steps.length; i++)
                           SizedBox(
-                            width:
-                                (constraints.maxWidth - gap * (columns - 1)) /
-                                    columns,
+                            width: (gridWidth - gap * (columns - 1)) / columns,
                             child: Container(
                               padding: EdgeInsets.all(MonettaTokens.space[2]),
                               decoration: BoxDecoration(
-                                color: palette.surface,
+                                color: palette.surfaceDeep,
                                 borderRadius: BorderRadius.circular(
                                   MonettaTokens.radiusCard,
                                 ),
@@ -138,15 +192,25 @@ class WholesaleScreen extends StatelessWidget {
                               ),
                               child: Column(
                                 children: [
-                                  CircleAvatar(
-                                    radius: MonettaTokens.space[2],
-                                    backgroundColor: palette.action,
+                                  Container(
+                                    key: Key('wholesale-step-n-${i + 1}'),
+                                    width: 26,
+                                    height: 26,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: palette.action,
+                                      shape: BoxShape.circle,
+                                    ),
                                     child: Text(
                                       '${i + 1}',
                                       style: clientGuideStyle(
                                         context,
                                         MonettaTokens.navLabel,
                                         color: palette.onAction,
+                                      ).copyWith(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1,
                                       ),
                                     ),
                                   ),
@@ -163,7 +227,7 @@ class WholesaleScreen extends StatelessWidget {
                                     style: clientGuideStyle(
                                       context,
                                       MonettaTokens.accountRow,
-                                    ),
+                                    ).copyWith(fontSize: wide ? 18 : 15),
                                   ),
                                   SizedBox(height: MonettaTokens.space[1]),
                                   Text(
@@ -173,7 +237,7 @@ class WholesaleScreen extends StatelessWidget {
                                       context,
                                       MonettaTokens.navLabel,
                                       color: palette.inkMuted,
-                                    ),
+                                    ).copyWith(fontSize: wide ? 14 : null),
                                   ),
                                 ],
                               ),
@@ -186,25 +250,23 @@ class WholesaleScreen extends StatelessWidget {
               ],
             ),
           ),
-          for (final category in ['bolsa', 'perfume']) ...[
-            ClientGuideEditorial(
-              title: category == 'bolsa' ? 'BOLSOS Y CARTERAS' : 'PERFUMES',
-              subtitle: category == 'bolsa'
-                  ? 'Explora nuestro catálogo de mayoreo'
-                  : 'Descubre nuestra selección de fragancias originales',
-              imageAsset: category == 'bolsa'
-                  ? kGuideWholesaleBags
-                  : kGuideWholesalePerfumes,
-              overlaySide: GuideTextSide.left,
-              action: GuidePillButton(
-                key: ValueKey('wholesale-catalog-$category'),
-                label: 'VER CATÁLOGO',
-                onPressed: store == null
-                    ? null
-                    : () => _catalog(context, category: category),
-              ),
-            ),
-          ],
+          if (wide)
+            Row(
+              children: [
+                for (final category in _wholesaleCategories)
+                  Expanded(
+                    child: _banner(
+                      context,
+                      category,
+                      store != null,
+                      height: (screenWidth / 2 / 1.6).clamp(260.0, 420.0),
+                    ),
+                  ),
+              ],
+            )
+          else
+            for (final category in _wholesaleCategories)
+              _banner(context, category, store != null),
           ClientGuideServices(services: kClientGuideWholesaleServices),
           Padding(
             padding: EdgeInsets.all(MonettaTokens.space[3]),

@@ -96,7 +96,8 @@ void main() {
     Finder menuText(String text) =>
         find.descendant(of: menu, matching: find.text(text));
     // Guide v2: the menu lists exactly these links. Search, Categorías,
-    // Maquillaje y skincare, Mayoreo, Contacto and Nuestra historia left it.
+    // Maquillaje y skincare, Contacto and Nuestra historia left it; Mayoreo
+    // is listed, as in the theme's menu.
     expect(menuText('Bolsas'), findsOneWidget);
     expect(menuText('Carteras'), findsOneWidget);
     expect(menuText('Relojes'), findsOneWidget);
@@ -106,7 +107,7 @@ void main() {
     expect(menuText('Buscar una pieza'), findsNothing);
     expect(menuText('Categorías'), findsNothing);
     expect(menuText('Maquillaje y skincare'), findsNothing);
-    expect(menuText('Mayoreo'), findsNothing);
+    expect(menuText('Mayoreo'), findsOneWidget);
     expect(menuText('Contacto'), findsNothing);
     expect(menuText('Nuestra historia'), findsNothing);
     expect(menuText('TIENDA'), findsNothing);

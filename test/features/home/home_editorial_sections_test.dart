@@ -133,7 +133,64 @@ void main() {
     );
   });
 
-  testWidgets('home exposes the story and reseller hub without a new nav tab', (
+  testWidgets(
+      'home no longer shows Más sobre Monetta, even when the section order lists about',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final store = CatalogStore(database: openTestDatabase());
+    addTearDown(store.dispose);
+    await store.loadFromAsset();
+    // The fallback content still lists the about section; Inicio must skip it.
+    expect(HomeContent.fallback.sectionOrder, contains(HomeSectionId.about));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StoreScope(
+          notifier: store,
+          child: const HomeScreen(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final homeScroll = find
+        .byWidgetPredicate(
+          (widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        )
+        .first;
+    // Walk the whole page in small steps and check every lazily built slice,
+    // so a card that scrolls out of the tree cannot hide from the assertions.
+    void expectNoAbout() {
+      expect(find.byKey(const ValueKey('home-about-card')), findsNothing);
+      expect(find.byKey(const ValueKey('home-about-image')), findsNothing);
+      expect(find.text('Más sobre Monetta'), findsNothing);
+      expect(find.text('Conoce nuestra historia'), findsNothing);
+    }
+
+    final position = tester.state<ScrollableState>(homeScroll).position;
+    var sawFooter = false;
+    expectNoAbout();
+    var previous = -1.0;
+    for (var step = 0; step < 200 && position.pixels != previous; step++) {
+      previous = position.pixels;
+      await tester.drag(homeScroll, const Offset(0, -300));
+      await tester.pump();
+      expectNoAbout();
+      sawFooter = sawFooter ||
+          find
+              .byKey(const ValueKey('client-guide-footer'))
+              .evaluate()
+              .isNotEmpty;
+    }
+    final atEnd = position.pixels == position.maxScrollExtent;
+    expect(atEnd, isTrue, reason: 'the walk reached the end of the page');
+    expect(sawFooter, isTrue, reason: 'the walk passed through the footer');
+  });
+
+  testWidgets('the home footer Nuestra historia still opens the story screen', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(390, 900));
@@ -159,39 +216,63 @@ void main() {
               widget.axisDirection == AxisDirection.down,
         )
         .first;
-    await tester.scrollUntilVisible(
-      find.text('Conoce nuestra historia'),
-      600,
-      scrollable: homeScroll,
+    final footerStory = find.descendant(
+      of: find.byKey(const ValueKey('client-guide-footer')),
+      matching: find.text('Nuestra historia'),
     );
-    await Scrollable.ensureVisible(
-      tester.element(find.text('Conoce nuestra historia')),
-      alignment: .35,
-    );
+    await tester.scrollUntilVisible(footerStory, 600, scrollable: homeScroll);
     await tester.pumpAndSettle();
-
-    final aboutCard = find.byKey(const ValueKey('home-about-card'));
-    final aboutImage = find.byKey(const ValueKey('home-about-image'));
-    expect(tester.getSize(aboutCard).width, 390);
-    expect(tester.getSize(aboutImage), const Size(388, 360));
-
-    await tester.tap(find.text('Conoce nuestra historia'));
+    await tester.tap(footerStory);
     await tester.pumpAndSettle();
     expect(find.byType(AboutMonettaScreen), findsOneWidget);
+  });
 
-    Navigator.of(
-      tester.element(find.byType(AboutMonettaScreen)),
-    ).pop();
+  testWidgets('home exposes the reseller hub without a new nav tab', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final store = CatalogStore(database: openTestDatabase());
+    addTearDown(store.dispose);
+    await store.loadFromAsset();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StoreScope(
+          notifier: store,
+          child: const HomeScreen(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final homeScroll = find
+        .byWidgetPredicate(
+          (widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        )
+        .first;
+    // «Más sobre Monetta» left Inicio, so the hub is reached through the
+    // footer's «Nuestra historia» and the story's «CONOCER EL PROGRAMA».
+    final footerStory = find.descendant(
+      of: find.byKey(const ValueKey('client-guide-footer')),
+      matching: find.text('Nuestra historia'),
+    );
+    await tester.scrollUntilVisible(footerStory, 600, scrollable: homeScroll);
     await tester.pumpAndSettle();
-    final partnerButton = find.byKey(const ValueKey('home-open-partner'));
+    await tester.tap(footerStory);
+    await tester.pumpAndSettle();
+    final partnerButton = find.byKey(const ValueKey('about-open-partner'));
     await tester.scrollUntilVisible(
       partnerButton,
-      500,
-      scrollable: homeScroll,
-    );
-    await Scrollable.ensureVisible(
-      tester.element(partnerButton),
-      alignment: .35,
+      400,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const ValueKey('about-monetta-scroll')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
     );
     await tester.pumpAndSettle();
     await tester.tap(partnerButton);
