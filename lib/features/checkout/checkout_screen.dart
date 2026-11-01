@@ -130,6 +130,7 @@ class BagScreen extends StatefulWidget {
 class _BagScreenState extends State<BagScreen> {
   CartSessionScope? _requestedScope;
   String? _requestedIntentShape;
+  bool _removingUnavailable = false;
 
   @override
   Widget build(BuildContext context) {
@@ -170,18 +171,49 @@ class _BagScreenState extends State<BagScreen> {
       ),
       body: SafeArea(
         bottom: true,
-        child: lines.isEmpty
-            ? const _EmptyBag()
-            : _BagContents(
-                lines: lines,
-                launchSecureCheckout: widget.launchSecureCheckout,
-                cartController: cartScope?.notifier,
-                checkoutCoordinator: cartScope?.checkoutCoordinator,
-                cartScope: sessionScope,
-                localIntent: localIntent,
+        child: Column(
+          children: [
+            if (store.hiddenBagLines.isNotEmpty)
+              _UnavailableBagNotice(
+                onRemove: _removingUnavailable
+                    ? null
+                    : () => unawaited(_removeUnavailable()),
               ),
+            Expanded(
+              child: lines.isEmpty
+                  ? const _EmptyBag()
+                  : _BagContents(
+                      lines: lines,
+                      launchSecureCheckout: widget.launchSecureCheckout,
+                      cartController: cartScope?.notifier,
+                      checkoutCoordinator: cartScope?.checkoutCoordinator,
+                      cartScope: sessionScope,
+                      localIntent: localIntent,
+                    ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _removeUnavailable() async {
+    final store = StoreScope.of(context);
+    setState(() => _removingUnavailable = true);
+    try {
+      await store.removeUnavailableBagLines();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No pudimos retirar los artículos. Inténtalo de nuevo.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _removingUnavailable = false);
+    }
   }
 
   void _scheduleReconciliation(
@@ -207,6 +239,42 @@ class _BagScreenState extends State<BagScreen> {
         await checkoutCoordinator?.preload(refreshed);
       }());
     });
+  }
+}
+
+class _UnavailableBagNotice extends StatelessWidget {
+  const _UnavailableBagNotice({required this.onRemove});
+
+  final VoidCallback? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: palette.surface,
+          borderRadius: BoutiqueRadius.card,
+          border: Border.all(color: palette.hairline, width: .5),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Algunos artículos ya no están disponibles y no se incluyeron en tu bolsa',
+              style: boutiqueText(size: 13, color: palette.ink, height: 1.35),
+            ),
+            TextButton(
+              onPressed: onRemove,
+              child: const Text('Retirar no disponibles'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -976,6 +1044,17 @@ class _BagLineTile extends StatelessWidget {
                   Text(
                     line.variant.title,
                     style: boutiqueText(size: 12, color: palette.inkMuted),
+                  ),
+                ],
+                if (!line.variant.available) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    'Agotado',
+                    style: boutiqueText(
+                      size: 12,
+                      color: palette.inkMuted,
+                      weight: FontWeight.w600,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 6),

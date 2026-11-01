@@ -1,10 +1,10 @@
-/// CHAR-04: characterization of the guest -> account bag merge.
+/// CHAR-04: objective behaviour of the guest -> account bag merge (RF-53, E4).
 ///
-/// `BagStore.mergeDeviceItemsIntoAccount` does not add quantities: for a
-/// variant present in both scopes, the guest row replaces the account row, and
-/// no cap is applied (`CatalogStore.updateBagQuantity` caps at 10, this path
-/// does not). These tests pin that behaviour so RF-50 (E4: add with a cap of
-/// 10) has to change them explicitly.
+/// The merge sums quantities with a cap of 10 instead of replacing: for a
+/// variant present in both scopes, `guest + account` wins, capped at 10. Only
+/// the guest scope is drained; other accounts are untouched. The variant wins
+/// by key: on a product conflict the guest row's product is kept (unchanged
+/// whole-row replacement, only the quantity math is new).
 library;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -30,8 +30,8 @@ void main() {
   tearDown(() => db.close());
 
   test(
-      'CHAR-04 (vigente, cambia en RF-50 según E4) la cantidad del invitado '
-      'reemplaza a la de la cuenta en vez de sumarse', () async {
+      'CHAR-04 (RF-53, E4) the merge sums guest and account instead of '
+      'replacing: 2 + 1 = 3', () async {
     await bag.upsert(
       productId: 'p-account',
       variantId: 'v1',
@@ -43,19 +43,16 @@ void main() {
     await bag.mergeDeviceItemsIntoAccount('A');
 
     final account = await bag.all(accountId: 'A');
-    expect(_quantities(account), {'v1': 1});
+    expect(_quantities(account), {'v1': 3});
     expect(
       account.single.productId,
       'p-guest',
-      reason: 'the guest row replaces the whole account row',
+      reason: 'the variant wins by key; the guest row product is kept',
     );
     expect(await bag.all(), isEmpty, reason: 'the guest has no lines left');
   });
 
-  test(
-      'CHAR-04 (vigente, cambia en RF-50 según E4) la fusión no aplica '
-      'ningún tope: V x15 del invitado sustituye a V x3 de la cuenta',
-      () async {
+  test('CHAR-04 (RF-53, E4) the merge caps at 10: 3 + 15 = 10', () async {
     await bag.upsert(productId: 'p1', variantId: 'v1', quantity: 15);
     await bag.upsert(
       productId: 'p1',
@@ -66,14 +63,13 @@ void main() {
 
     await bag.mergeDeviceItemsIntoAccount('A');
 
-    expect(_quantities(await bag.all(accountId: 'A')), {'v1': 15});
+    expect(_quantities(await bag.all(accountId: 'A')), {'v1': 10});
     expect(await bag.all(), isEmpty);
   });
 
   test(
-      'CHAR-04 (vigente, cambia en RF-50 según E4) la fusión añade las '
-      'variantes sólo del invitado, conserva las sólo de la cuenta y no toca '
-      'a otra cuenta', () async {
+      'CHAR-04 (RF-53, E4) the merge adds guest-only variants, keeps '
+      'account-only ones and leaves another account alone', () async {
     await bag.upsert(productId: 'p1', variantId: 'v1', quantity: 1);
     await bag.upsert(productId: 'p3', variantId: 'v3', quantity: 4);
     await bag.upsert(
@@ -98,7 +94,7 @@ void main() {
     await bag.mergeDeviceItemsIntoAccount('A');
 
     expect(_quantities(await bag.all(accountId: 'A')), {
-      'v1': 1,
+      'v1': 3,
       'v2': 5,
       'v3': 4,
     });
@@ -107,9 +103,8 @@ void main() {
   });
 
   test(
-      'CHAR-04 (vigente, cambia en RF-50 según E4) lo que ve la app: tras la '
-      'fusión y setAccountScope, bagLines y bagQuantity reflejan la cantidad '
-      'del invitado', () async {
+      'CHAR-04 (RF-53, E4) what the app sees: after merge and setAccountScope, '
+      'bagLines and bagQuantity add guest and account', () async {
     final store = CatalogStore(database: db, shopDomain: 'monetta.mx');
     await store.loadFromAsset();
     await store.syncWithShopify();
@@ -149,11 +144,11 @@ void main() {
     final byVariant = {
       for (final line in store.bagLines) line.variant.id: line.quantity,
     };
-    expect(byVariant, {sharedVariant: 2, otherVariant: 1});
+    expect(byVariant, {sharedVariant: 5, otherVariant: 1});
     expect(
       store.bagQuantity,
-      3,
-      reason: 'the guest quantity (2) replaced the account quantity (3)',
+      6,
+      reason: 'the guest quantity (2) is added to the account quantity (3)',
     );
 
     await store.setAccountScope(null);

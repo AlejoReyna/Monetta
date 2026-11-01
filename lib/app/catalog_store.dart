@@ -157,8 +157,23 @@ class CatalogStore extends ChangeNotifier {
                 ),
       ];
 
-  int get bagQuantity =>
-      _bagQuantities.values.fold(0, (sum, quantity) => sum + quantity);
+  int get bagQuantity => bagLines.fold(0, (sum, line) => sum + line.quantity);
+
+  /// Persisted lines whose product or exact variant is absent from the catalog.
+  /// Sold-out variants remain visible and are not included here.
+  List<BagLineRow> get hiddenBagLines {
+    final visibleVariantIds = {for (final line in bagLines) line.variant.id};
+    return [
+      for (final entry in _bagQuantities.entries)
+        if (!visibleVariantIds.contains(entry.key))
+          if (_bagProductByVariant[entry.key] case final productId?)
+            BagLineRow(
+              productId: productId,
+              variantId: entry.key,
+              quantity: entry.value,
+            ),
+    ];
+  }
 
   double get bagSubtotal =>
       bagLines.fold(0, (sum, line) => sum + line.lineTotal);
@@ -574,6 +589,20 @@ class CatalogStore extends ChangeNotifier {
       await _bagStore.remove(variantId, accountId: scope);
       notifyListeners();
     }
+  }
+
+  /// Keeps hidden lines in memory until their scoped durable deletion succeeds.
+  Future<void> removeUnavailableBagLines() async {
+    final variantIds = [for (final line in hiddenBagLines) line.variantId];
+    if (variantIds.isEmpty) return;
+    final scope = _accountScope;
+    await _bagStore.removeVariants(variantIds, accountId: scope);
+    if (_accountScope != scope) return;
+    for (final variantId in variantIds) {
+      _bagQuantities.remove(variantId);
+      _bagProductByVariant.remove(variantId);
+    }
+    notifyListeners();
   }
 
   /// Clears durable and in-memory bag state after a trusted checkout event.
