@@ -16,8 +16,19 @@ concurrency:
 jobs:
   flutter:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
+      # The full test suite plus the Gradle build no longer fit on the
+      # runner's disk ("No space left on device" during the Android compile).
+      # Drop preinstalled toolchains this job never uses; keep the Android SDK.
+      - name: Free runner disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup \
+            /usr/share/swift /usr/local/share/boost /opt/hostedtoolcache/CodeQL \
+            /usr/local/share/powershell /usr/local/share/chromium
+          sudo docker image prune --all --force > /dev/null 2>&1 || true
+          df -h /
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
