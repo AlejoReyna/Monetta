@@ -87,20 +87,14 @@
             {%- capture cat_url -%}{% render 'monetta-guia-url', key: photo_key %}{%- endcapture -%}
             {%- assign cat_url = cat_url | strip -%}
           {%- endif -%}
-          <li class="v41-cat">
-            {%- if cat_url != blank -%}
+          {%- if cat_url != blank -%}
+            <li class="v41-cat">
               <a class="v41-cat__link" href="{{ cat_url }}">
-            {%- else -%}
-              <div class="v41-cat__link">
-            {%- endif -%}
-              <img src="{{ parts[0] | asset_url }}" width="{{ parts[1] }}" height="{{ parts[2] }}" alt="" loading="lazy" decoding="async">
-              <span>{{ parts[3] }}</span>
-            {%- if cat_url != blank -%}
+                <img src="{{ parts[0] | asset_url }}" width="{{ parts[1] }}" height="{{ parts[2] }}" alt="" loading="lazy" decoding="async">
+                <span>{{ parts[3] }}</span>
               </a>
-            {%- else -%}
-              </div>
-            {%- endif -%}
-          </li>
+            </li>
+          {%- endif -%}
         {%- endfor -%}
       </ul>
       <a class="v41-close" href="{{ all_url | strip }}"><span class="v41-close__glass" aria-hidden="true">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</span><span>Ver categorías</span></a>
