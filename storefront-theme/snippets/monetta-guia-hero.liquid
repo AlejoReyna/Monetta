@@ -18,18 +18,20 @@
   @param {string} [focus] - object-position of the photograph, e.g. '30% 50%'.
   @param {boolean} [eager] - First viewport only.
   @param {string} [id] - Heading id (for aria-labelledby).
+  @param {boolean} [lettered] - The photograph already carries the lettering (the delivered banners B31 / B32): no wash, and the
+    title and copy stay in the page only as the single text equivalent for screen readers.
 {%- enddoc -%}
 {%- liquid
   assign side = side | default: 'left'
   assign tag = tag | default: 'h1'
 -%}
-<div class="guide-hero guide-hero--text-{{ side }}"{% if focus != blank %} style="--hero-focus: {{ focus }}"{% endif %}>
+<div class="guide-hero guide-hero--text-{{ side }}{% if lettered %} guide-hero--lettered{% endif %}"{% if focus != blank %} style="--hero-focus: {{ focus }}"{% endif %}>
   {% render 'monetta-guia-photo', name: photo, class: 'guide-hero__photo', eager: eager %}
-  <span class="guide-hero__scrim" aria-hidden="true"></span>
+  {%- unless lettered -%}<span class="guide-hero__scrim" aria-hidden="true"></span>{%- endunless -%}
   {%- if url != blank and pill_label == blank -%}
     <a class="guide-hero__link" href="{{ url }}" aria-label="{{ title | escape }}"></a>
   {%- endif -%}
-  <div class="guide-hero__copy">
+  <div class="guide-hero__copy{% if lettered %} visually-hidden{% endif %}">
     {%- if eyebrow != blank -%}<p class="guide-hero__eyebrow">{{ eyebrow | escape }}</p>{%- endif -%}
     <{{ tag }} class="guide-hero__title{% if caps %} guide-hero__title--caps{% endif %}{% if italic %} guide-hero__title--italic{% endif %}"{% if id != blank %} id="{{ id }}"{% endif %}>{{ title | escape }}{% if accent != blank %}<span class="visually-hidden"> {{ accent | escape }}</span>{% endif %}</{{ tag }}>
     {%- if accent != blank -%}<p class="guide-hero__accent guide-script guide-script--underlined" aria-hidden="true">{{ accent | escape }}</p>{%- endif -%}

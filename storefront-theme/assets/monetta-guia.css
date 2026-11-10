@@ -1139,31 +1139,30 @@ img.guia-menu__icon {
   gap: var(--space-4) var(--space-3);
 }
 
-.footer-grid--guia .footer-brand,
-.footer-grid--guia .footer-col--social {
+.footer-grid--guia .footer-brand {
   grid-column: 1 / -1;
 }
 
-/* The column's list is a grid of text links; the social row stays a row of 48px icon targets. */
-.footer-col--social .guia-social {
+/* v4.1: the wordmark and the social icons share the brand row; the icons stay 48px targets. */
+.footer-grid--guia .footer-brand {
   display: flex;
-  justify-content: flex-start;
-  margin-left: -10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
 }
 
-.footer-col--social .guia-social__link {
-  justify-content: center;
-  width: var(--tap);
-  min-height: var(--tap);
+.footer-brand .guia-social {
+  gap: 0;
+  margin-right: -10px;
 }
 
 @media (min-width: 768px) {
   .footer-grid--guia {
-    grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
   }
 
-  .footer-grid--guia .footer-brand,
-  .footer-grid--guia .footer-col--social {
+  .footer-grid--guia .footer-brand {
     grid-column: auto;
   }
 }
@@ -1693,36 +1692,36 @@ img.guia-menu__icon {
   margin: 0 0 var(--space-3);
 }
 
+/* v4.1: the three steps sit side by side in one row; on phones the row scrolls inside itself, the cards never stack or shrink. */
 .guia-steps__list {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
+  display: flex;
+  gap: var(--space-3);
+  margin: 0 calc(var(--edge-r) * -1) 0 calc(var(--edge-l) * -1);
+  padding: var(--space-1) var(--edge-r) var(--space-3) var(--edge-l);
+  overflow-x: auto;
   list-style: none;
+  scroll-padding-inline: var(--edge-l);
+  scroll-snap-type: x proximity;
+}
+
+.guia-steps__list:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: -2px;
 }
 
 .guia-step {
   display: flex;
+  flex: 0 0 min(78%, 320px);
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-3) var(--space-1);
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-hairline);
   border-radius: var(--radius-card);
-  background: var(--color-surface-deep);
-  text-align: center;
-}
-
-.guia-step__n {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--color-action-primary);
-  color: var(--color-on-action-primary);
-  font-size: 13px;
-  font-weight: 600;
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px rgb(33 27 22 / 0.06), 0 6px 14px -8px rgb(33 27 22 / 0.16);
+  scroll-snap-align: start;
+  text-align: start;
 }
 
 .guia-step__icon {
@@ -1732,16 +1731,16 @@ img.guia-menu__icon {
 .guia-step__title {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 400;
   line-height: 1.2;
 }
 
 .guia-step__body {
   margin: 0;
-  font-size: 12px;
-  line-height: 1.35;
-  color: var(--color-ink-muted);
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--color-ink);
 }
 
 .guia-page__banners {
@@ -1823,15 +1822,19 @@ img.guia-menu__icon {
 
 @media (min-width: 768px) {
   .guia-steps__list {
-    max-width: 880px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-inline: 0;
+    padding-inline: 0;
+    overflow: visible;
+  }
+
+  .guia-step {
+    flex: none;
   }
 
   .guia-step__title {
-    font-size: 18px;
-  }
-
-  .guia-step__body {
-    font-size: 14px;
+    font-size: 20px;
   }
 
   .guia-page__banners {
@@ -1840,6 +1843,140 @@ img.guia-menu__icon {
 
   .guia-page__banners .guide-hero {
     height: clamp(260px, calc(50vw / 1.6), 420px);
+  }
+}
+
+/* v4.1 buttons: the WhatsApp icon outside a light capsule (Contacto, Mayoreo) and the capsule alone («Comienza a vender»). */
+.guia-wa {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.guia-wa__icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.guia-wa__pill,
+.guia-pill-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-hairline);
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px rgb(33 27 22 / 0.08), 0 3px 8px -4px rgb(33 27 22 / 0.18);
+  color: var(--color-ink);
+  text-align: center;
+  text-decoration: none;
+}
+
+.guia-wa__pill {
+  flex: 1 1 auto;
+}
+
+.guia-wa:focus-visible,
+.guia-pill-button:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.guia-steps__cta {
+  width: 100%;
+  margin-top: var(--space-4);
+}
+
+.guia-community,
+.guia-benefits,
+.guia-doubts-block {
+  padding-top: var(--space-6);
+}
+
+.guia-community__title {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-serif);
+  font-size: var(--type-section-title-size);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.guia-community__body {
+  margin: 0 0 var(--space-4);
+}
+
+.guia-community__groups {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guia-benefits h2,
+.guia-doubts-block h2 {
+  margin: 0 0 var(--space-3);
+}
+
+.guia-benefits__list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guia-benefits__list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.guia-benefits__icon {
+  flex: none;
+  color: var(--color-accent-text);
+}
+
+@media (min-width: 768px) {
+  .guia-steps,
+  .guia-community,
+  .guia-benefits,
+  .guia-doubts-block {
+    text-align: center;
+  }
+
+  .guia-steps__cta {
+    width: auto;
+    min-width: 280px;
+    margin-inline: auto;
+  }
+
+  .guia-community__body {
+    max-width: 640px;
+    margin-inline: auto;
+  }
+
+  .guia-community__groups {
+    grid-template-columns: repeat(2, minmax(0, 320px));
+    justify-content: center;
+    gap: var(--space-5);
+  }
+
+  .guia-benefits__list {
+    max-width: 640px;
+    margin-inline: auto;
+    text-align: start;
+  }
+
+  .guia-doubts-block .guia-wa {
+    max-width: 480px;
+    margin-inline: auto;
   }
 }
 
@@ -1924,10 +2061,27 @@ img.guia-menu__icon {
   height: 40px;
 }
 
-@media (min-width: 1024px) {
-  .guia-contact {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    align-items: start;
+.guia-contact__join-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--type-section-title-size);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .guia-contact__channels,
+  .guia-contact__social {
+    text-align: center;
+  }
+
+  .guia-contact__channels .guia-wa {
+    max-width: 480px;
+    margin-inline: auto;
+  }
+
+  .guia-contact__list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

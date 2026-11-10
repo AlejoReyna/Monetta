@@ -3,9 +3,14 @@
   lib/features/home in PR #33). Each icon sits in a 48px target and names the network.
 
   @param {string} [class] - Extra class of the list.
+  @param {string} [whatsapp] - Number with country code, digits only: adds the WhatsApp icon as the last item (the footer).
+  @param {string} [whatsapp_label] - Accessible name of that icon.
 {%- enddoc -%}
 <ul class="guia-social {{ class }}" role="list">
   <li><a class="guia-social__link" href="https://www.tiktok.com/@monetta.oficial" target="_blank" rel="noopener" aria-label="Monetta en TikTok (se abre en otra pestaña)">{% render 'monetta-guia-icon', name: 'red-tiktok', size: 30 %}</a></li>
   <li><a class="guia-social__link" href="https://www.instagram.com/_monetta.mx" target="_blank" rel="noopener" aria-label="Monetta en Instagram (se abre en otra pestaña)">{% render 'monetta-guia-icon', name: 'red-instagram', size: 30 %}</a></li>
   <li><a class="guia-social__link" href="https://www.facebook.com/profile.php?id=100091065527635" target="_blank" rel="noopener" aria-label="Monetta en Facebook (se abre en otra pestaña)">{% render 'monetta-guia-icon', name: 'red-facebook', size: 30 %}</a></li>
+  {%- if whatsapp != blank -%}
+    <li><a class="guia-social__link" href="https://wa.me/{{ whatsapp | strip | escape }}" target="_blank" rel="noopener" aria-label="{{ whatsapp_label | default: 'WhatsApp' | escape }} (se abre en otra pestaña)">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 30 %}</a></li>
+  {%- endif -%}
 </ul>
