@@ -1,68 +1,61 @@
 {%- comment -%}
-  Monetta footer as the client guide draws it (slide 04): the wordmark, an «Ayuda» column from a store menu, the store's
-  policies as «Información» and the social icons as «Síguenos», then the rights line. The phone dock reserves its height
-  through --bottom-ui. The brand text and the WhatsApp button stay as settings; WhatsApp now lives in the menu and Contacto.
+  Monetta footer as UI v4.1 draws it: the wordmark with the social icons, an «Ayuda» column (Contacto, Envíos, Cambios y
+  devoluciones) and an «Información» column (Mayoreo, Aviso de privacidad, Términos y condiciones), then the rights line.
+  No search link. The phone dock reserves its height through --bottom-ui. The WhatsApp number setting feeds the last icon.
 {%- endcomment -%}
+{%- liquid
+  # The four policies keep their standard address when the store has not published one yet, so the link stays in place.
+  assign shipping_url = shop.shipping_policy.url | default: '/policies/shipping-policy'
+  assign refund_url = shop.refund_policy.url | default: '/policies/refund-policy'
+  assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
+  assign terms_url = shop.terms_of_service.url | default: '/policies/terms-of-service'
+  capture contact_url
+    render 'monetta-guia-url', key: 'contacto'
+  endcapture
+  capture wholesale_url
+    render 'monetta-guia-url', key: 'mayoreo'
+  endcapture
+-%}
 <div class="container">
   <div class="footer-grid footer-grid--guia">
     <div class="footer-brand">
       <a class="wordmark" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}, ir al inicio">{% render 'monetta-logo', height: 26, logo: section.settings.logo %}</a>
+      {% render 'monetta-guia-social', whatsapp: section.settings.whatsapp_number, whatsapp_label: section.settings.whatsapp_label %}
     </div>
-    {%- for block in section.blocks -%}
-      {%- if block.type == 'link_list' -%}
-        <div class="footer-col" {{ block.shopify_attributes }}>
-          {%- if block.settings.heading != blank -%}<h2>{{ block.settings.heading | escape }}</h2>{%- endif -%}
-          <ul role="list">
-            {%- for link in linklists[block.settings.menu].links -%}
-              <li><a href="{{ link.url }}">{% render 'monetta-label', kind: 'link', link: link %}</a></li>
-            {%- endfor -%}
-          </ul>
-        </div>
-      {%- endif -%}
-    {%- endfor -%}
-    {%- if shop.policies.size > 0 -%}
-      <div class="footer-col">
-        <h2>Información</h2>
-        <ul role="list">
-          {%- for policy in shop.policies -%}
-            <li><a href="{{ policy.url }}">{% render 'monetta-label', kind: 'policy', policy: policy %}</a></li>
-          {%- endfor -%}
-        </ul>
-      </div>
-    {%- endif -%}
-    <div class="footer-col footer-col--social">
-      <h2>Síguenos</h2>
-      {% render 'monetta-guia-social' %}
+    <div class="footer-col">
+      <h2>Ayuda</h2>
+      <ul role="list">
+        <li><a href="{{ contact_url | strip }}">Contacto</a></li>
+        <li><a href="{{ shipping_url }}">Envíos</a></li>
+        <li><a href="{{ refund_url }}">Cambios y devoluciones</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h2>Información</h2>
+      <ul role="list">
+        <li><a href="{{ wholesale_url | strip }}">Mayoreo</a></li>
+        <li><a href="{{ privacy_url }}">Aviso de privacidad</a></li>
+        <li><a href="{{ terms_url }}">Términos y condiciones</a></li>
+      </ul>
     </div>
   </div>
   {%- if section.settings.payments_line != blank -%}
     <p class="footer-payments">{{ section.settings.payments_line | escape }}</p>
   {%- endif -%}
   <div class="footer-bottom">
-    <span>© {{ 'now' | date: '%Y' }} {{ shop.name | escape }}. Todos los derechos reservados.</span>
+    <span>© {{ 'now' | date: '%Y' }} MONETTA</span>
   </div>
 </div>
 {% schema %}
 {
   "name": "Monetta · Pie de página",
   "enabled_on": { "groups": ["footer"] },
-  "max_blocks": 4,
   "settings": [
     { "type": "image_picker", "id": "logo", "label": "Logotipo", "info": "Opcional. Sin imagen se usa el logotipo original incluido en el tema." },
     { "type": "textarea", "id": "description", "label": "Texto de marca (no se muestra en el diseño de la guía)", "default": "Boutique mexicana de bolsas, carteras y relojes originales importados de Estados Unidos. Envíos a todo México." },
-    { "type": "text", "id": "whatsapp_number", "label": "WhatsApp (número con lada; no se muestra en el diseño de la guía)", "default": "528261066868", "info": "Solo dígitos, con 52 al inicio. Déjalo vacío para ocultar el botón." },
-    { "type": "text", "id": "whatsapp_label", "label": "Texto del botón de WhatsApp", "default": "WhatsApp 826 106 6868" },
-    { "type": "text", "id": "payments_line", "label": "Línea de pagos", "default": "Pagos seguros con tarjeta de crédito o débito y transferencia bancaria.", "info": "Déjalo vacío para ocultar la línea." }
-  ],
-  "blocks": [
-    {
-      "type": "link_list",
-      "name": "Columna de enlaces",
-      "settings": [
-        { "type": "text", "id": "heading", "label": "Título", "default": "Comprar" },
-        { "type": "link_list", "id": "menu", "label": "Menú" }
-      ]
-    }
+    { "type": "text", "id": "whatsapp_number", "label": "WhatsApp (número con lada)", "default": "528261066868", "info": "Solo dígitos, con 52 al inicio. Es el último ícono de las redes. Déjalo vacío para ocultarlo." },
+    { "type": "text", "id": "whatsapp_label", "label": "Nombre accesible del ícono de WhatsApp", "default": "WhatsApp 826 106 6868" },
+    { "type": "text", "id": "payments_line", "label": "Línea de pagos", "default": "", "info": "El diseño v4.1 no la incluye. Déjalo vacío para ocultar la línea." }
   ]
 }
 {% endschema %}
