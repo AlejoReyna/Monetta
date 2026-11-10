@@ -320,9 +320,13 @@ async function bridgePaidIfApplicable(
         tags: payload.tags,
         customer: payload.customer,
         currency: payload.currency,
+        discount_codes: payload.discount_codes
+          ? [...payload.discount_codes]
+          : undefined,
         note_attributes: payload.note_attributes
           ? [...payload.note_attributes]
           : undefined,
+        line_items: payload.line_items ? [...payload.line_items] : undefined,
       },
     });
   } catch (error) {
