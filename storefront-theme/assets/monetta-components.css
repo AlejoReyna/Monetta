@@ -586,8 +586,8 @@ body.has-checkout-bar {
 .site-footer {
   margin-top: calc(var(--section-gap) * 1.5);
   padding: 48px 0 calc(28px + var(--bottom-ui));
-  border-top: 1px solid var(--color-hairline);
-  background: var(--color-bar);
+  /* UI v4.1 (C5-05): pie gris muy tenue, local exception to the white canvas. */
+  background: var(--color-surface-tile);
 }
 
 .footer-grid {
