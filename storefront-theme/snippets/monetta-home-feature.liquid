@@ -1,0 +1,55 @@
+{%- doc -%}
+  Nueva colección (UI:G01-A): one large product, manual previous/next, thumbnails of the real set.
+  The large card opens the product. A thumbnail only changes which product is featured.
+  Recién llegado stays hidden unless the section setting is on and custom.fecha_comercial is a date within 30 days.
+
+  @param {string} heading_id
+  @param {object} source
+  @param {string} heading
+  @param {string} link_label
+  @param {number} limit
+  @param {boolean} newest_first
+  @param {boolean} show_new_label
+{%- enddoc -%}
+{%- liquid
+  assign set_url = source.url
+-%}
+<section class="section v41-block v41-feature" aria-labelledby="{{ heading_id }}" data-v41-feature>
+  {% render 'monetta-section-header', id: heading_id, title: heading, title_url: set_url, link_url: set_url, link_label: link_label %}
+  {% paginate source.products by 250 %}
+    {%- assign products = source.products -%}
+    {%- if newest_first -%}{%- assign products = products | sort: 'created_at' | reverse -%}{%- endif -%}
+    {%- if products.size > 0 -%}
+      <div class="v41-feature__hero">
+        <div class="v41-feature__stage" data-feature-stage>
+          {%- for product in products limit: limit -%}
+            {%- if forloop.first -%}
+              {% render 'monetta-home-feature-card', product: product, eager: true, show_new_label: show_new_label %}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+        <div class="v41-feature__nav">
+          <button type="button" class="v41-icon-btn" data-feature-prev aria-label="Anterior">{% render 'monetta-icon', name: 'chevronLeft', size: 22 %}</button>
+          <button type="button" class="v41-icon-btn" data-feature-next aria-label="Siguiente">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</button>
+        </div>
+      </div>
+      <ul class="v41-scroll v41-feature__thumbs" role="list">
+        {%- for product in products limit: limit -%}
+          <li>
+            <button type="button" class="v41-thumb{% if forloop.first %} is-selected{% endif %}" data-feature-pick aria-current="{% if forloop.first %}true{% else %}false{% endif %}" aria-label="{{ product.title | escape }}">
+              {%- if product.featured_image -%}
+                <img src="{{ product.featured_image | image_url: width: 240 }}" width="240" height="240" alt="" loading="lazy" decoding="async">
+              {%- endif -%}
+            </button>
+            <template data-feature-template>
+              {% render 'monetta-home-feature-card', product: product, show_new_label: show_new_label %}
+            </template>
+          </li>
+        {%- endfor -%}
+      </ul>
+      <a class="v41-close" href="{{ set_url }}"><span class="v41-close__glass" aria-hidden="true">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</span><span>Ver Nueva colección</span></a>
+    {%- else -%}
+      <p class="body-copy">{% if request.design_mode %}Elige una colección con productos.{% else %}Pronto habrá piezas nuevas aquí.{% endif %}</p>
+    {%- endif -%}
+  {% endpaginate %}
+</section>

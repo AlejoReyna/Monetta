@@ -29,29 +29,31 @@
 
 /* @generated:tokens:start — design-system/build.mjs from design-system/monetta.tokens.json; edit the manifest, not this block */
 :root {
-  --color-canvas: #fbf8f2;
-  --color-bar: #f7f3ec;
+  --color-canvas: #ffffff;
+  --color-bar: #ffffff;
   --color-surface: #ffffff;
-  --color-surface-warm: #f3eadf;
-  --color-surface-tile: #f4eee5;
-  --color-ink: #211b16;
-  --color-ink-muted: #73665d;
-  --color-action-primary: #745237;
+  --color-surface-warm: #ffffff;
+  --color-surface-tile: #f6f6f4;
+  --color-ink: #242622;
+  --color-ink-muted: #595d56;
+  --color-action-primary: #242622;
   --color-on-action-primary: #ffffff;
-  --color-action-dark: #2d1e14;
-  --color-on-action-dark: #fbf8f2;
-  --color-accent-text: #805c32;
-  --color-gold: #c5a052;
-  --color-divider: #e7dcce;
-  --color-border-control: #8a7766;
-  --color-navigation-active: #8c6436;
-  --color-navigation-inactive: #211b16;
-  --color-sale: #a3342b;
-  --color-sale-surface: #f6deda;
-  --color-success: #3b7b4a;
-  --color-success-surface: #eaf4ec;
-  --color-scrim: rgba(33, 27, 22, 0.451);
-  --color-on-photo: #f8f5ee;
+  --color-action-dark: #242622;
+  --color-on-action-dark: #ffffff;
+  --color-accent-text: #a58248;
+  --color-gold: #a58248;
+  --color-divider: #e6e6e6;
+  --color-border-control: #595d56;
+  --color-navigation-active: #a58248;
+  --color-navigation-inactive: #242622;
+  --color-sale: #a63535;
+  --color-sale-surface: #f8e8e8;
+  --color-success: #3b7030;
+  --color-success-surface: #e7f0e4;
+  --color-scrim: rgba(36, 38, 34, 0.45);
+  --color-on-photo: #ffffff;
+  --color-error: #a63535;
+  --color-focus: #1f211f;
   /* Names the components already use. They point at the semantic roles above; new work uses the roles. */
   --color-surface-deep: var(--color-surface-tile);
   --color-gold-text: var(--color-accent-text);
@@ -62,8 +64,8 @@
   --color-ink-on-warm: var(--color-ink);
 
   /* Type families and roles (compact values; medium and expanded override below) */
-  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-sans: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --type-campaign-font: var(--font-serif);
   --type-campaign-weight: 400;
   --type-campaign-lh: 1.08;
@@ -79,7 +81,7 @@
   --type-section-title-lh: 1.15;
   --type-section-title-track: -0.01em;
   --type-section-title-size: 23px;
-  --type-product-name-font: var(--font-serif);
+  --type-product-name-font: var(--font-sans);
   --type-product-name-weight: 400;
   --type-product-name-lh: 1.15;
   --type-product-name-track: -0.01em;
@@ -95,7 +97,7 @@
   --type-body-track: 0em;
   --type-body-size: 15px;
   --type-card-label-font: var(--font-sans);
-  --type-card-label-weight: 500;
+  --type-card-label-weight: 600;
   --type-card-label-lh: 1.35;
   --type-card-label-track: 0em;
   --type-card-label-size: 14px;
@@ -110,23 +112,26 @@
   --type-control-track: 0.02em;
   --type-control-size: 14px;
   --type-nav-label-font: var(--font-sans);
-  --type-nav-label-weight: 500;
+  --type-nav-label-weight: 600;
   --type-nav-label-lh: 1.2;
   --type-nav-label-track: 0em;
   --type-nav-label-size: 12px;
   --type-eyebrow-font: var(--font-sans);
-  --type-eyebrow-weight: 500;
+  --type-eyebrow-weight: 600;
   --type-eyebrow-lh: 1.3;
   --type-eyebrow-track: 0.14em;
   --type-eyebrow-size: 11px;
 
   /* Geometry */
-  --radius-card: 12px;
-  --radius-control: 12px;
-  --radius-tile: 10px;
+  --radius-card: 18px;
+  --radius-control: 24px;
+  --radius-tile: 18px;
   --radius-chip: 999px;
   --radius-pill: 999px;
-  --radius-sheet: 20px;
+  --radius-sheet: 24px;
+  --radius-panel: 24px;
+  --focus-width: 2px;
+  --focus-offset: 3px;
   --radius-dock: 0px;
   --space-1: 4px;
   --space-2: 8px;
@@ -152,9 +157,10 @@
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Elevation */
-  --shadow-card: 0 4px 14px rgba(61, 43, 28, 0.059);
-  --shadow-float: 0 1px 6px rgba(61, 43, 28, 0.122);
-  --shadow-panel: 0 24px 64px rgba(61, 43, 28, 0.18);
+  --shadow-card: 0 2px 8px rgb(36 38 34 / 0.05);
+  --shadow-float: 0 2px 8px rgb(36 38 34 / 0.05);
+  --shadow-panel: 0 2px 8px rgb(36 38 34 / 0.05);
+  --halo: 0 0 10px 2px rgb(165 130 72 / 0.18);
   --shadow-dock: none;
 }
 
@@ -227,4 +233,10 @@
   :root {
     --section-gap: 64px;
   }
+}
+
+/* v4.1: halo C (oro 18%, desenfoque 10, expansión 2) y foco propuesto. El oro no se usa como texto pequeño. */
+.mw :focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
 }

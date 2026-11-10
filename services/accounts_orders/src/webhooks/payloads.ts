@@ -56,6 +56,24 @@ export interface ShopifyOrderWebhookPayload {
    * `note_attributes` on the resulting order.
    */
   readonly note_attributes?: ReadonlyArray<{ readonly name: string; readonly value: string }>;
+  /**
+   * Merchandise lines Rewards uses for the eligible subtotal. Only the
+   * fields `toEarnInput` reads are typed. Shipping, tips, and gift cards
+   * are not taken from here.
+   */
+  readonly line_items?: ReadonlyArray<{
+    readonly variant_id?: number | null;
+    readonly product_id?: number | null;
+    readonly quantity?: number;
+    readonly price?: string | null;
+    readonly total_discount?: string | null;
+  }>;
+  /**
+   * Order-level codes. Rewards reads `code` to detect wholesale; the
+   * eligible subtotal comes from each line's `total_discount`, not from
+   * the code amount.
+   */
+  readonly discount_codes?: ReadonlyArray<{ readonly code?: string }>;
 }
 
 export interface ShopifyCustomerRedactWebhookPayload {

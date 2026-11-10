@@ -354,25 +354,25 @@
       {
         "type": "font_picker",
         "id": "type_body_font",
-        "default": "work_sans_n4",
+        "default": "dm_sans_n4",
         "label": "t:options.body"
       },
       {
         "type": "font_picker",
         "id": "type_subheading_font",
-        "default": "work_sans_n5",
+        "default": "dm_sans_n7",
         "label": "t:options.subheading"
       },
       {
         "type": "font_picker",
         "id": "type_heading_font",
-        "default": "anonymous_pro_n4",
+        "default": "cormorant_n4",
         "label": "t:options.heading"
       },
       {
         "type": "font_picker",
         "id": "type_accent_font",
-        "default": "anonymous_pro_n4",
+        "default": "cormorant_n7",
         "label": "t:options.accent"
       },
       {
@@ -1550,7 +1550,7 @@
         "step": 1,
         "unit": "px",
         "label": "t:settings.border_radius",
-        "default": 100
+        "default": 24
       },
       {
         "type": "select",
