@@ -1,0 +1,57 @@
+{%- doc -%}
+  Large product of Nueva colección.
+
+  @param {object} product
+  @param {boolean} [eager]
+  @param {boolean} [show_new_label]
+{%- enddoc -%}
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign currency = cart.currency.iso_code
+  assign pct = 0
+  if product.available and variant.compare_at_price > variant.price
+    assign pct = variant.compare_at_price | minus: variant.price | times: 100.0 | divided_by: variant.compare_at_price | round
+  endif
+  capture brand
+    render 'monetta-facet', product: product, kind: 'brands'
+  endcapture
+  assign brand = brand | strip
+  assign show_new = false
+  if show_new_label
+    assign commercial = product.metafields.custom.fecha_comercial.value
+    if commercial != blank
+      assign commercial_seconds = commercial | date: '%s' | plus: 0
+      assign now_seconds = 'now' | date: '%s' | plus: 0
+      assign age_days = now_seconds | minus: commercial_seconds | divided_by: 86400
+      if commercial_seconds > 0 and age_days >= 0 and age_days <= 30
+        assign show_new = true
+      endif
+    endif
+  endif
+  assign image = product.featured_image
+-%}
+<article class="v41-feature__card" data-product-handle="{{ product.handle }}">
+  <a class="v41-feature__media" href="{{ product.url }}">
+    {%- if image -%}
+      <img src="{{ image | image_url: width: 1200 }}" width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt | default: product.title | escape }}" {% if eager %}loading="eager"{% else %}loading="lazy"{% endif %} decoding="async">
+    {%- endif -%}
+    {%- if show_new -%}
+      <img class="v41-feature__new" src="{{ 'monetta-v41-recien-llegado.svg' | asset_url }}" width="120" height="36" alt="Recién llegado" loading="lazy" decoding="async">
+    {%- endif -%}
+    {%- unless product.available -%}<span class="v41-sold">AGOTADO</span>{%- endunless -%}
+  </a>
+  <button type="button" class="v41-fav" data-save-product="{{ product.handle }}" data-product-title="{{ product.title | escape }}" aria-pressed="false" aria-label="Guardar {{ product.title | escape }}" hidden>{% render 'monetta-icon', name: 'heart', size: 24, class: 'save-icon--off' %}{% render 'monetta-icon', name: 'heartFilled', size: 24, class: 'save-icon--on' %}</button>
+  <div class="v41-feature__meta">
+    <div class="v41-feature__copy">
+      {%- if brand != blank -%}<p class="v41-feature__brand">{{ brand | escape }}</p>{%- endif -%}
+      <p class="v41-feature__name">{{ product.title | escape }}</p>
+    </div>
+    <p class="v41-feature__price">
+      <span class="v41-feature__now">{{ variant.price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</span>
+      {%- if pct > 0 -%}
+        <s>{{ variant.compare_at_price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</s>
+        <span class="v41-feature__pct">({{ pct }}%)</span>
+      {%- endif -%}
+    </p>
+  </div>
+</article>

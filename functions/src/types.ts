@@ -74,9 +74,6 @@ export interface CatalogProductDocument {
     readonly compareAtPrice: number | null;
     readonly sku: string | null;
     readonly available: boolean;
-    readonly inventoryQuantity: number | null;
-    readonly inventoryPolicy: string;
-    readonly inventoryItemId: string;
   }>;
   readonly createdAt: string;
   readonly updatedAt: string;
