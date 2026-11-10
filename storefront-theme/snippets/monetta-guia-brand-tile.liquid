@@ -6,6 +6,7 @@
 
   @param {string} entry - 'Name', 'Name:art' or 'Name:art:Vendor'. art picks assets/monetta-app-brand-<art>.webp; Vendor is
     the product vendor when it differs from the name shown (Dior is sold as Christian Dior).
+  @param {boolean} [sold_only] - When true, a logo is shown only if the store sells that vendor.
 {%- enddoc -%}
 {%- liquid
   assign parts = entry | split: ':'
@@ -18,6 +19,7 @@
   endif
 -%}
 {%- if sold or art != blank -%}
+  {%- unless sold_only and sold == false -%}
   {%- if sold -%}
     {%- capture url -%}{% render 'monetta-guia-url', key: 'brand', brand: vendor %}{%- endcapture -%}
   {%- else -%}
@@ -32,4 +34,5 @@
       {%- endif -%}
     </a>
   </li>
+  {%- endunless -%}
 {%- endif -%}

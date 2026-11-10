@@ -1,18 +1,43 @@
 {%- comment -%}
-  Home rail of compact product cards (Novedades). Products come from the collection chosen in the editor, in that
-  collection's own order (set it to "newest first" in the admin for a Novedades rail). Prices, compare-at and sold-out
-  states are rendered by Shopify at request time. The next card peeks on phones; buttons appear from 1024 px.
+  Home product block. presentation=rail is the compact carousel (Lo más buscado).
+  presentation=feature is Nueva colección (large card + thumbnails). presentation=feed is Para ti.
+  A blank collection with hide_without_collection renders nothing.
 {%- endcomment -%}
-{%- assign heading_id = section.id | append: '-heading' -%}
 {%- liquid
-  assign source = section.settings.collection | default: collections.all
+  assign heading_id = section.id | append: '-heading'
+  assign source = section.settings.collection
+  assign hidden = false
+  if source == blank
+    if section.settings.hide_without_collection
+      assign hidden = true
+    else
+      assign source = collections.all
+    endif
+  endif
   assign rail_id = 'rail-' | append: section.id
+  assign presentation = section.settings.presentation | default: 'rail'
 -%}
+{%- if hidden -%}
+  {%- if request.design_mode -%}
+    <p class="v41-note" {{ section.shopify_attributes }}>{{ section.settings.heading | escape }} no se muestra hasta que elijas una colección.</p>
+  {%- else -%}
+    {% style %}#shopify-section-{{ section.id }} { display: none; }{% endstyle %}
+  {%- endif -%}
+{%- elsif presentation == 'feature' -%}
+  <div {{ section.shopify_attributes }}>
+    {% render 'monetta-home-feature', heading_id: heading_id, source: source, heading: section.settings.heading, link_label: section.settings.link_label, limit: section.settings.products_to_show, newest_first: section.settings.newest_first, show_new_label: section.settings.show_new_label %}
+  </div>
+{%- elsif presentation == 'feed' -%}
+  <div {{ section.shopify_attributes }}>
+    {% render 'monetta-home-feed', heading_id: heading_id, source: source, heading: section.settings.heading, link_label: section.settings.link_label, limit: section.settings.products_to_show %}
+  </div>
+{%- else -%}
 <section class="section container" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
   {% render 'monetta-section-header',
     id: heading_id,
     title: section.settings.heading,
-    link_url: section.settings.link_url,
+    title_url: source.url,
+    link_url: section.settings.link_url | default: source.url,
     link_label: section.settings.link_label,
     rail_id: rail_id
   %}
@@ -32,15 +57,29 @@
   {%- endif -%}
   {% endpaginate %}
 </section>
+{%- endif -%}
 
 {% schema %}
 {
   "name": "Monetta · Carrusel",
   "settings": [
+    {
+      "type": "select",
+      "id": "presentation",
+      "label": "Presentación",
+      "default": "rail",
+      "options": [
+        { "value": "rail", "label": "Carrusel" },
+        { "value": "feature", "label": "Nueva colección" },
+        { "value": "feed", "label": "Para ti" }
+      ]
+    },
+    { "type": "checkbox", "id": "hide_without_collection", "label": "Ocultar si no hay colección", "default": false },
+    { "type": "checkbox", "id": "show_new_label", "label": "Mostrar Recién llegado", "info": "Permanece oculto sin una fecha comercial en el metacampo fecha_comercial.", "default": false },
     { "type": "checkbox", "id": "newest_first", "label": "Mostrar las más recientes primero", "default": false },
     { "type": "text", "id": "heading", "label": "Título", "default": "Novedades" },
-    { "type": "collection", "id": "collection", "label": "Colección", "info": "Sin colección se usa todo el catálogo. El orden es el de la colección." },
-    { "type": "range", "id": "products_to_show", "label": "Productos", "min": 4, "max": 12, "step": 1, "default": 8 },
+    { "type": "collection", "id": "collection", "label": "Colección", "info": "Si «Ocultar si no hay colección» está activo y esta queda vacía, la sección no se muestra." },
+    { "type": "range", "id": "products_to_show", "label": "Productos", "min": 4, "max": 40, "step": 1, "default": 8 },
     { "type": "text", "id": "link_label", "label": "Texto del enlace", "default": "Ver todo" },
     { "type": "url", "id": "link_url", "label": "Enlace" }
   ],

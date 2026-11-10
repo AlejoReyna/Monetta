@@ -254,12 +254,65 @@
     openQuickView(trigger);
   });
 
+  function initFeature(root) {
+    if (root.dataset.v41Feature) return;
+    root.dataset.v41Feature = 'true';
+    const stage = root.querySelector('[data-feature-stage]');
+    const picks = [...root.querySelectorAll('[data-feature-pick]')];
+    if (!stage || picks.length === 0) return;
+    let index = 0;
+    const show = (next) => {
+      index = (next + picks.length) % picks.length;
+      const template = picks[index].parentElement.querySelector('template');
+      if (template) stage.replaceChildren(template.content.cloneNode(true));
+      picks.forEach((pick, item) => {
+        const selected = item === index;
+        pick.classList.toggle('is-selected', selected);
+        pick.setAttribute('aria-current', selected ? 'true' : 'false');
+      });
+      const title = picks[index].getAttribute('aria-label');
+      if (title) window.Monetta?.announce?.(`Mostrando ${title}`);
+    };
+    root.querySelector('[data-feature-prev]')?.addEventListener('click', () => show(index - 1));
+    root.querySelector('[data-feature-next]')?.addEventListener('click', () => show(index + 1));
+    picks.forEach((pick, item) => pick.addEventListener('click', () => show(item)));
+  }
+
+  async function submitFeed(form, checkout) {
+    const id = form.querySelector('[name="id"]')?.value;
+    if (!id || !window.Monetta?.add) return false;
+    const result = await window.Monetta.add({
+      id,
+      quantity: 1,
+      name: form.dataset.productName || '',
+      open: false,
+      trigger: form.querySelector('button'),
+    });
+    if (result?.ok && checkout) window.location.assign(checkout);
+    return true;
+  }
+
+  function initFeed(root) {
+    if (root.dataset.v41Feed) return;
+    root.dataset.v41Feed = 'true';
+    root.addEventListener('submit', (event) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement)) return;
+      if (!form.matches('[data-feed-add], [data-feed-buy]')) return;
+      if (!window.Monetta?.add) return;
+      event.preventDefault();
+      submitFeed(form, form.dataset.checkout || '');
+    });
+  }
+
   const bind = (scope = document) => {
     scope.querySelectorAll('[data-guia-carousel]').forEach(initCarousel);
     scope.querySelectorAll('[data-guia-collections]').forEach(initCollections);
     scope.querySelectorAll('.guia-register').forEach(initRegister);
     scope.querySelectorAll('[data-guia-recent]').forEach(initRecent);
     scope.querySelectorAll('[data-guia-copy]').forEach(initCopy);
+    scope.querySelectorAll('[data-v41-feature]').forEach(initFeature);
+    scope.querySelectorAll('.v41-feed').forEach(initFeed);
   };
   bind();
   document.addEventListener('shopify:section:load', (event) => bind(event.target));
