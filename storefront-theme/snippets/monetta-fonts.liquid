@@ -1,11 +1,15 @@
 {%- doc -%}
-  Inter (400/500/600/700) and Playfair Display (400, and 700 for the product cards' brand and price), the app's bundled OFL
-  fonts, served from the theme's assets (WOFF2; Playfair 700 is the app's TTF until it is converted).
-  The guide's free stand-ins (PR #33): Cormorant Garamond (300, 400, 500; 300 and 400 italic) for text on photographs and
-  Mrs Saint Delafield for the script accents. They are never preloaded: they appear below the header, and swap is fine.
-  Licences: assets/monetta-{Inter,PlayfairDisplay,CormorantGaramond,MrsSaintDelafield}-OFL.txt. Regular, SemiBold and Playfair
-  are preloaded.
+  v4.1: Cormorant Garamond (400/700, editorial) and DM Sans (400/600/700, UI) come from Shopify's font library
+  (settings.type_heading_font and settings.type_body_font). Inter and Playfair stay loaded for sections that still
+  name them. Cormorant light/italic and Mrs Saint Delafield stay for text drawn on photographs.
 {%- enddoc -%}
+{% style %}
+  {{ settings.type_heading_font | font_face: font_display: 'swap' }}
+  {{ settings.type_heading_font | font_modify: 'weight', 'bold' | font_face: font_display: 'swap' }}
+  {{ settings.type_body_font | font_face: font_display: 'swap' }}
+  {{ settings.type_body_font | font_modify: 'weight', '600' | font_face: font_display: 'swap' }}
+  {{ settings.type_body_font | font_modify: 'weight', 'bold' | font_face: font_display: 'swap' }}
+{% endstyle %}
 {{ 'Inter-Regular.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
 {{ 'Inter-SemiBold.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
 {{ 'PlayfairDisplay-Regular.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
