@@ -4,11 +4,6 @@
   No search link. The phone dock reserves its height through --bottom-ui. The WhatsApp number setting feeds the last icon.
 {%- endcomment -%}
 {%- liquid
-  # The four policies keep their standard address when the store has not published one yet, so the link stays in place.
-  assign shipping_url = shop.shipping_policy.url | default: '/policies/shipping-policy'
-  assign refund_url = shop.refund_policy.url | default: '/policies/refund-policy'
-  assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
-  assign terms_url = shop.terms_of_service.url | default: '/policies/terms-of-service'
   capture contact_url
     render 'monetta-guia-url', key: 'contacto'
   endcapture
@@ -26,16 +21,24 @@
       <h2>Ayuda</h2>
       <ul role="list">
         <li><a href="{{ contact_url | strip }}">Contacto</a></li>
-        <li><a href="{{ shipping_url }}">Envíos</a></li>
-        <li><a href="{{ refund_url }}">Cambios y devoluciones</a></li>
+        {%- if shop.shipping_policy != blank -%}
+          <li><a href="{{ shop.shipping_policy.url }}">Envíos</a></li>
+        {%- endif -%}
+        {%- if shop.refund_policy != blank -%}
+          <li><a href="{{ shop.refund_policy.url }}">Cambios y devoluciones</a></li>
+        {%- endif -%}
       </ul>
     </div>
     <div class="footer-col">
       <h2>Información</h2>
       <ul role="list">
         <li><a href="{{ wholesale_url | strip }}">Mayoreo</a></li>
-        <li><a href="{{ privacy_url }}">Aviso de privacidad</a></li>
-        <li><a href="{{ terms_url }}">Términos y condiciones</a></li>
+        {%- if shop.privacy_policy != blank -%}
+          <li><a href="{{ shop.privacy_policy.url }}">Aviso de privacidad</a></li>
+        {%- endif -%}
+        {%- if shop.terms_of_service != blank -%}
+          <li><a href="{{ shop.terms_of_service.url }}">Términos y condiciones</a></li>
+        {%- endif -%}
       </ul>
     </div>
   </div>
