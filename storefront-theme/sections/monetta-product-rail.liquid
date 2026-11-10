@@ -33,11 +33,12 @@
   </div>
 {%- else -%}
 <section class="section container" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
+  {%- assign rail_link_url = section.settings.link_url | default: source.url -%}
   {% render 'monetta-section-header',
     id: heading_id,
     title: section.settings.heading,
     title_url: source.url,
-    link_url: section.settings.link_url | default: source.url,
+    link_url: rail_link_url,
     link_label: section.settings.link_label,
     rail_id: rail_id
   %}
