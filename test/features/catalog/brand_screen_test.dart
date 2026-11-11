@@ -86,8 +86,15 @@ void main() {
     }
 
     final category = categories.first;
-    expect(find.byKey(Key('brand-tab-$category')), findsOneWidget);
-    await tester.tap(find.byKey(Key('brand-tab-$category')));
+    final tab = find.byKey(Key('brand-tab-$category')).hitTestable();
+    final categoryStrip = find.byWidgetPredicate(
+      (widget) =>
+          widget is Scrollable &&
+          axisDirectionToAxis(widget.axisDirection) == Axis.horizontal,
+    );
+    await tester.scrollUntilVisible(tab, 200, scrollable: categoryStrip);
+    await tester.pump();
+    await tester.tap(tab);
     await tester.pumpAndSettle();
 
     final visible = tester

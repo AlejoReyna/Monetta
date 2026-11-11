@@ -16,7 +16,10 @@ void main() {
       final store = await loadedStore();
       addTearDown(store.dispose);
       final product = store.products.firstWhere(
-        (p) => p.isInStock && p.images.length > 1,
+        (p) =>
+            p.isInStock &&
+            p.images.length > 1 &&
+            store.facetsFor(p.id)?.brand != null,
       );
       await pumpQuickView(tester, store, product);
 
