@@ -10,9 +10,6 @@
   {{ settings.type_body_font | font_modify: 'weight', '600' | font_face: font_display: 'swap' }}
   {{ settings.type_body_font | font_modify: 'weight', 'bold' | font_face: font_display: 'swap' }}
 {% endstyle %}
-{{ 'Inter-Regular.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
-{{ 'Inter-SemiBold.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
-{{ 'PlayfairDisplay-Regular.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
 <style>
   @font-face {
     font-family: 'Inter';
