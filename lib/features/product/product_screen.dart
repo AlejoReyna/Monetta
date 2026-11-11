@@ -21,6 +21,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
+import '../../app/monetta_tokens.g.dart';
 import '../../app/storefront_layout.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
@@ -972,7 +973,7 @@ class _AvailabilityLine extends StatelessWidget {
           height: 6,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: inStock ? const Color(0xFF3B7B4A) : palette.sale,
+            color: inStock ? MonettaTokens.success : palette.sale,
           ),
         ),
         const SizedBox(width: BoutiqueSpace.sm),

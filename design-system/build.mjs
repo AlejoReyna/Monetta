@@ -77,12 +77,11 @@ if (failures.length) {
 const bp = tokens.layout.breakpoint;
 const sizes = (name) => tokens.type.role[name].size;
 const roleNames = Object.keys(tokens.type.role);
-// The web stacks keep the bundled faces first and add system faces, as the earlier hand-written tokens did.
-const WEB_STACK = {
-  serif: `'Playfair Display', Georgia, 'Times New Roman', serif`,
-  sans: `'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif`,
+// The web stacks put the bundled v4.1 faces first, then the manifest's system fallbacks.
+const familyCss = (key) => {
+  const f = tokens.type.family[key];
+  return [`'${f.name}'`, ...f.fallback.map((n) => (/\s/.test(n) ? `'${n}'` : n))].join(', ');
 };
-const familyCss = (key) => WEB_STACK[key];
 
 const colorLines = Object.entries(light).map(([k, v]) => `  --color-${kebab(k)}: ${cssColor(v)};`);
 const legacy = [
@@ -141,6 +140,12 @@ const base = [
   '  /* Elevation */',
   ...Object.entries(tokens.elevation).map(([k, v]) => `  --shadow-${k}: ${v.replace(/#([0-9a-f]{8})/gi, (m) => cssColor(m))};`),
   '  --shadow-dock: none;',
+  '',
+  '  /* Focus ring and halo C (v4.1 §006/§007) */',
+  `  --focus-color: ${cssColor(light[tokens.focus.color])};`,
+  `  --focus-width: ${tokens.focus.width}px;`,
+  `  --focus-offset: ${tokens.focus.offset}px;`,
+  `  --halo-gold: ${cssColor(tokens.halo.color + Math.round(tokens.halo.alpha * 255).toString(16).padStart(2, '0').toUpperCase())};`,
 ];
 const responsive = (label, query, overrides) => [
   `/* ${label} */`,
@@ -263,6 +268,18 @@ ${dartDark.join('\n')}
   static const double controlHeight = ${tokens.size.control};
   static const double tapTarget = ${tokens.size.tap};
   static const double logoHeight = ${tokens.size.logoHeight};
+
+  // Focus ring and halo C (v4.1).
+  static const Color focusColor = ${dartColor(light[tokens.focus.color])};
+  static const double focusWidth = ${tokens.focus.width};
+  static const double focusOffset = ${tokens.focus.offset};
+  static const Color haloColor = ${dartColor(tokens.halo.color + Math.round(tokens.halo.alpha * 255).toString(16).padStart(2, '0').toUpperCase())};
+  static const double haloBlur = ${tokens.halo.blur};
+  static const double haloSpread = ${tokens.halo.spread};
+
+  // Type families (bundled faces; pubspec declares them).
+  static const String serifFamily = '${tokens.type.family.serif.name}';
+  static const String sansFamily = '${tokens.type.family.sans.name}';
 
   // Layout.
   static const double breakpointMedium = ${bp.medium};

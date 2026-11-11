@@ -19,30 +19,31 @@ import 'shopper_copy.dart';
 /// Fixed light-palette values retained for brand artwork, media overlays, and
 /// backwards-compatible callers while feature UI migrates to [MonettaColors].
 /// Theme-dependent widgets should read `context.monettaColors` instead.
-const Color kInk = Color(0xFF111111);
+const Color kInk = MonettaTokens.ink;
 
-const Color kInkMuted = Color(0xFF737373);
+const Color kInkMuted = MonettaTokens.inkMuted;
 
 /// Monetta's accent, rationed. See the library note.
-const Color kGold = Color(0xFFAA7D44);
+const Color kGold = MonettaTokens.gold;
 
-/// Purple used when an animated home-section title has fully resolved.
-const Color kPurple = Color(0xFF725A82);
+/// Colour of an animated home-section title once resolved. v4.1 has no purple:
+/// titles resolve to ink.
+const Color kPurple = MonettaTokens.ink;
 
 /// A lighter counterpart that keeps small purple copy legible on dark canvas.
 const Color kPurpleOnDark = Color(0xFFB79AC7);
 
 /// Pale ground used for catalog photography and quiet footer surfaces.
-const Color kMist = Color(0xFFF5F5F5);
+const Color kMist = MonettaTokens.surfaceWarm;
 
 /// Slightly darker than [kMist] so the rounded search field remains visible.
-const Color kSearchFill = Color(0xFFF1F1F1);
+const Color kSearchFill = MonettaTokens.surfaceTile;
 
 /// Sale copy follows common retail convention and stays distinct from gold.
-const Color kSale = Color(0xFFA3342B);
+const Color kSale = MonettaTokens.sale;
 
 /// The 0.5px hairline colour: ink at 15%.
-const Color kLine = Color(0x26111111);
+const Color kLine = Color(0x26242622);
 
 const BorderRadius kSquare = BorderRadius.zero;
 
@@ -160,7 +161,7 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
     successSurface: MonettaTokens.successSurface,
     scrim: MonettaTokens.scrim,
     navigationSurface: MonettaTokens.bar,
-    navigationSelection: Color(0x29C5A052),
+    navigationSelection: MonettaTokens.surfaceTile,
     navigationForeground: MonettaTokens.navigationActive,
     navigationForegroundMuted: MonettaTokens.navigationInactive,
     surfaceWarm: MonettaTokens.surfaceWarm,
@@ -386,7 +387,7 @@ String formatCatalogMoney(Money? money) {
 // Typography
 // ---------------------------------------------------------------------------
 
-const String _displayFamily = 'Inter';
+const String _displayFamily = MonettaTokens.sansFamily;
 const List<String> _displayFallback = <String>[
   'Helvetica',
   'Arial',
@@ -395,8 +396,8 @@ const List<String> _displayFallback = <String>[
 
 /// Serif used by Monetta's storefront navigation and editorial section titles.
 ///
-/// The client guide uses the bundled Playfair face; system serifs remain fallbacks.
-const String kEditorialFontFamily = 'Playfair Display';
+/// MONETTA UI v4.1: Cormorant Garamond (bundled); system serifs remain fallbacks.
+const String kEditorialFontFamily = MonettaTokens.serifFamily;
 const List<String> _editorialFallback = <String>[
   'New York',
   'Iowan Old Style',

@@ -25,8 +25,8 @@ import '../../app/theme.dart';
 // Type
 // ---------------------------------------------------------------------------
 
-/// Editorial serif. Playfair Display when registered; platform serif until then.
-const String kBoutiqueSerifFamily = 'Playfair Display';
+/// Editorial serif (v4.1): Cormorant Garamond 400/700.
+const String kBoutiqueSerifFamily = MonettaTokens.serifFamily;
 const List<String> kBoutiqueSerifFallback = <String>[
   'New York',
   'Iowan Old Style',
@@ -36,8 +36,8 @@ const List<String> kBoutiqueSerifFallback = <String>[
   'serif',
 ];
 
-/// Controls, prices, navigation. Inter when registered; platform sans until then.
-const String kBoutiqueSansFamily = 'Inter';
+/// Controls, prices, navigation (v4.1): DM Sans 400/600/700.
+const String kBoutiqueSansFamily = MonettaTokens.sansFamily;
 const List<String> kBoutiqueSansFallback = <String>[
   'SF Pro Text',
   'Helvetica Neue',
@@ -228,7 +228,7 @@ abstract final class BoutiqueRadius {
 // rest of this file (and its callers) already read.
 const Color _ivory = MonettaTokens.onPhoto;
 const Color _pageGround = MonettaTokens.canvas;
-const Color _tile = MonettaTokens.surfaceTile;
+const Color _tile = MonettaTokens.surface;
 const Color _warm = MonettaTokens.surfaceWarm;
 const Color _boutiqueInk = MonettaTokens.ink;
 const Color _mutedBoutiqueInk = MonettaTokens.inkMuted;
@@ -331,7 +331,7 @@ class BoutiquePalette {
         selectedFill: shared.surfaceMuted,
         selectedBorder: shared.contentPrimary,
         sale: shared.sale,
-        onDark: const Color(0xFFF8F5EE),
+        onDark: MonettaTokens.onPhoto,
         action: shared.actionPrimary,
         onAction: shared.onActionPrimary,
         actionDark: shared.actionDark,

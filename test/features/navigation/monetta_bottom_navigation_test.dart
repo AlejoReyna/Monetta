@@ -136,11 +136,29 @@ void main() {
           greaterThanOrEqualTo(4.5),
           reason: 'inactive on the surface',
         );
-        expect(
-          _contrast(renderedActive, renderedInactive),
-          greaterThanOrEqualTo(3.0),
-          reason: 'active against inactive',
-        );
+        if (dark) {
+          expect(
+            _contrast(renderedActive, renderedInactive),
+            greaterThanOrEqualTo(3.0),
+            reason: 'active against inactive',
+          );
+        } else {
+          // v4.1 light: icon and label stay ink; the current destination is
+          // marked by its capsule (and w600), not by a second colour.
+          final capsule =
+              _selectionColor(tester, MonettaBottomDestination.home);
+          expect(capsule, MonettaTokens.surfaceTile, reason: 'active capsule');
+          expect(
+            _selectionColor(tester, MonettaBottomDestination.catalog).a,
+            0,
+            reason: 'inactive has no capsule',
+          );
+          expect(
+            _contrast(renderedActive, capsule),
+            greaterThanOrEqualTo(4.5),
+            reason: 'active label on its capsule',
+          );
+        }
       });
     }
 
@@ -201,7 +219,14 @@ void main() {
         final icon = _iconColor(tester, d);
         final label = _labelStyle(tester, d).color!;
         expect(icon, label, reason: '${d.name} icon and label share a color');
-        _expectBetween(icon, _lightInactive, _lightActive, d.name);
+        // v4.1: the capsule is what cross-fades.
+        final alpha = _selectionColor(tester, d).a;
+        expect(alpha, greaterThan(0), reason: '${d.name} capsule mid-fade');
+        expect(
+          alpha,
+          lessThan(MonettaTokens.surfaceTile.a),
+          reason: '${d.name} capsule mid-fade',
+        );
       }
       for (final d in _destinations) {
         expect(tester.getSize(_icon(d)), const Size(24, 24), reason: d.name);
@@ -745,7 +770,7 @@ void main() {
       expect(_opacityAbove(icon, dest), 1.0);
     });
 
-    testWidgets('NAV-11 no painted background between the ink well and icon',
+    testWidgets('NAV-11 only the v4.1 selection capsule paints behind an icon',
         (tester) async {
       _phone(tester);
       await tester.pumpWidget(_Harness(current: MonettaBottomDestination.home));
@@ -760,13 +785,23 @@ void main() {
           of: _icon(d),
           matching: find.descendant(
             of: _dest(d),
-            matching: find.byWidgetPredicate(_paintsBackground),
+            matching: find.byWidgetPredicate(
+              (w) =>
+                  _paintsBackground(w) &&
+                  w.key != Key('bottom-nav-${d.name}-selection'),
+            ),
           ),
         );
         expect(
           backgrounds,
           findsNothing,
           reason: '${d.name} paints a fill behind its icon',
+        );
+        final capsule = _selectionColor(tester, d);
+        expect(
+          capsule.a,
+          d == MonettaBottomDestination.catalog ? greaterThan(0) : 0,
+          reason: '${d.name} capsule only when current',
         );
       }
     });
@@ -879,6 +914,13 @@ TextStyle _labelStyle(WidgetTester tester, MonettaBottomDestination d) {
 String _labelText(WidgetTester tester, MonettaBottomDestination d) =>
     _paragraph(tester, d).text.toPlainText();
 
+Color _selectionColor(WidgetTester tester, MonettaBottomDestination d) {
+  final box = tester.widget<DecoratedBox>(
+    find.byKey(Key('bottom-nav-${d.name}-selection')),
+  );
+  return (box.decoration as BoxDecoration).color!;
+}
+
 BoxDecoration _surfaceDecoration(WidgetTester tester) =>
     tester.widget<DecoratedBox>(_surface).decoration as BoxDecoration;
 
@@ -965,22 +1007,6 @@ void _expectPair(
 ) {
   expect(_iconColor(tester, d), color, reason: '${d.name} icon');
   expect(_labelStyle(tester, d).color, color, reason: '${d.name} label');
-}
-
-void _expectBetween(Color value, Color a, Color b, String reason) {
-  expect(value, isNot(a), reason: '$reason is still at the start color');
-  expect(value, isNot(b), reason: '$reason already reached the end color');
-  for (final (v, x, y) in [
-    (value.r, a.r, b.r),
-    (value.g, a.g, b.g),
-    (value.b, a.b, b.b),
-  ]) {
-    expect(
-      v,
-      inInclusiveRange(x < y ? x : y, x < y ? y : x),
-      reason: '$reason is outside the $a..$b range',
-    );
-  }
 }
 
 double _contrast(Color a, Color b) {

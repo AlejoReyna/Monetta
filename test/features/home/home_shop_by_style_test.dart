@@ -7,6 +7,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/features/boutique/boutique_tokens.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/features/boutique/guide_brand_tile.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
@@ -142,18 +144,18 @@ void main() {
       expect(photoSize.width, closeTo(photoSize.height, .01));
       expect(photoSize.width, closeTo(tester.getSize(tote).width, .01));
       expect(tester.widget<Image>(photo).fit, BoxFit.cover);
-      // Cream ground with the 10 px tile radius.
+      // Tile ground follows the surfaceTile token (section pending the v4.1 Home rework).
       final decorated = tester.widget<DecoratedBox>(
         find.descendant(of: tote, matching: find.byType(DecoratedBox)).first,
       );
       final decoration = decorated.decoration as BoxDecoration;
-      expect(decoration.color, const Color(0xFFF4EEE5));
-      expect(decoration.borderRadius, BorderRadius.circular(10));
-      // The label: Playfair Display 12, centred, one line with ellipsis.
+      expect(decoration.color, MonettaTokens.surfaceTile);
+      expect(decoration.borderRadius, BorderRadius.circular(18));
+      // The label: editorial serif 12, centred, one line with ellipsis.
       final label = tester.widget<Text>(
         find.descendant(of: tote, matching: find.text('Tote')),
       );
-      expect(label.style?.fontFamily, 'Playfair Display');
+      expect(label.style?.fontFamily, kBoutiqueSerifFamily);
       expect(label.style?.fontSize, 12);
       expect(label.maxLines, 1);
       expect(label.overflow, TextOverflow.ellipsis);

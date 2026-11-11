@@ -4,6 +4,7 @@
 // «Categorías», a shopping cart and no underline.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
 import 'package:monetta_app/app/theme.dart';
@@ -125,7 +126,7 @@ void main() {
         ),
       );
       expect(grounds, findsOneWidget, reason: 'a single container, no frame');
-      expect(palette.surfaceDeep, const Color(0xFFF3EADF));
+      expect(palette.surfaceDeep, MonettaTokens.surfaceWarm);
       final decoration =
           tester.widget<DecoratedBox>(grounds).decoration as BoxDecoration;
       expect(decoration.borderRadius, kProductCardRadius);

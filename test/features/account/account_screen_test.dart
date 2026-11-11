@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/account_controller.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
@@ -233,7 +234,7 @@ void main() {
       expect(find.text('Política de privacidad'), findsOneWidget);
       expect(
         tester.widget<Text>(deleteLink).style?.color,
-        const Color(0xFFA3342B),
+        MonettaTokens.sale,
       );
 
       // One «Cerrar sesión» only: the duplicate text button is gone.

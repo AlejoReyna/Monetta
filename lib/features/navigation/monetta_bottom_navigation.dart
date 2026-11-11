@@ -18,6 +18,9 @@ enum MonettaBottomDestination { home, catalog, bag, account }
 
 // Layout of the docked bar. The theme is the only source of its colors.
 const double _kBarMinHeight = 56;
+
+/// Radius of the v4.1 selection capsule behind the current destination.
+const double _kSelectionRadius = 24;
 const double _kBarSidePadding = 10;
 const double _kBarMaxContentWidth = 480;
 // 2 (was 4) so that «Categorías» (about 69 pt in Inter 600 at 13) still fits
@@ -414,67 +417,80 @@ class _NavItemState extends State<_NavItem> {
         onHighlightChanged: (pressed) => setState(() => _pressed = pressed),
         // The visible label and the badge are already in [semanticLabel].
         child: ExcludeSemantics(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: _kBarMinHeight),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: _kItemHorizontalPadding,
-                vertical: _kItemVerticalPadding,
-              ),
-              child: Opacity(
-                opacity: _pressed ? _kPressedOpacity : 1,
-                child: TweenAnimationBuilder<double>(
-                  duration: widget.animationsDisabled ? Duration.zero : kSnap,
-                  curve: kMotionCurve,
-                  tween: Tween(end: selected ? 1 : 0),
-                  builder: (context, progress, _) {
-                    final color = Color.lerp(
-                      colors.navigationForegroundMuted,
-                      colors.navigationForeground,
-                      progress,
-                    )!;
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconTheme.merge(
-                          data: IconThemeData(color: color),
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              _NavGlyph(
-                                key: Key('bottom-nav-${destination.name}-icon'),
-                                destination: destination,
-                              ),
-                              if (badge > 0)
-                                Positioned(
-                                  left: 16,
-                                  top: -6,
-                                  child: _BagBadge(count: badge),
-                                ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: _kIconLabelGap),
-                        Text(
-                          label,
-                          key: Key('bottom-nav-${destination.name}-label'),
-                          maxLines: widget.wrapLabel ? null : 1,
-                          softWrap: widget.wrapLabel,
-                          textAlign: TextAlign.center,
-                          textScaler: widget.labelScaler,
-                          style: _labelStyle(
-                            weight:
-                                selected ? FontWeight.w600 : FontWeight.w400,
-                            color: color,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+          // v4.1 (nav_0–nav_3): the current destination sits on a soft capsule;
+          // icon and label stay ink. The capsule cross-fades, nothing moves.
+          child: TweenAnimationBuilder<double>(
+            duration: widget.animationsDisabled ? Duration.zero : kSnap,
+            curve: kMotionCurve,
+            tween: Tween(end: selected ? 1 : 0),
+            builder: (context, progress, _) {
+              final color = Color.lerp(
+                colors.navigationForegroundMuted,
+                colors.navigationForeground,
+                progress,
+              )!;
+              return DecoratedBox(
+                key: Key('bottom-nav-${destination.name}-selection'),
+                decoration: BoxDecoration(
+                  color: colors.navigationSelection.withValues(
+                    alpha: colors.navigationSelection.a * progress,
+                  ),
+                  borderRadius: BorderRadius.circular(_kSelectionRadius),
                 ),
-              ),
-            ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: _kBarMinHeight),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: _kItemHorizontalPadding,
+                      vertical: _kItemVerticalPadding,
+                    ),
+                    child: Opacity(
+                      opacity: _pressed ? _kPressedOpacity : 1,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconTheme.merge(
+                            data: IconThemeData(color: color),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                _NavGlyph(
+                                  key: Key(
+                                    'bottom-nav-${destination.name}-icon',
+                                  ),
+                                  destination: destination,
+                                ),
+                                if (badge > 0)
+                                  Positioned(
+                                    left: 16,
+                                    top: -6,
+                                    child: _BagBadge(count: badge),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: _kIconLabelGap),
+                          Text(
+                            label,
+                            key: Key('bottom-nav-${destination.name}-label'),
+                            maxLines: widget.wrapLabel ? null : 1,
+                            softWrap: widget.wrapLabel,
+                            textAlign: TextAlign.center,
+                            textScaler: widget.labelScaler,
+                            style: _labelStyle(
+                              weight:
+                                  selected ? FontWeight.w600 : FontWeight.w400,
+                              color: color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),

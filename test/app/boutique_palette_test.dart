@@ -38,7 +38,7 @@ void main() {
     // generated tokens (design-system/monetta.tokens.json).
     for (final target in <String, (Color, Color Function(BoutiquePalette))>{
       'canvas': (MonettaTokens.canvas, (p) => p.canvas),
-      'surface (product tiles)': (MonettaTokens.surfaceTile, (p) => p.surface),
+      'surface (product tiles)': (MonettaTokens.surface, (p) => p.surface),
       'surfaceDeep (warm panels)': (
         MonettaTokens.surfaceWarm,
         (p) => p.surfaceDeep,
@@ -60,12 +60,8 @@ void main() {
       );
     }
 
-    test('STYLE-01 the page ground is a warm ivory, never pure white', () {
-      expect(MonettaColors.light.canvas, isNot(const Color(0xFFFFFFFF)));
-      expect(
-        MonettaColors.light.canvas.r,
-        greaterThan(MonettaColors.light.canvas.b),
-      );
+    test('STYLE-01 v4.1: the page ground is pure white', () {
+      expect(MonettaColors.light.canvas, const Color(0xFFFFFFFF));
     });
 
     test('STYLE-01 the bars share one navigation surface', () {
@@ -82,12 +78,12 @@ void main() {
         final light = await _paletteUnder(tester, buildTheme());
         expect(light.ink, MonettaTokens.ink);
         expect(light.inkMuted, MonettaTokens.inkMuted);
-        expect(light.gold, const Color(0xFFC5A052));
+        expect(light.gold, const Color(0xFFA58248));
         expect(light.goldText, MonettaTokens.accentText);
         expect(light.hairline, MonettaTokens.divider);
         expect(light.selectedBorder, MonettaTokens.actionPrimary);
-        expect(light.sale, const Color(0xFFA3342B));
-        expect(light.onDark, const Color(0xFFF8F5EE));
+        expect(light.sale, const Color(0xFFA63535));
+        expect(light.onDark, MonettaTokens.onPhoto);
 
         final dark = await _paletteUnder(tester, buildDarkTheme());
         const shared = MonettaColors.dark;
@@ -102,7 +98,7 @@ void main() {
         expect(dark.selectedFill, shared.surfaceMuted);
         expect(dark.selectedBorder, shared.contentPrimary);
         expect(dark.sale, shared.sale);
-        expect(dark.onDark, const Color(0xFFF8F5EE));
+        expect(dark.onDark, MonettaTokens.onPhoto);
         expect(dark.action, shared.actionPrimary);
 
         // MonettaColors.light: the semantic roles of the guideline.
@@ -121,10 +117,10 @@ void main() {
         expect(l.accent, kGold);
         expect(l.accentContent, MonettaTokens.accentText);
         expect(l.sale, kSale);
-        expect(l.sale, const Color(0xFFA3342B));
-        expect(l.success, const Color(0xFF3B7B4A));
+        expect(l.sale, const Color(0xFFA63535));
+        expect(l.success, const Color(0xFF3B7030));
         expect(l.warningSurface, MonettaTokens.surfaceWarm);
-        expect(l.successSurface, const Color(0xFFEAF4EC));
+        expect(l.successSurface, MonettaTokens.successSurface);
         expect(l.navigationForeground, MonettaTokens.navigationActive);
         expect(l.navigationForegroundMuted, MonettaTokens.navigationInactive);
 

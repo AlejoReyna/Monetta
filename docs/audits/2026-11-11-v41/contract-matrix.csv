@@ -1,0 +1,51 @@
+contract,screen,assessment,evidence_followup
+UI:G01,Home,Partial,F01–F03; Home renders
+UI:G01-A,Featured new collection,Missing required composition,F02; four-card grid instead of selected product/40-item rail
+UI:G01-B,Most wanted / For you / Wholesale,Partial; For you missing,F02
+UI:G02,Sidebar,Partial,F04/F09/F11
+UI:G03,Categories,Partial; family tree missing,F04
+UI:G04,All brands,Missing required directory/entry,F04
+UI:G05,Collection/catalog,Partial,F05/F06
+UI:G06,Global search,Core present; UI contract incomplete,Search/count tests; F05/F06
+UI:G07,Filters,Partial,F05
+UI:G07-A,New/offers/availability,Partial; new/offers absent,F05; business date gate
+UI:G08,Sort,Partial,F05; oldest missing
+UI:G05-A,Brand collection,Partial,F01/F05/F06
+UI:G13,Wholesale,Partial,F15/F03/F16
+UI:G09,Quick view,Partial,F06/F07; selection/add tests
+UI:G10,PDP,Partial,F07/F08
+UI:G10-A,PDP details/recommendations,Partial,F07; three required sets incomplete
+UI:G11,Zoom,Partial,"F07; pinch exists, explicit controls missing"
+UI:G12,Restock request,Partial; request form missing,F08/F06
+UI:G14,Cart,Core present; required UI states incomplete,F11/F17; cart-summary tests
+UI:G14-A,Cart edits/recovery,Core present; full contract recheck needed,Quantity/recovery source; cart tests; no live ambiguous mutation exercised
+UI:G14-B,Wholesale gold cart state,Missing,F11
+UI:G14-C,Authoritative summary,Core present; eligibility unverified,Shopify-summary tests; F17
+UI:G15,Checkout/payment,Provider gate,Checkout-return tests; F17
+UI:G15-A,Address/delivery in checkout,Provider gate,Hosted checkout; F09/F17
+UI:G16,Order confirmation,Partial,F12; authoritative item/delivery detail incomplete; no live payment
+UI:G17,Access/registration,Provider gate; presentation gap,F17; no local guest label
+UI:G17-A,Email/verification,Provider gate,Hosted provider; F17; real OTP not exercised
+UI:G18,Account,Partial,F09/F10/F11
+UI:G19,Rewards,Partial,F10
+UI:G20,Tier benefits,Missing,F10; tier/benefit data gate
+UI:G21,Balance/movements,Partial; normal entry missing,F10; existing components not exposed by Rewards screen
+UI:G22,Order history,Core present,History/filter/status tests; F01/F12 for presentation/detail
+UI:G23,Order detail,Partial,F12
+UI:G24,Favorites,Partial; recommendations missing,F13
+UI:G25,Notifications,Core present; presentation incomplete,Inbox/route tests; F11 for account badge
+UI:G26,Profile,Core present for name/photo,Profile editor/account tests; provider-supported fields still need validation
+UI:G27,Addresses,Missing account management,F09; informational sheet only
+UI:G28,Payment methods,Unsupported management exposed as info,F09; conditional provider gate
+UI:G29,Preferences,Core present for local interests,Existing PersonalizationScreen; no blanket consent/provider claim
+UI:G30,Help/policies,Partial,F03/F09; Contact substitutes for required help destinations
+UI:G30-A,FAQ/policy reading,Missing required in-app CMS reading flow,F03/F09; privacy external link exists
+UI:G31,Layers/return,Core present; incomplete audit,Dialogs/navigation exist; F07; focus/keyboard/return not comprehensively exercised
+UI:G32,Failed/cancelled/expired login,Core error handling; provider gate,Hosted login/errors and account tests; F17; designed recovery surface absent locally
+UI:G33,Unavailable content/retired links,Partial; acceptance unverified,Missing-product/external-link fallbacks exist; all route states not exercised
+UI:G34,App notification permission,Partial,Explicit system-permission request exists; current notice differs from Tus avisos / Ahora no surface
+UI:G35,Real options/feed add,Partial,Variant/add tests pass; F02/F06 for missing For you feed and card selection
+UI:G37,Recover search/filter results,Core present; controls incomplete,Search/count/collection tests; F05
+UI:G38,Help/contact/external links,Partial,F03/F14; launcher-failure test passes
+UI:G39,Guest purchase/shipping/login,Provider gate; UI gap,F17; identity/rates/return need live verification
+UI:G40,Contact,Partial,F14/F16

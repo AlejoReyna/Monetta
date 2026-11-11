@@ -1,0 +1,51 @@
+contract,screen,primary_owner,support,reviewers,initial_status
+UI:G01,Home,A07,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G01-A,Featured new collection,A07,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G01-B,Most wanted / For you / Wholesale,A07,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G02,Sidebar,A04,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G03,Categories,A04,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G04,All brands,A04,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G05,Collection/catalog,A04,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G06,Global search,A04,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G07,Filters,A04,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G07-A,New/offers/availability,A04,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G08,Sort,A04,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G05-A,Brand collection,A04,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G13,Wholesale,A06,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G09,Quick view,A02,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G10,PDP,A02,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G10-A,PDP details/recommendations,A02,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G11,Zoom,A02,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G12,Restock request,A08,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G14,Cart,A08,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G14-A,Cart edits/recovery,A08,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G14-B,Wholesale gold cart state,A08,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G14-C,Authoritative summary,A08,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G15,Checkout/payment,A08,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G15-A,Address/delivery in checkout,A08,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G16,Order confirmation,A08,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G17,Access/registration,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G17-A,Email/verification,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G18,Account,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G19,Rewards,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G20,Tier benefits,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G21,Balance/movements,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G22,Order history,A08,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G23,Order detail,A08,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G24,Favorites,A07,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G25,Notifications,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G26,Profile,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G27,Addresses,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G28,Payment methods,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G29,Preferences,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G30,Help/policies,A06,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G30-A,FAQ/policy reading,A06,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G31,Layers/return,A00,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G32,Failed/cancelled/expired login,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G33,Unavailable content/retired links,A00,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G34,App notification permission,A05,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G35,Real options/feed add,A02,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G37,Recover search/filter results,A04,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G38,Help/contact/external links,A06,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G39,Guest purchase/shipping/login,A08,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED
+UI:G40,Contact,A06,A01 shared UI / A03 authoritative data / A00 integration,A09 visual + A10 engineering,NOT_STARTED

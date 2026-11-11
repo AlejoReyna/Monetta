@@ -1,7 +1,7 @@
 {%- doc -%}
   Bridge from Atelier's design variables to the Monetta tokens, for the pages that still render Atelier sections inside the Monetta
   shell (layout/theme.liquid: contact, mayoreo, cómo vender, policies) and for the storefront password page (layout/password.liquid).
-  The merchant's content, blocks and layout settings are untouched; only what the store looks like changes: Inter and Playfair
+  The merchant's content, blocks and layout settings are untouched; only what the store looks like changes: DM Sans and Cormorant Garamond
   instead of Atelier's fonts, the warm palette instead of Atelier's black-and-white colour schemes, pill buttons and 12px fields.
   The theme settings (config/settings_data.json) are not edited, so the editor still shows Atelier's own values for these
   sections. Replaces snippets/monetta-secondary-headings.liquid (22 Oct), which only swapped the heading face.
@@ -9,14 +9,14 @@
   Colours are written as values because Atelier also reads each one as an "r g b" triplet for its opacities.
 {%- enddoc -%}
 <style>
-  /* Type: body copy is Inter at the body role's size; every heading preset is Playfair Display 400 (the merchant's sizes stay). */
+  /* Type: body copy is DM Sans at the body role's size; every heading preset is Cormorant Garamond 400 (the merchant's sizes stay). */
   body.mw-atelier {
     --font-body--family: var(--font-sans);
     --font-body--style: normal;
     --font-body--weight: 400;
     --font-subheading--family: var(--font-sans);
     --font-subheading--style: normal;
-    --font-subheading--weight: 500;
+    --font-subheading--weight: 600;
     --font-heading--family: var(--font-serif);
     --font-heading--style: normal;
     --font-heading--weight: 400;

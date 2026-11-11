@@ -1,0 +1,306 @@
+{
+  "scope": "plan only; no implementation launched",
+  "verified_model_guidance_date": "2026-11-11",
+  "max_total_agents": 4,
+  "max_child_agents": 3,
+  "coordinator": {
+    "id": "A00",
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "xhigh",
+    "prompt": "prompts/a00-coordinator.md"
+  },
+  "stages": [
+    [
+      "A01",
+      "A03"
+    ],
+    [
+      "A02",
+      "A04",
+      "A06"
+    ],
+    [
+      "A05",
+      "A07",
+      "A08"
+    ],
+    [
+      "A00:integration"
+    ],
+    [
+      "A09",
+      "A10"
+    ]
+  ],
+  "packages": [
+    {
+      "id": "A01",
+      "name": "Shared visual foundation",
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "size": "L",
+      "deps": [],
+      "findings": [
+        "F01",
+        "F16"
+      ],
+      "contracts": [
+        "ALL (shared foundation)"
+      ],
+      "prompt_file": "prompts/a01.md"
+    },
+    {
+      "id": "A02",
+      "name": "Product variants, common cards and PDP",
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "size": "L",
+      "deps": [
+        "A01",
+        "A03:interfaces"
+      ],
+      "findings": [
+        "F06",
+        "F07"
+      ],
+      "contracts": [
+        "UI:G05",
+        "UI:G09",
+        "UI:G10",
+        "UI:G10-A",
+        "UI:G11",
+        "UI:G35"
+      ],
+      "prompt_file": "prompts/a02.md"
+    },
+    {
+      "id": "A03",
+      "name": "Authoritative capabilities and service contracts",
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "size": "L / external gates",
+      "deps": [],
+      "findings": [
+        "F08",
+        "F09",
+        "F10",
+        "F11",
+        "F12",
+        "F17"
+      ],
+      "contracts": [
+        "UI:G12",
+        "UI:G15",
+        "UI:G15-A",
+        "UI:G17",
+        "UI:G17-A",
+        "UI:G18",
+        "UI:G19",
+        "UI:G20",
+        "UI:G21",
+        "UI:G23",
+        "UI:G27",
+        "UI:G28",
+        "UI:G39"
+      ],
+      "prompt_file": "prompts/a03.md"
+    },
+    {
+      "id": "A04",
+      "name": "Navigation, taxonomy, brands and discovery controls",
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "size": "L",
+      "deps": [
+        "A01",
+        "A03:interfaces"
+      ],
+      "findings": [
+        "F04",
+        "F05"
+      ],
+      "contracts": [
+        "UI:G02",
+        "UI:G03",
+        "UI:G04",
+        "UI:G05",
+        "UI:G05-A",
+        "UI:G06",
+        "UI:G07",
+        "UI:G07-A",
+        "UI:G08",
+        "UI:G37"
+      ],
+      "prompt_file": "prompts/a04.md"
+    },
+    {
+      "id": "A05",
+      "name": "Account, Rewards and notification navigation",
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "size": "L / external gates",
+      "deps": [
+        "A01",
+        "A03",
+        "A04",
+        "A06"
+      ],
+      "findings": [
+        "F09",
+        "F10",
+        "F11",
+        "F17"
+      ],
+      "contracts": [
+        "UI:G17",
+        "UI:G17-A",
+        "UI:G18",
+        "UI:G19",
+        "UI:G20",
+        "UI:G21",
+        "UI:G25",
+        "UI:G26",
+        "UI:G27",
+        "UI:G28",
+        "UI:G29",
+        "UI:G32",
+        "UI:G34"
+      ],
+      "prompt_file": "prompts/a05.md"
+    },
+    {
+      "id": "A06",
+      "name": "Registration, footer, policies, Contact and Wholesale",
+      "model": "gpt-6.1-terra",
+      "effort": "high",
+      "size": "M-L",
+      "deps": [
+        "A01",
+        "A03:interfaces"
+      ],
+      "findings": [
+        "F03",
+        "F14",
+        "F15"
+      ],
+      "contracts": [
+        "UI:G01 (shared end sections)",
+        "UI:G13",
+        "UI:G30",
+        "UI:G30-A",
+        "UI:G38",
+        "UI:G40"
+      ],
+      "prompt_file": "prompts/a06.md"
+    },
+    {
+      "id": "A07",
+      "name": "Home experience and Favorites recommendations",
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "size": "L",
+      "deps": [
+        "A01",
+        "A02",
+        "A03:interfaces",
+        "A04",
+        "A06"
+      ],
+      "findings": [
+        "F02",
+        "F13"
+      ],
+      "contracts": [
+        "UI:G01",
+        "UI:G01-A",
+        "UI:G01-B",
+        "UI:G24",
+        "UI:G35"
+      ],
+      "prompt_file": "prompts/a07.md"
+    },
+    {
+      "id": "A08",
+      "name": "Checkout continuity, orders and variant restock",
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "size": "L / external gates",
+      "deps": [
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A06"
+      ],
+      "findings": [
+        "F08",
+        "F11",
+        "F12",
+        "F17"
+      ],
+      "contracts": [
+        "UI:G12",
+        "UI:G14",
+        "UI:G14-A",
+        "UI:G14-B",
+        "UI:G14-C",
+        "UI:G15",
+        "UI:G15-A",
+        "UI:G16",
+        "UI:G22",
+        "UI:G23",
+        "UI:G31",
+        "UI:G39"
+      ],
+      "prompt_file": "prompts/a08.md"
+    },
+    {
+      "id": "A09",
+      "name": "Independent visual and accessibility review",
+      "model": "gpt-6.1-terra",
+      "effort": "high",
+      "size": "M-L verification",
+      "deps": [
+        "A00:integrated_candidate"
+      ],
+      "findings": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F09",
+        "F10",
+        "F11",
+        "F12",
+        "F13",
+        "F14",
+        "F15",
+        "F16"
+      ],
+      "contracts": [
+        "ALL 50"
+      ],
+      "prompt_file": "prompts/a09.md"
+    },
+    {
+      "id": "A10",
+      "name": "Independent engineering and integration review",
+      "model": "gpt-6-astra",
+      "effort": "high",
+      "size": "L verification",
+      "deps": [
+        "A00:integrated_candidate"
+      ],
+      "findings": [
+        "ALL 17"
+      ],
+      "contracts": [
+        "ALL 50"
+      ],
+      "prompt_file": "prompts/a10.md"
+    }
+  ]
+}

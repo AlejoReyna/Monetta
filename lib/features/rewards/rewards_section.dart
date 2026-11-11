@@ -16,6 +16,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/account_controller.dart';
+import '../../app/monetta_tokens.g.dart';
 import '../../data/accounts_orders/accounts_orders_config.dart';
 import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
@@ -744,11 +745,11 @@ class _StateDot extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final color = switch (state) {
-      'available' => const Color(0xFF3B7B4A),
+      'available' => MonettaTokens.success,
       'pending' => palette.goldText,
       'used' => palette.inkMuted,
-      'expired' => const Color(0xFFA3342B),
-      'reversed' => const Color(0xFFA3342B),
+      'expired' => MonettaTokens.sale,
+      'reversed' => MonettaTokens.sale,
       _ => palette.inkMuted,
     };
     return Semantics(

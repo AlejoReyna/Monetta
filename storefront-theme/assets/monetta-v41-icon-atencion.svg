@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" version="1.1" width="30" height="30" viewBox="0 0 30 30">
+<path transform="matrix(1,0,0,-1,3,27)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#a58248" d="M4 11V14C4 25 20 25 20 14V11"/>
+<path transform="matrix(1,0,0,-1,3,27)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#a58248" d="M4 6H5C6.1056 6 7 6.8944 7 8V12C7 13.1056 6.1056 14 5 14H4C2.8944 14 2 13.1056 2 12V8C2 6.8944 2.8944 6 4 6Z"/>
+<path transform="matrix(1,0,0,-1,3,27)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#a58248" d="M19 6H20C21.1056 6 22 6.8944 22 8V12C22 13.1056 21.1056 14 20 14H19C17.8944 14 17 13.1056 17 12V8C17 6.8944 17.8944 6 19 6Z"/>
+<path transform="matrix(1,0,0,-1,3,27)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#a58248" d="M20 6C20 1 15 2 12 2"/>
+<path transform="matrix(1,0,0,-1,2.88,26.8)" stroke-width=".27" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#ffffff" stroke-opacity=".7" d="M4 11V14C4 25 20 25 20 14V11"/>
+<path transform="matrix(1,0,0,-1,2.88,26.8)" stroke-width=".27" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#ffffff" stroke-opacity=".7" d="M4 6H5C6.1056 6 7 6.8944 7 8V12C7 13.1056 6.1056 14 5 14H4C2.8944 14 2 13.1056 2 12V8C2 6.8944 2.8944 6 4 6Z"/>
+<path transform="matrix(1,0,0,-1,2.88,26.8)" stroke-width=".27" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#ffffff" stroke-opacity=".7" d="M19 6H20C21.1056 6 22 6.8944 22 8V12C22 13.1056 21.1056 14 20 14H19C17.8944 14 17 13.1056 17 12V8C17 6.8944 17.8944 6 19 6Z"/>
+<path transform="matrix(1,0,0,-1,2.88,26.8)" stroke-width=".27" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#ffffff" stroke-opacity=".7" d="M20 6C20 1 15 2 12 2"/>
+</svg>

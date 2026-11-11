@@ -28,8 +28,8 @@
     display: flex;
     flex: 1;
     min-height: 100svh;
-    background: var(--color-canvas, #fbf8f2);
-    color: var(--color-ink, #211b16);
+    background: var(--color-canvas, #ffffff);
+    color: var(--color-ink, #242622);
   }
 
   .guia-welcome__photo {
@@ -66,7 +66,7 @@
 
   .guia-welcome__tagline {
     margin: 0;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: var(--font-serif);
     font-size: clamp(26px, 7.4vw, 34px);
     font-weight: 400;
     line-height: 1.15;
@@ -81,7 +81,7 @@
 
   .guia-welcome__eyebrow {
     margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-sans);
     font-size: 12px;
     font-weight: 500;
     line-height: 1.6;
@@ -100,9 +100,9 @@
     padding: 0 24px;
     border: 0;
     border-radius: 999px;
-    background: var(--color-action-primary, #745237);
+    background: var(--color-action-primary, #ffffff);
     color: var(--color-on-action-primary, #ffffff);
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-sans);
     font-size: 15px;
     font-weight: 600;
     letter-spacing: 0.12em;
@@ -111,11 +111,11 @@
   }
 
   .guia-welcome__start:hover {
-    background: var(--color-action-dark, #2d1e14);
+    background: var(--color-action-dark, #242622);
   }
 
   .guia-welcome__start:focus-visible {
-    outline: 2px solid var(--color-ink, #211b16);
+    outline: 2px solid var(--color-ink, #242622);
     outline-offset: 3px;
   }
 
