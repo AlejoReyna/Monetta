@@ -31,7 +31,7 @@ The split appears only when the system reports a vertical division (active or fl
 | Filters | The results update with each change | «Filtrar y ordenar». «Ver N» closes; in a collection, «Cancelar» puts back what was applied on opening. |
 | Carrito / Cuenta on the rail | Stays | The bag / the account. Orders and the other account pages open inside the right side. |
 | Inicio / Categorías on the rail | Changes | Stays |
-| «Continuar al checkout» | Checkout spans both sides: the form left of the crease, «Tu pedido» right of it, each scrolling on its own. «Volver al inicio» after a purchase closes it and returns both sides to their start. |
+| «Continuar al checkout» | Checkout spans both sides: «Tu pedido» left of the crease, who pays and «IR A PAGAR» right of it, each scrolling on its own. «Volver al inicio» after a purchase closes it and returns both sides to their start. |
 
 The rail marks what each side shows: the browsing page's destination and the right side's bag or account. Its handlers are the visible browsing page's own (`DuoRailRegistration`), so Inicio, Categorías, Carrito and Cuenta behave as that page's bar would.
 
