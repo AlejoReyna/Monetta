@@ -28,14 +28,18 @@
       <p class="guide-services__body">Estamos para ayudarte</p>
     </li>
   {%- else -%}
+    {%- comment -%}UI v4.1 (UI:G01, servicios recibidos): two lines under each gold icon.{%- endcomment -%}
     <li class="guide-services__item">
       <img class="guide-services__icon" src="{{ 'monetta-v41-envio.svg' | asset_url }}" width="30" height="30" alt="" loading="lazy" decoding="async">
+      <p class="guide-services__line">ENVÍO GRATIS<br>5 - 7 días hábiles</p>
     </li>
     <li class="guide-services__item">
       <img class="guide-services__icon" src="{{ 'monetta-v41-original.svg' | asset_url }}" width="30" height="30" alt="" loading="lazy" decoding="async">
+      <p class="guide-services__line">Producto Original<br>Importado desde E.U.A</p>
     </li>
     <li class="guide-services__item">
       <img class="guide-services__icon" src="{{ 'monetta-v41-pago.svg' | asset_url }}" width="30" height="30" alt="" loading="lazy" decoding="async">
+      <p class="guide-services__line">Paga a Meses<br>Sin Intereses</p>
     </li>
   {%- endif -%}
 </ul>

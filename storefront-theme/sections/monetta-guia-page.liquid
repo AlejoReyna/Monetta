@@ -16,12 +16,12 @@
   {%- when 'mayoreo' -%}
     {%- capture catalog_url -%}{% render 'monetta-guia-url', key: 'catalogo' %}{%- endcapture -%}
     <div class="guia-page guia-page--mayoreo" {{ section.shopify_attributes }}>
-      {% render 'monetta-guia-hero', photo: 'mayoreo-banner', lettered: true, title: 'Mayoreo', caps: true, italic: true, body: 'Obtén precios especiales en productos originales importados de tus marcas favoritas.', focus: '8% 50%', eager: true %}
+      {% render 'monetta-guia-hero', photo: 'mayoreo-banner', lettered: true, title: 'Mayoreo', caps: true, italic: true, body: 'Obtén precios especiales en productos originales importados de tus marcas favoritas.', focus: '8% 50%', eager: true, mobile_title: 'monetta-v41-b32-titulo.png', mobile_title_size: '720x159', mobile_body: 'monetta-v41-b32-descripcion.png', mobile_body_size: '720x262', tone: '#f7f5f6' %}
       <section class="container guia-steps" aria-labelledby="{{ heading_id }}-steps">
         <h2 class="display display--section" id="{{ heading_id }}-steps">¿Cómo comprar?</h2>
         <ol class="guia-steps__list" tabindex="0" aria-label="Pasos para comprar a mayoreo">
           <li class="guia-step">{% render 'monetta-icon', name: 'bag', size: 30, class: 'guia-step__icon' %}<h3 class="guia-step__title">Elige tus productos</h3><p class="guia-step__body">Arma tu pedido seleccionando entre miles de modelos originales de tus marcas favoritas.</p></li>
-          <li class="guia-step">{% render 'monetta-icon', name: 'add', size: 30, class: 'guia-step__icon' %}<h3 class="guia-step__title">Agrega mínimo 3 piezas</h3><p class="guia-step__body">Combina tus favoritos en el carrito y el descuento se aplica automáticamente.</p></li>
+          <li class="guia-step"><span class="guia-step__icon">{% render 'monetta-nav-glyph', name: 'cart', size: 30 %}</span><h3 class="guia-step__title">Agrega mínimo 3 piezas</h3><p class="guia-step__body">Combina tus favoritos en el carrito y el descuento se aplica automáticamente.</p></li>
           <li class="guia-step">{% render 'monetta-icon', name: 'wallet', size: 30, class: 'guia-step__icon' %}<h3 class="guia-step__title">Liquida o aparta</h3><p class="guia-step__body">Paga de contado o escríbenos por WhatsApp para apartar con $800 pesos de anticipo por pedido y liquida en 20 días.</p></li>
         </ol>
         <a class="guia-pill-button guia-steps__cta" href="{{ catalog_url | strip }}">Comienza a vender</a>
@@ -52,9 +52,10 @@
         {% render 'monetta-section-header', id: rail_heading, title: 'Productos que te pueden interesar', link_url: catalog_url, link_label: 'Ver todo', rail_id: rail_id %}
         <div class="rail">
           <ul class="rail__track" id="{{ rail_id }}" role="list" aria-label="Productos que te pueden interesar">
-            {%- for product in collections.all.products limit: 8 -%}
+            {%- for product in collections.all.products limit: 40 -%}
               <li>{% render 'monetta-card', product: product, density: 'compact', sizes: '(min-width: 1024px) 25vw, 36vw' %}</li>
             {%- endfor -%}
+            <li class="v41-close-item"><a class="v41-close" href="{{ catalog_url | strip }}"><span class="v41-close__glass" aria-hidden="true">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</span><span>Ver todo</span></a></li>
           </ul>
         </div>
       </section>
@@ -62,12 +63,12 @@
 
   {%- when 'contacto' -%}
     <div class="guia-page guia-page--contacto" {{ section.shopify_attributes }}>
-      {% render 'monetta-guia-hero', photo: 'contacto-banner', lettered: true, title: 'Tu boutique y proveedor de', accent: 'confianza.', body: 'Bienvenida a nuestro paraíso de modelos originales de marcas que amas, importados y con envíos garantizados a todo México.', focus: '8% 50%', eager: true %}
+      {% render 'monetta-guia-hero', photo: 'contacto-banner', lettered: true, title: 'Tu boutique y proveedor de', accent: 'confianza.', body: 'Bienvenida a nuestro paraíso de modelos originales de marcas que amas, importados y con envíos garantizados a todo México.', focus: '8% 50%', eager: true, mobile_title: 'monetta-v41-b31-titulo.png', mobile_title_size: '720x406', mobile_body: 'monetta-v41-b31-descripcion.png', mobile_body_size: '720x240', tone: '#ece8e5' %}
       <div class="container guia-contact">
         <section class="guia-contact__channels" aria-labelledby="{{ heading_id }}-channels">
           <h2 class="display display--section" id="{{ heading_id }}-channels">Contáctanos</h2>
           <p class="guia-contact__lede">Estamos para ayudarte</p>
-          <a class="guia-wa" href="{{ wa }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 40, class: 'guia-wa__icon' %}<span class="guia-wa__pill">Enviar WhatsApp al 826 106 6868</span><span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+          <a class="guia-wa" href="{{ wa }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 40, class: 'guia-wa__icon' %}<span class="guia-wa__pill">Enviar Whatsapp al 826 106 6868</span><span class="visually-hidden"> (se abre en otra pestaña)</span></a>
         </section>
         <section class="guia-contact__join" aria-labelledby="{{ heading_id }}-join">
           <h2 class="guia-contact__join-title" id="{{ heading_id }}-join">Únete</h2>
@@ -82,38 +83,6 @@
           <h2 class="display display--section" id="{{ heading_id }}-social">Síguenos en redes</h2>
           <p class="guia-contact__lede">Descubre novedades, lanzamientos y más.</p>
           {% render 'monetta-guia-social', class: 'guia-social--contact' %}
-        </section>
-        {%- comment -%}Web only: the store's contact form (the app has WhatsApp instead). Shopify sends it to the store's email.{%- endcomment -%}
-        <section class="guia-contact__form" aria-labelledby="{{ heading_id }}-form">
-          <h2 class="display display--section" id="{{ heading_id }}-form">Escríbenos</h2>
-          <p class="guia-contact__lede">Déjanos tu mensaje y te responderemos por correo.</p>
-          {%- form 'contact', id: 'guia-contact-form', class: 'guia-form' -%}
-            {%- if form.posted_successfully? -%}
-              <p class="form-note" role="status">Gracias. Recibimos tu mensaje y te responderemos pronto.</p>
-            {%- endif -%}
-            {%- if form.errors -%}
-              <p class="form-error" role="alert">{% render 'monetta-icon', name: 'error', size: 18 %}<span>Revisa {% for field in form.errors %}{% case field %}{% when 'email' %}tu correo electrónico{% when 'body' %}el mensaje{% else %}el campo «{{ form.errors.translated_fields[field] | default: field | escape }}»{% endcase %}{% unless forloop.last %}, {% endunless %}{% endfor %}.</span></p>
-            {%- endif -%}
-            <div class="form-grid">
-              <label class="field">
-                <span class="field__label">Nombre</span>
-                <input class="input" type="text" name="contact[name]" value="{{ form.name | escape }}" autocomplete="name">
-              </label>
-              <label class="field">
-                <span class="field__label">Correo electrónico</span>
-                <input class="input" type="email" name="contact[email]" value="{{ form.email | escape }}" autocomplete="email" required>
-              </label>
-            </div>
-            <label class="field">
-              <span class="field__label">Teléfono (opcional)</span>
-              <input class="input" type="tel" name="contact[phone]" value="{{ form.phone | escape }}" autocomplete="tel">
-            </label>
-            <label class="field">
-              <span class="field__label">Mensaje</span>
-              <textarea class="input" name="contact[body]" rows="5" required>{{ form.body | escape }}</textarea>
-            </label>
-            <button type="submit" class="btn btn--primary">Enviar mensaje</button>
-          {%- endform -%}
         </section>
       </div>
     </div>

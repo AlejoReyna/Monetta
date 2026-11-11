@@ -46,8 +46,8 @@
             </template>
           </li>
         {%- endfor -%}
+        <li class="v41-close-item"><a class="v41-close" href="{{ set_url }}"><span class="v41-close__glass" aria-hidden="true">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</span><span>Ver Nueva colección</span></a></li>
       </ul>
-      <a class="v41-close" href="{{ set_url }}"><span class="v41-close__glass" aria-hidden="true">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</span><span>Ver Nueva colección</span></a>
     {%- else -%}
       <p class="body-copy">{% if request.design_mode %}Elige una colección con productos.{% else %}Pronto habrá piezas nuevas aquí.{% endif %}</p>
     {%- endif -%}

@@ -38,7 +38,7 @@
         {%- if section.settings.show_banner_categorias -%}
           <div class="guia-carousel__slide" role="group" aria-roledescription="diapositiva" aria-label="3 de {{ banner_count }}">
             <a class="v41-banner" href="{{ categories_url | strip }}">
-              <img src="{{ 'monetta-v41-b03.webp' | asset_url }}" width="1920" height="800" alt="Todas las categorías" loading="lazy" decoding="async">
+              <img src="{{ 'monetta-v41-b03.webp' | asset_url }}" width="1920" height="800" alt="Miles de modelos originales por descubrir" loading="lazy" decoding="async">
             </a>
           </div>
         {%- endif -%}
@@ -96,8 +96,8 @@
             </li>
           {%- endif -%}
         {%- endfor -%}
+        <li class="v41-close-item"><a class="v41-close" href="{{ all_url | strip }}"><span class="v41-close__glass" aria-hidden="true">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</span><span>Ver categorías</span></a></li>
       </ul>
-      <a class="v41-close" href="{{ all_url | strip }}"><span class="v41-close__glass" aria-hidden="true">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</span><span>Ver categorías</span></a>
     </section>
 
   {%- when 'brands' -%}
@@ -117,8 +117,7 @@
     {%- if brand_tiles != blank -%}
       <section class="section v41-block v41-brands" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
         {% render 'monetta-section-header', id: heading_id, title: 'Tus marcas favoritas', title_url: brands_url, link_url: brands_url, link_label: 'Ver todas' %}
-        <ul class="v41-scroll v41-brands__track" role="list">{{ brand_tiles }}</ul>
-        <a class="v41-close" href="{{ brands_url }}"><span class="v41-close__glass" aria-hidden="true">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</span><span>Ver marcas</span></a>
+        <ul class="v41-scroll v41-brands__track" role="list">{{ brand_tiles }}<li class="v41-close-item"><a class="v41-close" href="{{ brands_url }}"><span class="v41-close__glass" aria-hidden="true">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</span><span>Ver marcas</span></a></li></ul>
       </section>
     {%- elsif request.design_mode -%}
       <p class="v41-note" {{ section.shopify_attributes }}>Esta sección no se muestra hasta que la tienda tenga estas marcas.</p>
@@ -155,7 +154,7 @@
     <section class="v41-mayoreo" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
       <h2 class="visually-hidden" id="{{ heading_id }}">Mayoreo</h2>
       <div class="v41-mayoreo__frame">
-        <img src="{{ 'monetta-v41-b04.webp' | asset_url }}" width="1920" height="800" alt="" loading="lazy" decoding="async">
+        <img src="{{ 'monetta-v41-b04-sin-control.jpg' | asset_url }}" width="1920" height="800" alt="Precios de mayoreo a partir de 3 piezas" loading="lazy" decoding="async">
         <a class="v41-mayoreo__cta" href="{{ mayoreo_url | strip }}">Comenzar a vender</a>
       </div>
     </section>
@@ -217,7 +216,7 @@
       "type": "checkbox",
       "id": "show_banner_categorias",
       "label": "Mostrar el banner de categorías",
-      "default": false
+      "default": true
     },
     {
       "type": "checkbox",

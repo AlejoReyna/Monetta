@@ -20,13 +20,34 @@
   @param {string} [id] - Heading id (for aria-labelledby).
   @param {boolean} [lettered] - The photograph already carries the lettering (the delivered banners B31 / B32): no wash, and the
     title and copy stay in the page only as the single text equivalent for screen readers.
+  @param {string} [mobile_title] - Asset of the delivered mobile title lettering (03_banners/lettering_mobile). With
+    mobile_body, phones show title, then copy beside the photograph's right side, on the banner's own tone (UI v4.1 hero_typography).
+  @param {string} [mobile_title_size] - Its pixel size, 'WxH'.
+  @param {string} [mobile_body] - Asset of the delivered mobile copy lettering.
+  @param {string} [mobile_body_size] - Its pixel size, 'WxH'.
+  @param {string} [tone] - Background colour of the banner, for the phone composition.
 {%- enddoc -%}
 {%- liquid
   assign side = side | default: 'left'
   assign tag = tag | default: 'h1'
+  assign has_mobile = false
+  if lettered and mobile_title != blank and mobile_body != blank
+    assign has_mobile = true
+    assign title_size = mobile_title_size | split: 'x'
+    assign body_size = mobile_body_size | split: 'x'
+  endif
 -%}
-<div class="guide-hero guide-hero--text-{{ side }}{% if lettered %} guide-hero--lettered{% endif %}"{% if focus != blank %} style="--hero-focus: {{ focus }}"{% endif %}>
+<div class="guide-hero guide-hero--text-{{ side }}{% if lettered %} guide-hero--lettered{% endif %}{% if has_mobile %} guide-hero--has-mobile{% endif %}" style="{% if focus != blank %}--hero-focus: {{ focus }};{% endif %}{% if tone != blank %} --hero-tone: {{ tone }};{% endif %}">
   {% render 'monetta-guia-photo', name: photo, class: 'guide-hero__photo', eager: eager %}
+  {%- if has_mobile -%}
+    <div class="guide-hero__mobile" aria-hidden="true">
+      <img class="guide-hero__m-title" src="{{ mobile_title | asset_url }}" width="{{ title_size[0] }}" height="{{ title_size[1] }}" alt="" decoding="async">
+      <div class="guide-hero__m-row">
+        <img class="guide-hero__m-body" src="{{ mobile_body | asset_url }}" width="{{ body_size[0] }}" height="{{ body_size[1] }}" alt="" decoding="async">
+        {% render 'monetta-guia-photo', name: photo, class: 'guide-hero__m-photo', eager: eager %}
+      </div>
+    </div>
+  {%- endif -%}
   {%- unless lettered -%}<span class="guide-hero__scrim" aria-hidden="true"></span>{%- endunless -%}
   {%- if url != blank and pill_label == blank -%}
     <a class="guide-hero__link" href="{{ url }}" aria-label="{{ title | escape }}"></a>

@@ -120,6 +120,61 @@
   background: linear-gradient(to left, rgb(var(--guide-scrim) / 0.9) 0%, rgb(var(--guide-scrim) / 0.6) 42%, rgb(var(--guide-scrim) / 0) 78%);
 }
 
+/* UI v4.1 hero_typography: on phones the Contacto / Mayoreo heroes use the delivered mobile lettering layers on the banner's own
+   tone (title, then copy beside the right side of the original photograph) so the lettering stays readable at 320px. */
+.guide-hero__mobile {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .guide-hero--has-mobile {
+    display: block;
+    height: auto;
+    padding-top: var(--space-5);
+    background: var(--hero-tone, var(--color-surface-deep));
+  }
+
+  .guide-hero--has-mobile > .guide-hero__photo {
+    display: none;
+  }
+
+  .guide-hero--has-mobile .guide-hero__mobile {
+    display: block;
+  }
+
+  .guide-hero__m-title {
+    display: block;
+    width: min(64%, 300px);
+    height: auto;
+    margin-inline-start: var(--edge-l);
+  }
+
+  .guide-hero__m-row {
+    display: grid;
+    grid-template-columns: 52% 48%;
+    align-items: center;
+    margin-top: var(--space-3);
+  }
+
+  .guide-hero__m-body {
+    display: block;
+    width: calc(100% - var(--edge-l) - var(--space-2));
+    height: auto;
+    margin-inline-start: var(--edge-l);
+  }
+
+  .guide-hero__m-photo {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 922 / 800;
+    object-fit: cover;
+    object-position: 100% 50%;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 22%);
+    mask-image: linear-gradient(to right, transparent 0, #000 22%);
+  }
+}
+
 .guide-hero__copy {
   display: flex;
   flex-direction: column;
@@ -1880,6 +1935,12 @@ img.guia-menu__icon {
 
 .guia-wa__pill {
   flex: 1 1 auto;
+}
+
+/* UI:G40: «Enviar Whatsapp al 826 106 6868» on one line at the base size down to 320px; larger text may still wrap. */
+.guia-contact__channels .guia-wa__pill {
+  padding-inline: var(--space-3);
+  font-size: clamp(13px, 4vw, 16px);
 }
 
 .guia-wa:focus-visible,
