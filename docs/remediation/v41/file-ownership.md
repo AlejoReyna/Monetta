@@ -7,3 +7,21 @@ Stage 1 leases:
 - A03: services/accounts_orders, lib/data/customer_auth, accounts_orders, notifications, Shopify editorial data, rewards_api/models, app/notification_controller transport only, own tests/handoff/evidence. No feature layouts or checkout orchestration.
 
 Workers use isolated checkouts and task-scoped commits, no nested agents. Later stages remain unleased until foundation acceptance.
+
+## Direct-launch coordination update
+
+User independently launched A01/A02/A04/A05/A06/A07/A08 in top-level threads. The duplicate delegated A01 has been cancelled; its isolated diff is retained. An assumed duplicate A03 was also cancelled before confirming there was no direct A03; its worktree is retained for recovery. No package is accepted from these unfinished edits.
+
+A02 exclusive shared-root lease (user-approved scope extension):
+- lib/features/catalog/product_card.dart, product_tile.dart, product-owned helpers
+- lib/features/product/ except external product flows
+- lib/domain/product.dart
+- lib/data/shopify/queries.dart, mappers.dart, catalog_item_mapper.dart and product catalog repository mapping (exclude editorial-content APIs owned A03)
+- lib/data/local/tables.dart, database.dart, database.g.dart, catalog_cache_store.dart; product/cache tests
+- docs/remediation/v41/handoffs/A02.md and evidence/A02/
+
+A02 alone may change the local cache schema and run one scoped codegen pass after notifying A00 that inputs are ready; no other worker may touch local database/generated outputs or dependency locks. Preserve old cache data and test old-schema upgrade plus cold-load roundtrip. No Git/index operations in shared root.
+
+Root Flutter test/codegen slot: A01 finishes current focused foundation checks first; then A02 codegen and focused tests after handoff. Other root checks wait for a grant; no shared build-folder concurrency. No codegen while a root test/build is active. A00 will not start a root Flutter process during these slots.
+
+A04/A05/A06/A07/A08: preserve existing edits, stop dependent integration and root test/codegen until foundation gate and renewed stage lease. A06 isolated edits must await A01 release of client_guide_sections.dart. A08 has no product_screen.dart lease until A02 releases it.
