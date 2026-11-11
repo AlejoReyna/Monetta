@@ -183,13 +183,14 @@ void main() {
     expect(find.text('Ana'), findsOneWidget);
     expect(find.text('ana@example.com'), findsOneWidget);
 
-    // The five links, top to bottom.
+    // The six links, top to bottom; Mayoreo follows the theme's menu.
     final labels = [
       'Bolsas',
       'Carteras',
       'Relojes',
       'Perfumes',
       'Todas las marcas',
+      'Mayoreo',
     ];
     var previous = -1.0;
     for (final label in labels) {
@@ -219,7 +220,6 @@ void main() {
       'Buscar una pieza',
       'Categorías',
       'Maquillaje y skincare',
-      'Mayoreo',
       'Contacto',
       'Nuestra historia',
     ]) {

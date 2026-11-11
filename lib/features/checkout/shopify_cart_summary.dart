@@ -1,7 +1,5 @@
-/// Costos autoritativos del Cart Shopify + controles de descuento accesibles.
+/// Costos autoritativos del Cart Shopify, presentados como el carrito del theme.
 library;
-
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 
@@ -11,7 +9,7 @@ import '../../data/shopify/cart/cart_session_store.dart';
 import '../../domain/cart.dart';
 import '../boutique/boutique_tokens.dart';
 
-class ShopifyCartSummary extends StatefulWidget {
+class ShopifyCartSummary extends StatelessWidget {
   const ShopifyCartSummary({
     required this.controller,
     required this.scope,
@@ -26,39 +24,22 @@ class ShopifyCartSummary extends StatefulWidget {
   final VoidCallback onContinue;
 
   @override
-  State<ShopifyCartSummary> createState() => _ShopifyCartSummaryState();
-}
-
-class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
-  final TextEditingController _code = TextEditingController();
-
-  @override
-  void dispose() {
-    _code.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: widget.controller,
+      animation: controller,
       builder: (context, _) {
-        final cart = widget.controller.scopedSnapshot?.scope == widget.scope
-            ? widget.controller.snapshot?.cart
+        final cart = controller.scopedSnapshot?.scope == scope
+            ? controller.snapshot?.cart
             : null;
         if (cart == null) return const SizedBox.shrink();
         final palette = context.boutique;
-        final applying = widget.controller.discountStatus ==
-            CartDiscountUpdateStatus.applying;
         final allocatedApplications = cart.discountApplications
             .where((item) => item.totalAllocatedAmount != null)
             .toList(growable: false);
-        final returnedCodes = {
-          for (final item in cart.discountCodes) item.code.toUpperCase(),
-        };
-        final unconfirmedCodes = widget.controller.requestedDiscountCodes
-            .where((code) => !returnedCodes.contains(code.toUpperCase()))
-            .toList(growable: false);
+        final itemCount = cart.lines.fold<int>(
+          0,
+          (sum, line) => sum + line.quantity,
+        );
 
         return Container(
           key: const ValueKey('shopify-cart-summary'),
@@ -77,10 +58,10 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
               ),
               const SizedBox(height: 18),
               _MoneyRow(
-                label: cart.cost.subtotalEstimated
-                    ? 'Subtotal de Shopify (estimado)'
-                    : 'Subtotal de Shopify',
-                money: cart.cost.subtotal,
+                label: itemCount == 1
+                    ? 'Subtotal (1 artículo)'
+                    : 'Subtotal ($itemCount artículos)',
+                value: formatCartMoney(cart.cost.subtotal),
               ),
               if (allocatedApplications.isNotEmpty) ...[
                 const SizedBox(height: 10),
@@ -90,8 +71,8 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                             CartDiscountApplicationKind.automatic
                         ? 'Descuento automático'
                         : 'Descuento aplicado',
-                    money: application.totalAllocatedAmount!,
-                    negative: true,
+                    value:
+                        '−${formatCartMoney(application.totalAllocatedAmount!)}',
                   ),
               ],
               if (cart.discountApplications.any(
@@ -104,7 +85,7 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                 ),
               ],
               const SizedBox(height: 10),
-              _SummaryTextRow(
+              const _MoneyRow(
                 label: 'Envío',
                 value: 'Se calcula en Shopify',
               ),
@@ -113,118 +94,14 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                 child: Container(height: .5, color: palette.hairline),
               ),
               _MoneyRow(
-                label: cart.cost.totalEstimated
-                    ? 'Total de Shopify (estimado)'
-                    : 'Total de Shopify',
-                money: cart.cost.total,
+                label: cart.cost.totalEstimated ? 'Total estimado' : 'Total',
+                value: formatCartMoney(cart.cost.total, withCurrency: true),
                 prominent: true,
               ),
-              const SizedBox(height: 20),
-              TextField(
-                key: const ValueKey('discount-code-field'),
-                controller: _code,
-                enabled: !applying,
-                textCapitalization: TextCapitalization.characters,
-                style: boutiqueText(size: 14, color: palette.ink),
-                decoration: InputDecoration(
-                  labelText: 'Código de descuento',
-                  hintText: 'Escribe tu código',
-                  labelStyle: boutiqueText(size: 12, color: palette.inkMuted),
-                  hintStyle: boutiqueText(size: 12, color: palette.inkMuted),
-                  filled: true,
-                  fillColor: palette.surfaceDeep,
-                  contentPadding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BoutiqueRadius.control,
-                    borderSide: BorderSide(color: palette.hairline, width: .5),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BoutiqueRadius.control,
-                    borderSide: BorderSide(color: palette.ink, width: 1),
-                  ),
-                ),
-                onSubmitted: applying ? null : (_) => _apply(),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: BoutiqueButton(
-                  key: const ValueKey('apply-discount-button'),
-                  label: applying ? 'APLICANDO…' : 'APLICAR CÓDIGO',
-                  filled: false,
-                  onPressed: applying ? null : _apply,
-                ),
-              ),
-              for (final discount in cart.discountCodes)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: Text(
-                    discount.code,
-                    style: boutiqueText(size: 13, color: palette.ink),
-                  ),
-                  subtitle: Text(
-                    discount.applicable ? 'Aplicado' : 'Válido, no aplicable',
-                    style: boutiqueText(size: 11, color: palette.inkMuted),
-                  ),
-                  trailing: IconButton(
-                    tooltip: 'Eliminar código ${discount.code}',
-                    onPressed: applying
-                        ? null
-                        : () => unawaited(
-                              widget.controller.removeDiscountCode(
-                                scope: widget.scope,
-                                localIntent: widget.localIntent,
-                                code: discount.code,
-                              ),
-                            ),
-                    icon: const Icon(Icons.close, size: 18),
-                  ),
-                ),
-              for (final code in unconfirmedCodes)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: Text(
-                    code,
-                    style: boutiqueText(size: 13, color: palette.ink),
-                  ),
-                  subtitle: Text(
-                    widget.controller.discountStatus ==
-                            CartDiscountUpdateStatus.error
-                        ? 'No confirmado'
-                        : 'Inválido',
-                    style: boutiqueText(size: 11, color: palette.inkMuted),
-                  ),
-                  trailing: IconButton(
-                    tooltip: 'Eliminar código $code',
-                    onPressed: applying
-                        ? null
-                        : () => unawaited(
-                              widget.controller.removeDiscountCode(
-                                scope: widget.scope,
-                                localIntent: widget.localIntent,
-                                code: code,
-                              ),
-                            ),
-                    icon: const Icon(Icons.close, size: 18),
-                  ),
-                ),
-              if (widget.controller.discountMessage case final message?) ...[
-                const SizedBox(height: 6),
-                Semantics(
-                  liveRegion: true,
-                  child: Text(
-                    message,
-                    key: const ValueKey('discount-status-message'),
-                    style: boutiqueText(size: 11, color: palette.inkMuted),
-                  ),
-                ),
-              ],
               const SizedBox(height: 18),
               BoutiqueButton(
                 label: 'Continuar al checkout',
-                onPressed: widget.onContinue,
+                onPressed: onContinue,
               ),
             ],
           ),
@@ -232,36 +109,64 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
       },
     );
   }
+}
 
-  void _apply() {
-    final value = _code.text;
-    unawaited(
-      widget.controller.applyDiscountCode(
-        scope: widget.scope,
-        localIntent: widget.localIntent,
-        code: value,
-      ),
-    );
+/// Presents a Shopify decimal string as the store's `$ {{amount}}` format.
+///
+/// Presentation only (invariant 6): the amount is rounded to cents half-up
+/// with integer/string arithmetic on the decimal string, never via `double`,
+/// and no total is ever computed from the result.
+String formatCartMoney(CartMoney money, {bool withCurrency = false}) {
+  var raw = money.amount.trim();
+  final negative = raw.startsWith('-');
+  if (negative || raw.startsWith('+')) raw = raw.substring(1);
+  final dot = raw.indexOf('.');
+  final wholeText = dot < 0 ? raw : raw.substring(0, dot);
+  final fractionText = dot < 0 ? '' : raw.substring(dot + 1);
+  final isDecimal = RegExp(r'^\d*$');
+  if ((wholeText.isEmpty && fractionText.isEmpty) ||
+      !isDecimal.hasMatch(wholeText) ||
+      !isDecimal.hasMatch(fractionText)) {
+    // Not a decimal string: show it untouched rather than guess.
+    return withCurrency
+        ? '${money.amount} ${money.currencyCode}'
+        : money.amount;
   }
+  final cents = BigInt.parse(
+    '${wholeText.isEmpty ? '0' : wholeText}'
+    '${fractionText.padRight(2, '0').substring(0, 2)}',
+  );
+  // Half-up: look at the first digit dropped after the cents.
+  final roundUp =
+      fractionText.length > 2 && fractionText.codeUnitAt(2) >= 0x35; // '5'
+  final rounded = roundUp ? cents + BigInt.one : cents;
+  final digits = rounded.toString().padLeft(3, '0');
+  final whole = digits.substring(0, digits.length - 2);
+  final grouped = whole.replaceAllMapped(
+    RegExp(r'\B(?=(\d{3})+$)'),
+    (_) => ',',
+  );
+  final isZero = rounded == BigInt.zero;
+  final text =
+      '${negative && !isZero ? '-' : ''}\$ $grouped.${digits.substring(digits.length - 2)}';
+  return withCurrency ? '$text ${money.currencyCode}' : text;
 }
 
 class _MoneyRow extends StatelessWidget {
   const _MoneyRow({
     required this.label,
-    required this.money,
-    this.negative = false,
+    required this.value,
     this.prominent = false,
   });
 
   final String label;
-  final CartMoney money;
-  final bool negative;
+  final String value;
   final bool prominent;
 
   @override
   Widget build(BuildContext context) => _SummaryTextRow(
         label: label,
-        value: '${negative ? '−' : ''}${money.amount} ${money.currencyCode}',
+        value: value,
         prominent: prominent,
       );
 }

@@ -103,7 +103,7 @@ void main() {
     expect(find.text(kCheckoutDoubleChargeBody), findsOneWidget);
     expect(find.text(kCheckoutReturnViewOrdersLabel), findsOneWidget);
     expect(find.text(kCheckoutDoubleChargePayAnywayLabel), findsOneWidget);
-    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+    expect(find.byType(CheckoutFlowScreen), findsNothing);
     expect(harness.launches, 0);
   });
 
@@ -118,7 +118,7 @@ void main() {
     await _tapCartCheckout(tester);
 
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
-    expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
+    expect(find.byType(CheckoutFlowScreen), findsOneWidget);
   });
 
   testWidgets('a new cart token keeps the warning and still shows the sheet', (
@@ -141,7 +141,7 @@ void main() {
     await _tapCartCheckout(tester);
 
     expect(find.text(kCheckoutDoubleChargeTitle), findsOneWidget);
-    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+    expect(find.byType(CheckoutFlowScreen), findsNothing);
     expect(harness.guard.isActive, isTrue);
   });
 
@@ -183,7 +183,7 @@ void main() {
     await tester.pumpAndSettle();
     await _tapCartCheckout(tester);
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
-    expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
+    expect(find.byType(CheckoutFlowScreen), findsOneWidget);
   });
 
   testWidgets('a restarted app shows the sheet while the bag is not empty', (
@@ -227,7 +227,7 @@ void main() {
     await _tapCartCheckout(tester);
 
     expect(find.text(kCheckoutDoubleChargeTitle), findsOneWidget);
-    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+    expect(find.byType(CheckoutFlowScreen), findsNothing);
   });
 
   testWidgets('a warning older than 24 hours opens checkout directly', (
@@ -244,7 +244,7 @@ void main() {
     await _tapCartCheckout(tester);
 
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
-    expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
+    expect(find.byType(CheckoutFlowScreen), findsOneWidget);
     expect(guard.isActive, isFalse);
   });
 
@@ -263,7 +263,7 @@ void main() {
 
     expect(find.text('Mis pedidos'), findsWidgets);
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
-    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+    expect(find.byType(CheckoutFlowScreen), findsNothing);
     expect(harness.guard.isActive, isTrue);
   });
 
@@ -279,7 +279,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('checkout-double-charge-pay')));
     await tester.pumpAndSettle();
 
-    expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
+    expect(find.byType(CheckoutFlowScreen), findsOneWidget);
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
     expect(harness.guard.isActive, isTrue);
   });
@@ -300,7 +300,7 @@ void main() {
         ),
       ),
     );
-    await _openReview(tester);
+    await _revealPay(tester);
     await tester.tap(find.byKey(const ValueKey('checkout-pay-button')));
     await tester.pumpAndSettle();
 
@@ -326,7 +326,7 @@ void main() {
         ),
       ),
     );
-    await _openReview(tester);
+    await _revealPay(tester);
     await tester.tap(find.byKey(const ValueKey('checkout-pay-button')));
     await tester.pumpAndSettle();
 
@@ -348,7 +348,7 @@ void main() {
         ),
       ),
     );
-    await _openReview(tester);
+    await _revealPay(tester);
     await tester.tap(find.byKey(const ValueKey('checkout-pay-button')));
     await tester.pumpAndSettle();
 
@@ -374,7 +374,7 @@ void main() {
         ),
       ),
     );
-    await _openReview(tester);
+    await _revealPay(tester);
     await tester.tap(find.byKey(const ValueKey('checkout-pay-button')));
     await tester.pumpAndSettle();
 
@@ -391,15 +391,11 @@ Future<void> _tapCartCheckout(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-Future<void> _openReview(WidgetTester tester) async {
+/// Checkout asks for nothing: the pay control is there from the start.
+Future<void> _revealPay(WidgetTester tester) async {
   await tester.pump();
-  final fields = find.byType(TextFormField);
-  await tester.enterText(fields.at(0), 'buyer@example.invalid');
-  await tester.enterText(fields.at(1), '8112345678');
-  await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-  await tester.tap(find.text('REVISAR PEDIDO'));
-  await tester.pumpAndSettle();
   await tester.ensureVisible(find.byKey(const ValueKey('checkout-pay-button')));
+  await tester.pumpAndSettle();
 }
 
 final class _BagHarness {

@@ -478,7 +478,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('checkout spans both sides: form left, order summary right',
+  testWidgets('checkout spans both sides: order left, the way to pay right',
       (tester) async {
     final shop = await catalog();
     await shop.store.addToBag(shop.single);
@@ -499,15 +499,17 @@ void main() {
     await settle(tester);
 
     expect(find.byType(CheckoutFlowScreen), findsOneWidget);
-    expect(
-      tester.getRect(find.byKey(const Key('checkout-duo-form'))),
-      inside(kLeftSide),
-    );
     final summary = find.byKey(const Key('checkout-duo-summary'));
-    expect(tester.getRect(summary), inside(kRightSide));
+    expect(tester.getRect(summary), inside(kLeftSide));
     expect(
       find.descendant(of: summary, matching: find.text('Tu pedido')),
       findsOneWidget,
+    );
+    final pay = find.byKey(const Key('checkout-duo-pay'));
+    expect(tester.getRect(pay), inside(kRightSide));
+    expect(
+      tester.getRect(find.byKey(const ValueKey('checkout-pay-button'))),
+      inside(kRightSide),
     );
 
     await tester.tap(find.byTooltip('Volver'));
