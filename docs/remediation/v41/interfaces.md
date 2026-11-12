@@ -41,3 +41,12 @@ Reviewed immutable copy: evidence/A00/A03-capability-proposal-v1.md. The capabil
 - Account ad publishing schema/material/destination, secure payment-management capability, and cart wholesale-eligibility source are unavailable. Hide dependent actions/claims.
 - Guest/account shipping uses actual provider cart identity, address and rate reconciliation. Email input cannot confer authentication/free shipping. Live rate evidence remains unverified.
 - Producer metadata: selectedOptions JSON object and imageUrls string list from actual Shopify Admin variant data; absent -> {}/[]. A02 consumes in Flutter mapping/cache, no product-photo fallback.
+
+## A03 additive signatures — compiling proposal, tests/integration pending
+
+- CustomerGraphqlClient(config: CustomerAccountConfig, client?: http.Client) uses existing Shopify discovery/raw Shopify token.
+- ShopifyCustomerAddressService(client): fetchAddresses(String accessToken) -> Future<CustomerAddressBook>; create(String accessToken, CustomerAddressInput, {bool defaultAddress=false}) -> Future<CustomerAddress>; update(String accessToken, String addressId, CustomerAddressInput, {bool? defaultAddress}) -> Future<CustomerAddress>; delete(String accessToken, String addressId) -> Future<void>. Provider input names: territoryCode, zoneCode, phoneNumber.
+- ShopifyCustomerOrderDetailsService(client).fetchOrderDetails(String accessToken, String orderGid) -> Future<CustomerOrderDetails?>. Paginated lines/fulfillments; null historical address/variant retained; HTTPS tracking only; shipment independent of payment.
+- ShopPolicyRepository(StorefrontClient).fetch() -> Future<Map<ShopPolicyKind, CapabilityRead<ShopPolicyContent>>>; kinds shipping/refund/privacy/terms, content id/title/bodyHtml/url. Missing/empty published policy returns unavailable; transport/provider failure throws, preserving failure versus missing content. Callers must handle thrown errors for retry, not turn them into unpublished content.
+
+A00 checked pinned 2026-07 provider reference: [address create](https://shopify.dev/docs/api/customer/2026-07/mutations/customerAddressCreate) requires customer_write_customers; [Order](https://shopify.dev/docs/api/customer/2026-07/objects/Order) requires customer_read_orders and distinguishes line/fulfillment/address fields; [Shop policies](https://shopify.dev/docs/api/storefront/2026-07/objects/Shop) provides merchant privacy/refund/shipping/terms. This documents API existence, not configured app permissions or live proof. No UI/global provider wiring until code/tests integrated.
