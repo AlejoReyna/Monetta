@@ -74,6 +74,12 @@ describe('rewards API v1', () => {
     expect(body.balance).toMatchObject({ availableCents: 0, pendingCents: 0 });
     expect(body.program.redemptionEnabled).toBe(false);
     expect(body.incentives.firstPurchase.enabled).toBe(false);
+    expect((body as unknown as { capabilities: unknown }).capabilities).toEqual({
+      schemaVersion: 1,
+      membership: { supported: false, reason: 'authoritative_rules_unavailable' },
+      tierProgress: { supported: false, reason: 'authoritative_rules_unavailable' },
+      tierBenefits: { supported: false, reason: 'authoritative_rules_unavailable' },
+    });
   });
 
   it('cotiza con tope 20% y bloquea el canje tras la bandera', async () => {

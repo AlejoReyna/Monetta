@@ -185,36 +185,14 @@ class NotificationController extends ChangeNotifier {
     }
   }
 
+  /// Existing FCM service registers whole products, not selected variants.
+  /// UI must hide the dependent G12 action while this capability is false.
+  bool get variantRestockAvailable => false;
+
   Future<bool> createRestockAlert(String rawProductId) async {
-    if (!available || saving) return false;
-    saving = true;
-    lastError = null;
+    lastError = 'El aviso por variante aún no está disponible.';
     notifyListeners();
-    try {
-      permission = await _gateway!.requestPermission();
-      if (!permission.canReceive) {
-        throw const NotificationException(
-          'Activa las notificaciones del dispositivo para recibir este aviso.',
-        );
-      }
-      await _ensureInstallation();
-      await _syncEndpoint();
-      final next = preferences.copyWith(productAlerts: true);
-      preferences = next;
-      await _syncPreferences(source: 'product_alert');
-      await _persistPreferences();
-      await _api!.createProductAlert(
-        credential: _credential!,
-        productKey: _shopifyProductKey(rawProductId),
-      );
-      return true;
-    } catch (error) {
-      lastError = _friendlyError(error);
-      return false;
-    } finally {
-      saving = false;
-      notifyListeners();
-    }
+    return false;
   }
 
   void recordPushOutcome(String event) {
@@ -373,10 +351,6 @@ class NotificationController extends ChangeNotifier {
       );
     }
     onOpenRoute(route);
-  }
-
-  static String _shopifyProductKey(String raw) {
-    return raw.startsWith('shopify:') ? raw : 'shopify:$raw';
   }
 
   static String _friendlyError(Object error) {

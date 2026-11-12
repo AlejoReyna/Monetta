@@ -24,11 +24,19 @@ class RewardsApi {
   final RewardsTokenProvider tokenProvider;
   final http.Client _client;
 
+  int _sessionGeneration = 0;
+
+  /// Called by the app on sign-out/account change, including A -> B -> A.
+  void clearSession() => _sessionGeneration++;
+
   Future<Map<String, String>> _headers() async {
     final token = await tokenProvider();
+    if (token == null || token.isEmpty) {
+      throw const RewardsApiError('unauthenticated');
+    }
     return {
       'Content-Type': 'application/json',
-      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+      'Authorization': 'Bearer $token',
     };
   }
 
@@ -36,7 +44,7 @@ class RewardsApi {
     try {
       final json = jsonDecode(body) as Map<String, dynamic>;
       final code = '${json['error'] ?? 'internal_error'}';
-      throw RewardsApiError(code, json['message'] as String?);
+      throw RewardsApiError(code);
     } on RewardsApiError {
       rethrow;
     } on Object {
@@ -44,46 +52,63 @@ class RewardsApi {
     }
   }
 
-  Future<RewardsSummary> summary() async {
-    final res = await _client.get(
-      Uri.parse('$baseUrl/customers/me/rewards'),
-      headers: await _headers(),
-    );
+  Future<Map<String, dynamic>> _read(Uri uri) async {
+    final generation = _sessionGeneration;
+    final headers = await _headers();
+    final res = await _client.get(uri, headers: headers);
+    final currentHeaders = await _headers();
+    if (generation != _sessionGeneration ||
+        headers['Authorization'] != currentHeaders['Authorization']) {
+      throw const RewardsApiError('stale_session');
+    }
     if (res.statusCode != 200) _throwFor(res.statusCode, res.body);
-    return RewardsSummary.fromJson(
-      jsonDecode(res.body) as Map<String, dynamic>,
-    );
+    if (res.bodyBytes.length > 2 * 1024 * 1024) {
+      throw const RewardsApiError('invalid_response');
+    }
+    try {
+      final value = jsonDecode(res.body);
+      if (value is Map<String, dynamic>) return value;
+    } catch (_) {/* classified below */}
+    throw const RewardsApiError('invalid_response');
   }
+
+  Future<RewardsSummary> summary() async => RewardsSummary.fromJson(
+        await _read(Uri.parse('$baseUrl/customers/me/rewards')),
+      );
 
   Future<({List<RewardsMovement> movements, String? nextCursor})> activity({
     int limit = 20,
     String? cursor,
   }) async {
+    if (limit < 1 || limit > 100) throw ArgumentError.value(limit, 'limit');
     final uri = Uri.parse('$baseUrl/customers/me/rewards/activity').replace(
       queryParameters: {
         'limit': '$limit',
         if (cursor != null) 'cursor': cursor,
       },
     );
-    final res = await _client.get(uri, headers: await _headers());
-    if (res.statusCode != 200) _throwFor(res.statusCode, res.body);
-    final json = jsonDecode(res.body) as Map<String, dynamic>;
-    final items = (json['movements'] as List? ?? [])
-        .whereType<Map<String, dynamic>>()
+    final json = await _read(uri);
+    final rows = json['movements'];
+    final next = json['nextCursor'];
+    if (rows is! List ||
+        rows.any((r) => r is! Map<String, dynamic>) ||
+        (next != null && (next is! String || next.isEmpty))) {
+      throw const RewardsApiError('invalid_response');
+    }
+    final items = rows
+        .cast<Map<String, dynamic>>()
         .map(RewardsMovement.fromJson)
         .toList(growable: false);
-    return (movements: items, nextCursor: json['nextCursor'] as String?);
+    return (movements: items, nextCursor: next as String?);
   }
 
   Future<OrderRewardsState> orderRewards(String orderShopifyId) async {
-    final res = await _client.get(
-      Uri.parse('$baseUrl/customers/me/orders/$orderShopifyId/rewards'),
-      headers: await _headers(),
+    final data = await _read(
+      Uri.parse(
+        '$baseUrl/customers/me/orders/${Uri.encodeComponent(orderShopifyId)}/rewards',
+      ),
     );
-    if (res.statusCode != 200) _throwFor(res.statusCode, res.body);
-    return OrderRewardsState.fromJson(
-      jsonDecode(res.body) as Map<String, dynamic>,
-    );
+    return OrderRewardsState.fromJson(data);
   }
 
   Future<RewardsQuote> quote({

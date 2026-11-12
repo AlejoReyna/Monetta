@@ -28,7 +28,12 @@ void main() {
     expect(
       RewardsSummary.fromJson({
         'program': {'redemptionEnabled': false},
-        'balance': {'availableCents': 18400, 'pendingCents': 5400},
+        'balance': {
+          'availableCents': 18400,
+          'pendingCents': 5400,
+          'reservedCents': 0,
+          'asOf': '2026-09-14T00:00:00Z',
+        },
         'incentives': {
           'firstPurchase': {'enabled': false},
           'review': {'enabled': false},

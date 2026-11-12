@@ -25,6 +25,8 @@ const PRODUCT_FIELDS = `
         price
         compareAtPrice
         sku
+        selectedOptions { name value }
+        image { url }
         availableForSale
         inventoryQuantity
         inventoryPolicy
