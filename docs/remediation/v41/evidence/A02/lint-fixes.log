@@ -1,0 +1,58 @@
+Computing fixes in product_card.dart...
+Applying fixes...
+
+product_card.dart
+  require_trailing_commas - 11 fixes
+
+11 fixes made in 1 file.
+Computing fixes in product_tile.dart...
+Applying fixes...
+
+product_tile.dart
+  curly_braces_in_flow_control_structures - 1 fix
+  require_trailing_commas - 3 fixes
+
+4 fixes made in 1 file.
+Computing fixes in product_selection.dart...
+Applying fixes...
+
+product_selection.dart
+  require_trailing_commas - 3 fixes
+
+3 fixes made in 1 file.
+Computing fixes in product_screen.dart...
+Applying fixes...
+
+product_screen.dart
+  require_trailing_commas - 21 fixes
+
+21 fixes made in 1 file.
+Computing fixes in product_zoom.dart...
+Applying fixes...
+
+product_zoom.dart
+  require_trailing_commas - 20 fixes
+
+20 fixes made in 1 file.
+Computing fixes in product_recommendations.dart...
+Applying fixes...
+
+product_recommendations.dart
+  require_trailing_commas - 3 fixes
+
+3 fixes made in 1 file.
+Computing fixes in quick_view.dart...
+Applying fixes...
+
+quick_view.dart
+  curly_braces_in_flow_control_structures - 1 fix
+  require_trailing_commas - 8 fixes
+
+9 fixes made in 1 file.
+Computing fixes in variant_selection.dart...
+Applying fixes...
+
+variant_selection.dart
+  require_trailing_commas - 2 fixes
+
+2 fixes made in 1 file.

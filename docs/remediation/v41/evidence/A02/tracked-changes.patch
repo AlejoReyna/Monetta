@@ -1,0 +1,4192 @@
+diff --git a/lib/data/local/catalog_cache_store.dart b/lib/data/local/catalog_cache_store.dart
+index a3de4d2..fb2c204 100644
+--- a/lib/data/local/catalog_cache_store.dart
++++ b/lib/data/local/catalog_cache_store.dart
+@@ -314,6 +314,10 @@ class CatalogCacheStore {
+       available: row.available,
+       compareAtPrice: row.compareAtPrice,
+       sku: row.sku,
++      selectedOptions: Map<String, String>.from(
++        jsonDecode(row.selectedOptions) as Map,
++      ),
++      imageUrls: _decodeStringList(row.imageUrls),
+     );
+   }
+ 
+@@ -329,6 +333,8 @@ class CatalogCacheStore {
+       available: variant.available,
+       compareAtPrice: Value(variant.compareAtPrice),
+       sku: Value(variant.sku),
++      selectedOptions: Value(jsonEncode(variant.selectedOptions)),
++      imageUrls: Value(_encodeStringList(variant.imageUrls)),
+     );
+   }
+ 
+diff --git a/lib/data/local/database.dart b/lib/data/local/database.dart
+index 9519a75..4d337b0 100644
+--- a/lib/data/local/database.dart
++++ b/lib/data/local/database.dart
+@@ -48,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
+   factory AppDatabase.connect() => AppDatabase(_openConnection());
+ 
+   @override
+-  int get schemaVersion => 9;
++  int get schemaVersion => 10;
+ 
+   @override
+   MigrationStrategy get migration => MigrationStrategy(
+@@ -114,6 +114,21 @@ class AppDatabase extends _$AppDatabase {
+               'REAL',
+             );
+           }
++          if (from < 10) {
++            await _addColumnIfMissing(
++              'cached_variants',
++              'selected_options',
++              "TEXT NOT NULL DEFAULT '{}'",
++            );
++            await _addColumnIfMissing(
++              'cached_variants',
++              'image_urls',
++              "TEXT NOT NULL DEFAULT '[]'",
++            );
++            // A delta cursor cannot backfill fields added to unchanged
++            // Shopify variants. Require a complete refresh next time online.
++            await customStatement('DELETE FROM sync_cursors');
++          }
+         },
+         beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON;'),
+       );
+diff --git a/lib/data/local/database.g.dart b/lib/data/local/database.g.dart
+index 80bea0b..05e6d5c 100644
+--- a/lib/data/local/database.g.dart
++++ b/lib/data/local/database.g.dart
+@@ -708,9 +708,34 @@ class $CachedVariantsTable extends CachedVariants
+   late final GeneratedColumn<String> sku = GeneratedColumn<String>(
+       'sku', aliasedName, true,
+       type: DriftSqlType.string, requiredDuringInsert: false);
++  static const VerificationMeta _selectedOptionsMeta =
++      const VerificationMeta('selectedOptions');
+   @override
+-  List<GeneratedColumn> get $columns =>
+-      [id, productId, title, price, compareAtPrice, available, sku];
++  late final GeneratedColumn<String> selectedOptions = GeneratedColumn<String>(
++      'selected_options', aliasedName, false,
++      type: DriftSqlType.string,
++      requiredDuringInsert: false,
++      defaultValue: const Constant('{}'));
++  static const VerificationMeta _imageUrlsMeta =
++      const VerificationMeta('imageUrls');
++  @override
++  late final GeneratedColumn<String> imageUrls = GeneratedColumn<String>(
++      'image_urls', aliasedName, false,
++      type: DriftSqlType.string,
++      requiredDuringInsert: false,
++      defaultValue: const Constant('[]'));
++  @override
++  List<GeneratedColumn> get $columns => [
++        id,
++        productId,
++        title,
++        price,
++        compareAtPrice,
++        available,
++        sku,
++        selectedOptions,
++        imageUrls
++      ];
+   @override
+   String get aliasedName => _alias ?? actualTableName;
+   @override
+@@ -760,6 +785,16 @@ class $CachedVariantsTable extends CachedVariants
+       context.handle(
+           _skuMeta, sku.isAcceptableOrUnknown(data['sku']!, _skuMeta));
+     }
++    if (data.containsKey('selected_options')) {
++      context.handle(
++          _selectedOptionsMeta,
++          selectedOptions.isAcceptableOrUnknown(
++              data['selected_options']!, _selectedOptionsMeta));
++    }
++    if (data.containsKey('image_urls')) {
++      context.handle(_imageUrlsMeta,
++          imageUrls.isAcceptableOrUnknown(data['image_urls']!, _imageUrlsMeta));
++    }
+     return context;
+   }
+ 
+@@ -783,6 +818,10 @@ class $CachedVariantsTable extends CachedVariants
+           .read(DriftSqlType.bool, data['${effectivePrefix}available'])!,
+       sku: attachedDatabase.typeMapping
+           .read(DriftSqlType.string, data['${effectivePrefix}sku']),
++      selectedOptions: attachedDatabase.typeMapping.read(
++          DriftSqlType.string, data['${effectivePrefix}selected_options'])!,
++      imageUrls: attachedDatabase.typeMapping
++          .read(DriftSqlType.string, data['${effectivePrefix}image_urls'])!,
+     );
+   }
+ 
+@@ -800,6 +839,8 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
+   final double? compareAtPrice;
+   final bool available;
+   final String? sku;
++  final String selectedOptions;
++  final String imageUrls;
+   const CachedVariant(
+       {required this.id,
+       required this.productId,
+@@ -807,7 +848,9 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
+       required this.price,
+       this.compareAtPrice,
+       required this.available,
+-      this.sku});
++      this.sku,
++      required this.selectedOptions,
++      required this.imageUrls});
+   @override
+   Map<String, Expression> toColumns(bool nullToAbsent) {
+     final map = <String, Expression>{};
+@@ -822,6 +865,8 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
+     if (!nullToAbsent || sku != null) {
+       map['sku'] = Variable<String>(sku);
+     }
++    map['selected_options'] = Variable<String>(selectedOptions);
++    map['image_urls'] = Variable<String>(imageUrls);
+     return map;
+   }
+ 
+@@ -836,6 +881,8 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
+           : Value(compareAtPrice),
+       available: Value(available),
+       sku: sku == null && nullToAbsent ? const Value.absent() : Value(sku),
++      selectedOptions: Value(selectedOptions),
++      imageUrls: Value(imageUrls),
+     );
+   }
+ 
+@@ -850,6 +897,8 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
+       compareAtPrice: serializer.fromJson<double?>(json['compareAtPrice']),
+       available: serializer.fromJson<bool>(json['available']),
+       sku: serializer.fromJson<String?>(json['sku']),
++      selectedOptions: serializer.fromJson<String>(json['selectedOptions']),
++      imageUrls: serializer.fromJson<String>(json['imageUrls']),
+     );
+   }
+   @override
+@@ -863,6 +912,8 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
+       'compareAtPrice': serializer.toJson<double?>(compareAtPrice),
+       'available': serializer.toJson<bool>(available),
+       'sku': serializer.toJson<String?>(sku),
++      'selectedOptions': serializer.toJson<String>(selectedOptions),
++      'imageUrls': serializer.toJson<String>(imageUrls),
+     };
+   }
+ 
+@@ -873,7 +924,9 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
+           double? price,
+           Value<double?> compareAtPrice = const Value.absent(),
+           bool? available,
+-          Value<String?> sku = const Value.absent()}) =>
++          Value<String?> sku = const Value.absent(),
++          String? selectedOptions,
++          String? imageUrls}) =>
+       CachedVariant(
+         id: id ?? this.id,
+         productId: productId ?? this.productId,
+@@ -883,6 +936,8 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
+             compareAtPrice.present ? compareAtPrice.value : this.compareAtPrice,
+         available: available ?? this.available,
+         sku: sku.present ? sku.value : this.sku,
++        selectedOptions: selectedOptions ?? this.selectedOptions,
++        imageUrls: imageUrls ?? this.imageUrls,
+       );
+   CachedVariant copyWithCompanion(CachedVariantsCompanion data) {
+     return CachedVariant(
+@@ -895,6 +950,10 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
+           : this.compareAtPrice,
+       available: data.available.present ? data.available.value : this.available,
+       sku: data.sku.present ? data.sku.value : this.sku,
++      selectedOptions: data.selectedOptions.present
++          ? data.selectedOptions.value
++          : this.selectedOptions,
++      imageUrls: data.imageUrls.present ? data.imageUrls.value : this.imageUrls,
+     );
+   }
+ 
+@@ -907,14 +966,16 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
+           ..write('price: $price, ')
+           ..write('compareAtPrice: $compareAtPrice, ')
+           ..write('available: $available, ')
+-          ..write('sku: $sku')
++          ..write('sku: $sku, ')
++          ..write('selectedOptions: $selectedOptions, ')
++          ..write('imageUrls: $imageUrls')
+           ..write(')'))
+         .toString();
+   }
+ 
+   @override
+-  int get hashCode =>
+-      Object.hash(id, productId, title, price, compareAtPrice, available, sku);
++  int get hashCode => Object.hash(id, productId, title, price, compareAtPrice,
++      available, sku, selectedOptions, imageUrls);
+   @override
+   bool operator ==(Object other) =>
+       identical(this, other) ||
+@@ -925,7 +986,9 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
+           other.price == this.price &&
+           other.compareAtPrice == this.compareAtPrice &&
+           other.available == this.available &&
+-          other.sku == this.sku);
++          other.sku == this.sku &&
++          other.selectedOptions == this.selectedOptions &&
++          other.imageUrls == this.imageUrls);
+ }
+ 
+ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
+@@ -936,6 +999,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
+   final Value<double?> compareAtPrice;
+   final Value<bool> available;
+   final Value<String?> sku;
++  final Value<String> selectedOptions;
++  final Value<String> imageUrls;
+   final Value<int> rowid;
+   const CachedVariantsCompanion({
+     this.id = const Value.absent(),
+@@ -945,6 +1010,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
+     this.compareAtPrice = const Value.absent(),
+     this.available = const Value.absent(),
+     this.sku = const Value.absent(),
++    this.selectedOptions = const Value.absent(),
++    this.imageUrls = const Value.absent(),
+     this.rowid = const Value.absent(),
+   });
+   CachedVariantsCompanion.insert({
+@@ -955,6 +1022,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
+     this.compareAtPrice = const Value.absent(),
+     required bool available,
+     this.sku = const Value.absent(),
++    this.selectedOptions = const Value.absent(),
++    this.imageUrls = const Value.absent(),
+     this.rowid = const Value.absent(),
+   })  : id = Value(id),
+         productId = Value(productId),
+@@ -969,6 +1038,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
+     Expression<double>? compareAtPrice,
+     Expression<bool>? available,
+     Expression<String>? sku,
++    Expression<String>? selectedOptions,
++    Expression<String>? imageUrls,
+     Expression<int>? rowid,
+   }) {
+     return RawValuesInsertable({
+@@ -979,6 +1050,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
+       if (compareAtPrice != null) 'compare_at_price': compareAtPrice,
+       if (available != null) 'available': available,
+       if (sku != null) 'sku': sku,
++      if (selectedOptions != null) 'selected_options': selectedOptions,
++      if (imageUrls != null) 'image_urls': imageUrls,
+       if (rowid != null) 'rowid': rowid,
+     });
+   }
+@@ -991,6 +1064,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
+       Value<double?>? compareAtPrice,
+       Value<bool>? available,
+       Value<String?>? sku,
++      Value<String>? selectedOptions,
++      Value<String>? imageUrls,
+       Value<int>? rowid}) {
+     return CachedVariantsCompanion(
+       id: id ?? this.id,
+@@ -1000,6 +1075,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
+       compareAtPrice: compareAtPrice ?? this.compareAtPrice,
+       available: available ?? this.available,
+       sku: sku ?? this.sku,
++      selectedOptions: selectedOptions ?? this.selectedOptions,
++      imageUrls: imageUrls ?? this.imageUrls,
+       rowid: rowid ?? this.rowid,
+     );
+   }
+@@ -1028,6 +1105,12 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
+     if (sku.present) {
+       map['sku'] = Variable<String>(sku.value);
+     }
++    if (selectedOptions.present) {
++      map['selected_options'] = Variable<String>(selectedOptions.value);
++    }
++    if (imageUrls.present) {
++      map['image_urls'] = Variable<String>(imageUrls.value);
++    }
+     if (rowid.present) {
+       map['rowid'] = Variable<int>(rowid.value);
+     }
+@@ -1044,6 +1127,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
+           ..write('compareAtPrice: $compareAtPrice, ')
+           ..write('available: $available, ')
+           ..write('sku: $sku, ')
++          ..write('selectedOptions: $selectedOptions, ')
++          ..write('imageUrls: $imageUrls, ')
+           ..write('rowid: $rowid')
+           ..write(')'))
+         .toString();
+@@ -4603,9 +4688,10 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
+   final String? attributionCode;
+   final String status;
+ 
+-  /// Shopify Customer Account `Order.transactions.type` values, joined
+-  /// with commas (`bank_deposit`, `manual`, `card`, …). Null when the
+-  /// order history query did not return a transaction type — never guessed.
++  /// Payment method tokens joined with commas (`bank_deposit`, `manual`,
++  /// `card`, …). Customer Account `Order.transactions.type`, or the same
++  /// normalized gateway names from the order mirror. Null when neither
++  /// source returned a method — never guessed.
+   final String? paymentMethod;
+ 
+   /// Shopify `cancelledAt`. Null when the order was not canceled.
+@@ -5807,6 +5893,8 @@ typedef $$CachedVariantsTableCreateCompanionBuilder = CachedVariantsCompanion
+   Value<double?> compareAtPrice,
+   required bool available,
+   Value<String?> sku,
++  Value<String> selectedOptions,
++  Value<String> imageUrls,
+   Value<int> rowid,
+ });
+ typedef $$CachedVariantsTableUpdateCompanionBuilder = CachedVariantsCompanion
+@@ -5818,6 +5906,8 @@ typedef $$CachedVariantsTableUpdateCompanionBuilder = CachedVariantsCompanion
+   Value<double?> compareAtPrice,
+   Value<bool> available,
+   Value<String?> sku,
++  Value<String> selectedOptions,
++  Value<String> imageUrls,
+   Value<int> rowid,
+ });
+ 
+@@ -5870,6 +5960,13 @@ class $$CachedVariantsTableFilterComposer
+   ColumnFilters<String> get sku => $composableBuilder(
+       column: $table.sku, builder: (column) => ColumnFilters(column));
+ 
++  ColumnFilters<String> get selectedOptions => $composableBuilder(
++      column: $table.selectedOptions,
++      builder: (column) => ColumnFilters(column));
++
++  ColumnFilters<String> get imageUrls => $composableBuilder(
++      column: $table.imageUrls, builder: (column) => ColumnFilters(column));
++
+   $$CachedProductsTableFilterComposer get productId {
+     final $$CachedProductsTableFilterComposer composer = $composerBuilder(
+         composer: this,
+@@ -5919,6 +6016,13 @@ class $$CachedVariantsTableOrderingComposer
+   ColumnOrderings<String> get sku => $composableBuilder(
+       column: $table.sku, builder: (column) => ColumnOrderings(column));
+ 
++  ColumnOrderings<String> get selectedOptions => $composableBuilder(
++      column: $table.selectedOptions,
++      builder: (column) => ColumnOrderings(column));
++
++  ColumnOrderings<String> get imageUrls => $composableBuilder(
++      column: $table.imageUrls, builder: (column) => ColumnOrderings(column));
++
+   $$CachedProductsTableOrderingComposer get productId {
+     final $$CachedProductsTableOrderingComposer composer = $composerBuilder(
+         composer: this,
+@@ -5967,6 +6071,12 @@ class $$CachedVariantsTableAnnotationComposer
+   GeneratedColumn<String> get sku =>
+       $composableBuilder(column: $table.sku, builder: (column) => column);
+ 
++  GeneratedColumn<String> get selectedOptions => $composableBuilder(
++      column: $table.selectedOptions, builder: (column) => column);
++
++  GeneratedColumn<String> get imageUrls =>
++      $composableBuilder(column: $table.imageUrls, builder: (column) => column);
++
+   $$CachedProductsTableAnnotationComposer get productId {
+     final $$CachedProductsTableAnnotationComposer composer = $composerBuilder(
+         composer: this,
+@@ -6019,6 +6129,8 @@ class $$CachedVariantsTableTableManager extends RootTableManager<
+             Value<double?> compareAtPrice = const Value.absent(),
+             Value<bool> available = const Value.absent(),
+             Value<String?> sku = const Value.absent(),
++            Value<String> selectedOptions = const Value.absent(),
++            Value<String> imageUrls = const Value.absent(),
+             Value<int> rowid = const Value.absent(),
+           }) =>
+               CachedVariantsCompanion(
+@@ -6029,6 +6141,8 @@ class $$CachedVariantsTableTableManager extends RootTableManager<
+             compareAtPrice: compareAtPrice,
+             available: available,
+             sku: sku,
++            selectedOptions: selectedOptions,
++            imageUrls: imageUrls,
+             rowid: rowid,
+           ),
+           createCompanionCallback: ({
+@@ -6039,6 +6153,8 @@ class $$CachedVariantsTableTableManager extends RootTableManager<
+             Value<double?> compareAtPrice = const Value.absent(),
+             required bool available,
+             Value<String?> sku = const Value.absent(),
++            Value<String> selectedOptions = const Value.absent(),
++            Value<String> imageUrls = const Value.absent(),
+             Value<int> rowid = const Value.absent(),
+           }) =>
+               CachedVariantsCompanion.insert(
+@@ -6049,6 +6165,8 @@ class $$CachedVariantsTableTableManager extends RootTableManager<
+             compareAtPrice: compareAtPrice,
+             available: available,
+             sku: sku,
++            selectedOptions: selectedOptions,
++            imageUrls: imageUrls,
+             rowid: rowid,
+           ),
+           withReferenceMapper: (p0) => p0
+diff --git a/lib/data/local/tables.dart b/lib/data/local/tables.dart
+index 3556026..e34dba7 100644
+--- a/lib/data/local/tables.dart
++++ b/lib/data/local/tables.dart
+@@ -54,6 +54,8 @@ class CachedVariants extends Table {
+   RealColumn get compareAtPrice => real().nullable()();
+   BoolColumn get available => boolean()();
+   TextColumn get sku => text().nullable()();
++  TextColumn get selectedOptions => text().withDefault(const Constant('{}'))();
++  TextColumn get imageUrls => text().withDefault(const Constant('[]'))();
+ 
+   @override
+   Set<Column> get primaryKey => {id};
+diff --git a/lib/data/repositories/catalog_repository.dart b/lib/data/repositories/catalog_repository.dart
+index 647c2ff..d1620fb 100644
+--- a/lib/data/repositories/catalog_repository.dart
++++ b/lib/data/repositories/catalog_repository.dart
+@@ -356,6 +356,25 @@ Product productFromCatalogSnapshot(Map<String, dynamic> json) => Product(
+           compareAtPrice: variant['compare_at_price'] == null
+               ? null
+               : double.parse(variant['compare_at_price'] as String),
++          selectedOptions: {
++            for (final option
++                in (variant['selectedOptions'] as List? ?? const [])
++                    .whereType<Map<String, dynamic>>())
++              if (option['name'] is String && option['value'] is String)
++                option['name'] as String: option['value'] as String,
++            // Ajax option positions are meaningful only with their actual
++            // product option names. The trimmed legacy snapshot lacks both.
++            for (var i = 0;
++                i < (json['options'] as List? ?? const []).length;
++                i++)
++              if ((json['options'] as List)[i] case {'name': final String name})
++                if (variant['option${i + 1}'] case final String value)
++                  name: value,
++          },
++          imageUrls: [
++            if (variant['featured_image'] case {'src': final String src}) src,
++            if (variant['image'] case {'url': final String url}) url,
++          ],
+         );
+       }).toList(),
+     );
+diff --git a/lib/data/repositories/realtime_catalog_repository.dart b/lib/data/repositories/realtime_catalog_repository.dart
+index ddb88de..d61d882 100644
+--- a/lib/data/repositories/realtime_catalog_repository.dart
++++ b/lib/data/repositories/realtime_catalog_repository.dart
+@@ -162,6 +162,11 @@ class RealtimeCatalogRepository {
+             'variant.compareAtPrice',
+           ),
+           sku: _nullableString(variant['sku'], 'variant.sku'),
++          selectedOptions: _variantOptions(variant['selectedOptions']),
++          imageUrls: _stringList(
++            variant['imageUrls'] ?? const <String>[],
++            'variant.imageUrls',
++          ),
+         ),
+       );
+     }
+@@ -272,3 +277,12 @@ class RealtimeCatalogRepository {
+   static Future<void> _defaultRetryDelay(Duration duration) =>
+       Future<void>.delayed(duration);
+ }
++
++Map<String, String> _variantOptions(Object? raw) {
++  if (raw == null) return const {};
++  if (raw is! Map<String, Object?> ||
++      raw.values.any((value) => value is! String)) {
++    throw const FormatException('Invalid variant.selectedOptions');
++  }
++  return raw.cast<String, String>();
++}
+diff --git a/lib/data/shopify/mappers.dart b/lib/data/shopify/mappers.dart
+index 6452233..37b3807 100644
+--- a/lib/data/shopify/mappers.dart
++++ b/lib/data/shopify/mappers.dart
+@@ -48,6 +48,15 @@ Product productFromJson(Map<String, dynamic> json) {
+       available: v['availableForSale'] == true,
+       compareAtPrice: money(v['compareAtPrice']),
+       sku: v['sku'] as String?,
++      selectedOptions: {
++        for (final option in (v['selectedOptions'] as List? ?? const [])
++            .whereType<Map<String, dynamic>>())
++          if (option['name'] is String && option['value'] is String)
++            option['name'] as String: option['value'] as String,
++      },
++      imageUrls: [
++        if (v['image'] case {'url': final String url}) url,
++      ],
+     );
+   }).toList();
+ 
+diff --git a/lib/data/shopify/queries.dart b/lib/data/shopify/queries.dart
+index 66d3403..2cafab8 100644
+--- a/lib/data/shopify/queries.dart
++++ b/lib/data/shopify/queries.dart
+@@ -38,6 +38,8 @@ fragment ProductFields on Product {
+         price { amount currencyCode }
+         compareAtPrice { amount }
+         sku
++        selectedOptions { name value }
++        image { url(transform: {maxWidth: 1200}) }
+       }
+     }
+   }
+@@ -410,7 +412,7 @@ query HomeContent {
+ String productConnectionQuery(String field) {
+   final selection = switch (field) {
+     'variants' =>
+-      'id title availableForSale price { amount currencyCode } compareAtPrice { amount } sku',
++      'id title availableForSale price { amount currencyCode } compareAtPrice { amount } sku selectedOptions { name value } image { url(transform: {maxWidth: 1200}) }',
+     'collections' => 'handle',
+     _ => throw ArgumentError.value(field),
+   };
+diff --git a/lib/domain/product.dart b/lib/domain/product.dart
+index 24a9c75..10e31de 100644
+--- a/lib/domain/product.dart
++++ b/lib/domain/product.dart
+@@ -102,6 +102,8 @@ class ProductVariant {
+     required this.available,
+     this.compareAtPrice,
+     this.sku,
++    this.selectedOptions = const {},
++    this.imageUrls = const [],
+   });
+ 
+   /// Canonical Shopify GID (`gid://shopify/ProductVariant/<legacy id>`).
+@@ -114,7 +116,22 @@ class ProductVariant {
+   /// Null for every variant on this store today — do not build logic on it.
+   final String? sku;
+ 
++  /// Exact option names/values from Shopify, never inferred from the title.
++  final Map<String, String> selectedOptions;
++
++  /// Only photographs explicitly associated with this variant by the source.
++  /// Storefront currently exposes one image; other sources may supply more.
++  final List<String> imageUrls;
++
+   /// Shopify's placeholder title for single-variant products. Such products
+   /// should not render a variant picker.
+   bool get isDefault => title == 'Default Title';
+ }
++
++/// Never assign a product photograph to an arbitrary colour/size. A product
++/// gallery is unambiguous only when the product has a single variant.
++List<String> imagesForVariant(Product product, ProductVariant? variant) {
++  if (variant == null) return const [];
++  if (variant.imageUrls.isNotEmpty) return variant.imageUrls;
++  return product.variants.length == 1 ? product.images : const [];
++}
+diff --git a/lib/features/catalog/product_card.dart b/lib/features/catalog/product_card.dart
+index 1fee0bb..f0fa846 100644
+--- a/lib/features/catalog/product_card.dart
++++ b/lib/features/catalog/product_card.dart
+@@ -62,7 +62,7 @@ export 'product_tile.dart'
+         productTileExtent,
+         tilePriceLinesFor;
+ 
+-class ProductCard extends StatelessWidget {
++class ProductCard extends StatefulWidget {
+   const ProductCard({
+     required this.product,
+     this.urgency,
+@@ -73,6 +73,9 @@ class ProductCard extends StatelessWidget {
+     this.showViewProduct = true,
+     this.onQuickView,
+     this.onTap,
++    this.initialVariantId,
++    this.onVariantChanged,
++    this.openDirectly = false,
+     super.key,
+   });
+ 
+@@ -109,9 +112,94 @@ class ProductCard extends StatelessWidget {
+   /// Overrides the default tap, which opens the quick view (or selects the
+   /// product in a tablet detail pane).
+   final VoidCallback? onTap;
++  final String? initialVariantId;
++  final ValueChanged<String?>? onVariantChanged;
++  final bool openDirectly;
+ 
+-  void _openQuickView(BuildContext context) =>
+-      unawaited(showProductQuickView(context, product));
++  @override
++  State<ProductCard> createState() => _ProductCardState();
++}
++
++class _ProductCardState extends State<ProductCard> {
++  late String? _selectedId =
++      widget.initialVariantId ?? selectedVariant(widget.product, 0)?.id;
++  Product get product => widget.product;
++  ProductTileDensity get density => widget.density;
++  VoidCallback? get onQuickView => widget.onQuickView;
++  VoidCallback? get onTap => widget.onTap;
++  bool get showWishlist => widget.showWishlist;
++  bool get showViewProduct => widget.showViewProduct;
++  String? get urgency => widget.urgency;
++
++  @override
++  void didUpdateWidget(covariant ProductCard oldWidget) {
++    super.didUpdateWidget(oldWidget);
++    if (oldWidget.product.id != product.id ||
++        oldWidget.initialVariantId != widget.initialVariantId) {
++      _selectedId = widget.initialVariantId ?? selectedVariant(product, 0)?.id;
++    }
++  }
++
++  void _openPdp(BuildContext context) => openProduct(
++        context,
++        product,
++        initialVariantId: _selectedId,
++        initialVariantIndex: _selectedId == null ? -1 : 0,
++      );
++
++  Widget? _options() {
++    final choices = selectableVariants(product);
++    if (choices.length < 2) return null;
++    final selected = selectedVariant(
++      product,
++      variantIndexForId(product, _selectedId, fallback: -1),
++    );
++    return PopupMenuButton<String>(
++      tooltip: 'Elegir opción',
++      initialValue: _selectedId,
++      onSelected: (id) {
++        setState(() => _selectedId = id);
++        widget.onVariantChanged?.call(id);
++      },
++      itemBuilder: (_) => [
++        for (final variant in choices)
++          PopupMenuItem(
++            value: variant.id,
++            child: Text(
++              '${variant.title}${variant.available ? '' : ' · Agotado'}',
++            ),
++          ),
++      ],
++      child: ConstrainedBox(
++        constraints: const BoxConstraints(minHeight: 48),
++        child: Row(
++          children: [
++            Expanded(
++              child: Text(
++                selected?.title ?? 'Elegir opción',
++                softWrap: true,
++                style: boutiqueText(size: 12, height: 1.3),
++              ),
++            ),
++            const Icon(Icons.expand_more, size: 18),
++          ],
++        ),
++      ),
++    );
++  }
++
++  void _openQuickView(BuildContext context) => unawaited(
++        showProductQuickView(
++          context,
++          product,
++          initialVariantId: _selectedId,
++          initialVariantIndex: _selectedId == null ? -1 : 0,
++          onVariantChanged: (id) {
++            if (mounted) setState(() => _selectedId = id);
++            widget.onVariantChanged?.call(id);
++          },
++        ),
++      );
+ 
+   /// A long press: the caller's [onQuickView] when given, the quick view
+   /// otherwise.
+@@ -128,10 +216,14 @@ class ProductCard extends StatelessWidget {
+       onTap!();
+       return;
+     }
++    if (widget.openDirectly) {
++      _openPdp(context);
++      return;
++    }
+     // A tablet detail pane keeps selecting the product beside the list.
+     if (BrowseDetailScope.maybeOf(context) != null &&
+         context.findAncestorWidgetOfExactType<ProductScreen>() == null) {
+-      openProduct(context, product);
++      _openPdp(context);
+       return;
+     }
+     _openQuickView(context);
+@@ -142,7 +234,15 @@ class ProductCard extends StatelessWidget {
+     final store = StoreScope.of(context);
+     final facets = store.facetsFor(product.id);
+     final wishlisted = store.wishlist.contains(product.id);
+-    final data = ProductTileData.fromProduct(product, facets: facets);
++    final data = ProductTileData.fromProduct(
++      product,
++      facets: facets,
++      variant: selectedVariant(
++        product,
++        variantIndexForId(product, _selectedId, fallback: -1),
++      ),
++      selectDefaultVariant: false,
++    );
+     // Beside the bag a long press lifts the card instead of opening the card.
+     final lifts = DuoWorkspace.isDual(context, listen: true) &&
+         DuoWorkspace.regionOf(context) == DuoRegion.browse;
+@@ -155,6 +255,7 @@ class ProductCard extends StatelessWidget {
+           data: data,
+           density: density,
+           eyebrow: urgency,
++          optionControl: _options(),
+           wishlisted: wishlisted,
+           onToggleWishlist:
+               showWishlist ? () => store.toggleWishlist(product.id) : null,
+@@ -162,10 +263,11 @@ class ProductCard extends StatelessWidget {
+           footer: showViewProduct
+               ? TileViewProductButton(
+                   key: Key('view-product-${product.id}'),
+-                  onPressed: () => openProduct(context, product),
++                  onPressed: () => _openPdp(context),
+                 )
+               : null,
+-          semanticHint: 'Abre la vista previa',
++          semanticHint:
++              widget.openDirectly ? 'Abre el producto' : 'Abre la vista previa',
+           onTap: () => _tap(context),
+         ),
+       ),
+@@ -250,8 +352,14 @@ void openProduct(
+   BuildContext context,
+   Product product, {
+   int initialVariantIndex = 0,
++  String? initialVariantId,
+ }) {
+   final store = StoreScope.of(context);
++  initialVariantIndex = variantIndexForId(
++    product,
++    initialVariantId,
++    fallback: initialVariantIndex,
++  );
+   // One key wherever the page is drawn: a window that opens moves it to its
+   // right side with its state.
+   final key = GlobalKey(debugLabel: 'product ${product.id}');
+@@ -261,6 +369,7 @@ void openProduct(
+           key: key,
+           productId: product.id,
+           initialVariantIndex: initialVariantIndex,
++          initialVariantId: initialVariantId,
+         ),
+       );
+   final beside = DuoPanePage(
+diff --git a/lib/features/catalog/product_tile.dart b/lib/features/catalog/product_tile.dart
+index 4e8e3e2..bbea1c3 100644
+--- a/lib/features/catalog/product_tile.dart
++++ b/lib/features/catalog/product_tile.dart
+@@ -20,6 +20,7 @@
+ /// [ProductTileData.fromProduct] and [ProductTileData.fromCatalogItem].
+ library;
+ 
++import 'dart:math' as math;
+ import '../../app/storefront_layout.dart';
+ import 'package:flutter/material.dart';
+ 
+@@ -33,6 +34,7 @@ import '../../domain/catalog_item.dart';
+ import '../../domain/product.dart';
+ import '../../reco/explainer.dart';
+ import '../boutique/boutique_tokens.dart';
++import 'product_controls.dart';
+ 
+ /// How much room a tile has. Only the type scale and the inner padding
+ /// change — the anatomy is identical, so a shopper recognises the same card
+@@ -146,7 +148,18 @@ const double _cardPhotoGap = BoutiqueSpace.sm;
+ const BorderRadius kProductCardRadius = BorderRadius.all(Radius.circular(6));
+ 
+ /// Height a grid reserves under a tile that carries a footer control.
+-const double kTileFooterExtent = _footerGap + 40;
++const double kTileFooterExtent = _footerGap + 48;
++
++double _tileFooterExtent(TextScaler scaler, double width) {
++  final painter = TextPainter(
++    text: TextSpan(text: 'VER PRODUCTO', style: boutiqueText(size: 13)),
++    textDirection: TextDirection.ltr,
++    textScaler: scaler,
++  )..layout(maxWidth: math.max(1, width - 16));
++  final extent = _footerGap + math.max(48.0, painter.height + 17);
++  painter.dispose();
++  return extent;
++}
+ 
+ /// Unscaled-or-scaled height of the caption block of a card: the gap under the
+ /// photograph, brand, name and [priceLines] lines of price. Each font size is
+@@ -157,10 +170,14 @@ double _cardCaptionExtent(
+   TextScaler textScaler, {
+   required int priceLines,
+ }) {
+-  final text = textScaler.scale(density.cardBrandSize) * _brandLineHeight +
++  final enlarged = StorefrontLayout.enlargedText(textScaler);
++  priceLines = priceLines < 2 ? 2 : priceLines;
++  final text = textScaler.scale(density.cardBrandSize) *
++          _brandLineHeight *
++          (enlarged ? 3 : 1) +
+       textScaler.scale(density.cardNameSize) *
+           _nameLineHeight *
+-          density.nameMaxLines +
++          (enlarged ? 6 : density.nameMaxLines) +
+       textScaler.scale(density.cardPriceSize) * _priceLineHeight * priceLines;
+   // The engine rounds each line box, which can add a fraction of a pixel per
+   // line (up to about 1% at large sizes). A small proportional allowance plus
+@@ -247,7 +264,9 @@ double productTileExtent({
+   double? footerExtent,
+ }) {
+   final footer = footerExtent ??
+-      (variant == ProductTileVariant.card ? kTileFooterExtent : 0);
++      (variant == ProductTileVariant.card
++          ? _tileFooterExtent(textScaler, tileWidth - 2 * density.cardPadding)
++          : 0);
+   if (variant == ProductTileVariant.edgeToEdge) {
+     return tileWidth * density.imageHeightFactor +
+         variant.captionExtent(density, textScaler) +
+@@ -257,6 +276,7 @@ double productTileExtent({
+   return padding +
+       (tileWidth - 2 * padding) +
+       variant.captionExtent(density, textScaler, priceLines: priceLines) +
++      48 +
+       footer +
+       padding;
+ }
+@@ -292,6 +312,7 @@ class ProductTileData {
+     required this.priceLabel,
+     required this.imageUrls,
+     this.brand,
++    this.variantLabel,
+     this.compareAtLabel,
+     this.badge,
+     this.inStock = true,
+@@ -300,6 +321,7 @@ class ProductTileData {
+ 
+   /// Brand line. Null hides the line rather than printing a placeholder.
+   final String? brand;
++  final String? variantLabel;
+   final String title;
+   final String priceLabel;
+ 
+@@ -316,6 +338,7 @@ class ProductTileData {
+     final parts = <String>[
+       if (brand != null) brand!,
+       title,
++      if (variantLabel != null) variantLabel!,
+       priceLabel,
+       if (compareAtLabel != null) 'antes $compareAtLabel',
+       if (!inStock) 'agotado',
+@@ -329,10 +352,18 @@ class ProductTileData {
+     Product product, {
+     CanonicalFacets? facets,
+     bool allowNewBadge = true,
++    ProductVariant? variant,
++    bool selectDefaultVariant = true,
+   }) {
++    if (selectDefaultVariant) {
++      variant ??= product.variants.isEmpty ? null : product.variants.first;
++    }
++    final price = variant?.price ?? product.price;
++    final compare = variant?.compareAtPrice;
++    final onSale = compare != null && compare > price;
+     final brand = facets?.brand?.value;
+-    final discount = (product.discountFraction * 100).round();
+-    final badge = product.isOnSale && discount > 0
++    final discount = onSale ? ((compare - price) / compare * 100).round() : 0;
++    final badge = onSale && discount > 0
+         ? ProductTileBadge(label: '-$discount%', tone: ProductBadgeTone.sale)
+         : allowNewBadge && (facets?.newArrival ?? false)
+             ? const ProductTileBadge(
+@@ -343,18 +374,13 @@ class ProductTileData {
+ 
+     return ProductTileData(
+       brand: brand == null ? null : brandLabel(brand),
+-      title: cardPieceName(
+-        title: product.title,
+-        colorSlug: facets == null || facets.colors.isEmpty
+-            ? null
+-            : facets.colors.first.value,
+-      ),
+-      priceLabel: formatShopperPrice(product.price),
+-      compareAtLabel:
+-          product.isOnSale ? formatShopperPrice(product.compareAtPrice!) : null,
++      title: shopperProductName(product.title),
++      variantLabel: variant?.isDefault == false ? variant!.title : null,
++      priceLabel: formatShopperPrice(price),
++      compareAtLabel: onSale ? formatShopperPrice(compare) : null,
+       badge: badge,
+-      imageUrls: product.images,
+-      inStock: product.isInStock,
++      imageUrls: imagesForVariant(product, variant),
++      inStock: variant?.available ?? false,
+     );
+   }
+ 
+@@ -385,46 +411,21 @@ String _catalogBrandLabel(CatalogItem item) {
+ /// The brown «VER PRODUCTO» pill at the foot of every card.
+ class TileViewProductButton extends StatelessWidget {
+   const TileViewProductButton({required this.onPressed, super.key});
+-
+   final VoidCallback onPressed;
+-
+   @override
+-  Widget build(BuildContext context) {
+-    final palette = context.boutique;
+-    return Semantics(
+-      button: true,
+-      label: 'Ver producto',
+-      excludeSemantics: true,
+-      onTap: onPressed,
+-      child: SizedBox(
+-        height: 40,
+-        width: double.infinity,
+-        child: Material(
+-          color: palette.action,
+-          shape: const StadiumBorder(),
+-          child: InkWell(
+-            customBorder: const StadiumBorder(),
+-            onTap: onPressed,
+-            child: Center(
+-              child: FittedBox(
+-                fit: BoxFit.scaleDown,
+-                child: Text(
+-                  'VER PRODUCTO',
+-                  maxLines: 1,
+-                  style: boutiqueText(
+-                    size: 13,
+-                    weight: FontWeight.w400,
+-                    color: palette.onAction,
+-                    height: 1.1,
+-                  ).copyWith(letterSpacing: 0.5),
+-                ),
+-              ),
+-            ),
+-          ),
++  Widget build(BuildContext context) => OutlinedButton(
++        onPressed: onPressed,
++        style: OutlinedButton.styleFrom(
++          minimumSize: const Size(double.infinity, 48),
++          foregroundColor: context.boutique.ink,
++          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+         ),
+-      ),
+-    );
+-  }
++        child: Text(
++          'VER PRODUCTO',
++          textAlign: TextAlign.center,
++          style: boutiqueText(size: 13, color: context.boutique.ink),
++        ),
++      );
+ }
+ 
+ // Serif caption of the card. The family is bundled; the fallback list keeps a
+@@ -437,8 +438,8 @@ TextStyle _tileSerif({
+   TextDecoration? decoration,
+ }) =>
+     TextStyle(
+-      fontFamily: kBoutiqueSerifFamily,
+-      fontFamilyFallback: kBoutiqueSerifFallback,
++      fontFamily: kBoutiqueSansFamily,
++      fontFamilyFallback: kBoutiqueSansFallback,
+       fontSize: size,
+       fontWeight: weight,
+       height: height,
+@@ -497,6 +498,7 @@ class MonettaProductTile extends StatelessWidget {
+     this.imageOverlay,
+     this.eyebrow,
+     this.footer,
++    this.optionControl,
+     this.semanticHint,
+     super.key,
+   });
+@@ -535,6 +537,7 @@ class MonettaProductTile extends StatelessWidget {
+   /// that shows it reserves [kTileFooterExtent] more height per row through
+   /// [productGridDelegate], which does so by default for the card.
+   final Widget? footer;
++  final Widget? optionControl;
+ 
+   /// Screen-reader hint for the tap, e.g. «Abre la vista previa».
+   final String? semanticHint;
+@@ -571,8 +574,11 @@ class MonettaProductTile extends StatelessWidget {
+         if (data.brand case final brand?) ...[
+           Text(
+             brand,
+-            maxLines: 1,
+-            overflow: TextOverflow.ellipsis,
++            maxLines:
++                StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
++                    ? null
++                    : 1,
++            overflow: TextOverflow.clip,
+             style: variant == ProductTileVariant.edgeToEdge
+                 ? boutiqueText(
+                     size: density.brandSize,
+@@ -591,8 +597,14 @@ class MonettaProductTile extends StatelessWidget {
+         ],
+         Text(
+           data.title,
+-          maxLines: density.nameMaxLines,
+-          overflow: TextOverflow.ellipsis,
++          maxLines:
++              StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
++                  ? null
++                  : density.nameMaxLines,
++          overflow:
++              StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
++                  ? TextOverflow.visible
++                  : TextOverflow.ellipsis,
+           style: variant == ProductTileVariant.edgeToEdge
+               ? boutiqueText(
+                   size: density.nameSize,
+@@ -612,6 +624,92 @@ class MonettaProductTile extends StatelessWidget {
+     );
+   }
+ 
++  double _measuredCaptionExtent(BuildContext context, double width) {
++    final scaler = MediaQuery.textScalerOf(context);
++    final enlarged = StorefrontLayout.enlargedText(scaler);
++    Size measure(
++      String value,
++      double size,
++      double height,
++      FontWeight weight, {
++      int? lines,
++      double? maxWidth,
++    }) {
++      final painter = TextPainter(
++        text: TextSpan(
++          text: value,
++          style: _tileSerif(
++            size: size,
++            weight: weight,
++            color: context.boutique.ink,
++            height: height,
++          ),
++        ),
++        textDirection: Directionality.of(context),
++        textScaler: scaler,
++        maxLines: lines,
++      )..layout(maxWidth: maxWidth ?? width);
++      final measured = painter.size;
++      painter.dispose();
++      return measured;
++    }
++
++    final price = measure(
++      data.priceLabel,
++      density.cardPriceSize,
++      _priceLineHeight,
++      FontWeight.w700,
++      maxWidth: double.infinity,
++    );
++    final compare =
++        data.compareAtLabel == null || density == ProductTileDensity.mini
++            ? Size.zero
++            : measure(
++                data.compareAtLabel!,
++                density.cardPriceSize - 2,
++                _priceLineHeight,
++                FontWeight.w400,
++                maxWidth: double.infinity,
++              );
++    final priceHeight = compare == Size.zero
++        ? price.height
++        : price.width + 8 + compare.width <= width
++            ? math.max(price.height, compare.height)
++            : price.height + 2 + compare.height;
++    return variant.captionGap +
++        _priceGap +
++        priceHeight +
++        // Paragraph and button line boxes round independently in Flutter.
++        8 +
++        measure(
++          data.title,
++          density.cardNameSize,
++          _nameLineHeight,
++          FontWeight.w400,
++          lines: enlarged ? null : density.nameMaxLines,
++        ).height +
++        (data.brand == null
++            ? 0
++            : _brandGap +
++                measure(
++                  data.brand!,
++                  density.cardBrandSize,
++                  _brandLineHeight,
++                  FontWeight.w700,
++                  lines: enlarged ? null : 1,
++                ).height) +
++        (eyebrow == null
++            ? 0
++            : measure(
++                  eyebrow!.toUpperCase(),
++                  11,
++                  1.45,
++                  FontWeight.w400,
++                  lines: 1,
++                ).height +
++                BoutiqueSpace.xs);
++  }
++
+   /// The card: one rounded warm ground with the photograph, the favourite,
+   /// the caption and the pill inside it.
+   Widget _buildCard(BuildContext context) {
+@@ -636,12 +734,43 @@ class MonettaProductTile extends StatelessWidget {
+                 // is pinned to the foot so every card of a row lines up. On
+                 // its own the card is as tall as its content.
+                 final fill = constraints.hasTightHeight;
++                final optionText = TextPainter(
++                  text: TextSpan(
++                    text: data.variantLabel ?? 'Elegir opción',
++                    style: boutiqueText(size: 12, height: 1.3),
++                  ),
++                  textDirection: Directionality.of(context),
++                  textScaler: MediaQuery.textScalerOf(context),
++                )..layout(maxWidth: math.max(1, constraints.maxWidth - 22));
++                final optionHeight = math.max(48.0, optionText.height + 16);
++                optionText.dispose();
++                final caption =
++                    _measuredCaptionExtent(context, constraints.maxWidth);
++                final footerHeight = footer == null
++                    ? 0
++                    : _tileFooterExtent(
++                        MediaQuery.textScalerOf(context),
++                        constraints.maxWidth,
++                      );
++                final photoHeight = fill
++                    ? math.max(
++                        0.0,
++                        math.min(
++                          constraints.maxWidth,
++                          constraints.maxHeight -
++                              caption -
++                              optionHeight -
++                              footerHeight,
++                        ),
++                      )
++                    : constraints.maxWidth;
+                 return Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   mainAxisSize: fill ? MainAxisSize.max : MainAxisSize.min,
+                   children: [
+-                    AspectRatio(
+-                      aspectRatio: variant.photoAspectRatio(density),
++                    SizedBox(
++                      height: photoHeight,
++                      width: double.infinity,
+                       child: _TileImage(
+                         data: data,
+                         variant: variant,
+@@ -650,6 +779,7 @@ class MonettaProductTile extends StatelessWidget {
+                       ),
+                     ),
+                     SizedBox(height: variant.captionGap),
++                    SizedBox(height: optionHeight, child: optionControl),
+                     _caption(context),
+                     if (footer case final control?) ...[
+                       const SizedBox(height: _footerGap),
+@@ -682,11 +812,13 @@ class MonettaProductTile extends StatelessWidget {
+       ),
+     );
+ 
+-    return GestureDetector(
+-      onTap: onTap,
+-      onLongPress: onQuickView,
+-      behavior: HitTestBehavior.opaque,
+-      child: card,
++    return Material(
++      type: MaterialType.transparency,
++      child: InkWell(
++        onTap: onTap,
++        onLongPress: onQuickView,
++        child: card,
++      ),
+     );
+   }
+ 
+@@ -754,56 +886,52 @@ class _PriceLine extends StatelessWidget {
+     // and a second line would leave a gap above the pill on every card of a
+     // grid that holds a sale piece. The mini card has no room for the
+     // compare-at price at all.
+-    return FittedBox(
+-      fit: BoxFit.scaleDown,
+-      alignment: AlignmentDirectional.centerStart,
+-      child: Row(
+-        mainAxisSize: MainAxisSize.min,
+-        crossAxisAlignment: CrossAxisAlignment.center,
+-        children: [
+-          Text(
+-            data.priceLabel,
+-            maxLines: 1,
+-            softWrap: false,
+-            style: card
+-                ? _tileSerif(
+-                    size: density.cardPriceSize,
+-                    weight: FontWeight.w700,
+-                    color: palette.ink,
+-                    height: _priceLineHeight,
+-                  )
+-                : boutiqueText(
+-                    size: density.priceSize,
+-                    weight: FontWeight.w700,
+-                    color: palette.ink,
+-                    height: _priceLineHeight,
+-                  ),
+-          ),
+-          if (!mini)
+-            if (data.compareAtLabel case final before?) ...[
+-              const SizedBox(width: BoutiqueSpace.sm),
+-              Text(
+-                before,
+-                maxLines: 1,
+-                softWrap: false,
+-                style: card
+-                    ? _tileSerif(
+-                        size: density.cardPriceSize - 2,
+-                        weight: FontWeight.w400,
+-                        color: palette.inkMuted,
+-                        height: _priceLineHeight,
+-                        decoration: TextDecoration.lineThrough,
+-                      )
+-                    : boutiqueText(
+-                        size: density.priceSize - 3,
+-                        color: palette.inkMuted,
+-                        height: _priceLineHeight,
+-                        decoration: TextDecoration.lineThrough,
+-                      ),
+-              ),
+-            ],
+-        ],
+-      ),
++    return Wrap(
++      spacing: 8,
++      runSpacing: 2,
++      crossAxisAlignment: WrapCrossAlignment.center,
++      children: [
++        Text(
++          data.priceLabel,
++          maxLines: 1,
++          softWrap: false,
++          style: card
++              ? _tileSerif(
++                  size: density.cardPriceSize,
++                  weight: FontWeight.w700,
++                  color: palette.ink,
++                  height: _priceLineHeight,
++                )
++              : boutiqueText(
++                  size: density.priceSize,
++                  weight: FontWeight.w700,
++                  color: palette.ink,
++                  height: _priceLineHeight,
++                ),
++        ),
++        if (!mini)
++          if (data.compareAtLabel case final before?) ...[
++            Text(
++              before,
++              maxLines: 1,
++              softWrap: false,
++              style: card
++                  ? _tileSerif(
++                      size: density.cardPriceSize - 2,
++                      weight: FontWeight.w400,
++                      color: palette.inkMuted,
++                      height: _priceLineHeight,
++                      decoration: TextDecoration.lineThrough,
++                    )
++                  : boutiqueText(
++                      size: density.priceSize - 3,
++                      color: palette.inkMuted,
++                      height: _priceLineHeight,
++                      decoration: TextDecoration.lineThrough,
++                    ),
++            ),
++          ],
++      ],
+     );
+   }
+ }
+@@ -869,7 +997,7 @@ class _TileImageState extends State<_TileImage> {
+       // The photo's own white margin stays. `cover` is chosen only when it
+       // crops less than that margin; otherwise the photo is contained whole,
+       // so handles and straps are never cut.
+-      maxCoverTrim: kPackshotMaxCoverTrim,
++      maxCoverTrim: 0,
+       cacheWidth: widget.data.imageCacheWidth,
+       fallbackLabel: widget.data.fallbackLabel,
+       onFailed: _advance,
+@@ -886,29 +1014,10 @@ class _TileImageState extends State<_TileImage> {
+       children: [
+         photo,
+         if (!widget.data.inStock)
+-          IgnorePointer(
+-            child: ColoredBox(
+-              // Sold out has to read without relying on colour alone, and
+-              // it never blocks the tap that opens the piece.
+-              color: palette.canvas.withValues(alpha: 0.66),
+-              child: Center(
+-                child: Container(
+-                  padding: const EdgeInsets.symmetric(
+-                    horizontal: BoutiqueSpace.md,
+-                    vertical: 6,
+-                  ),
+-                  decoration: BoxDecoration(
+-                    color: palette.canvas,
+-                    borderRadius: BoutiqueRadius.capsule,
+-                    border: Border.all(color: palette.ink, width: 0.8),
+-                  ),
+-                  child: Text(
+-                    'AGOTADO',
+-                    style: boutiqueEyebrow(size: 10, color: palette.ink),
+-                  ),
+-                ),
+-              ),
+-            ),
++          const Positioned(
++            left: 4,
++            bottom: 4,
++            child: ProductSoldOutBadge(),
+           ),
+         if (edge && badge != null)
+           Positioned(
+@@ -999,62 +1108,18 @@ class _WishlistButton extends StatelessWidget {
+     this.cornerIcon = false,
+     this.mini = false,
+   });
+-
+   final bool wishlisted;
+   final VoidCallback onPressed;
+   final bool cornerIcon;
+-
+-  /// The mini card: a 40pt zone over a 16pt heart.
+   final bool mini;
+-
+-  Widget _heartIcon(BuildContext context, BoutiquePalette palette) {
+-    final icon = Icon(
+-      wishlisted ? Icons.favorite : Icons.favorite_border,
+-      size: mini
+-          ? 16
+-          : cornerIcon
+-              ? 20
+-              : 19,
+-      color: wishlisted ? palette.goldText : palette.ink,
+-    );
+-    // In the dark theme the photograph keeps its white ground, so the light
+-    // outline heart sits on a card-coloured disc to stay visible.
+-    if (!cornerIcon || Theme.of(context).brightness != Brightness.dark) {
+-      return icon;
+-    }
+-    return DecoratedBox(
+-      decoration: BoxDecoration(
+-        color: palette.surfaceDeep.withValues(alpha: 0.9),
+-        shape: BoxShape.circle,
+-      ),
+-      child: Padding(padding: const EdgeInsets.all(4), child: icon),
+-    );
+-  }
+-
+   @override
+-  Widget build(BuildContext context) {
+-    final palette = context.boutique;
+-    return Semantics(
+-      button: true,
+-      toggled: wishlisted,
+-      label: wishlisted ? 'Quitar de favoritos' : 'Guardar en favoritos',
+-      child: SizedBox(
+-        width: mini ? 40 : BoutiqueSpace.tapTarget,
+-        height: mini ? 40 : BoutiqueSpace.tapTarget,
+-        child: IconButton(
+-          tooltip: wishlisted ? 'Quitar de favoritos' : 'Guardar',
+-          onPressed: onPressed,
+-          padding: cornerIcon ? const EdgeInsets.all(4) : EdgeInsets.zero,
+-          alignment: cornerIcon ? Alignment.topRight : Alignment.center,
+-          icon: _heartIcon(context, palette),
+-        ),
+-      ),
+-    );
+-  }
++  Widget build(BuildContext context) => ProductFavoriteButton(
++        selected: wishlisted,
++        onPressed: onPressed,
++        onPhoto: true,
++      );
+ }
+ 
+-/// Visible, accessible entry to the quick view. Rendered only when the surface
+-/// wires [MonettaProductTile.onQuickView]; long-press remains as a shortcut.
+ class _QuickViewButton extends StatelessWidget {
+   const _QuickViewButton({required this.onPressed});
+ 
+diff --git a/lib/features/product/product_screen.dart b/lib/features/product/product_screen.dart
+index a24eb69..6da987e 100644
+--- a/lib/features/product/product_screen.dart
++++ b/lib/features/product/product_screen.dart
+@@ -1,15 +1,6 @@
+-/// Ficha de producto Fig.07 — boutique cálida.
+-///
+-/// Galería cuadrada y contenida (nunca recorta asas) con cuatro miniaturas,
+-/// fav, compartir, zoom y flechas; marca + nombre + precio con `-X%` solo
+-/// cuando `compare_at` lo respalda; swatches solo con mapeo fiable
+-/// ([ProductOptionSelector]); fila de confianza; «Agregar a bolsa» y «Comprar
+-/// ahora»; disponibilidad y frase de apartado; acordeones Descripción–
+-/// Detalles–Envíos (cerrados al abrir); «Apartar»; relacionados en cuatro
+-/// tarjetas mini con la [ProductCard] compartida.
+-///
+-/// Agotado abre igual pero se distingue (sello + CTA de aviso en el muelle). El corazón
+-/// solo guarda — jamás navega.
++/// Product detail with one stable Shopify variant selection, contained
++/// photography, native purchase controls and lazy editorial continuation.
++/// Unsupported policy/restock capabilities stay hidden until A00 attaches them.
+ library;
+ 
+ import 'dart:async';
+@@ -26,7 +17,6 @@ import '../../app/storefront_layout.dart';
+ import '../../app/shopper_copy.dart';
+ import '../../app/theme.dart';
+ import '../../data/media/media_url.dart';
+-import '../../data/normalize/facets.dart';
+ import '../../data/shopify/cart_attribution.dart';
+ import '../../domain/product.dart';
+ import '../../main.dart';
+@@ -39,7 +29,9 @@ import '../catalog/product_card.dart';
+ import '../catalog/product_tile.dart' show PackshotBlend;
+ import '../catalog/search_screen.dart';
+ import '../checkout/checkout_screen.dart';
+-import '../checkout/mini_cart.dart' show showMiniCart;
++import '../catalog/product_controls.dart';
++import 'product_recommendations.dart';
++import 'product_zoom.dart';
+ import '../navigation/guide_chrome.dart';
+ import '../navigation/guide_drawer.dart';
+ import '../navigation/monetta_bottom_navigation.dart';
+@@ -55,6 +47,11 @@ class ProductScreen extends StatefulWidget {
+   const ProductScreen({
+     required this.productId,
+     this.initialVariantIndex = 0,
++    this.initialVariantId,
++    this.onRestock,
++    this.endSectionsBuilder,
++    this.shippingPolicy,
++    this.returnsPolicy,
+     this.onClose,
+     super.key,
+   });
+@@ -64,6 +61,15 @@ class ProductScreen extends StatefulWidget {
+   /// Variante seleccionada en la vista rápida u otra superficie previa.
+   /// Se conserva al abrir la ficha para no perder la elección.
+   final int initialVariantIndex;
++  final String? initialVariantId;
++  final ProductRestockAction? onRestock;
++
++  /// A06/A00 attach the shared registration/footer here.
++  final WidgetBuilder? endSectionsBuilder;
++
++  /// Only current, approved policy content may enable these accordions.
++  final String? shippingPolicy;
++  final String? returnsPolicy;
+   final VoidCallback? onClose;
+ 
+   @override
+@@ -75,6 +81,8 @@ class _ProductScreenState extends State<ProductScreen> {
+   final PageController _gallery = PageController();
+   final GlobalKey _shareSource = GlobalKey();
+   String? _variantId;
++  bool _selectionInitialized = false;
++  bool _added = false;
+   int _page = 0;
+   late int _variantIndex = widget.initialVariantIndex;
+   final Set<String> _open = <String>{};
+@@ -108,34 +116,32 @@ class _ProductScreenState extends State<ProductScreen> {
+   Future<void> _openApartado(Product product) async {
+     final store = StoreScope.of(context);
+     store.record(EventType.whatsappApartado, productId: product.id);
+-    final request = ApartadoRequest(
+-      productTitle: product.title,
+-      productHandle: product.handle,
+-      price: selectedVariant(product, _variantIndex)?.price ?? product.price,
+-      attributionCode: const AttributionCodeGenerator().generate(
+-        DateTime.now().microsecondsSinceEpoch,
+-      ),
+-    );
+-    final launched = await launchUrl(
+-      request.uri,
+-      mode: LaunchMode.externalApplication,
+-    );
+-    if (!launched && mounted) {
+-      ScaffoldMessenger.of(context).showSnackBar(
+-        const SnackBar(content: Text('No se pudo abrir WhatsApp')),
+-      );
+-    }
+-  }
+-
+-  Future<void> _openConcierge(Product product) async {
+-    final launched = await launchUrl(
+-      conciergeWhatsAppUri(productTitle: product.title),
+-      mode: LaunchMode.externalApplication,
+-    );
+-    if (!launched && mounted) {
+-      ScaffoldMessenger.of(context).showSnackBar(
+-        const SnackBar(content: Text('No se pudo abrir WhatsApp')),
++    final variant = selectedVariant(product, _variantIndex);
++    if (variant == null) return;
++    final config = StorefrontConfig.fromEnvironment();
++    final message = <String>[
++      'Hola MONETTA, quiero solicitar un apartado.',
++      product.title,
++      if (!variant.isDefault) 'Opción: ${variant.title}',
++      'Variante: ${variant.id}',
++      'Precio: ${formatShopperPrice(variant.price)}',
++      if (config.isUsable && product.handle.isNotEmpty)
++        Uri.https(config.shopDomain, '/products/${product.handle}').toString(),
++      'Enviar esta solicitud no confirma un apartado ni realiza un cobro.',
++      'Código: ${const AttributionCodeGenerator().generate(DateTime.now().microsecondsSinceEpoch)}',
++    ].join('\n');
++    try {
++      final launched = await launchUrl(
++        Uri.https(
++          'wa.me',
++          '/${ApartadoRequest.whatsappNumber}',
++          {'text': message},
++        ),
++        mode: LaunchMode.externalApplication,
+       );
++      if (!launched && mounted) _showMessage('No se pudo abrir WhatsApp');
++    } catch (_) {
++      if (mounted) _showMessage('No se pudo abrir WhatsApp');
+     }
+   }
+ 
+@@ -164,31 +170,6 @@ class _ProductScreenState extends State<ProductScreen> {
+     }
+   }
+ 
+-  Future<void> _createRestockAlert(Product product) async {
+-    final notifications = NotificationScope.maybeOf(context);
+-    if (notifications == null || !notifications.available) {
+-      ScaffoldMessenger.of(context).showSnackBar(
+-        const SnackBar(
+-          content: Text(
+-            'Los avisos todavía no están disponibles en esta versión.',
+-          ),
+-        ),
+-      );
+-      return;
+-    }
+-    final ok = await notifications.createRestockAlert(product.id);
+-    if (!mounted) return;
+-    ScaffoldMessenger.of(context).showSnackBar(
+-      SnackBar(
+-        content: Text(
+-          ok
+-              ? 'Te avisaremos cuando esta pieza vuelva.'
+-              : notifications.lastError ?? 'No pudimos crear el aviso.',
+-        ),
+-      ),
+-    );
+-  }
+-
+   Future<void> _add(Product product) => _purchase(product, buyNow: false);
+ 
+   Future<void> _buyNow(Product product) => _purchase(product, buyNow: true);
+@@ -198,7 +179,10 @@ class _ProductScreenState extends State<ProductScreen> {
+   /// whatever the outcome.
+   Future<void> _purchase(Product product, {required bool buyNow}) async {
+     if (_adding) return;
+-    setState(() => _adding = true);
++    setState(() {
++      _adding = true;
++      _added = false;
++    });
+     final result = await tryAddSelectionToBag(context, product, _variantIndex);
+     if (!mounted) return;
+     // Released before any feedback so the action is usable again as soon as
+@@ -210,7 +194,7 @@ class _ProductScreenState extends State<ProductScreen> {
+         if (buyNow) {
+           await openBag(context);
+         } else {
+-          await showMiniCart(context);
++          setState(() => _added = true);
+         }
+       case BagAddStatus.soldOut:
+         _showMessage('Esta opción está agotada.');
+@@ -236,14 +220,57 @@ class _ProductScreenState extends State<ProductScreen> {
+     }
+   }
+ 
++  Widget _recommendationSection(
++    BuildContext context,
++    String title,
++    List<Product> products,
++  ) =>
++      Column(
++        crossAxisAlignment: CrossAxisAlignment.stretch,
++        children: [
++          const SizedBox(height: 32),
++          Padding(
++            padding:
++                const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
++            child: Text(title, style: boutiqueSectionHeading(context: context)),
++          ),
++          const SizedBox(height: 16),
++          _Rail(key: ValueKey(title), title: title, products: products),
++        ],
++      );
++
+   @override
+   Widget build(BuildContext context) {
+     final store = StoreScope.of(context);
+-    final product = store.products.firstWhere((p) => p.id == widget.productId);
++    final product =
++        store.products.where((p) => p.id == widget.productId).firstOrNull;
++    if (product == null) {
++      return Scaffold(
++        appBar: AppBar(title: const Text('Producto no disponible')),
++        body: Center(
++          child: TextButton(
++            onPressed: () => openCategories(context),
++            child: Text(
++              'Explorar productos',
++              style: boutiqueText(color: context.boutique.ink),
++            ),
++          ),
++        ),
++      );
++    }
+     final facets = store.facetsFor(product.id);
+     final wishlisted = store.wishlist.contains(product.id);
+     final selectable = selectableVariants(product);
+-    _variantId ??= selectedVariant(product, _variantIndex)?.id;
++    if (!_selectionInitialized) {
++      _variantIndex = variantIndexForId(
++        product,
++        widget.initialVariantId,
++        fallback: widget.initialVariantIndex,
++      );
++      _variantId = widget.initialVariantId ??
++          selectedVariant(product, _variantIndex)?.id;
++      _selectionInitialized = true;
++    }
+     final selectedPosition = selectable.indexWhere((v) => v.id == _variantId);
+     if (selectedPosition >= 0) _variantIndex = selectedPosition;
+     final selectionMissing =
+@@ -251,31 +278,28 @@ class _ProductScreenState extends State<ProductScreen> {
+     final selected =
+         selectionMissing ? null : selectedVariant(product, _variantIndex);
+     final price = selected?.price ?? product.price;
+-    final compare = selected?.compareAtPrice ?? product.compareAtPrice;
++    final compare = selected?.compareAtPrice;
+     final onSale = selectionOnSale(product, _variantIndex);
+     final discount = selectionDiscountPercent(product, _variantIndex);
+     final inStock =
+         !selectionMissing && selectionInStock(product, _variantIndex);
+-    final images = product.images.isEmpty ? <String?>[null] : product.images;
++    final memberImages = imagesForVariant(product, selected);
++    final images = memberImages.isEmpty ? <String?>[null] : memberImages;
++    if (_page >= images.length) _page = 0;
+     final shopifyDescription = shopifyDescriptionText(product.descriptionHtml);
+-    // Shopify remains the primary source of truth. When it is genuinely empty,
+-    // compose one conservative sentence from normalized catalog facts.
+-    final description = shopifyDescription.isNotEmpty
+-        ? shopifyDescription
+-        : factualDescription(
+-            title: product.title,
+-            brandSlug: facets?.brand?.value,
+-            categorySlug: facets?.category?.value,
+-            silhouetteSlug: facets?.silhouette?.value,
+-            colorSlug: facets == null || facets.colors.isEmpty
+-                ? null
+-                : facets.colors.first.value,
+-          );
+-    final recent = store.recentlyViewed(excluding: product.id);
+-    final related = facets?.brand?.value == null
++    final description = shopifyDescription;
++    final recent = uniqueProductSet(
++      store.recentlyViewed(excluding: product.id, limit: 40),
++      excluding: product.id,
++    );
++    final related = relatedProductSet(product, store.products, store.facetsFor);
++    final brand = facets?.brand?.value;
++    final sameBrand = brand == null
+         ? const <Product>[]
+-        : store.moreFromBrand(facets!.brand!.value, excluding: product.id);
+-    final notifications = NotificationScope.maybeOf(context);
++        : uniqueProductSet(
++            store.moreFromBrand(brand, excluding: product.id, limit: 40),
++            excluding: product.id,
++          );
+     final palette = context.boutique;
+ 
+     return PopScope(
+@@ -329,6 +353,18 @@ class _ProductScreenState extends State<ProductScreen> {
+                         : () => _goToPage((_page + 1) % images.length),
+                     onToggleWishlist: () => store.toggleWishlist(product.id),
+                     onShare: () => _share(product, price),
++                    onZoom: memberImages.isEmpty
++                        ? null
++                        : () async {
++                            final next = await showProductZoom(
++                              context,
++                              images: memberImages,
++                              initialPage: _page,
++                              title:
++                                  '${shopperProductName(product.title)}${selected?.isDefault == false ? ' · ${selected!.title}' : ''}',
++                            );
++                            if (mounted && next != null) _goToPage(next);
++                          },
+                   ),
+                   if (images.length > 1)
+                     _Thumbnails(
+@@ -357,7 +393,11 @@ class _ProductScreenState extends State<ProductScreen> {
+                         Text(
+                           brandLabel(facets!.brand!.value),
+                           key: const Key('product-brand'),
+-                          style: boutiqueDisplay(22, color: palette.ink),
++                          style: boutiqueText(
++                            size: 18,
++                            weight: FontWeight.w600,
++                            color: palette.ink,
++                          ),
+                         ),
+                         const SizedBox(height: BoutiqueSpace.xs),
+                       ],
+@@ -425,15 +465,18 @@ class _ProductScreenState extends State<ProductScreen> {
+                         ProductOptionSelector(
+                           product: product,
+                           selectedIndex: _variantIndex,
+-                          onSelect: (i) => setState(() {
+-                            _variantIndex = i;
+-                            _variantId = selectable[i].id;
+-                          }),
++                          onSelect: (i) {
++                            if (_adding) return;
++                            setState(() {
++                              _variantIndex = i;
++                              _variantId = i < 0 ? null : selectable[i].id;
++                              _page = 0;
++                              _added = false;
++                              if (_gallery.hasClients) _gallery.jumpToPage(0);
++                            });
++                          },
+                         ),
+                       ],
+-                      const SizedBox(height: BoutiqueSpace.lg),
+-                      const _TrustRow(),
+-                      const SizedBox(height: BoutiqueSpace.lg),
+                       if (inStock) ...[
+                         PurchaseDockButton(
+                           key: const Key('purchase-dock-primary'),
+@@ -452,129 +495,115 @@ class _ProductScreenState extends State<ProductScreen> {
+                         const SizedBox(height: BoutiqueSpace.lg),
+                       ],
+                       _AvailabilityLine(inStock: inStock),
+-                      if (inStock) ...[
+-                        const SizedBox(height: BoutiqueSpace.sm),
+-                        Text(
+-                          kApartadoSentence,
+-                          style: boutiqueText(
+-                            size: 13,
+-                            color: palette.ink,
+-                            height: 1.45,
+-                          ),
++                      if (_added)
++                        Semantics(
++                          liveRegion: true,
++                          child: const Text('Agregado al carrito'),
+                         ),
+-                      ],
+-                      if (!inStock) ...[
+-                        const SizedBox(height: BoutiqueSpace.sm),
+-                        KeyedSubtree(
++                      const SizedBox(height: BoutiqueSpace.lg),
++                      const _TrustRow(),
++                      if (!inStock &&
++                          selected != null &&
++                          widget.onRestock != null)
++                        TextButton(
+                           key: const ValueKey('create-restock-alert'),
+-                          child: PurchaseDockButton(
+-                            key: const Key('purchase-dock-primary'),
+-                            label: notifications?.saving == true
+-                                ? 'Guardando…'
+-                                : 'Avísame cuando vuelva',
+-                            large: true,
+-                            onPressed: notifications?.saving == true
+-                                ? null
+-                                : () => _createRestockAlert(product),
++                          onPressed: () => widget.onRestock!(product, selected),
++                          child: Text(
++                            'Avísame cuando vuelva',
++                            style: boutiqueText(color: palette.ink),
+                           ),
+                         ),
+-                      ],
+                       const SizedBox(height: BoutiqueSpace.lg),
+                       Divider(height: 1, thickness: 1, color: palette.hairline),
+-                      _BoutiqueAccordion(
+-                        label: 'Descripción',
+-                        open: _open.contains('descripcion'),
+-                        onTap: () => setState(() {
+-                          _open.contains('descripcion')
+-                              ? _open.remove('descripcion')
+-                              : _open.add('descripcion');
+-                        }),
+-                        child: Text(
+-                          (description == null || description.isEmpty)
+-                              ? 'Pieza original importada de Estados Unidos.'
+-                              : description,
+-                          style: boutiqueText(
+-                            size: 14,
+-                            color: palette.ink,
+-                            height: 1.6,
++                      if (description.isNotEmpty)
++                        _BoutiqueAccordion(
++                          label: 'Descripción',
++                          open: _open.contains('descripcion'),
++                          onTap: () => setState(() {
++                            _open.contains('descripcion')
++                                ? _open.remove('descripcion')
++                                : _open.add('descripcion');
++                          }),
++                          child: Text(
++                            description,
++                            style: boutiqueText(
++                              size: 14,
++                              color: palette.ink,
++                              height: 1.6,
++                            ),
+                           ),
+                         ),
+-                      ),
+                       _BoutiqueAccordion(
+-                        label: 'Detalles',
+-                        open: _open.contains('detalles'),
+-                        onTap: () => setState(() {
+-                          _open.contains('detalles')
+-                              ? _open.remove('detalles')
+-                              : _open.add('detalles');
+-                        }),
+-                        child: _Details(facets: facets),
++                        label: 'Otras formas de comprar',
++                        open: _open.contains('otras'),
++                        onTap: () => setState(
++                          () => _open.contains('otras')
++                              ? _open.remove('otras')
++                              : _open.add('otras'),
++                        ),
++                        child: Column(
++                          crossAxisAlignment: CrossAxisAlignment.start,
++                          children: [
++                            const Text(
++                              'Enviar una solicitud no confirma el apartado ni realiza un cobro.',
++                            ),
++                            if (selected != null)
++                              TextButton.icon(
++                                key: const Key('purchase-apartar'),
++                                onPressed: () => _openApartado(product),
++                                style: TextButton.styleFrom(
++                                  foregroundColor: palette.ink,
++                                ),
++                                icon: const Icon(Icons.chat_outlined),
++                                label: const Text(
++                                  'Solicitar apartado por WhatsApp',
++                                ),
++                              ),
++                          ],
++                        ),
+                       ),
+-                      _BoutiqueAccordion(
+-                        label: 'Envíos y devoluciones',
+-                        open: _open.contains('envio'),
+-                        onTap: () => setState(() {
+-                          _open.contains('envio')
+-                              ? _open.remove('envio')
+-                              : _open.add('envio');
+-                        }),
+-                        child: Text(
+-                          'Envío a todo México en 3 a 5 días hábiles, por DHL, FedEx o Estafeta. '
+-                          'Si la pieza no es lo que esperabas, escríbenos por WhatsApp y lo resolvemos.',
+-                          style: boutiqueText(
+-                            size: 14,
+-                            color: palette.ink,
+-                            height: 1.6,
++                      if (widget.shippingPolicy case final policy?
++                          when policy.trim().isNotEmpty)
++                        _BoutiqueAccordion(
++                          label: 'Envíos',
++                          open: _open.contains('envios'),
++                          onTap: () => setState(
++                            () => _open.contains('envios')
++                                ? _open.remove('envios')
++                                : _open.add('envios'),
+                           ),
++                          child: Text(policy),
++                        ),
++                      if (widget.returnsPolicy case final policy?
++                          when policy.trim().isNotEmpty)
++                        _BoutiqueAccordion(
++                          label: 'Cambios y devoluciones',
++                          open: _open.contains('cambios'),
++                          onTap: () => setState(
++                            () => _open.contains('cambios')
++                                ? _open.remove('cambios')
++                                : _open.add('cambios'),
++                          ),
++                          child: Text(policy),
+                         ),
+-                      ),
+-                      const SizedBox(height: BoutiqueSpace.sm),
+-                      _WhatsAppLink(onTap: () => _openConcierge(product)),
+-                      const SizedBox(height: BoutiqueSpace.xl),
+-                      _PurchaseSection(
+-                        onApartado: () => _openApartado(product),
+-                      ),
+                     ],
+                   ),
+                 ),
+-                if (related.isNotEmpty) ...[
+-                  const SizedBox(height: BoutiqueSpace.xxl),
+-                  Padding(
+-                    padding: const EdgeInsets.fromLTRB(
+-                      BoutiqueSpace.gutter,
+-                      0,
+-                      BoutiqueSpace.gutter,
+-                      BoutiqueSpace.md,
+-                    ),
+-                    child: Text(
+-                      'Productos relacionados',
+-                      style: boutiqueSectionHeading(
+-                        context: context,
+-                        color: palette.ink,
+-                      ),
+-                    ),
++                if (related.isNotEmpty)
++                  _recommendationSection(context, 'Relacionados', related),
++                if (sameBrand.isNotEmpty)
++                  _recommendationSection(context, 'Más de la marca', sameBrand),
++                if (recent.isNotEmpty)
++                  _recommendationSection(
++                    context,
++                    'Vistos hace un momento',
++                    recent,
+                   ),
+-                  _Rail(products: related),
+-                ],
+-                if (recent.isNotEmpty) ...[
+-                  const SizedBox(height: BoutiqueSpace.xxl),
+-                  Padding(
+-                    padding: const EdgeInsets.fromLTRB(
+-                      BoutiqueSpace.gutter,
+-                      0,
+-                      BoutiqueSpace.gutter,
+-                      BoutiqueSpace.md,
+-                    ),
+-                    child: Text(
+-                      'Vistas hace un momento',
+-                      style: boutiqueSectionHeading(
+-                        context: context,
+-                        color: palette.ink,
+-                      ),
+-                    ),
++                if (widget.endSectionsBuilder != null)
++                  KeyedSubtree(
++                    key: const Key('product-end-sections'),
++                    child: widget.endSectionsBuilder!(context),
+                   ),
+-                  _Rail(products: recent),
+-                ],
+                 const SizedBox(height: 40),
+               ],
+             ),
+@@ -628,6 +657,7 @@ class _Gallery extends StatelessWidget {
+     required this.onToggleWishlist,
+     required this.onShare,
+     required this.shareKey,
++    required this.onZoom,
+   });
+ 
+   final Product product;
+@@ -642,6 +672,7 @@ class _Gallery extends StatelessWidget {
+   final VoidCallback onToggleWishlist;
+   final VoidCallback onShare;
+   final GlobalKey shareKey;
++  final VoidCallback? onZoom;
+ 
+   @override
+   Widget build(BuildContext context) {
+@@ -665,41 +696,30 @@ class _Gallery extends StatelessWidget {
+                       : 'p-${product.id}-$i',
+                   // `contain`: handles and straps are the recognisable
+                   // part — `cover` crops exactly those.
+-                  child: InteractiveViewer(
+-                    minScale: 1,
+-                    maxScale: 2.2,
+-                    child: PackshotBlend(
+-                      ground: palette.surfaceDeep,
+-                      child: MonettaImage(
+-                        url: images[i],
+-                        fit: BoxFit.contain,
+-                        cacheWidth: MediaUrl.heroWidth,
+-                        fallbackLabel:
+-                            '${shopperProductName(product.title)} · Monetta',
++                  child: InkWell(
++                    onTap: onZoom,
++                    child: InteractiveViewer(
++                      minScale: 1,
++                      maxScale: 2.2,
++                      child: PackshotBlend(
++                        ground: palette.surfaceDeep,
++                        child: MonettaImage(
++                          url: images[i],
++                          fit: BoxFit.contain,
++                          cacheWidth: MediaUrl.heroWidth,
++                          fallbackLabel:
++                              '${shopperProductName(product.title)} · Monetta',
++                        ),
+                       ),
+                     ),
+                   ),
+                 ),
+               ),
+               if (!inStock)
+-                IgnorePointer(
+-                  child: Center(
+-                    child: Container(
+-                      padding: const EdgeInsets.symmetric(
+-                        horizontal: BoutiqueSpace.lg,
+-                        vertical: 8,
+-                      ),
+-                      decoration: BoxDecoration(
+-                        color: palette.canvas,
+-                        borderRadius: BoutiqueRadius.capsule,
+-                        border: Border.all(color: palette.ink, width: 1),
+-                      ),
+-                      child: Text(
+-                        'AGOTADO',
+-                        style: boutiqueEyebrow(size: 11, color: palette.ink),
+-                      ),
+-                    ),
+-                  ),
++                const Positioned(
++                  left: 8,
++                  bottom: 4,
++                  child: ProductSoldOutBadge(),
+                 ),
+               if (onPrevious != null)
+                 Positioned(
+@@ -738,11 +758,10 @@ class _Gallery extends StatelessWidget {
+                 child: Column(
+                   mainAxisSize: MainAxisSize.min,
+                   children: [
+-                    _RoundPhotoButton(
+-                      buttonKey: const Key('product-header-favorite'),
+-                      tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
+-                      icon: wishlisted ? Icons.favorite : Icons.favorite_border,
+-                      filled: wishlisted,
++                    ProductFavoriteButton(
++                      key: const Key('product-header-favorite'),
++                      selected: wishlisted,
++                      onPhoto: true,
+                       onPressed: onToggleWishlist,
+                     ),
+                     _RoundPhotoButton(
+@@ -754,20 +773,17 @@ class _Gallery extends StatelessWidget {
+                   ],
+                 ),
+               ),
+-              Positioned(
+-                bottom: BoutiqueSpace.xs,
+-                right: BoutiqueSpace.xs,
+-                child: _RoundPhotoButton(
+-                  buttonKey: const Key('product-gallery-zoom'),
+-                  tooltip: 'Ampliar foto',
+-                  icon: Icons.zoom_in,
+-                  onPressed: () => _openZoom(
+-                    context,
+-                    images[page],
+-                    shopperProductName(product.title),
++              if (onZoom != null)
++                Positioned(
++                  bottom: BoutiqueSpace.xs,
++                  right: BoutiqueSpace.xs,
++                  child: _RoundPhotoButton(
++                    buttonKey: const Key('product-gallery-zoom'),
++                    tooltip: 'Ampliar foto',
++                    icon: Icons.zoom_in,
++                    onPressed: onZoom ?? () {},
+                   ),
+                 ),
+-              ),
+             ],
+           ),
+         ),
+@@ -776,57 +792,18 @@ class _Gallery extends StatelessWidget {
+   }
+ }
+ 
+-void _openZoom(BuildContext context, String? url, String title) {
+-  final palette = context.boutique;
+-  showDialog<void>(
+-    context: context,
+-    builder: (context) => Dialog(
+-      backgroundColor: palette.canvas,
+-      insetPadding: const EdgeInsets.all(BoutiqueSpace.md),
+-      child: AspectRatio(
+-        aspectRatio: 1,
+-        child: Stack(
+-          children: [
+-            InteractiveViewer(
+-              minScale: 1,
+-              maxScale: 4,
+-              child: MonettaImage(
+-                url: url,
+-                fit: BoxFit.contain,
+-                cacheWidth: MediaUrl.heroWidth,
+-                fallbackLabel: title,
+-              ),
+-            ),
+-            Positioned(
+-              top: 0,
+-              right: 0,
+-              child: IconButton(
+-                tooltip: 'Cerrar',
+-                onPressed: () => Navigator.of(context).pop(),
+-                icon: const Icon(Icons.close),
+-              ),
+-            ),
+-          ],
+-        ),
+-      ),
+-    ),
+-  );
+-}
+-
+ class _RoundPhotoButton extends StatelessWidget {
+   const _RoundPhotoButton({
+     required this.tooltip,
+     required this.icon,
+     required this.onPressed,
+     this.buttonKey,
+-    this.filled = false,
+   });
+ 
+   final String tooltip;
+   final IconData icon;
+   final VoidCallback onPressed;
+   final Key? buttonKey;
+-  final bool filled;
+ 
+   /// Visible disc; the touch zone around it is the full 48pt.
+   static const double _disc = 40;
+@@ -841,7 +818,6 @@ class _RoundPhotoButton extends StatelessWidget {
+         : const Color(0xEBFFFFFF);
+     return Semantics(
+       button: true,
+-      toggled: filled,
+       label: tooltip,
+       child: SizedBox(
+         key: buttonKey,
+@@ -866,7 +842,7 @@ class _RoundPhotoButton extends StatelessWidget {
+                     child: Icon(
+                       icon,
+                       size: 19,
+-                      color: filled ? palette.goldText : palette.ink,
++                      color: palette.ink,
+                     ),
+                   ),
+                 ),
+@@ -913,9 +889,8 @@ class _Thumbnails extends StatelessWidget {
+                     button: true,
+                     selected: i == active,
+                     label: 'Foto ${i + 1} de ${images.length}',
+-                    child: GestureDetector(
++                    child: InkWell(
+                       onTap: () => onSelect(i),
+-                      behavior: HitTestBehavior.opaque,
+                       child: Container(
+                         key: ValueKey('thumb-$i'),
+                         width: thumb,
+@@ -979,9 +954,7 @@ class _AvailabilityLine extends StatelessWidget {
+         const SizedBox(width: BoutiqueSpace.sm),
+         Expanded(
+           child: Text(
+-            inStock
+-                ? 'Disponible · envío 3 a 5 días'
+-                : 'Agotado · te avisamos cuando vuelva',
++            inStock ? 'Disponible' : 'Esta opción no está disponible',
+             style: boutiqueText(size: 12, color: palette.inkMuted, height: 1.4),
+           ),
+         ),
+@@ -1002,7 +975,6 @@ class _TrustRow extends StatelessWidget {
+     // Three guarantees of the guide. The delivery days are the ones the
+     // availability line below already states (3 a 5 días).
+     const items = <(IconData, String, String)>[
+-      (Icons.inventory_2_outlined, 'Entrega estimada', '3 a 5 días'),
+       (
+         Icons.verified_user_outlined,
+         'Productos originales',
+@@ -1125,9 +1097,9 @@ class _BoutiqueAccordion extends StatelessWidget {
+             button: true,
+             expanded: open,
+             label: label,
+-            child: GestureDetector(
+-              onTap: onTap,
+-              behavior: HitTestBehavior.opaque,
++            child: TextButton(
++              onPressed: onTap,
++              style: TextButton.styleFrom(padding: EdgeInsets.zero),
+               child: Container(
+                 constraints: const BoxConstraints(
+                   minHeight: BoutiqueSpace.tapTarget,
+@@ -1173,156 +1145,94 @@ class _BoutiqueAccordion extends StatelessWidget {
+   }
+ }
+ 
+-class _WhatsAppLink extends StatelessWidget {
+-  const _WhatsAppLink({required this.onTap});
+-
+-  final VoidCallback onTap;
+-
++/// A horizontal rail of related pieces.
++///
++/// Lazy common cards over one stable set, with manual paging and a full-set
++/// route. Each real ID appears once; reduced motion uses immediate movement.
++class _Rail extends StatefulWidget {
++  const _Rail({required this.products, required this.title, super.key});
++  final List<Product> products;
++  final String title;
+   @override
+-  Widget build(BuildContext context) {
+-    final palette = context.boutique;
+-    return Semantics(
+-      button: true,
+-      label: 'Escribir por WhatsApp',
+-      child: GestureDetector(
+-        onTap: onTap,
+-        behavior: HitTestBehavior.opaque,
+-        child: Container(
+-          constraints: const BoxConstraints(minHeight: BoutiqueSpace.tapTarget),
+-          alignment: Alignment.centerLeft,
+-          child: Row(
+-            children: [
+-              Icon(Icons.chat_outlined, size: 16, color: palette.ink),
+-              const SizedBox(width: BoutiqueSpace.sm),
+-              Flexible(
+-                child: Column(
+-                  mainAxisSize: MainAxisSize.min,
+-                  crossAxisAlignment: CrossAxisAlignment.start,
+-                  children: [
+-                    Text(
+-                      'Escribir por WhatsApp',
+-                      maxLines: 2,
+-                      overflow: TextOverflow.ellipsis,
+-                      style: boutiqueText(size: 13, color: palette.ink),
+-                    ),
+-                    const SizedBox(height: 4),
+-                    Container(height: 1, width: 140, color: palette.ink),
+-                  ],
+-                ),
+-              ),
+-            ],
+-          ),
+-        ),
+-      ),
+-    );
+-  }
++  State<_Rail> createState() => _RailState();
+ }
+ 
+-/// Apartar stays available after the product information. The guide's two
+-/// purchase buttons sit above the accordions.
+-class _PurchaseSection extends StatelessWidget {
+-  const _PurchaseSection({required this.onApartado});
+-
+-  final VoidCallback onApartado;
+-
++class _RailState extends State<_Rail> {
++  final _controller = ScrollController();
++  final _selections = <String, String>{};
+   @override
+-  Widget build(BuildContext context) {
+-    final palette = context.boutique;
+-    return Column(
+-      key: const Key('purchase-section'),
+-      crossAxisAlignment: CrossAxisAlignment.stretch,
+-      children: [
+-        Text(
+-          'Otras formas de comprar',
+-          style: boutiqueSectionHeading(context: context, color: palette.ink),
+-        ),
+-        const SizedBox(height: BoutiqueSpace.md),
+-        Center(
+-          child: TextButton(
+-            key: const Key('purchase-apartar'),
+-            onPressed: onApartado,
+-            style: TextButton.styleFrom(
+-              minimumSize: const Size(48, BoutiqueSpace.tapTarget),
+-              foregroundColor: palette.ink,
+-            ),
+-            child: Text(
+-              'Apartar',
+-              style: boutiqueText(size: 14, weight: FontWeight.w600),
+-            ),
+-          ),
+-        ),
+-      ],
+-    );
++  void dispose() {
++    _controller.dispose();
++    super.dispose();
+   }
+-}
+-
+-class _Details extends StatelessWidget {
+-  const _Details({required this.facets});
+ 
+-  final CanonicalFacets? facets;
+-
+-  @override
+-  Widget build(BuildContext context) {
+-    final palette = context.boutique;
+-    final rows = <(String, String)>[
+-      if (facets?.category != null)
+-        ('Tipo', categoryLabel(facets!.category!.value)),
+-      if (facets?.silhouette != null)
+-        ('Forma', silhouetteLabel(facets!.silhouette!.value)),
+-      if (facets != null && facets!.colors.isNotEmpty)
+-        ('Color', facets!.colors.map((c) => colorLabel(c.value)).join(', ')),
+-      if (facets != null && facets!.patterns.isNotEmpty)
+-        (
+-          'Motivo',
+-          facets!.patterns.map((p) => patternLabel(p.value)).join(', '),
+-        ),
+-    ];
+-    if (rows.isEmpty) {
+-      return Text(
+-        'Pieza original importada de Estados Unidos.',
+-        style: boutiqueText(size: 14, color: palette.ink, height: 1.6),
+-      );
++  void _move(double delta) {
++    final position = _controller.position;
++    final target =
++        (_controller.offset + delta).clamp(0.0, position.maxScrollExtent);
++    if (reduceMotion(context)) {
++      _controller.jumpTo(target);
++    } else {
++      _controller.animateTo(target, duration: kSwap, curve: kMotionCurve);
+     }
+-    return Column(
+-      children: [
+-        for (final row in rows)
+-          Padding(
+-            padding: const EdgeInsets.only(bottom: 10),
+-            child: Row(
+-              crossAxisAlignment: CrossAxisAlignment.start,
+-              children: [
+-                SizedBox(
+-                  width: 88,
+-                  child: Text(
+-                    row.$1,
+-                    style: boutiqueText(size: 12, color: palette.inkMuted),
+-                  ),
+-                ),
+-                Expanded(
+-                  child: Text(
+-                    row.$2,
+-                    style: boutiqueText(size: 13, color: palette.ink),
+-                  ),
++  }
++
++  Future<void> _viewSet() async {
++    final store = StoreScope.of(context);
++    final titleStyle = boutiqueText(
++      size: 20,
++      weight: FontWeight.w600,
++      color: context.boutique.ink,
++    );
++    final titlePainter = TextPainter(
++      text: TextSpan(text: widget.title, style: titleStyle),
++      textDirection: Directionality.of(context),
++      textScaler: MediaQuery.textScalerOf(context),
++    )..layout(maxWidth: math.max(1, MediaQuery.sizeOf(context).width - 112));
++    final toolbarHeight = math.max(kToolbarHeight, titlePainter.height + 16);
++    titlePainter.dispose();
++    await Navigator.of(context).push<void>(
++      monettaFadeRoute(
++        StoreScope(
++          notifier: store,
++          child: Scaffold(
++            appBar: AppBar(
++              toolbarHeight: toolbarHeight,
++              title: Text(
++                widget.title,
++                style: titleStyle,
++                softWrap: true,
++                overflow: TextOverflow.visible,
++              ),
++            ),
++            body: LayoutBuilder(
++              builder: (context, constraints) => GridView.builder(
++                key: ValueKey('product-set-grid-${widget.title}'),
++                padding: const EdgeInsets.all(16),
++                gridDelegate: productGridDelegate(
++                  context,
++                  availableWidth: constraints.maxWidth - 32,
+                 ),
+-              ],
++                itemCount: widget.products.length,
++                itemBuilder: (_, index) {
++                  final product = widget.products[index];
++                  return ProductCard(
++                    key: ValueKey(product.id),
++                    product: product,
++                    initialVariantId: _selections[product.id],
++                    onVariantChanged: (id) {
++                      if (id != null) _selections[product.id] = id;
++                    },
++                  );
++                },
++              ),
+             ),
+           ),
+-      ],
++        ),
++      ),
+     );
++    if (mounted) setState(() {});
+   }
+-}
+-
+-/// A horizontal rail of related pieces.
+-///
+-/// Four [ProductTileDensity.mini] cards across the width, scrolling when there
+-/// are more. With enlarged text four across would not fit a caption, so the
+-/// rail falls back to the regular compact card at about 40 % of the width.
+-class _Rail extends StatelessWidget {
+-  const _Rail({required this.products});
+-
+-  final List<Product> products;
+-
+-  static const double _gap = 8;
+ 
+   @override
+   Widget build(BuildContext context) {
+@@ -1331,40 +1241,72 @@ class _Rail extends StatelessWidget {
+     return LayoutBuilder(
+       builder: (context, constraints) {
+         final width = constraints.maxWidth;
+-        final density =
+-            enlarged ? ProductTileDensity.compact : ProductTileDensity.mini;
++        const density = ProductTileDensity.compact;
+         final tileWidth = enlarged
+-            ? width * 0.4
+-            : (width - 2 * BoutiqueSpace.gutter - 3 * _gap) / 4;
+-        return SizedBox(
+-          height: productTileExtent(
+-            tileWidth: tileWidth,
+-            textScaler: textScaler,
+-            density: density,
+-            footerExtent: enlarged ? null : 0,
+-          ),
+-          child: ListView.separated(
+-            key: const Key('product-rail'),
+-            clipBehavior: Clip.none,
+-            scrollDirection: Axis.horizontal,
+-            padding:
+-                const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
+-            itemCount: products.length,
+-            separatorBuilder: (_, __) => SizedBox(
+-              width: enlarged ? BoutiqueSpace.md : _gap,
++            ? math.min(320.0, width * .85)
++            : math.min(260.0, width * .55);
++        return Column(
++          children: [
++            SizedBox(
++              height: productTileExtent(
++                tileWidth: tileWidth,
++                textScaler: textScaler,
++                density: density,
++              ),
++              child: ListView.separated(
++                key: const Key('product-rail'),
++                controller: _controller,
++                clipBehavior: Clip.none,
++                scrollDirection: Axis.horizontal,
++                padding: const EdgeInsets.symmetric(
++                  horizontal: BoutiqueSpace.gutter,
++                ),
++                // Lazy construction/photography over an already authoritative,
++                // stable set. Fewer than 40 remains the real count.
++                itemCount: widget.products.length,
++                separatorBuilder: (_, __) => const SizedBox(width: 8),
++                itemBuilder: (context, index) {
++                  final product = widget.products[index];
++                  return SizedBox(
++                    width: tileWidth,
++                    child: ProductCard(
++                      key: ValueKey(product.id),
++                      product: product,
++                      density: density,
++                      initialVariantId: _selections[product.id],
++                      onVariantChanged: (id) {
++                        if (id != null) _selections[product.id] = id;
++                      },
++                    ),
++                  );
++                },
++              ),
+             ),
+-            itemBuilder: (context, index) {
+-              final product = products[index];
+-              return SizedBox(
+-                width: tileWidth,
+-                child: ProductCard(
+-                  product: product,
+-                  density: density,
+-                  showViewProduct: enlarged,
++            Wrap(
++              alignment: WrapAlignment.center,
++              crossAxisAlignment: WrapCrossAlignment.center,
++              children: [
++                IconButton(
++                  tooltip: 'Productos anteriores',
++                  onPressed: () => _move(-tileWidth),
++                  icon: const Icon(Icons.chevron_left),
+                 ),
+-              );
+-            },
+-          ),
++                TextButton(
++                  key: ValueKey('product-set-${widget.title}'),
++                  onPressed: _viewSet,
++                  style: TextButton.styleFrom(
++                    foregroundColor: context.boutique.ink,
++                  ),
++                  child: Text('Ver ${widget.title.toLowerCase()}'),
++                ),
++                IconButton(
++                  tooltip: 'Productos siguientes',
++                  onPressed: () => _move(tileWidth),
++                  icon: const Icon(Icons.chevron_right),
++                ),
++              ],
++            ),
++          ],
+         );
+       },
+     );
+diff --git a/lib/features/product/product_selection.dart b/lib/features/product/product_selection.dart
+index ad99198..3627d8f 100644
+--- a/lib/features/product/product_selection.dart
++++ b/lib/features/product/product_selection.dart
+@@ -1,16 +1,6 @@
+-/// Shared purchase selection for package C (Fig.07 ficha + Fig.06 quick-view).
+-///
+-/// Both surfaces select from the *same* Shopify variants and add the *same*
+-/// variant id to the bag. This file owns that logic so the two widgets cannot
+-/// drift: the ficha and the sheet only render.
+-///
+-/// Colour rule (brief: "swatches solo con mapeo fiable"): a variant title maps
+-/// to a swatch only when it names exactly one canonical colour — no `/`, no
+-/// second colour word, no invented hex. Anything else (`Cafe/Dorado`,
+-/// `Arena/Beige Dorado Signature Canvas`, `Marrón` which has no alias) returns
+-/// null and the UI falls back to neutral text chips. Stock urgency
+-/// (`Últimas piezas`) is never fabricated here either: the catalog carries
+-/// only an `available` bool, so there is no quantity to render.
++/// Shared product selection and guarded purchase actions.
++/// Named options come only from selectedOptions; legacy variant titles remain
++/// neutral labels. Missing combinations resolve to -1, never another variant.
+ library;
+ 
+ import 'package:flutter/material.dart';
+@@ -21,6 +11,9 @@ import '../../main.dart';
+ import '../boutique/boutique_tokens.dart';
+ import '../checkout/checkout_screen.dart' show openBag;
+ import '../checkout/mini_cart.dart' show showMiniCart;
++import 'variant_selection.dart';
++
++export 'variant_selection.dart';
+ 
+ // ---------------------------------------------------------------------------
+ // Selection
+@@ -29,10 +22,11 @@ import '../checkout/mini_cart.dart' show showMiniCart;
+ /// Variants the shopper can choose from. Single-variant `Default Title`
+ /// products have no meaningful choice and return empty.
+ List<ProductVariant> selectableVariants(Product product) {
+-  return product.variants.where((v) => !v.isDefault).toList();
++  return productChoices(product);
+ }
+ 
+ ProductVariant? selectedVariant(Product product, int index) {
++  if (index < 0) return null;
+   final selectable = selectableVariants(product);
+   if (selectable.isEmpty) {
+     return product.variants.isEmpty ? null : product.variants.first;
+@@ -46,8 +40,7 @@ double selectionPrice(Product product, int index) {
+ }
+ 
+ double? selectionCompareAt(Product product, int index) {
+-  return selectedVariant(product, index)?.compareAtPrice ??
+-      product.compareAtPrice;
++  return selectedVariant(product, index)?.compareAtPrice;
+ }
+ 
+ /// True only when the data carries a real `compare_at` above price.
+@@ -67,7 +60,7 @@ int selectionDiscountPercent(Product product, int index) {
+ }
+ 
+ bool selectionInStock(Product product, int index) {
+-  return selectedVariant(product, index)?.available ?? product.isInStock;
++  return selectedVariant(product, index)?.available ?? false;
+ }
+ 
+ // ---------------------------------------------------------------------------
+@@ -203,7 +196,11 @@ bool hasReliableColorOptions(Product product) {
+   final selectable = selectableVariants(product);
+   if (selectable.isEmpty) return false;
+   for (final variant in selectable) {
+-    final slug = reliableColorSlug(variant.title);
++    final color = variant.selectedOptions.entries.where(
++      (e) => const ['color', 'colour', 'colores'].contains(fold(e.key)),
++    );
++    if (color.length != 1) return false;
++    final slug = _colorAliasToSlug[fold(color.single.value)];
+     if (slug == null) return false;
+     if (slug == 'multicolor') return false;
+     if (!kProductSwatchFills.containsKey(slug)) return false;
+@@ -330,7 +327,7 @@ Future<void> testOnlyAdd(
+ ///   alone).
+ /// * Anything else → neutral text chips.
+ /// * Single-variant products → nothing (no fake choice).
+-class ProductOptionSelector extends StatelessWidget {
++class ProductOptionSelector extends StatefulWidget {
+   const ProductOptionSelector({
+     required this.product,
+     required this.selectedIndex,
+@@ -341,82 +338,123 @@ class ProductOptionSelector extends StatelessWidget {
+   });
+ 
+   final Product product;
+-
+-  /// Label above the swatches when the options are colours.
++  final int? selectedIndex;
++  final ValueChanged<int> onSelect;
+   final String colorHeading;
+-
+-  /// Appends the chosen colour to the label («Color: Negro»). The preview
+-  /// turns it off and prints a bare «Colores».
+   final bool showSelectedName;
+ 
+-  /// The chosen option. Null means none is chosen yet (the quick view opened
+-  /// to make the shopper pick); an out-of-range index falls back to the first.
+-  final int? selectedIndex;
+-  final ValueChanged<int> onSelect;
++  @override
++  State<ProductOptionSelector> createState() => _ProductOptionSelectorState();
++}
++
++class _ProductOptionSelectorState extends State<ProductOptionSelector> {
++  Map<String, String> _values = {};
++
++  void _readSelection() {
++    _values = Map.of(
++      widget.selectedIndex == null
++          ? const <String, String>{}
++          : selectedVariant(widget.product, widget.selectedIndex!)
++                  ?.selectedOptions ??
++              const <String, String>{},
++    );
++  }
++
++  @override
++  void initState() {
++    super.initState();
++    _readSelection();
++  }
++
++  @override
++  void didUpdateWidget(covariant ProductOptionSelector oldWidget) {
++    super.didUpdateWidget(oldWidget);
++    if (oldWidget.product.id != widget.product.id ||
++        (oldWidget.selectedIndex != widget.selectedIndex &&
++            widget.selectedIndex != -1)) {
++      _readSelection();
++    }
++  }
+ 
+   @override
+   Widget build(BuildContext context) {
+     final palette = context.boutique;
+-    final selectable = selectableVariants(product);
+-    if (selectable.isEmpty) return const SizedBox.shrink();
+-    final chosen = selectedIndex;
+-    final int? safeIndex = chosen == null
+-        ? null
+-        : (chosen < 0 || chosen >= selectable.length)
+-            ? 0
+-            : chosen;
+-
+-    if (hasReliableColorOptions(product)) {
+-      final selectedTitle =
+-          safeIndex == null ? null : selectable[safeIndex].title;
+-      return Column(
+-        crossAxisAlignment: CrossAxisAlignment.start,
++    final choices = selectableVariants(widget.product);
++    if (choices.isEmpty) return const SizedBox.shrink();
++    final groups = productOptionValues(widget.product);
++    // Old snapshots with no selectedOptions retain honest, complete labels.
++    // Never turn the variant title into a fabricated colour or size.
++    if (groups.isEmpty) {
++      return Wrap(
++        spacing: 8,
++        runSpacing: 8,
+         children: [
++          for (var i = 0; i < choices.length; i++)
++            _OptionChip(
++              label: choices[i].title,
++              selected: widget.selectedIndex == i,
++              available: choices[i].available,
++              onTap: () => widget.onSelect(i),
++            ),
++        ],
++      );
++    }
++    return Column(
++      crossAxisAlignment: CrossAxisAlignment.start,
++      children: [
++        for (final group in groups.entries) ...[
+           Text(
+-            showSelectedName && selectedTitle != null
+-                ? '$colorHeading: $selectedTitle'
+-                : colorHeading,
++            _values[group.key] == null || !widget.showSelectedName
++                ? group.key
++                : '${group.key}: ${_values[group.key]}',
+             style: boutiqueText(size: 14, color: palette.ink, height: 1.3),
+           ),
+-          const SizedBox(height: BoutiqueSpace.xs),
+           Wrap(
++            spacing: 8,
++            runSpacing: 4,
+             children: [
+-              for (var i = 0; i < selectable.length; i++)
+-                _Swatch(
+-                  fill: kProductSwatchFills[
+-                      reliableColorSlug(selectable[i].title)]!,
+-                  selected: i == safeIndex,
+-                  available: selectable[i].available,
+-                  label: selectable[i].title,
+-                  onTap: () => onSelect(i),
++              for (final value in group.value)
++                Builder(
++                  builder: (context) {
++                    final next = {..._values, group.key: value};
++                    final index = indexForOptions(widget.product, next);
++                    final available = index >= 0 && choices[index].available;
++                    final isColor = const ['color', 'colour', 'colores']
++                        .contains(fold(group.key));
++                    final slug =
++                        isColor ? _colorAliasToSlug[fold(value)] : null;
++                    void select() {
++                      setState(() => _values = next);
++                      widget.onSelect(index);
++                    }
++
++                    if (slug != null && kProductSwatchFills.containsKey(slug)) {
++                      return _Swatch(
++                        fill: kProductSwatchFills[slug]!,
++                        selected: _values[group.key] == value,
++                        available: available,
++                        label: value,
++                        onTap: select,
++                      );
++                    }
++                    return _OptionChip(
++                      label: value,
++                      selected: _values[group.key] == value,
++                      available: available,
++                      onTap: select,
++                    );
++                  },
+                 ),
+             ],
+           ),
++          const SizedBox(height: 8),
+         ],
+-      );
+-    }
+-
+-    return Column(
+-      crossAxisAlignment: CrossAxisAlignment.start,
+-      children: [
+-        Text(
+-          'Opción',
+-          style: boutiqueText(size: 14, color: palette.ink, height: 1.3),
+-        ),
+-        const SizedBox(height: BoutiqueSpace.sm),
+-        Wrap(
+-          spacing: BoutiqueSpace.sm,
+-          runSpacing: BoutiqueSpace.sm,
+-          children: [
+-            for (var i = 0; i < selectable.length; i++)
+-              _OptionChip(
+-                label: selectable[i].title,
+-                selected: i == safeIndex,
+-                available: selectable[i].available,
+-                onTap: () => onSelect(i),
+-              ),
+-          ],
+-        ),
++        if (widget.selectedIndex == -1)
++          Text(
++            'Esta combinación no está disponible.',
++            key: const Key('product-combination-unavailable'),
++            style: boutiqueText(size: 13, color: palette.inkMuted),
++          ),
+       ],
+     );
+   }
+@@ -447,9 +485,9 @@ class _Swatch extends StatelessWidget {
+       button: true,
+       selected: selected,
+       label: 'Color $label${available ? '' : ', no disponible'}',
+-      child: GestureDetector(
+-        onTap: onTap,
+-        behavior: HitTestBehavior.opaque,
++      child: TextButton(
++        onPressed: onTap,
++        style: TextButton.styleFrom(padding: EdgeInsets.zero),
+         child: SizedBox(
+           width: BoutiqueSpace.tapTarget,
+           height: BoutiqueSpace.tapTarget,
+@@ -505,14 +543,14 @@ class _OptionChip extends StatelessWidget {
+       button: true,
+       selected: selected,
+       label: 'Opción $label${available ? '' : ', no disponible'}',
+-      child: GestureDetector(
+-        onTap: onTap,
+-        behavior: HitTestBehavior.opaque,
++      child: TextButton(
++        onPressed: onTap,
++        style: TextButton.styleFrom(padding: EdgeInsets.zero),
+         child: Opacity(
+           opacity: available ? 1 : 0.45,
+           child: Container(
+             constraints: const BoxConstraints(
+-              minHeight: 44,
++              minHeight: 48,
+               maxWidth: 220,
+             ),
+             padding: const EdgeInsets.symmetric(
+@@ -537,8 +575,6 @@ class _OptionChip extends StatelessWidget {
+                 Flexible(
+                   child: Text(
+                     label.toUpperCase(),
+-                    maxLines: 2,
+-                    overflow: TextOverflow.ellipsis,
+                     style: boutiqueEyebrow(size: 10, color: palette.ink),
+                   ),
+                 ),
+diff --git a/lib/features/product/purchase_dock.dart b/lib/features/product/purchase_dock.dart
+index bedad79..fa62523 100644
+--- a/lib/features/product/purchase_dock.dart
++++ b/lib/features/product/purchase_dock.dart
+@@ -8,6 +8,7 @@ library;
+ import 'package:flutter/material.dart';
+ 
+ import '../boutique/boutique_tokens.dart';
++import '../boutique/client_guide_components.dart';
+ 
+ /// Minimum height of a dock action.
+ const double kPurchaseDockButtonHeight = 48;
+@@ -83,75 +84,66 @@ class PurchaseDockButton extends StatelessWidget {
+   Widget build(BuildContext context) {
+     final palette = context.boutique;
+     final enabled = onPressed != null && !pending;
+-    final background = enabled
+-        ? palette.action
+-        : Color.alphaBlend(
+-            palette.canvas.withValues(alpha: 0.45),
+-            palette.action,
+-          );
+-    return Semantics(
+-      button: true,
+-      enabled: enabled,
+-      label: label,
+-      excludeSemantics: true,
+-      onTap: enabled ? onPressed : null,
+-      child: Material(
+-        color: background,
+-        shape: const StadiumBorder(),
+-        child: InkWell(
+-          onTap: enabled ? onPressed : null,
+-          customBorder: const StadiumBorder(),
+-          child: ConstrainedBox(
+-            constraints: BoxConstraints(
+-              minHeight:
+-                  large ? kPurchaseButtonHeight : kPurchaseDockButtonHeight,
++    final foreground = large ? const Color(0xFF242622) : palette.onAction;
++    final button = Material(
++      color: large ? Colors.transparent : palette.action,
++      shape: StadiumBorder(
++        side:
++            large ? BorderSide(color: palette.borderControl) : BorderSide.none,
++      ),
++      child: InkWell(
++        onTap: enabled ? onPressed : null,
++        customBorder: const StadiumBorder(),
++        child: ConstrainedBox(
++          constraints: BoxConstraints(
++            minHeight:
++                large ? kPurchaseButtonHeight : kPurchaseDockButtonHeight,
++          ),
++          child: Padding(
++            padding: EdgeInsets.symmetric(
++              horizontal: BoutiqueSpace.xl,
++              vertical: large ? BoutiqueSpace.sm : BoutiqueSpace.md,
+             ),
+-            child: Padding(
+-              padding: EdgeInsets.symmetric(
+-                horizontal: BoutiqueSpace.xl,
+-                vertical: large ? BoutiqueSpace.sm : BoutiqueSpace.md,
+-              ),
+-              child: Row(
+-                mainAxisAlignment: MainAxisAlignment.center,
+-                children: [
+-                  if (pending) ...[
+-                    SizedBox(
+-                      width: 16,
+-                      height: 16,
+-                      child: CircularProgressIndicator(
+-                        strokeWidth: 2,
+-                        color: palette.onAction,
+-                      ),
+-                    ),
+-                    const SizedBox(width: BoutiqueSpace.sm),
+-                  ],
+-                  Flexible(
+-                    // No line cap: at large text scales the button grows
+-                    // instead of truncating the label.
+-                    child: Text(
+-                      label,
+-                      textAlign: TextAlign.center,
+-                      style: large
+-                          ? boutiqueText(
+-                              size: 15,
+-                              color: palette.onAction,
+-                              height: 1.2,
+-                            ).copyWith(letterSpacing: 0.9)
+-                          : boutiqueText(
+-                              size: 14,
+-                              weight: FontWeight.w600,
+-                              color: palette.onAction,
+-                              height: 1.2,
+-                            ),
++            child: Row(
++              mainAxisAlignment: MainAxisAlignment.center,
++              children: [
++                if (pending) ...[
++                  SizedBox(
++                    width: 16,
++                    height: 16,
++                    child: CircularProgressIndicator(
++                      strokeWidth: 2,
++                      color: foreground,
+                     ),
+                   ),
++                  const SizedBox(width: BoutiqueSpace.sm),
+                 ],
+-              ),
++                Flexible(
++                  child: Text(
++                    label,
++                    textAlign: TextAlign.center,
++                    style: boutiqueText(
++                      size: large ? 15 : 14,
++                      weight: large ? FontWeight.w400 : FontWeight.w600,
++                      color: foreground,
++                      height: 1.2,
++                    ).copyWith(letterSpacing: large ? .9 : null),
++                  ),
++                ),
++              ],
+             ),
+           ),
+         ),
+       ),
+     );
++    return Semantics(
++      button: true,
++      enabled: enabled,
++      label: label,
++      excludeSemantics: true,
++      onTap: enabled ? onPressed : null,
++      child: large ? GuideGlassSurface(child: button) : button,
++    );
+   }
+ }
+ 
+@@ -173,39 +165,35 @@ class PurchaseOutlineButton extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     final palette = context.boutique;
+-    final enabled = onPressed != null;
+     return Semantics(
+       button: true,
+-      enabled: enabled,
++      enabled: onPressed != null,
+       label: label,
+       excludeSemantics: true,
+       onTap: onPressed,
+-      child: Material(
+-        color: Colors.transparent,
+-        shape: StadiumBorder(side: BorderSide(color: palette.borderControl)),
+-        child: InkWell(
+-          onTap: onPressed,
+-          customBorder: const StadiumBorder(),
+-          child: ConstrainedBox(
+-            constraints: const BoxConstraints(minHeight: kPurchaseButtonHeight),
+-            child: Padding(
+-              padding: const EdgeInsets.symmetric(
+-                horizontal: BoutiqueSpace.xl,
+-                vertical: BoutiqueSpace.sm,
+-              ),
+-              child: Center(
+-                child: Text(
+-                  label,
+-                  textAlign: TextAlign.center,
+-                  style: boutiqueText(
+-                    size: 15,
+-                    color:
+-                        enabled ? textColor : textColor.withValues(alpha: 0.45),
+-                    height: 1.2,
+-                  ).copyWith(letterSpacing: 0.9),
+-                ),
+-              ),
++      child: GuideGlassSurface(
++        halo: onPressed != null,
++        child: OutlinedButton(
++          onPressed: onPressed,
++          style: OutlinedButton.styleFrom(
++            minimumSize: const Size(double.infinity, kPurchaseButtonHeight),
++            padding: const EdgeInsets.symmetric(
++              horizontal: BoutiqueSpace.xl,
++              vertical: BoutiqueSpace.sm,
+             ),
++            side: BorderSide(color: palette.borderControl),
++            shape: const StadiumBorder(),
++          ),
++          child: Text(
++            label,
++            textAlign: TextAlign.center,
++            style: boutiqueText(
++              size: 15,
++              color: onPressed != null
++                  ? const Color(0xFF242622)
++                  : const Color(0x73242622),
++              height: 1.2,
++            ).copyWith(letterSpacing: .9),
+           ),
+         ),
+       ),
+diff --git a/lib/features/product/quick_view.dart b/lib/features/product/quick_view.dart
+index 21c4d85..0fbbabf 100644
+--- a/lib/features/product/quick_view.dart
++++ b/lib/features/product/quick_view.dart
+@@ -1,28 +1,11 @@
+-/// Quick-view Fig.06 — vista previa centrada sobre la pantalla atenuada.
+-///
+-/// Una tarjeta centrada (≈ 79 % del ancho, máximo 440) con «‹» y «×» sobre la
+-/// foto, fila de miniaturas, marca–nombre–precio (con anterior y `-%` solo con
+-/// dato real), colores con la misma [ProductOptionSelector] de la ficha,
+-/// «Stock» (Disponible o Agotado) — **sin** línea de `Últimas piezas`: el
+-/// catálogo no trae cantidades, solo `available`, y la urgencia nunca se
+-/// fabrica —, y «AGREGAR A BOLSA» + «VER PRODUCTO» con la misma selección y el
+-/// mismo add-to-bag de la ficha ([tryAddSelectionToBag]). Si no cabe (texto
+-/// grande, pantallas bajas) el contenido de la tarjeta se desplaza por dentro.
+-///
+-/// No toca `product_card.dart` (dueño B): esa tarjeta ya expone `onQuickView`
+-/// como callback opcional. Cualquier tarjeta la abre con:
+-///
+-/// ```dart
+-/// ProductCard(
+-///   product: product,
+-///   onQuickView: () => showProductQuickView(context, product),
+-/// )
+-/// ```
++/// Centered quick view: exact variant options, photography, price and stock;
++/// independent favorite, X/Escape, in-place add confirmation and PDP entry.
+ library;
+ 
+ import 'dart:math' as math;
+ 
+ import 'package:flutter/material.dart';
++import 'package:flutter/services.dart';
+ 
+ import '../../app/media/monetta_image.dart';
+ import '../../app/motion.dart';
+@@ -37,7 +20,7 @@ import '../../reco/explainer.dart';
+ import '../boutique/boutique_tokens.dart';
+ import '../catalog/product_card.dart';
+ import '../catalog/product_tile.dart' show PackshotBlend;
+-import '../checkout/mini_cart.dart';
++import '../catalog/product_controls.dart';
+ import '../navigation/duo_workspace.dart';
+ import 'product_selection.dart';
+ import 'purchase_dock.dart';
+@@ -58,8 +41,17 @@ Future<void> showProductQuickView(
+   Product product, {
+   int initialVariantIndex = 0,
+   bool requireChoice = false,
++  String? initialVariantId,
++  ValueChanged<String?>? onVariantChanged,
++  ProductRestockAction? onRestock,
+ }) {
+   final store = StoreScope.of(context);
++  final originFocus = FocusManager.instance.primaryFocus;
++  initialVariantIndex = variantIndexForId(
++    product,
++    initialVariantId,
++    fallback: initialVariantIndex,
++  );
+   store.record(EventType.galleryInteraction, productId: product.id);
+   // A two-sided window shows the card on its right side, beside the catalog,
+   // with no veil: touching another piece replaces it.
+@@ -74,6 +66,8 @@ Future<void> showProductQuickView(
+           product: product,
+           initialVariantIndex: initialVariantIndex,
+           requireChoice: requireChoice,
++          onVariantChanged: onVariantChanged,
++          onRestock: onRestock,
+           parentContext: paneContext,
+           embedded: true,
+         ),
+@@ -99,10 +93,14 @@ Future<void> showProductQuickView(
+         product: product,
+         initialVariantIndex: initialVariantIndex,
+         requireChoice: requireChoice,
++        onVariantChanged: onVariantChanged,
++        onRestock: onRestock,
+         parentContext: context,
+       ),
+     ),
+-  );
++  ).whenComplete(() {
++    if (originFocus?.context != null) originFocus!.requestFocus();
++  });
+ }
+ 
+ class _QuickViewSheet extends StatefulWidget {
+@@ -112,11 +110,15 @@ class _QuickViewSheet extends StatefulWidget {
+     this.initialVariantIndex = 0,
+     this.requireChoice = false,
+     this.embedded = false,
++    this.onVariantChanged,
++    this.onRestock,
+   });
+ 
+   final Product product;
+   final BuildContext parentContext;
+   final int initialVariantIndex;
++  final ValueChanged<String?>? onVariantChanged;
++  final ProductRestockAction? onRestock;
+ 
+   /// The card as a page of a two-sided window's right side rather than a
+   /// dialog: it stays after an add, and «×» returns that side to the bag.
+@@ -137,8 +139,16 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+   int? _variantIndex;
+   int _page = 0;
+   bool _adding = false;
++  bool _added = false;
++  String? _selectedId;
++  bool _missingCombination = false;
+   String? _error;
+ 
++  Product? get _currentProduct => StoreScope.of(context)
++      .products
++      .where((p) => p.id == widget.product.id)
++      .firstOrNull;
++
+   @override
+   void initState() {
+     super.initState();
+@@ -150,7 +160,10 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+       _variantIndex = (widget.initialVariantIndex >= 0 &&
+               widget.initialVariantIndex < selectable.length)
+           ? widget.initialVariantIndex
+-          : 0;
++          : widget.initialVariantIndex < 0
++              ? -1
++              : 0;
++      _selectedId = selectedVariant(widget.product, _variantIndex!)?.id;
+     }
+   }
+ 
+@@ -172,12 +185,18 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+   Future<void> _addToBag() async {
+     final index = _variantIndex;
+     if (index == null || _adding) return;
+-    final parent = widget.parentContext;
+     setState(() {
+       _adding = true;
+       _error = null;
++      _added = false;
+     });
+-    final result = await tryAddSelectionToBag(context, widget.product, index);
++    final product = _currentProduct;
++    final currentIndex = product == null
++        ? -1
++        : variantIndexForId(product, _selectedId, fallback: -1);
++    final result = product == null
++        ? const BagAddResult(BagAddStatus.unavailable)
++        : await tryAddSelectionToBag(context, product, currentIndex);
+     if (!mounted) return;
+     if (result.status != BagAddStatus.added) {
+       // The sheet stays open and the choice is kept so the shopper can retry.
+@@ -193,57 +212,36 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+       return;
+     }
+     NotificationScope.maybeOf(context)?.recordPushOutcome('add_to_cart');
+-    if (widget.embedded) {
+-      // Beside the bag the card stays; the add is confirmed on that side.
+-      setState(() => _adding = false);
+-      await showMiniCart(context);
+-      return;
+-    }
+-    Navigator.of(context).pop();
+-    // Same confirmation as the ficha — one modal at a time.
+-    if (parent.mounted) {
+-      await showMiniCart(parent);
+-    }
++    setState(() {
++      _adding = false;
++      _added = true;
++    });
+   }
+ 
+   void _viewFullProduct() {
+-    final product = widget.product;
++    final product = _currentProduct;
++    if (product == null) return;
+     final parent = widget.parentContext;
+     final variantIndex = _variantIndex ?? 0;
+     if (widget.embedded) {
+       // The product replaces this card on the same side.
+-      openProduct(context, product, initialVariantIndex: variantIndex);
++      openProduct(
++        context,
++        product,
++        initialVariantIndex: variantIndex,
++        initialVariantId: _selectedId,
++      );
+       return;
+     }
+     Navigator.of(context).pop();
+     if (parent.mounted) {
+-      openProduct(parent, product, initialVariantIndex: variantIndex);
+-    }
+-  }
+-
+-  Future<void> _requestRestock(Product product) async {
+-    final notifications = NotificationScope.maybeOf(context);
+-    if (notifications == null || !notifications.available) {
+-      ScaffoldMessenger.of(context).showSnackBar(
+-        const SnackBar(
+-          content: Text(
+-            'Los avisos todavía no están disponibles en esta versión.',
+-          ),
+-        ),
++      openProduct(
++        parent,
++        product,
++        initialVariantIndex: variantIndex,
++        initialVariantId: _selectedId,
+       );
+-      return;
+     }
+-    final ok = await notifications.createRestockAlert(product.id);
+-    if (!mounted) return;
+-    ScaffoldMessenger.of(context).showSnackBar(
+-      SnackBar(
+-        content: Text(
+-          ok
+-              ? 'Te avisaremos cuando esta pieza vuelva.'
+-              : notifications.lastError ?? 'No pudimos crear el aviso.',
+-        ),
+-      ),
+-    );
+   }
+ 
+   /// The two page buttons, under the stock line. «AGREGAR A BOLSA» keeps its
+@@ -256,11 +254,11 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+       label = _kChooseLabel;
+       onPressed = null;
+     } else if (!inStock) {
+-      label = 'Avísame cuando vuelva';
+-      onPressed = () => _requestRestock(widget.product);
++      label = 'Agotado';
++      onPressed = null;
+     } else {
+       label = _adding ? 'AGREGANDO…' : 'AGREGAR A BOLSA';
+-      onPressed = _addToBag;
++      onPressed = _currentProduct == null ? null : _addToBag;
+     }
+     return Column(
+       key: const Key('quick-view-actions'),
+@@ -278,20 +276,49 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+           ),
+           const SizedBox(height: BoutiqueSpace.sm),
+         ],
+-        PurchaseDockButton(
+-          key: const Key('quick-view-primary'),
+-          label: label,
+-          pending: _adding,
+-          large: true,
+-          onPressed: onPressed,
+-        ),
++        if (inStock || chosen == null || chosen == -1)
++          PurchaseDockButton(
++            key: const Key('quick-view-primary'),
++            label: label,
++            pending: _adding,
++            large: true,
++            onPressed: onPressed,
++          ),
++        if (!inStock &&
++            chosen != null &&
++            chosen >= 0 &&
++            widget.onRestock != null &&
++            _currentProduct != null)
++          TextButton(
++            onPressed: () {
++              final product = _currentProduct;
++              final variant = product == null
++                  ? null
++                  : selectedVariant(
++                      product,
++                      variantIndexForId(product, _selectedId, fallback: -1),
++                    );
++              if (product != null && variant != null && !variant.available) {
++                widget.onRestock!(product, variant);
++              }
++            },
++            child: Text(
++              'Avísame cuando vuelva',
++              style: boutiqueText(color: palette.ink),
++            ),
++          ),
++        if (_added)
++          Semantics(liveRegion: true, child: const Text('Agregado al carrito')),
++        if (_currentProduct == null)
++          const Text('Este producto ya no está disponible.'),
+         const SizedBox(height: BoutiqueSpace.sm),
+-        PurchaseOutlineButton(
+-          key: const Key('quick-view-view-product'),
+-          label: 'VER PRODUCTO',
+-          textColor: palette.action,
+-          onPressed: _viewFullProduct,
+-        ),
++        if (_currentProduct != null)
++          PurchaseOutlineButton(
++            key: const Key('quick-view-view-product'),
++            label: 'VER PRODUCTO',
++            textColor: palette.action,
++            onPressed: _viewFullProduct,
++          ),
+       ],
+     );
+   }
+@@ -347,48 +374,26 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+               controller: _gallery,
+               itemCount: images.length,
+               onPageChanged: (i) => setState(() => _page = i),
+-              itemBuilder: (_, i) => PackshotBlend(
+-                ground: palette.surfaceDeep,
+-                child: MonettaImage(
+-                  url: images[i],
+-                  fit: BoxFit.contain,
+-                  cacheWidth: MediaUrl.cardWidth,
+-                  fallbackLabel:
+-                      '${shopperProductName(product.title)} · Monetta',
++              itemBuilder: (_, i) => InkWell(
++                onTap: _viewFullProduct,
++                child: PackshotBlend(
++                  ground: palette.surfaceDeep,
++                  child: MonettaImage(
++                    url: images[i],
++                    fit: BoxFit.contain,
++                    cacheWidth: MediaUrl.cardWidth,
++                    fallbackLabel:
++                        '${shopperProductName(product.title)} · Monetta',
++                  ),
+                 ),
+               ),
+             ),
+             if (!inStock)
+-              IgnorePointer(
+-                child: Center(
+-                  child: Container(
+-                    padding: const EdgeInsets.symmetric(
+-                      horizontal: BoutiqueSpace.lg,
+-                      vertical: 8,
+-                    ),
+-                    decoration: BoxDecoration(
+-                      color: palette.canvas,
+-                      borderRadius: BoutiqueRadius.capsule,
+-                      border: Border.all(color: palette.ink, width: 1),
+-                    ),
+-                    child: Text(
+-                      'AGOTADO',
+-                      style: boutiqueEyebrow(size: 11, color: palette.ink),
+-                    ),
+-                  ),
+-                ),
++              const Positioned(
++                left: 8,
++                bottom: 4,
++                child: ProductSoldOutBadge(),
+               ),
+-            Positioned(
+-              top: BoutiqueSpace.xs,
+-              left: BoutiqueSpace.xs,
+-              child: _photoControl(
+-                key: const Key('quick-view-back'),
+-                tooltip: 'Regresar',
+-                icon: Icons.chevron_left,
+-                size: 30,
+-                palette: palette,
+-              ),
+-            ),
+             Positioned(
+               top: BoutiqueSpace.xs,
+               right: BoutiqueSpace.xs,
+@@ -425,9 +430,8 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+                   button: true,
+                   selected: i == _page,
+                   label: 'Foto ${i + 1} de ${images.length}',
+-                  child: GestureDetector(
++                  child: InkWell(
+                     onTap: () => _goToPage(i),
+-                    behavior: HitTestBehavior.opaque,
+                     child: Container(
+                       key: ValueKey('thumb-$i'),
+                       width: side,
+@@ -558,9 +562,13 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+   @override
+   Widget build(BuildContext context) {
+     final palette = context.boutique;
+-    final product = widget.product;
+     final store = StoreScope.of(context);
++    final currentProduct = _currentProduct;
++    final product = currentProduct ?? widget.product;
+     final facets = store.facetsFor(product.id);
++    if (_selectedId != null && !_missingCombination) {
++      _variantIndex = variantIndexForId(product, _selectedId);
++    }
+     final chosen = _variantIndex;
+     // Until an option is chosen the card shows the piece's own price and no
+     // sale or availability claim: those belong to one variant.
+@@ -570,8 +578,12 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+     final onSale = chosen != null && selectionOnSale(product, chosen);
+     final discount =
+         chosen == null ? 0 : selectionDiscountPercent(product, chosen);
+-    final inStock = chosen == null || selectionInStock(product, chosen);
+-    final images = product.images.isEmpty ? <String?>[null] : product.images;
++    final inStock = currentProduct != null &&
++        (chosen == null || selectionInStock(product, chosen));
++    final memberImages = chosen == null
++        ? const <String>[]
++        : imagesForVariant(product, selectedVariant(product, chosen));
++    final images = memberImages.isEmpty ? <String?>[null] : memberImages;
+ 
+     final media = MediaQuery.of(context);
+     final screen = media.size;
+@@ -633,13 +645,20 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+                           _buildThumbnails(palette, images),
+                           const SizedBox(height: BoutiqueSpace.md),
+                         ],
++                        Align(
++                          alignment: Alignment.centerRight,
++                          child: ProductFavoriteButton(
++                            selected: store.wishlist.contains(product.id),
++                            onPressed: () => store.toggleWishlist(product.id),
++                          ),
++                        ),
+                         if (facets?.brand != null)
+                           Text(
+                             brandLabel(facets!.brand!.value),
+                             key: const Key('quick-view-brand'),
+-                            style: boutiqueDisplay(
+-                              22,
+-                              weight: FontWeight.w700,
++                            style: boutiqueText(
++                              size: 18,
++                              weight: FontWeight.w600,
+                               color: palette.ink,
+                             ),
+                           ),
+@@ -647,8 +666,6 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+                         Text(
+                           shopperProductName(product.title),
+                           key: const Key('quick-view-name'),
+-                          maxLines: 2,
+-                          overflow: TextOverflow.ellipsis,
+                           style: boutiqueText(
+                             size: 15,
+                             color: palette.ink,
+@@ -682,11 +699,20 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+                             product: product,
+                             selectedIndex: chosen,
+                             colorHeading: 'Colores',
+-                            showSelectedName: false,
+-                            onSelect: (i) => setState(() {
+-                              _variantIndex = i;
+-                              _error = null;
+-                            }),
++                            showSelectedName: true,
++                            onSelect: (i) {
++                              if (_adding) return;
++                              setState(() {
++                                _variantIndex = i;
++                                _missingCombination = i < 0;
++                                _selectedId = selectedVariant(product, i)?.id;
++                                widget.onVariantChanged?.call(_selectedId);
++                                _page = 0;
++                                if (_gallery.hasClients) _gallery.jumpToPage(0);
++                                _added = false;
++                                _error = null;
++                              });
++                            },
+                           ),
+                         ],
+                         if (chosen != null) ...[
+@@ -705,7 +731,15 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
+         ),
+       ),
+     );
+-    if (!widget.embedded) return card;
++    if (!widget.embedded) {
++      return CallbackShortcuts(
++        bindings: {
++          const SingleActivator(LogicalKeyboardKey.escape): () =>
++              Navigator.of(context).pop(),
++        },
++        child: Focus(autofocus: true, child: card),
++      );
++    }
+     return Scaffold(
+       key: const Key('duo-preview'),
+       backgroundColor: palette.canvas,
+diff --git a/test/data/local/database_test.dart b/test/data/local/database_test.dart
+index 091d494..c3b0547 100644
+--- a/test/data/local/database_test.dart
++++ b/test/data/local/database_test.dart
+@@ -12,8 +12,8 @@ void main() {
+   tearDown(() => db.close());
+ 
+   group('AppDatabase', () {
+-    test('opens and reports schema version 9', () {
+-      expect(db.schemaVersion, 9);
++    test('opens and reports schema version 10', () {
++      expect(db.schemaVersion, 10);
+     });
+ 
+     test('round-trips a cached product and its variants', () async {
+diff --git a/test/features/catalog/product_card_test.dart b/test/features/catalog/product_card_test.dart
+index e273d18..3e1a60a 100644
+--- a/test/features/catalog/product_card_test.dart
++++ b/test/features/catalog/product_card_test.dart
+@@ -8,6 +8,7 @@ import 'package:monetta_app/domain/catalog_item.dart';
+ import 'package:monetta_app/domain/product.dart';
+ import 'package:monetta_app/features/catalog/product_card.dart';
+ import 'package:monetta_app/features/catalog/product_tile.dart';
++import 'package:monetta_app/features/catalog/product_controls.dart';
+ import 'package:monetta_app/main.dart';
+ 
+ Product _product({
+@@ -232,8 +233,8 @@ void main() {
+     );
+     await tester.pump();
+ 
+-    expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+-    await tester.tap(find.byIcon(Icons.favorite_border));
++    expect(find.byType(ProductFavoriteButton), findsOneWidget);
++    await tester.tap(find.byType(ProductFavoriteButton));
+     await tester.pumpAndSettle();
+ 
+     expect(opened, 0, reason: 'the heart must not open the product page');
+diff --git a/test/features/product/product_layout_responsive_test.dart b/test/features/product/product_layout_responsive_test.dart
+index 8843ec9..99c0279 100644
+--- a/test/features/product/product_layout_responsive_test.dart
++++ b/test/features/product/product_layout_responsive_test.dart
+@@ -1,4 +1,4 @@
+-import 'package:flutter/widgets.dart';
++import 'package:flutter/material.dart';
+ import 'package:flutter_test/flutter_test.dart';
+ import 'package:monetta_app/app/catalog_store.dart';
+ import 'package:monetta_app/app/shopper_copy.dart';
+@@ -43,6 +43,7 @@ final Map<String, Product Function(CatalogStore)> _scenarios = {
+ Future<void> _expectGuideContract(
+   WidgetTester tester, {
+   required double width,
++  bool inStock = true,
+ }) async {
+   final nav = find.byKey(const Key('bottom-nav-surface'));
+   expect(nav, findsOneWidget);
+@@ -52,8 +53,17 @@ Future<void> _expectGuideContract(
+   expect(rect.right, lessThanOrEqualTo(width + 0.01));
+   expect(rect.bottom, closeTo(kPhoneHeight, 0.01), reason: 'anchored below');
+   expect(find.byKey(const Key('home-menu-button')), findsOneWidget);
+-  await scrollTo(tester, find.byKey(kDockPrimaryKey));
+-  expect(find.byKey(kDockPrimaryKey), findsOneWidget);
++  if (inStock) {
++    await scrollTo(tester, find.byKey(kDockPrimaryKey));
++    expect(find.byKey(kDockPrimaryKey), findsOneWidget);
++  } else {
++    expect(find.byKey(kDockPrimaryKey), findsNothing);
++    expect(
++      find.byKey(kRestockKey),
++      findsNothing,
++      reason: 'G12 requires exact-variant capability',
++    );
++  }
+ 
+   await scrollToEnd(tester);
+   expect(tester.takeException(), isNull);
+@@ -115,7 +125,11 @@ void main() {
+           final product = pick(store);
+           await pumpFicha(tester, store, product.id, scale: scale);
+ 
+-          await _expectGuideContract(tester, width: width);
++          await _expectGuideContract(
++            tester,
++            width: width,
++            inStock: product.isInStock,
++          );
+         });
+       }
+ 
+@@ -142,7 +156,10 @@ void main() {
+       final size = tester.getSize(finder);
+       expect(size.width, greaterThanOrEqualTo(48), reason: '$what: width');
+       expect(size.height, greaterThanOrEqualTo(48), reason: '$what: height');
+-      final node = tester.getSemantics(finder);
++      final native =
++          find.descendant(of: finder, matching: find.byType(IconButton));
++      final node =
++          tester.getSemantics(native.evaluate().length == 1 ? native : finder);
+       expect(accessibleName(node), isNotEmpty, reason: '$what: name');
+       expect(
+         node.getSemanticsData().flagsCollection.isButton,
+@@ -186,6 +203,9 @@ void main() {
+ 
+           await scrollTo(tester, find.byKey(kBuyNowKey));
+           expectButton(tester, find.byKey(kBuyNowKey), what: 'COMPRAR AHORA');
++          await scrollTo(tester, find.text('Otras formas de comprar'));
++          await tester.tap(find.text('Otras formas de comprar'));
++          await tester.pump();
+           await scrollTo(tester, find.byKey(kApartarKey));
+           expectButton(tester, find.byKey(kApartarKey), what: 'Apartar');
+         });
+@@ -207,7 +227,10 @@ void main() {
+         await scrollTo(tester, find.byKey(kDockPrimaryKey));
+         await scrollTo(tester, name);
+         final title = tester.getSemantics(
+-          find.byKey(const Key('home-menu-button')),
++          find.descendant(
++            of: find.byKey(const Key('home-menu-button')),
++            matching: find.byType(IconButton),
++          ),
+         );
+         final content = tester.getSemantics(name);
+         final action = tester.getSemantics(find.byKey(kDockPrimaryKey));
+diff --git a/test/features/product/product_selection_test.dart b/test/features/product/product_selection_test.dart
+index adf2d69..5e89c0b 100644
+--- a/test/features/product/product_selection_test.dart
++++ b/test/features/product/product_selection_test.dart
+@@ -26,6 +26,7 @@ ProductVariant _variant(
+   double price = 1000,
+   double? compare,
+   bool available = true,
++  Map<String, String> options = const {},
+ }) {
+   return ProductVariant(
+     id: id ?? 'v-$title',
+@@ -33,6 +34,7 @@ ProductVariant _variant(
+     price: price,
+     compareAtPrice: compare,
+     available: available,
++    selectedOptions: options,
+   );
+ }
+ 
+@@ -73,7 +75,11 @@ void main() {
+       variants: [_variant('Negro'), _variant('Gris', available: false)],
+     );
+     expect(selectedVariant(product, 9)?.title, 'Negro');
+-    expect(selectedVariant(product, -1)?.title, 'Negro');
++    expect(
++      selectedVariant(product, -1),
++      isNull,
++      reason: 'G35 missing combinations must not select another variant',
++    );
+     expect(selectionInStock(product, 1), isFalse);
+   });
+ 
+@@ -98,9 +104,17 @@ void main() {
+ 
+   test('swatches only when every option maps reliably', () {
+     final reliable = _product(
+-      variants: [_variant('Azul Oscuro'), _variant('Gris')],
++      variants: [
++        _variant('Azul Oscuro', options: {'Color': 'Azul'}),
++        _variant('Gris', options: {'Color': 'Gris'}),
++      ],
+     );
+     expect(hasReliableColorOptions(reliable), isTrue);
++    expect(
++      hasReliableColorOptions(_product(variants: [_variant('Negro')])),
++      false,
++      reason: 'titles are not authoritative option metadata',
++    );
+ 
+     final mixed = _product(
+       variants: [_variant('Negro'), _variant('Cafe/Dorado')],
+diff --git a/test/features/product/purchase_dock_test.dart b/test/features/product/purchase_dock_test.dart
+index cfb7d52..590397f 100644
+--- a/test/features/product/purchase_dock_test.dart
++++ b/test/features/product/purchase_dock_test.dart
+@@ -6,9 +6,9 @@ import 'package:monetta_app/app/catalog_store.dart';
+ import 'package:monetta_app/app/theme.dart';
+ import 'package:monetta_app/data/local/database.dart';
+ import 'package:monetta_app/domain/product.dart';
+-import 'package:monetta_app/features/boutique/boutique_tokens.dart';
+ import 'package:monetta_app/features/checkout/checkout_screen.dart';
+ import 'package:monetta_app/features/product/product_selection.dart';
++import 'package:monetta_app/features/product/product_screen.dart';
+ import '../../support/product_screen_harness.dart';
+ import '../../support/scripted_catalog_store.dart';
+ 
+@@ -176,131 +176,109 @@ void main() {
+     }
+   });
+ 
+-  group('CART-02 the secondary purchase section', () {
+-    testWidgets(
+-      'CART-02 sits after the accordions and the WhatsApp link and before '
+-      '"Más de ...", with the secondary actions',
+-      (tester) async {
+-        setPhoneView(tester);
+-        final store = await loadedStore();
+-        final (:product, other: _) = productWithBrandRail(store);
+-        await pumpFicha(tester, store, product.id);
++  group('G10/G10-A purchase continuation', () {
++    Future<void> openMethods(WidgetTester tester) async {
++      final heading = find.text('Otras formas de comprar');
++      tester.state<ScrollableState>(mainScrollable()).position.jumpTo(0);
++      await tester.pump();
++      for (var i = 0; i < 15 && heading.hitTestable().evaluate().isEmpty; i++) {
++        await tester.drag(mainList(), const Offset(0, -150));
++        await tester.pump();
++      }
++      await tester.tap(heading.hitTestable());
++      await tester.pump();
++    }
+ 
+-        final section = find.byKey(kPurchaseSectionKey);
+-        final whatsapp = await contentOffsetOf(
+-          tester,
+-          find.text('Escribir por WhatsApp'),
+-        );
+-        final lastAccordion = await contentOffsetOf(
+-          tester,
+-          find.text('Envíos y devoluciones'),
+-        );
+-        final sectionTop = await contentOffsetOf(tester, section);
+-        final related = await contentOffsetOf(
+-          tester,
+-          find.text('Productos relacionados'),
+-        );
+-        final buyNowTop = await contentOffsetOf(tester, find.byKey(kBuyNowKey));
+-        expect(buyNowTop, lessThan(lastAccordion));
+-        expect(sectionTop, greaterThan(whatsapp));
+-        expect(sectionTop, greaterThan(lastAccordion));
+-        expect(sectionTop, lessThan(related));
+-
+-        await scrollTo(tester, section);
+-        final heading = find.descendant(
+-          of: section,
+-          matching: find.text('Otras formas de comprar'),
+-        );
+-        expect(heading, findsOneWidget);
+-        final style = styleOf(tester, heading);
+-        expect(style.fontFamily, kBoutiqueSerifFamily);
+-        expect(style.fontWeight, FontWeight.w400);
+-        expect(style.fontSize, kBoutiqueSectionHeadingSize);
+-
+-        final apartar = find.descendant(
+-          of: section,
+-          matching: find.byKey(kApartarKey),
+-        );
+-        expect(apartar, findsOneWidget);
+-        expect(
+-          find.descendant(
+-            of: find.byKey(kBuyNowKey),
+-            matching: find.text('COMPRAR AHORA'),
+-          ),
+-          findsOneWidget,
+-        );
+-        expect(
+-          find.descendant(of: apartar, matching: find.text('Apartar')),
+-          findsOneWidget,
+-        );
+-        expect(
+-          find.descendant(
+-            of: find.byKey(_bottomNavKey),
+-            matching: find.byKey(kBuyNowKey),
++    testWidgets('accordions follow required order and WhatsApp is lazy',
++        (tester) async {
++      setPhoneView(tester);
++      final store = await loadedStore();
++      final (:product, other: _) = productWithBrandRail(store);
++      await tester.pumpWidget(
++        fichaApp(
++          store,
++          ProductScreen(
++            productId: product.id,
++            shippingPolicy: 'Política de envíos de prueba.',
++            returnsPolicy: 'Política de cambios de prueba.',
+           ),
+-          findsNothing,
+-        );
+-      },
+-    );
+-
++        ),
++      );
++      await tester.pump();
++      final description =
++          await contentOffsetOf(tester, find.text('Descripción'));
++      final methods =
++          await contentOffsetOf(tester, find.text('Otras formas de comprar'));
++      final shipping = await contentOffsetOf(tester, find.text('Envíos'));
++      final returns =
++          await contentOffsetOf(tester, find.text('Cambios y devoluciones'));
++      expect(description, lessThan(methods));
++      expect(methods, lessThan(shipping));
++      expect(shipping, lessThan(returns));
++      expect(find.byKey(kApartarKey), findsNothing);
++      await openMethods(tester);
++      expect(find.byKey(kApartarKey), findsOneWidget);
++      expect(
++        find.text(
++          'Enviar una solicitud no confirma el apartado ni realiza un cobro.',
++        ),
++        findsOneWidget,
++      );
++      expect(find.byKey(kBuyNowKey), findsOneWidget);
++    });
+     testWidgets(
+-      'CART-02b "Comprar ahora" adds one unit of the chosen variant and '
+-      'opens the bag',
+-      (tester) async {
+-        setPhoneView(tester);
+-        final store = await loadedStore();
+-        final product = syntheticProduct(variants: chipVariants());
+-        addProducts(store, [product]);
+-        await pumpFicha(tester, store, product.id);
+-        await selectOption(tester, 'Talla mediana');
+-
+-        final buyNow = find.byKey(kBuyNowKey);
+-        await scrollTo(tester, buyNow);
+-        await tester.tap(buyNow);
+-        await tester.pumpAndSettle();
+-
+-        expect(store.bagQuantity, 1);
+-        expect(store.bagLines.single.variant.id, 'v-mediana');
+-        expect(find.byType(BagScreen), findsOneWidget);
+-      },
+-    );
+-
++        'Comprar ahora adds chosen variant and preserves other bag lines',
++        (tester) async {
++      setPhoneView(tester);
++      final store = await loadedStore();
++      final product = syntheticProduct(variants: chipVariants());
++      addProducts(store, [product]);
++      await store.addToBag(product, variantId: 'v-chica');
++      await pumpFicha(tester, store, product.id);
++      await selectOption(tester, 'Talla mediana');
++      await scrollTo(tester, find.byKey(kBuyNowKey));
++      await tester.tap(find.byKey(kBuyNowKey));
++      await tester.pumpAndSettle();
++      expect(store.bagQuantity, 2);
++      expect(
++        store.bagLines.map((line) => line.variant.id).toSet(),
++        {'v-chica', 'v-mediana'},
++      );
++      expect(find.byType(BagScreen), findsOneWidget);
++    });
+     testWidgets(
+-      'CART-02b "Apartar" opens the WhatsApp request and records the event',
+-      (tester) async {
+-        setPhoneView(tester);
+-        final launches = mockUrlLauncher();
+-        final store = await loadedStore();
+-        final product = syntheticProduct(title: 'Cartera Mini');
+-        addProducts(store, [product]);
+-        await pumpFicha(tester, store, product.id);
+-        final eventsBefore = store.eventCount;
+-
+-        final apartar = find.byKey(kApartarKey);
+-        await scrollTo(tester, apartar);
+-        await tester.tap(apartar);
+-        await tester.pumpAndSettle();
+-
+-        expect(launches, hasLength(1));
+-        expect(launches.single.method, 'launch');
+-        final url = Uri.parse(
+-          (launches.single.arguments as Map<Object?, Object?>)['url']!
+-              as String,
+-        );
+-        expect(url.scheme, 'https');
+-        expect(url.host, 'wa.me');
+-        expect(url.path, '/528261066868');
+-        final message = url.queryParameters['text']!;
+-        expect(message, contains('*Cartera Mini*'));
+-        expect(message, contains('Precio: \$1299.00 MXN'));
+-        expect(
+-          message,
+-          contains('https://monetta.mx/products/${product.handle}'),
+-        );
+-        expect(message, contains('Código: MN-'));
+-        expect(store.eventCount, eventsBefore + 1);
+-      },
+-    );
++        'lazy apartado opens contextual WhatsApp without fabricated deposit terms',
++        (tester) async {
++      setPhoneView(tester);
++      final launches = mockUrlLauncher();
++      final store = await loadedStore();
++      final product = syntheticProduct(title: 'Cartera Mini');
++      addProducts(store, [product]);
++      await pumpFicha(tester, store, product.id);
++      final eventsBefore = store.eventCount;
++      expect(launches, isEmpty);
++      expect(find.byKey(kApartarKey), findsNothing);
++      await openMethods(tester);
++      await scrollTo(tester, find.byKey(kApartarKey));
++      await tester.tap(find.byKey(kApartarKey));
++      await tester.pumpAndSettle();
++      expect(launches, hasLength(1));
++      expect(launches.single.method, 'launch');
++      final url = Uri.parse(
++        (launches.single.arguments as Map<Object?, Object?>)['url']! as String,
++      );
++      expect(url.scheme, 'https');
++      expect(url.host, 'wa.me');
++      expect(url.path, '/528261066868');
++      final message = url.queryParameters['text']!;
++      expect(message, contains('Cartera Mini'));
++      expect(message, contains('Variante: ${product.variants.single.id}'));
++      expect(message, contains('Precio: ${formatShopperPrice(product.price)}'));
++      expect(message, contains('Código: MN-'));
++      expect(message, isNot(contains('anticipo es')));
++      expect(message, isNot(contains('20 días')));
++      expect(store.eventCount, eventsBefore + 1);
++    });
+   });
+ 
+   group('CART-03 pending and failing adds', () {
+@@ -331,10 +309,7 @@ void main() {
+         await tester.pumpAndSettle();
+         expect(store.addCalls, 1);
+         expect(store.bagQuantity, 1);
+-        expect(find.text('En tu bolsa'), findsOneWidget);
+-
+-        await tester.tapAt(const Offset(195, 40));
+-        await tester.pumpAndSettle();
++        expect(find.text('Agregado al carrito'), findsOneWidget);
+         expect(find.text('En tu bolsa'), findsNothing);
+         expect(_inPrimary(find.text(_addLabel)), findsOneWidget);
+ 
+@@ -380,58 +355,27 @@ void main() {
+     );
+   });
+ 
+-  group('CART-04 availability', () {
++  group('G12 availability capability gate', () {
+     testWidgets(
+-      'CART-04 a fully sold-out piece offers the restock alert and only '
+-      '"Apartar"',
+-      (tester) async {
+-        setPhoneView(tester);
+-        final store = await loadedStore();
+-        final product = syntheticProduct(
+-          variants: [syntheticVariant(id: 'v-agotada', available: false)],
+-        );
+-        addProducts(store, [product]);
+-        await pumpFicha(tester, store, product.id);
+-
+-        expect(_primary(), findsOneWidget);
+-        expect(find.byKey(kRestockKey), findsOneWidget);
+-        expect(
+-          find.descendant(of: find.byKey(kRestockKey), matching: _primary()),
+-          findsOneWidget,
+-          reason: 'the restock key wraps the primary button',
+-        );
+-        expect(_inPrimary(find.text(_restockLabel)), findsOneWidget);
+-        expect(find.text(_addLabel, skipOffstage: false), findsNothing);
+-        expect(_inMainList(find.textContaining('Agotado')), findsWidgets);
+-        expect(
+-          find.descendant(
+-            of: find.byKey(_bottomNavKey),
+-            matching: find.textContaining('Agotado'),
+-          ),
+-          findsNothing,
+-        );
+-
+-        await scrollTo(tester, _primary());
+-        await tester.tap(_primary());
+-        await tester.pump();
+-        expect(store.bagQuantity, 0);
+-        expect(
+-          find.text('Los avisos todavía no están disponibles en esta versión.'),
+-          findsOneWidget,
+-        );
+-
+-        await scrollTo(tester, find.byKey(kApartarKey));
+-        expect(find.byKey(kApartarKey), findsOneWidget);
+-        expect(find.byKey(kBuyNowKey), findsNothing);
+-        expect(find.text('COMPRAR AHORA'), findsNothing);
+-      },
+-    );
+-
+-    testWidgets(
+-        'CART-04b with a sold-out variant selected the dock offers the '
+-        'alert; with an available one it adds exactly that variant', (
+-      tester,
+-    ) async {
++        'exhausted product hides add/buy/unsupported restock and keeps details',
++        (tester) async {
++      setPhoneView(tester);
++      final store = await loadedStore();
++      final product = syntheticProduct(
++        variants: [syntheticVariant(id: 'v-agotada', available: false)],
++      );
++      addProducts(store, [product]);
++      await pumpFicha(tester, store, product.id);
++      expect(_primary(), findsNothing);
++      expect(find.byKey(kRestockKey), findsNothing);
++      expect(find.text(_restockLabel), findsNothing);
++      expect(find.byKey(kBuyNowKey), findsNothing);
++      expect(find.text('AGOTADO'), findsOneWidget);
++      expect(store.bagQuantity, 0);
++      expect(find.text('Otras formas de comprar'), findsOneWidget);
++    });
++    testWidgets('available option restores add and sends exactly that variant',
++        (tester) async {
+       setPhoneView(tester);
+       final store = await loadedStore();
+       final product = syntheticProduct(
+@@ -439,16 +383,12 @@ void main() {
+       );
+       addProducts(store, [product]);
+       await pumpFicha(tester, store, product.id);
+-
+       await selectOption(tester, 'Talla chica');
+-      expect(_primary(), findsOneWidget);
+-      expect(_inPrimary(find.text(_restockLabel)), findsOneWidget);
+-      expect(find.text(_addLabel, skipOffstage: false), findsNothing);
+-
++      expect(_primary(), findsNothing);
++      expect(find.byKey(kRestockKey), findsNothing);
+       await selectOption(tester, 'Talla mediana');
+       expect(_inPrimary(find.text(_addLabel)), findsOneWidget);
+-      expect(find.byKey(kRestockKey), findsNothing);
+-
++      await scrollTo(tester, _primary());
+       await tester.tap(_primary());
+       await tester.pumpAndSettle();
+       expect(store.bagQuantity, 1);
+diff --git a/test/features/product/quick_view_purchase_test.dart b/test/features/product/quick_view_purchase_test.dart
+index 92477c1..1a9dae7 100644
+--- a/test/features/product/quick_view_purchase_test.dart
++++ b/test/features/product/quick_view_purchase_test.dart
+@@ -192,14 +192,13 @@ void main() {
+     });
+ 
+     testWidgets(
+-        'QUICK-05 a sold-out piece offers "Avísame cuando vuelva" and no add',
++        'G09/G12 hides unsupported exact-variant restock and prevents add',
+         (tester) async {
+       final (store, _) = await _open(tester, product: soldOutProduct());
+ 
+-      expect(inPrimary(find.text(kRestockLabel)), findsOneWidget);
++      expect(primaryButton(), findsNothing);
++      expect(find.text(kRestockLabel), findsNothing);
+       expect(find.text(kAddLabel), findsNothing);
+-      await tester.tap(primaryButton());
+-      await tester.pumpAndSettle();
+       expect(store.addCalls, 0);
+       expect(store.bagQuantity, 0);
+     });
+@@ -260,8 +259,13 @@ void main() {
+         expect(store.addCalls, 1);
+         expect(store.bagLines.single.variant.id, 'v-mediana');
+         expect(store.bagLines.single.quantity, 1);
+-        expect(_close(), findsNothing, reason: 'success closes the sheet');
+-        expect(_inMiniCart(), findsOneWidget);
++        expect(
++          _close(),
++          findsOneWidget,
++          reason: 'G09 confirms in the same layer',
++        );
++        expect(find.text('Agregado al carrito'), findsOneWidget);
++        expect(_inMiniCart(), findsNothing);
+         await flush(tester);
+       });
+     });
+@@ -308,7 +312,8 @@ void main() {
+         expect(store.addCalls, 2);
+         expect(store.bagQuantity, 1, reason: 'one unit, not two');
+         expect(store.bagLines.single.variant.id, second.id);
+-        expect(_close(), findsNothing);
++        expect(_close(), findsOneWidget);
++        expect(find.text('Agregado al carrito'), findsOneWidget);
+         expect(error, findsNothing);
+         await flush(tester);
+       });
+@@ -317,7 +322,7 @@ void main() {
+ 
+   group('TYPE-01e the piece name', () {
+     testWidgets(
+-        'TYPE-01e the brand is the editorial serif w700 22 and the name Inter '
++        'v4.1 the brand is DM Sans w600 18 and the name DM Sans '
+         'w400 15 in ink', (tester) async {
+       final (_, product) = await _open(tester);
+ 
+@@ -336,9 +341,9 @@ void main() {
+       final brand = find.byKey(const Key('quick-view-brand'));
+       if (brand.evaluate().isNotEmpty) {
+         final brandStyle = styleOf(tester, brand);
+-        expect(brandStyle.fontFamily, kBoutiqueSerifFamily);
+-        expect(brandStyle.fontWeight, FontWeight.w700);
+-        expect(brandStyle.fontSize, 22);
++        expect(brandStyle.fontFamily, kBoutiqueSansFamily);
++        expect(brandStyle.fontWeight, FontWeight.w600);
++        expect(brandStyle.fontSize, 18);
+       }
+     });
+   });

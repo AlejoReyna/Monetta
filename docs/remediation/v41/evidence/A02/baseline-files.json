@@ -1,0 +1,54 @@
+{
+  "lib/domain/product.dart": {
+    "sha256": "9809a4b22b3ed7cabe6186f7a6d3a387c6c4b258b597f679469a33b0a45ebf10",
+    "snapshot": "before/lib/domain/product.dart.txt"
+  },
+  "lib/data/shopify/mappers.dart": {
+    "sha256": "8baca131cce0391318fbcd4f587614726c57ac0888683b2aabf28aac407691aa",
+    "snapshot": "before/lib/data/shopify/mappers.dart.txt"
+  },
+  "lib/data/shopify/queries.dart": {
+    "sha256": "ed627fd64c2d1d319e4d4db03fe591080d2bbc92e80b5bf3337e2be28a4c3eee",
+    "snapshot": "before/lib/data/shopify/queries.dart.txt"
+  },
+  "lib/data/repositories/catalog_repository.dart": {
+    "sha256": "072580e99ba50d2d799d09b5e1f55ce74ac611e7bd5b640194fc8ea29e07464e",
+    "snapshot": "before/lib/data/repositories/catalog_repository.dart.txt"
+  },
+  "lib/data/local/tables.dart": {
+    "sha256": "d69405abac51b97906c7739c0da5daad13983d8080f736073d3b9d3f2ac88719",
+    "snapshot": "before/lib/data/local/tables.dart.txt"
+  },
+  "lib/data/local/database.dart": {
+    "sha256": "2094058f8dc6d3dd82fc36924158744fc0e1935f70167b5bc7d6db88d41c019a",
+    "snapshot": "before/lib/data/local/database.dart.txt"
+  },
+  "lib/data/local/database.g.dart": {
+    "sha256": "2ebd4781d4f9045ad3a5ffb5b0869734a3daac5f63443afb04bc686748a21ad5",
+    "snapshot": "before/lib/data/local/database.g.dart.txt"
+  },
+  "lib/data/local/catalog_cache_store.dart": {
+    "sha256": "b41521726c4df410cdbc6860d8c09f4046509d528cbd3424aea94a63fbb7ee63",
+    "snapshot": "before/lib/data/local/catalog_cache_store.dart.txt"
+  },
+  "lib/features/catalog/product_card.dart": {
+    "sha256": "c543b17eaf3254b6d131ff01bc4dfc01447b6a2dc872ea6b0e85edcb8d71a794",
+    "snapshot": "before/lib/features/catalog/product_card.dart.txt"
+  },
+  "lib/features/catalog/product_tile.dart": {
+    "sha256": "64c24ff9c28c4f874df2935a023d763957291ff9961ec5b19d57ae3bab7e2e77",
+    "snapshot": "before/lib/features/catalog/product_tile.dart.txt"
+  },
+  "lib/features/product/product_selection.dart": {
+    "sha256": "879aefe98cff30ca42c98d05bf296adfd5e291fc57f29d2117f2c3c4b49a2782",
+    "snapshot": "before/lib/features/product/product_selection.dart.txt"
+  },
+  "lib/features/product/product_screen.dart": {
+    "sha256": "22105d16ccca6be03745f1a0662fecb6f3e53c6d1aa0dcc5d0ce738b611b8c47",
+    "snapshot": "before/lib/features/product/product_screen.dart.txt"
+  },
+  "lib/features/product/quick_view.dart": {
+    "sha256": "339832d6e6c7b7f82fdbe6b2e14e588763eded92f7f66e8de20be5d974a0ccbd",
+    "snapshot": "before/lib/features/product/quick_view.dart.txt"
+  }
+}

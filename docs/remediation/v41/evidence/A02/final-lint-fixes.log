@@ -1,0 +1,99 @@
+Computing fixes in realtime_catalog_repository.dart...
+Applying fixes...
+
+realtime_catalog_repository.dart
+  require_trailing_commas - 1 fix
+
+1 fix made in 1 file.
+Computing fixes in product_tile.dart...
+Applying fixes...
+
+product_tile.dart
+  require_trailing_commas - 4 fixes
+
+4 fixes made in 1 file.
+Computing fixes in product_screen.dart...
+Applying fixes...
+
+product_screen.dart
+  require_trailing_commas - 16 fixes
+
+16 fixes made in 1 file.
+Computing fixes in product_zoom.dart...
+Applying fixes...
+
+product_zoom.dart
+  require_trailing_commas - 3 fixes
+
+3 fixes made in 1 file.
+Computing fixes in purchase_dock.dart...
+Applying fixes...
+
+purchase_dock.dart
+  require_trailing_commas - 13 fixes
+
+13 fixes made in 1 file.
+Computing fixes in v41_variant_cache_test.dart...
+Applying fixes...
+
+v41_variant_cache_test.dart
+  require_trailing_commas - 8 fixes
+
+8 fixes made in 1 file.
+Computing fixes in v41_realtime_variant_test.dart...
+Applying fixes...
+
+v41_realtime_variant_test.dart
+  require_trailing_commas - 5 fixes
+
+5 fixes made in 1 file.
+Computing fixes in v41_variant_mapping_test.dart...
+Applying fixes...
+
+v41_variant_mapping_test.dart
+  require_trailing_commas - 3 fixes
+
+3 fixes made in 1 file.
+Computing fixes in purchase_dock_test.dart...
+Applying fixes...
+
+purchase_dock_test.dart
+  require_trailing_commas - 9 fixes
+  unused_import - 1 fix
+
+10 fixes made in 1 file.
+Computing fixes in v41_product_flow_test.dart...
+Applying fixes...
+
+v41_product_flow_test.dart
+  require_trailing_commas - 36 fixes
+  unused_import - 1 fix
+
+37 fixes made in 1 file.
+Computing fixes in v41_product_recommendations_test.dart...
+Applying fixes...
+
+v41_product_recommendations_test.dart
+  require_trailing_commas - 5 fixes
+
+5 fixes made in 1 file.
+Computing fixes in v41_product_render_test.dart...
+Applying fixes...
+
+v41_product_render_test.dart
+  require_trailing_commas - 19 fixes
+
+19 fixes made in 1 file.
+Formatted lib/data/repositories/realtime_catalog_repository.dart
+Formatted lib/features/catalog/product_tile.dart
+Formatted lib/features/product/product_screen.dart
+Formatted lib/features/product/product_zoom.dart
+Formatted lib/features/product/purchase_dock.dart
+Formatted test/data/local/v41_variant_cache_test.dart
+Formatted test/data/repositories/v41_realtime_variant_test.dart
+Formatted test/data/shopify/v41_variant_mapping_test.dart
+Formatted test/features/product/purchase_dock_test.dart
+Formatted test/features/product/v41_product_flow_test.dart
+Formatted test/features/product/v41_product_recommendations_test.dart
+Formatted test/features/product/v41_product_render_test.dart
+Formatted 12 files (12 changed) in 0.06 seconds.

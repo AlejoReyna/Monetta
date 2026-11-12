@@ -1,0 +1,98 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart
+lib/features/home/home_for_you_section.dart:112:41: Error: Expected ',' before this.
+                                        case final url?
+                                        ^^^^
+lib/features/home/home_for_you_section.dart:112:41: Error: 'case' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                                        case final url?
+                                        ^^^^
+lib/features/home/home_for_you_section.dart:112:46: Error: Expected ')' before this.
+                                        case final url?
+                                             ^^^^^
+lib/features/home/home_for_you_section.dart:106:46: Error: Too many positional arguments: 0 allowed, but 1 found.
+Try removing the extra positional arguments.
+                              GestureDetector(
+                                             ^
+/opt/homebrew/share/flutter/packages/flutter/lib/src/widgets/gesture_detector.dart:237:3: Context: Found this candidate, but the arguments don't match.
+  GestureDetector({
+  ^^^^^^^^^^^^^^^
+lib/features/home/home_for_you_section.dart:176:35: Error: The method 'brandLabel' isn't defined for the type '_HomeForYouSectionState'.
+ - '_HomeForYouSectionState' is from 'package:monetta_app/features/home/home_for_you_section.dart' ('lib/features/home/home_for_you_section.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+                                  brandLabel(brand),
+                                  ^^^^^^^^^^
+lib/features/home/home_for_you_section.dart:196:33: Error: The method 'formatShopperPrice' isn't defined for the type '_HomeForYouSectionState'.
+ - '_HomeForYouSectionState' is from 'package:monetta_app/features/home/home_for_you_section.dart' ('lib/features/home/home_for_you_section.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'formatShopperPrice'.
+                                formatShopperPrice(price),
+                                ^^^^^^^^^^^^^^^^^^
+lib/features/home/home_new_collection_section.dart:116:46: Error: Member not found: 'MonettaImage.network'.
+                                MonettaImage.network(
+                                             ^^^^^^^
+lib/features/home/home_new_collection_section.dart:170:41: Error: The method 'brandLabel' isn't defined for the type '_HomeNewCollectionSectionState'.
+ - '_HomeNewCollectionSectionState' is from 'package:monetta_app/features/home/home_new_collection_section.dart' ('lib/features/home/home_new_collection_section.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+                                        brandLabel(brand),
+                                        ^^^^^^^^^^
+lib/features/home/home_new_collection_section.dart:196:37: Error: The method 'formatShopperPrice' isn't defined for the type '_HomeNewCollectionSectionState'.
+ - '_HomeNewCollectionSectionState' is from 'package:monetta_app/features/home/home_new_collection_section.dart' ('lib/features/home/home_new_collection_section.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'formatShopperPrice'.
+                                    formatShopperPrice(price),
+                                    ^^^^^^^^^^^^^^^^^^
+lib/features/home/home_new_collection_section.dart:205:39: Error: The method 'formatShopperPrice' isn't defined for the type '_HomeNewCollectionSectionState'.
+ - '_HomeNewCollectionSectionState' is from 'package:monetta_app/features/home/home_new_collection_section.dart' ('lib/features/home/home_new_collection_section.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'formatShopperPrice'.
+                                      formatShopperPrice(compare),
+                                      ^^^^^^^^^^^^^^^^^^
+00:00 +0 -1: loading /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: lib/features/home/home_for_you_section.dart:112:41: Error: Expected ',' before this.
+                                          case final url?
+                                          ^^^^
+  lib/features/home/home_for_you_section.dart:112:41: Error: 'case' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                                          case final url?
+                                          ^^^^
+  lib/features/home/home_for_you_section.dart:112:46: Error: Expected ')' before this.
+                                          case final url?
+                                               ^^^^^
+  lib/features/home/home_for_you_section.dart:106:46: Error: Too many positional arguments: 0 allowed, but 1 found.
+  Try removing the extra positional arguments.
+                                GestureDetector(
+                                               ^
+  /opt/homebrew/share/flutter/packages/flutter/lib/src/widgets/gesture_detector.dart:237:3: Context: Found this candidate, but the arguments don't match.
+    GestureDetector({
+    ^^^^^^^^^^^^^^^
+  lib/features/home/home_for_you_section.dart:176:35: Error: The method 'brandLabel' isn't defined for the type '_HomeForYouSectionState'.
+   - '_HomeForYouSectionState' is from 'package:monetta_app/features/home/home_for_you_section.dart' ('lib/features/home/home_for_you_section.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+                                    brandLabel(brand),
+                                    ^^^^^^^^^^
+  lib/features/home/home_for_you_section.dart:196:33: Error: The method 'formatShopperPrice' isn't defined for the type '_HomeForYouSectionState'.
+   - '_HomeForYouSectionState' is from 'package:monetta_app/features/home/home_for_you_section.dart' ('lib/features/home/home_for_you_section.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'formatShopperPrice'.
+                                  formatShopperPrice(price),
+                                  ^^^^^^^^^^^^^^^^^^
+  lib/features/home/home_new_collection_section.dart:116:46: Error: Member not found: 'MonettaImage.network'.
+                                  MonettaImage.network(
+                                               ^^^^^^^
+  lib/features/home/home_new_collection_section.dart:170:41: Error: The method 'brandLabel' isn't defined for the type '_HomeNewCollectionSectionState'.
+   - '_HomeNewCollectionSectionState' is from 'package:monetta_app/features/home/home_new_collection_section.dart' ('lib/features/home/home_new_collection_section.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+                                          brandLabel(brand),
+                                          ^^^^^^^^^^
+  lib/features/home/home_new_collection_section.dart:196:37: Error: The method 'formatShopperPrice' isn't defined for the type '_HomeNewCollectionSectionState'.
+   - '_HomeNewCollectionSectionState' is from 'package:monetta_app/features/home/home_new_collection_section.dart' ('lib/features/home/home_new_collection_section.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'formatShopperPrice'.
+                                      formatShopperPrice(price),
+                                      ^^^^^^^^^^^^^^^^^^
+  lib/features/home/home_new_collection_section.dart:205:39: Error: The method 'formatShopperPrice' isn't defined for the type '_HomeNewCollectionSectionState'.
+   - '_HomeNewCollectionSectionState' is from 'package:monetta_app/features/home/home_new_collection_section.dart' ('lib/features/home/home_new_collection_section.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'formatShopperPrice'.
+                                        formatShopperPrice(compare),
+                                        ^^^^^^^^^^^^^^^^^^
+  .
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: loading /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart

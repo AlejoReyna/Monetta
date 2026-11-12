@@ -1,0 +1,79 @@
+Analyzing 9 items...                                            
+
+warning • The generic type 'Map<dynamic, dynamic>' should have explicit type arguments but doesn't. Use explicit type arguments for 'Map<dynamic, dynamic>' • lib/data/repositories/catalog_repository.dart:362:32 • strict_raw_type
+warning • The generic type 'Map<dynamic, dynamic>' should have explicit type arguments but doesn't. Use explicit type arguments for 'Map<dynamic, dynamic>' • lib/data/shopify/mappers.dart:53:70 • strict_raw_type
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/product_card.dart:163:75 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/product_card.dart:173:48 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/product_card.dart:173:49 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/product_card.dart:175:10 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/product_card.dart:185:8 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/product_card.dart:185:9 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/product_card.dart:224:36 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/product_card.dart:338:36 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/product_controls.dart:54:18 • require_trailing_commas
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/features/catalog/product_tile.dart:338:7 • curly_braces_in_flow_control_structures
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/product_tile.dart:992:24 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_recommendations.dart:5:47 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_recommendations.dart:13:48 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_recommendations.dart:22:28 • require_trailing_commas
+warning • Unused import: '../../data/normalize/facets.dart'. Try removing the import directive • lib/features/product/product_screen.dart:29:8 • unused_import
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:145:77 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:230:69 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:239:79 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:257:10 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:265:47 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:288:30 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:295:34 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:356:137 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:485:69 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:521:49 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:526:102 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:533:72 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:535:30 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:544:54 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:545:48 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:554:59 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:555:48 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:565:64 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:569:65 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:680:69 • require_trailing_commas
+warning • A value for optional parameter 'filled' isn't ever given. Try removing the unused parameter • lib/features/product/product_screen.dart:757:10 • unused_element_parameter
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_selection.dart:368:37 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_selection.dart:452:18 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_selection.dart:460:69 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:26:76 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:40:70 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:80:56 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:80:57 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:85:52 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:86:18 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:97:50 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:98:18 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:115:65 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:118:76 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:124:62 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:127:67 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:129:28 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:138:67 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:143:68 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:144:26 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:145:18 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:145:19 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:145:20 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_zoom.dart:146:16 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/quick_view.dart:69:36 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/quick_view.dart:232:75 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/quick_view.dart:238:75 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/quick_view.dart:288:73 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/quick_view.dart:366:20 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/quick_view.dart:370:67 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/quick_view.dart:628:30 • require_trailing_commas
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/features/product/quick_view.dart:706:7 • curly_braces_in_flow_control_structures
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/quick_view.dart:710:9 • require_trailing_commas
+   info • The import of 'package:flutter/services.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart'. Try removing the import directive • lib/features/product/restock_request_sheet.dart:5:8 • unnecessary_import
+warning • Unused import: '../../data/media/media_url.dart'. Try removing the import directive • lib/features/product/restock_request_sheet.dart:10:8 • unused_import
+  error • The method 'mediaUrlFor' isn't defined for the type '_RestockRequestSheetState'. Try correcting the name to the name of an existing method, or defining a method named 'mediaUrlFor' • lib/features/product/restock_request_sheet.dart:218:32 • undefined_method
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/variant_selection.dart:31:74 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/variant_selection.dart:34:44 • require_trailing_commas
+
+75 issues found. (ran in 4.5s)

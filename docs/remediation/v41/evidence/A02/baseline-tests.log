@@ -1,0 +1,36 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart
+00:00 +0: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +1: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +2: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +3: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +4: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +5: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +6: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:01 +7: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:01 +8: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:01 +9: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:01 +10: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 the card keeps clear of the safe area and holds the actions, and the button is visible without scrolling
+00:02 +11: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 the card keeps clear of the safe area and holds the actions, and the button is visible without scrolling
+00:02 +12: /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: tapping the favourite saves it and does not open the piece
+00:02 +13: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 a piece without variants leaves the bag untouched
+00:02 +14: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 on a 320x568 phone the card scrolls inside and the button is still reachable and adds
+00:02 +15: /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: showWishlist: false removes the control entirely
+00:02 +16: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 a failing store yields null instead of throwing
+00:02 +17: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 at 320x568 and text scale 1.0 the button is reachable inside the card
+00:03 +18: /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: the compact density keeps the same anatomy in a rail
+00:03 +19: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 addToBagAndShowMiniCart adds and confirms an available variant
+00:03 +20: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 addToBagAndShowMiniCart adds and confirms an available variant
+00:03 +21: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 at 320x568 and text scale 2.0 the button is reachable inside the card
+00:03 +22: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 addToBagAndShowMiniCart shows no mini cart for a sold-out variant
+00:03 +23: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04b the keyboard QUICK-04b with a 300 keyboard the card ends above it and the safe inset is not counted twice
+00:03 +24: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 buyNowOpenBag adds and opens the bag
+00:03 +25: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 buyNowOpenBag adds and opens the bag
+00:04 +26: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-05 labels and prices QUICK-05 a sold-out piece offers "Avísame cuando vuelva" and no add
+00:04 +27: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 buyNowOpenBag does not open the bag when sold out
+00:04 +28: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-05 labels and prices QUICK-05 opened to choose, the sheet shows the piece price; after choosing it shows the price of that variant
+00:04 +29: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-05 labels and prices QUICK-05 opened to choose, the sheet shows the piece price; after choosing it shows the price of that variant
+00:04 +30: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: CART-03 pending and failing adds in the sheet CART-03 while pending the primary button says "AGREGANDO…", is disabled, and a second tap adds nothing
+00:04 +31: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: CART-03 pending and failing adds in the sheet CART-03 a failing add keeps the sheet open and the choice, shows the inline message, and a retry adds exactly one unit
+00:05 +32: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: TYPE-01e the piece name TYPE-01e the brand is the editorial serif w700 22 and the name Inter w400 15 in ink
+00:05 +33: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: (tearDownAll)
+00:05 +33: All tests passed!

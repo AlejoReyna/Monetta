@@ -1,0 +1,26 @@
+Analyzing 32 items...                                           
+
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/product/product_screen.dart:1239:53 • require_trailing_commas
+   info • Method invocation or property access on a 'dynamic' target. Try giving the target a type • test/data/shopify/v41_variant_mapping_test.dart:42:23 • avoid_dynamic_calls
+   info • Method invocation or property access on a 'dynamic' target. Try giving the target a type • test/data/shopify/v41_variant_mapping_test.dart:44:7 • avoid_dynamic_calls
+   info • Method invocation or property access on a 'dynamic' target. Try giving the target a type • test/data/shopify/v41_variant_mapping_test.dart:44:7 • avoid_dynamic_calls
+   info • Method invocation or property access on a 'dynamic' target. Try giving the target a type • test/data/shopify/v41_variant_mapping_test.dart:45:7 • avoid_dynamic_calls
+   info • Method invocation or property access on a 'dynamic' target. Try giving the target a type • test/data/shopify/v41_variant_mapping_test.dart:45:7 • avoid_dynamic_calls
+   info • Missing a required trailing comma. Try adding a trailing comma • test/features/product/product_layout_responsive_test.dart:62:56 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/features/product/product_layout_responsive_test.dart:126:55 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/features/product/product_layout_responsive_test.dart:226:48 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/features/product/product_selection_test.dart:79:75 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/features/product/product_selection_test.dart:107:7 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/features/product/product_selection_test.dart:112:63 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/features/product/quick_view_purchase_test.dart:263:53 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/features/product/v41_product_render_test.dart:201:48 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/features/product/v41_product_render_test.dart:207:48 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/features/product/v41_product_render_test.dart:219:26 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/features/product/v41_product_render_test.dart:222:76 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/support/v41_product_fixture.dart:20:11 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/support/v41_product_fixture.dart:22:7 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/support/v41_product_fixture.dart:43:17 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/support/v41_product_fixture.dart:45:13 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • test/support/v41_product_fixture.dart:47:7 • require_trailing_commas
+
+22 issues found. (ran in 3.0s)

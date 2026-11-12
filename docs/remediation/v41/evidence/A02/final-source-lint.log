@@ -1,0 +1,35 @@
+Computing fixes in product_tile.dart...
+Applying fixes...
+
+product_tile.dart
+  require_trailing_commas - 10 fixes
+
+10 fixes made in 1 file.
+Computing fixes in product_card.dart...
+Nothing to fix!
+Computing fixes in product_screen.dart...
+Applying fixes...
+
+product_screen.dart
+  require_trailing_commas - 4 fixes
+
+4 fixes made in 1 file.
+Computing fixes in quick_view.dart...
+Applying fixes...
+
+quick_view.dart
+  require_trailing_commas - 1 fix
+
+1 fix made in 1 file.
+Computing fixes in v41_product_render_test.dart...
+Applying fixes...
+
+v41_product_render_test.dart
+  require_trailing_commas - 2 fixes
+
+2 fixes made in 1 file.
+Formatted lib/features/catalog/product_tile.dart
+Formatted lib/features/product/product_screen.dart
+Formatted lib/features/product/quick_view.dart
+Formatted test/features/product/v41_product_render_test.dart
+Formatted 5 files (4 changed) in 0.03 seconds.

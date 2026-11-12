@@ -1,0 +1,12 @@
+[
+  {
+    "source": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/06_referencias/activos_vigentes_productos_y_logos/iris-plateado-dorado.png",
+    "test_fixture": "test/support/v41/iris-plateado-dorado.png",
+    "sha256": "026947bcd254e8b7356680dc5fcd29c08be280b8c2f487014e99a1e0e24976d9"
+  },
+  {
+    "source": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/06_referencias/activos_vigentes_productos_y_logos/iris-dorado.png",
+    "test_fixture": "test/support/v41/iris-dorado.png",
+    "sha256": "a3f8174bef8c81bf43f769028306e413abe016845bc4835025cc19c451fb0715"
+  }
+]

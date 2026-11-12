@@ -1,0 +1,128 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart
+00:00 +0: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +1: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +2: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +3: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +4: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +5: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +6: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +7: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +8: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +9: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +10: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +11: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +12: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +13: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +14: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:01 +15: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 the card keeps clear of the safe area and holds the actions, and the button is visible without scrolling
+00:01 +16: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 the card keeps clear of the safe area and holds the actions, and the button is visible without scrolling
+00:01 +17: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 the card keeps clear of the safe area and holds the actions, and the button is visible without scrolling
+00:01 +18: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 the card keeps clear of the safe area and holds the actions, and the button is visible without scrolling
+00:01 +19: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 the card keeps clear of the safe area and holds the actions, and the button is visible without scrolling
+00:01 +20: /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: showWishlist: false removes the control entirely
+00:01 +21: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 a failing store yields null instead of throwing
+00:02 +22: /Users/alexis/theCode/Monetta/test/features/product/product_selection_try_add_test.dart: CART-05 soldOut never reaches the store
+00:02 +23: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 on a 320x568 phone the card scrolls inside and the button is still reachable and adds
+00:02 +24: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 on a 320x568 phone the card scrolls inside and the button is still reachable and adds
+00:02 +25: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 addToBagAndShowMiniCart adds and confirms an available variant
+00:02 +26: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 addToBagAndShowMiniCart adds and confirms an available variant
+00:02 +27: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 addToBagAndShowMiniCart adds and confirms an available variant
+00:02 +28: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 at 320x568 and text scale 1.0 the button is reachable inside the card
+00:03 +29: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 at 320x568 and text scale 1.0 the button is reachable inside the card
+00:03 +30: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 addToBagAndShowMiniCart shows no mini cart for a sold-out variant
+00:03 +31: /Users/alexis/theCode/Monetta/test/features/product/product_selection_try_add_test.dart: CART-05 failed carries the error and leaves the bag empty
+00:03 +32: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 at 320x568 and text scale 2.0 the button is reachable inside the card
+00:03 +33: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 buyNowOpenBag adds and opens the bag
+00:03 +34: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 buyNowOpenBag adds and opens the bag
+00:03 +35: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:04 +36: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:04 +37: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:04 +38: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:04 +39: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:04 +40: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:05 +41: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:05 +42: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:05 +43: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:05 +44: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:06 +45: /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: independent heart/options carry actual variant card → quick → PDP → add and return
+00:06 +46: /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: independent heart/options carry actual variant card → quick → PDP → add and return
+00:06 +47: /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: independent heart/options carry actual variant card → quick → PDP → add and return
+00:06 +48: /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: independent heart/options carry actual variant card → quick → PDP → add and return
+00:07 +49: /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: independent heart/options carry actual variant card → quick → PDP → add and return
+00:07 +50: /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: independent heart/options carry actual variant card → quick → PDP → add and return
+00:07 +51: /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: independent heart/options carry actual variant card → quick → PDP → add and return
+00:07 +52: /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: independent heart/options carry actual variant card → quick → PDP → add and return
+00:07 +53: /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: independent heart/options carry actual variant card → quick → PDP → add and return
+00:07 +54: /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: independent heart/options carry actual variant card → quick → PDP → add and return
+00:08 +55: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:08 +56: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:08 +57: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:08 +58: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:09 +59: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:09 +60: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: G10/G10-A purchase continuation Comprar ahora adds chosen variant and preserves other bag lines
+00:09 +61: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: G10/G10-A purchase continuation Comprar ahora adds chosen variant and preserves other bag lines
+00:09 +62: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 320 wide x2.0
+00:09 +63: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 390-1x-light
+00:09 +64: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 390-1x-light
+00:09 +65: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 390-1x-light
+00:09 +66: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 390-1x-light
+00:09 +67: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 390-1x-light
+00:09 +68: /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: zoom exposes enlarge/reduce/reset and multiple photos with focus return
+00:10 +69: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-03 pending and failing adds CART-03 while the add is pending the button says so and a second tap adds nothing
+00:10 +70: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x1.0
+00:10 +71: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 390-1x-light
+00:10 +72: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 390-1x-light
+00:10 +73: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 390-1x-light
+00:10 +74: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 390-1x-light
+00:10 +75: /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: quick photo transition and catalog reorder use selected ID for purchase
+00:10 +76: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: G12 availability capability gate exhausted product hides add/buy/unsupported restock and keeps details
+00:11 +77: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: G12 availability capability gate exhausted product hides add/buy/unsupported restock and keeps details
+00:11 +78: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 390-1x-light
+00:11 +79: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 390-1x-light
+00:11 +80: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 390-1x-light
+00:11 +81: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 390-1x-light
+00:11 +82: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 390-1x-light
+00:11 +83: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x2.0
+00:11 +84: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x2.0
+00:11 +85: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x2.0
+00:11 +86: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x2.0
+00:11 +87: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x2.0
+00:11 +88: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: zoom 390-1x-light
+00:12 +89: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x2.0
+00:12 +90: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-dark
+00:12 +91: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 390 wide x2.0
+00:12 +92: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 390-1x-dark
+00:12 +93: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 390 wide x2.0
+00:12 +94: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 390-1x-dark
+00:12 +95: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 390-1x-dark
+00:13 +96: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 390-1x-dark
+00:13 +97: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 430 wide x1.0
+00:13 +98: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 390-1x-dark
+00:13 +99: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 430 wide x1.0
+00:13 +100: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: zoom 390-1x-dark
+00:13 +101: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: zoom 390-1x-dark
+00:13 +102: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 430 wide x1.0
+00:13 +103: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 320-2x-light
+00:14 +104: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 430 wide x2.0
+00:14 +105: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 320-2x-light
+00:14 +106: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 430 wide x2.0
+00:14 +107: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 320-2x-light
+00:14 +108: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 320-2x-light
+00:14 +109: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 430 wide x2.0
+00:14 +110: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 320-2x-light
+00:15 +111: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 320-2x-light
+00:15 +112: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 768 wide x1.0
+00:15 +113: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: zoom 320-2x-light
+00:15 +114: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 768 wide x1.0
+00:15 +115: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 768 wide x1.0
+00:15 +116: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 768 wide x1.0
+00:16 +117: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 768 wide x1.0
+00:16 +118: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 768 wide x2.0
+00:16 +119: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 768 wide x2.0
+00:16 +120: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 768 wide x2.0
+00:16 +121: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 768 wide x2.0
+00:17 +122: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 768 wide x2.0
+00:17 +123: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 back, heart, bag, dock button and secondary actions are named 48 px buttons
+00:17 +124: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 the reading order is header, content, dock
+00:17 +125: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: (tearDownAll)
+00:17 +125: All tests passed!

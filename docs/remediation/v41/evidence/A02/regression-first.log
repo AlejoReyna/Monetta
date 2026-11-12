@@ -1,0 +1,819 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart
+00:00 +0: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +1: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +2: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +3: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +4: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +5: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +6: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +7: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +8: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +8 -1: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +8 -1: /Users/alexis/theCode/Monetta/test/features/product/product_selection_test.dart: selection clamps an out-of-range index [E]
+  Expected: 'Negro'
+    Actual: <null>
+     Which: not an <Instance of 'String'>
+  
+  package:matcher                                         expect
+  package:flutter_test/src/widget_tester.dart 473:18      expect
+  test/features/product/product_selection_test.dart 76:5  main.<fn>
+  
+00:00 +9 -1: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +9 -2: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +9 -2: /Users/alexis/theCode/Monetta/test/features/product/product_selection_test.dart: swatches only when every option maps reliably [E]
+  Expected: true
+    Actual: <false>
+  
+  package:matcher                                          expect
+  package:flutter_test/src/widget_tester.dart 473:18       expect
+  test/features/product/product_selection_test.dart 103:5  main.<fn>
+  
+00:00 +10 -2: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +11 -2: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:00 +12 -2: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 addSelectionToBag (signature kept) CART-05 adds one unit and returns the chosen variant id
+00:01 +13 -2: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 the card keeps clear of the safe area and holds the actions, and the button is visible without scrolling
+00:01 +14 -2: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 the card keeps clear of the safe area and holds the actions, and the button is visible without scrolling
+00:01 +15 -2: /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: tapping the favourite saves it and does not open the piece
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _IconWidgetFinder:<Found 0 widgets with icon "IconData(U+0E25C)": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart:235:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart line 235
+The test description was:
+  tapping the favourite saves it and does not open the piece
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +15 -3: /Users/alexis/theCode/Monetta/test/features/product/product_selection_try_add_test.dart: CART-05 added carries the chosen variant id and adds one unit
+00:01 +15 -3: /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: tapping the favourite saves it and does not open the piece [E]
+  Test failed. See exception logs above.
+  The test description was: tapping the favourite saves it and does not open the piece
+  
+Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses
+TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request
+will actually be made. Any test expecting a real network connection and status code will fail.
+To test code that needs an HttpClient, provide your own HttpClient implementation to the code under
+test, so that your test can consistently provide a testable response to the code under test.
+00:01 +16 -3: /Users/alexis/theCode/Monetta/test/features/product/product_selection_try_add_test.dart: CART-05 added carries the chosen variant id and adds one unit
+00:02 +17 -3: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 on a 320x568 phone the card scrolls inside and the button is still reachable and adds
+00:02 +18 -3: /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: showWishlist: false removes the control entirely
+00:02 +19 -3: /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: showWishlist: false removes the control entirely
+00:02 +20 -3: /Users/alexis/theCode/Monetta/test/features/product/product_selection_try_add_test.dart: CART-05 soldOut never reaches the store
+00:02 +21 -3: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 at 320x568 and text scale 1.0 the button is reachable inside the card
+00:03 +22 -3: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 addToBagAndShowMiniCart adds and confirms an available variant
+00:03 +23 -3: /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: the compact density keeps the same anatomy in a rail
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 6.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/features/catalog/product_tile.dart:630:24
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#c6317 OVERFLOWING:
+  needs compositing
+  creator: Column ← LayoutBuilder ← Padding ← Stack ← DecoratedBox ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← MouseRegion ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(w=154.0, h=304.0)
+  size: Size(154.0, 304.0)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 6.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/features/catalog/product_tile.dart:630:24
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#6195f OVERFLOWING:
+  needs compositing
+  creator: Column ← LayoutBuilder ← Padding ← Stack ← DecoratedBox ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← MouseRegion ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(w=154.0, h=304.0)
+  size: Size(154.0, 304.0)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 6.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/features/catalog/product_tile.dart:630:24
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#3806d OVERFLOWING:
+  needs compositing
+  creator: Column ← LayoutBuilder ← Padding ← Stack ← DecoratedBox ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← MouseRegion ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(w=154.0, h=304.0)
+  size: Size(154.0, 304.0)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:03 +24 -3: /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: the compact density keeps the same anatomy in a rail
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: null
+  Actual: 'Multiple exceptions (3) were detected during the running of the current test, and at
+least one was unexpected.'
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart:303:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart line 303
+The test description was:
+  the compact density keeps the same anatomy in a rail
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:03 +24 -4: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 at 320x568 and text scale 2.0 the button is reachable inside the card
+00:03 +24 -4: /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: the compact density keeps the same anatomy in a rail [E]
+  Test failed. See exception logs above.
+  The test description was: the compact density keeps the same anatomy in a rail
+  
+00:03 +25 -4: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 at 320x568 and text scale 2.0 the button is reachable inside the card
+00:03 +26 -4: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-04 the purchase action stays inside the centred card QUICK-04 at 320x568 and text scale 2.0 the button is reachable inside the card
+00:03 +27 -4: /Users/alexis/theCode/Monetta/test/features/product/product_selection_try_add_test.dart: CART-05 unavailable leaves the bag alone
+00:03 +28 -4: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 buyNowOpenBag adds and opens the bag
+00:04 +29 -4: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 buyNowOpenBag adds and opens the bag
+00:04 +30 -4: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 buyNowOpenBag adds and opens the bag
+00:04 +31 -4: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-05 labels and prices QUICK-05 the guide labels are the uppercase commerce actions
+00:04 +32 -4: /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: CART-05 the callers go through the guard CART-05 buyNowOpenBag does not open the bag when sold out
+00:05 +33 -4: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-05 labels and prices QUICK-05 a sold-out piece offers "Avísame cuando vuelva" and no add
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _DescendantWidgetFinder:<Found 0 widgets with text "Avísame cuando vuelva" descending from
+widgets with key [<'quick-view-primary'>]: []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart:199:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart line 199
+The test description was:
+  QUICK-05 a sold-out piece offers "Avísame cuando vuelva" and no add
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:05 +33 -5: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:05 +33 -5: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: QUICK-05 labels and prices QUICK-05 a sold-out piece offers "Avísame cuando vuelva" and no add [E]
+  Test failed. See exception logs above.
+  The test description was: QUICK-05 a sold-out piece offers "Avísame cuando vuelva" and no add
+  
+00:05 +34 -5: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:06 +35 -5: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:06 +35 -6: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:06 +35 -6: /Users/alexis/theCode/Monetta/test/data/local/database_test.dart: AppDatabase opens and reports schema version 9 [E]
+  Expected: <9>
+    Actual: <10>
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/data/local/database_test.dart 16:7             main.<fn>.<fn>
+  
+00:06 +35 -6: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: CART-03 pending and failing adds in the sheet CART-03 while pending the primary button says "AGREGANDO…", is disabled, and a second tap adds nothing
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: Tristate:<Tristate.isFalse>
+  Actual: Tristate:<Tristate.none>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart:250:9)
+<asynchronous suspension>
+#5      withSemantics (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:420:5)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart:238:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart line 250
+The test description was:
+  CART-03 while pending the primary button says "AGREGANDO…", is disabled, and a second tap adds
+  nothing
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:06 +35 -7: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:06 +35 -7: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: CART-03 pending and failing adds in the sheet CART-03 while pending the primary button says "AGREGANDO…", is disabled, and a second tap adds nothing [E]
+  Test failed. See exception logs above.
+  The test description was: CART-03 while pending the primary button says "AGREGANDO…", is disabled, and a second tap adds nothing
+  
+00:07 +36 -7: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:07 +37 -7: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:07 +38 -7: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:07 +39 -7: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:07 +40 -7: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:07 +41 -7: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 the bottom nav is docked and the primary action is in the list
+00:07 +42 -7: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:07 +42 -7: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: CART-03 pending and failing adds in the sheet CART-03 a failing add keeps the sheet open and the choice, shows the inline message, and a retry adds exactly one unit
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: no matching candidates
+  Actual: _WidgetPredicateWidgetFinder:<Found 1 widget with widget matching predicate: [
+            RawTooltip-[LabeledGlobalKey<RawTooltipState>#34e24]("Cerrar vista previa", hover delay:
+0:00:00.000000, touch delay: 0:00:01.500000, dismiss delay: 0:00:00.100000, triggerMode:
+TooltipTriggerMode.longPress, enableFeedback: true, positionDelegate: Closure:
+(TooltipPositionContext) => Offset from Function '_getDefaultPositionDelegate@1902220820':., state:
+RawTooltipState#f7f37(ticker inactive)),
+          ]>
+   Which: means one was found but none were expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart:311:9)
+<asynchronous suspension>
+#5      withSemantics (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:420:5)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart:272:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart line 311
+The test description was:
+  CART-03 a failing add keeps the sheet open and the choice, shows the inline message, and a retry
+  adds exactly one unit
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:07 +42 -8: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:07 +42 -8: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: CART-03 pending and failing adds in the sheet CART-03 a failing add keeps the sheet open and the choice, shows the inline message, and a retry adds exactly one unit [E]
+  Test failed. See exception logs above.
+  The test description was: CART-03 a failing add keeps the sheet open and the choice, shows the inline message, and a retry adds exactly one unit
+  
+00:07 +43 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01 with a 34 inset the nav stays docked to the edge
+00:07 +44 -8: /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: TYPE-01e the piece name TYPE-01e the brand is the editorial serif w700 22 and the name Inter w400 15 in ink
+00:08 +45 -8: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 320 wide x1.0
+00:08 +46 -8: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 320 wide x1.0
+00:08 +47 -8: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 320 wide x1.0
+00:08 +48 -8: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 320 wide x1.0
+00:08 +49 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:08 +50 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +51 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +52 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +53 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +54 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +55 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +56 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +57 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +58 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +59 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +60 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +61 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +62 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +63 -8: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01b the nav holds no price or availability; the content does
+00:09 +64 -8: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x1.0
+00:09 +65 -8: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x1.0
+00:09 +66 -8: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x1.0
+00:09 +67 -8: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x1.0
+00:09 +68 -8: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x1.0
+00:09 +69 -8: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x1.0
+00:09 +70 -8: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x1.0
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+widget with key [<'purchase-dock-primary'>] never appeared in the main list
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      scrollTo (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:338:9)
+<asynchronous suspension>
+#2      _expectGuideContract (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:55:3)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:118:11)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  RESP-02 ficha Monetta, sold out, 320 wide x1.0
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:09 +70 -9: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01c at x2 and 390 wide the label is not truncated
+00:09 +70 -9: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x1.0 [E]
+  Test failed. See exception logs above.
+  The test description was: RESP-02 ficha Monetta, sold out, 320 wide x1.0
+  
+00:09 +71 -9: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-01 the purchase actions CART-01c at x2 and 390 wide the label is not truncated
+00:09 +72 -9: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x2.0
+00:09 +73 -9: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-02 the secondary purchase section CART-02 sits after the accordions and the WhatsApp link and before "Más de ...", with the secondary actions
+00:10 +74 -9: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-02 the secondary purchase section CART-02 sits after the accordions and the WhatsApp link and before "Más de ...", with the secondary actions
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+widget with text "Escribir por WhatsApp" never appeared in the main list
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      scrollTo (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:338:9)
+<asynchronous suspension>
+#2      contentOffsetOf (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:368:3)
+<asynchronous suspension>
+#3      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart:190:26)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  CART-02 sits after the accordions and the WhatsApp link and before "Más de ...", with the
+  secondary actions
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:10 +74 -10: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 320 wide x2.0
+00:10 +74 -10: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-02 the secondary purchase section CART-02 sits after the accordions and the WhatsApp link and before "Más de ...", with the secondary actions [E]
+  Test failed. See exception logs above.
+  The test description was: CART-02 sits after the accordions and the WhatsApp link and before "Más de ...", with the secondary actions
+  
+00:10 +75 -10: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-02 the secondary purchase section CART-02b "Comprar ahora" adds one unit of the chosen variant and opens the bag
+00:10 +76 -10: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x2.0
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+widget with key [<'purchase-dock-primary'>] never appeared in the main list
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      scrollTo (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:338:9)
+<asynchronous suspension>
+#2      _expectGuideContract (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:55:3)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:118:11)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  RESP-02 ficha Monetta, sold out, 320 wide x2.0
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:10 +76 -11: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x2.0 [E]
+  Test failed. See exception logs above.
+  The test description was: RESP-02 ficha Monetta, sold out, 320 wide x2.0
+  
+00:10 +76 -11: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-02 the secondary purchase section CART-02b "Apartar" opens the WhatsApp request and records the event
+00:11 +77 -11: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-02 the secondary purchase section CART-02b "Apartar" opens the WhatsApp request and records the event
+00:11 +78 -11: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-02 the secondary purchase section CART-02b "Apartar" opens the WhatsApp request and records the event
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+widget with key [<'purchase-apartar'>] never appeared in the main list
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      scrollTo (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:338:9)
+<asynchronous suspension>
+#2      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart:280:9)
+<asynchronous suspension>
+#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  CART-02b "Apartar" opens the WhatsApp request and records the event
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:11 +78 -12: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-02 the secondary purchase section CART-02b "Apartar" opens the WhatsApp request and records the event [E]
+  Test failed. See exception logs above.
+  The test description was: CART-02b "Apartar" opens the WhatsApp request and records the event
+  
+00:11 +78 -12: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x1.0
+00:11 +79 -12: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-03 pending and failing adds CART-03 while the add is pending the button says so and a second tap adds nothing
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "En tu bolsa": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart:334:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart line 334
+The test description was:
+  CART-03 while the add is pending the button says so and a second tap adds nothing
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:11 +79 -13: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 390 wide x1.0
+00:11 +79 -13: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-03 pending and failing adds CART-03 while the add is pending the button says so and a second tap adds nothing [E]
+  Test failed. See exception logs above.
+  The test description was: CART-03 while the add is pending the button says so and a second tap adds nothing
+  
+00:12 +80 -13: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-03 pending and failing adds CART-03b a failing add shows the message, keeps the choice and retries exactly once
+00:12 +81 -13: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 390 wide x1.0
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+widget with key [<'purchase-dock-primary'>] never appeared in the main list
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      scrollTo (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:338:9)
+<asynchronous suspension>
+#2      _expectGuideContract (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:55:3)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:118:11)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  RESP-02 ficha Monetta, sold out, 390 wide x1.0
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:12 +81 -14: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-04 availability CART-04 a fully sold-out piece offers the restock alert and only "Apartar"
+00:12 +81 -14: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 390 wide x1.0 [E]
+  Test failed. See exception logs above.
+  The test description was: RESP-02 ficha Monetta, sold out, 390 wide x1.0
+  
+00:12 +82 -14: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-04 availability CART-04 a fully sold-out piece offers the restock alert and only "Apartar"
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _KeyWidgetFinder:<Found 0 widgets with key [<'purchase-dock-primary'>]: []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart:396:9)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart line 396
+The test description was:
+  CART-04 a fully sold-out piece offers the restock alert and only "Apartar"
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:12 +82 -15: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x2.0
+00:12 +82 -15: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-04 availability CART-04 a fully sold-out piece offers the restock alert and only "Apartar" [E]
+  Test failed. See exception logs above.
+  The test description was: CART-04 a fully sold-out piece offers the restock alert and only "Apartar"
+  
+00:12 +83 -15: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-04 availability CART-04b with a sold-out variant selected the dock offers the alert; with an available one it adds exactly that variant
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _KeyWidgetFinder:<Found 0 widgets with key [<'purchase-dock-primary'>]: []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart:444:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart line 444
+The test description was:
+  CART-04b with a sold-out variant selected the dock offers the alert; with an available one it adds
+  exactly that variant
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:12 +83 -16: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x2.0
+00:12 +83 -16: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-04 availability CART-04b with a sold-out variant selected the dock offers the alert; with an available one it adds exactly that variant [E]
+  Test failed. See exception logs above.
+  The test description was: CART-04b with a sold-out variant selected the dock offers the alert; with an available one it adds exactly that variant
+  
+00:12 +84 -16: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x2.0
+00:13 +85 -16: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x2.0
+00:13 +86 -16: /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: CART-04c the external dock CART-04c the button opens the detail URL of the chosen variant, and nothing Monetta-checkout is offered
+00:13 +87 -16: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 390 wide x2.0
+00:13 +88 -16: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 390 wide x2.0
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+widget with key [<'purchase-dock-primary'>] never appeared in the main list
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      scrollTo (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:338:9)
+<asynchronous suspension>
+#2      _expectGuideContract (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:55:3)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:118:11)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  RESP-02 ficha Monetta, sold out, 390 wide x2.0
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:13 +88 -17: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 390 wide x2.0 [E]
+  Test failed. See exception logs above.
+  The test description was: RESP-02 ficha Monetta, sold out, 390 wide x2.0
+  
+00:13 +88 -17: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 390 wide x2.0
+00:13 +89 -17: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 430 wide x1.0
+00:13 +90 -17: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 430 wide x1.0
+00:14 +91 -17: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 430 wide x1.0
+00:14 +92 -17: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 430 wide x1.0
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+widget with key [<'purchase-dock-primary'>] never appeared in the main list
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      scrollTo (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:338:9)
+<asynchronous suspension>
+#2      _expectGuideContract (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:55:3)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:118:11)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  RESP-02 ficha Monetta, sold out, 430 wide x1.0
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:14 +92 -18: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 430 wide x1.0 [E]
+  Test failed. See exception logs above.
+  The test description was: RESP-02 ficha Monetta, sold out, 430 wide x1.0
+  
+00:14 +92 -18: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 430 wide x1.0
+00:14 +93 -18: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 430 wide x2.0
+00:15 +94 -18: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 430 wide x2.0
+00:15 +95 -18: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 430 wide x2.0
+00:15 +96 -18: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 430 wide x2.0
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+widget with key [<'purchase-dock-primary'>] never appeared in the main list
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      scrollTo (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:338:9)
+<asynchronous suspension>
+#2      _expectGuideContract (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:55:3)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:118:11)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  RESP-02 ficha Monetta, sold out, 430 wide x2.0
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:15 +96 -19: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 430 wide x2.0 [E]
+  Test failed. See exception logs above.
+  The test description was: RESP-02 ficha Monetta, sold out, 430 wide x2.0
+  
+00:15 +96 -19: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 430 wide x2.0
+00:15 +97 -19: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 768 wide x1.0
+00:16 +98 -19: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 768 wide x1.0
+00:16 +99 -19: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 768 wide x1.0
+00:16 +100 -19: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 768 wide x1.0
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+widget with key [<'purchase-dock-primary'>] never appeared in the main list
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      scrollTo (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:338:9)
+<asynchronous suspension>
+#2      _expectGuideContract (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:55:3)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:118:11)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  RESP-02 ficha Monetta, sold out, 768 wide x1.0
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:17 +100 -20: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 768 wide x1.0 [E]
+  Test failed. See exception logs above.
+  The test description was: RESP-02 ficha Monetta, sold out, 768 wide x1.0
+  
+00:17 +100 -20: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 768 wide x1.0
+00:17 +101 -20: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 768 wide x2.0
+00:17 +102 -20: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 768 wide x2.0
+00:17 +103 -20: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 768 wide x2.0
+00:17 +104 -20: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 768 wide x2.0
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+widget with key [<'purchase-dock-primary'>] never appeared in the main list
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      scrollTo (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:338:9)
+<asynchronous suspension>
+#2      _expectGuideContract (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:55:3)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:118:11)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  RESP-02 ficha Monetta, sold out, 768 wide x2.0
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:18 +104 -21: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 768 wide x2.0 [E]
+  Test failed. See exception logs above.
+  The test description was: RESP-02 ficha Monetta, sold out, 768 wide x2.0
+  
+00:18 +104 -21: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 768 wide x2.0
+00:18 +105 -21: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 back, heart, bag, dock button and secondary actions are named 48 px buttons
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: non-empty
+  Actual: ''
+menu: name
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.expectButton (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:146:7)
+#5      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:165:11)
+<asynchronous suspension>
+#6      withSemantics (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:420:5)
+<asynchronous suspension>
+#7      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:158:9)
+<asynchronous suspension>
+#8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart line 146
+The test description was:
+  A11Y-01 back, heart, bag, dock button and secondary actions are named 48 px buttons
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:18 +105 -22: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 back, heart, bag, dock button and secondary actions are named 48 px buttons [E]
+  Test failed. See exception logs above.
+  The test description was: A11Y-01 back, heart, bag, dock button and secondary actions are named 48 px buttons
+  
+00:18 +105 -22: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 the reading order is header, content, dock
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: contains <17>
+  Actual: {
+            18: 0,
+            20: 1,
+            21: 2,
+            5: 3,
+            10: 4,
+            11: 5,
+            7: 6,
+            8: 7,
+            12: 8,
+            13: 9,
+            14: 10,
+            15: 11,
+            22: 12,
+            23: 13,
+            24: 14,
+            25: 15
+          }
+   Which: does not contain <17>
+header is traversable
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:219:9)
+<asynchronous suspension>
+#5      withSemantics (file:///Users/alexis/theCode/Monetta/test/support/product_screen_harness.dart:420:5)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:198:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart line 219
+The test description was:
+  A11Y-01 the reading order is header, content, dock
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:18 +105 -23: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 the reading order is header, content, dock [E]
+  Test failed. See exception logs above.
+  The test description was: A11Y-01 the reading order is header, content, dock
+  
+00:18 +105 -23: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: (tearDownAll)
+00:18 +105 -23: Some tests failed.
+
+Failing tests:
+  /Users/alexis/theCode/Monetta/test/data/local/database_test.dart: AppDatabase opens and reports schema version 9
+  /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: tapping the favourite saves it and does not open the piece
+  /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: the compact density keeps the same anatomy in a rail
+  /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 back, heart, bag, dock button and secondary actions are named 48 px buttons
+  ... and 19 more

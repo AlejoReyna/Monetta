@@ -1,0 +1,102 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart
+00:00 +0: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: (setUpAll)
+00:00 +0: /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: ProductTileData shows a real discount and never invents one
+00:00 +1: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:00 +2: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:00 +3: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:00 +4: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:00 +5: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:00 +6: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:01 +7: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:01 +8: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:02 +9: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-light
+00:04 +10: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:04 +11: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:05 +12: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 390-1x-light
+00:06 +13: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 390-1x-light
+00:06 +14: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 320 wide x1.0
+00:06 +15: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 320 wide x1.0
+00:07 +16: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 320 wide x1.0
+00:07 +17: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 390-1x-light
+00:07 +18: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 390-1x-light
+00:07 +19: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x1.0
+00:08 +20: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 390-1x-light
+00:08 +21: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 390-1x-light
+00:08 +22: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 390-1x-light
+00:08 +23: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 320 wide x2.0
+00:09 +24: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: zoom 390-1x-light
+00:09 +25: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 320 wide x2.0
+00:09 +26: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: common card 390-1x-dark
+00:09 +27: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x2.0
+00:09 +28: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 390-1x-dark
+00:10 +29: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 390-1x-dark
+00:10 +30: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x1.0
+00:10 +31: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 390-1x-dark
+00:10 +32: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x1.0
+00:10 +33: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 390-1x-dark
+00:11 +34: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 390-1x-dark
+00:11 +35: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 390 wide x1.0
+00:11 +36: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: zoom 390-1x-dark
+00:11 +37: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: zoom 390-1x-dark
+00:11 +38: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x2.0
+00:11 +39: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x2.0
+00:11 +40: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 320-2x-light
+00:12 +41: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: quick view 320-2x-light
+00:12 +42: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 390 wide x2.0
+00:13 +43: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: PDP details 320-2x-light
+00:13 +44: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 390 wide x2.0
+00:13 +45: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 320-2x-light
+00:13 +46: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 320-2x-light
+00:14 +47: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: recommendation rail and same-set continuation 320-2x-light
+00:14 +48: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 430 wide x1.0
+00:14 +49: /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: zoom 320-2x-light
+00:14 +50: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 430 wide x1.0
+00:14 +51: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 430 wide x1.0
+00:15 +52: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 430 wide x1.0
+00:15 +53: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 430 wide x2.0
+00:15 +54: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 430 wide x2.0
+00:15 +55: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 430 wide x2.0
+00:16 +56: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 430 wide x2.0
+00:16 +57: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 430 wide x2.0
+00:16 +58: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 768 wide x1.0
+00:16 +59: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 768 wide x1.0
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: null
+  Actual: FlutterError:<A RenderFlex overflowed by 1.7 pixels on the bottom.>
+
+When the exception was thrown, this was the stack:
+#4      _expectGuideContract (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:50:3)
+#5      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart:128:17)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart line 50
+The test description was:
+  RESP-02 ficha Monetta, several variants, 768 wide x1.0
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:17 +59 -1: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 768 wide x1.0 [E]
+  Test failed. See exception logs above.
+  The test description was: RESP-02 ficha Monetta, several variants, 768 wide x1.0
+  
+00:17 +59 -1: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 768 wide x1.0
+00:17 +60 -1: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 768 wide x1.0
+00:17 +61 -1: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 768 wide x1.0
+00:17 +62 -1: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 768 wide x2.0
+00:18 +63 -1: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 768 wide x2.0
+00:18 +64 -1: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 768 wide x2.0
+00:18 +65 -1: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 768 wide x2.0
+00:18 +66 -1: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 768 wide x2.0
+00:18 +67 -1: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 back, heart, bag, dock button and secondary actions are named 48 px buttons
+00:19 +68 -1: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 the reading order is header, content, dock
+00:19 +69 -1: /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: (tearDownAll)
+00:19 +69 -1: Some tests failed.
+
+Failing tests:
+  /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 768 wide x1.0

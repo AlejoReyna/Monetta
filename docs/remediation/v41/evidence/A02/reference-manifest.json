@@ -1,0 +1,38 @@
+[
+  {
+    "path": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/08_IA/MONETTA_UI_Contrato_IA_v4.1.json",
+    "sha256": "9a9e0d4fe8035852fd4019169da8b9f98166269a59264e65f24276c59ffde700"
+  },
+  {
+    "path": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/02_sistema/tokens_v4.1.json",
+    "sha256": "6db226889efb606eb5caf8301d254ac6b376365eb67022c6305ab7d78b3608d0"
+  },
+  {
+    "path": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/01_documentacion/MONETTA_Documento_Maestro_UI_v4.1.md",
+    "sha256": "8338530ee5fa34a2fd117ae7631064684c1f45aa5df58252bf2651f69f556c54"
+  },
+  {
+    "path": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/05_maquetas/png/quick.png",
+    "sha256": "dc23c516e2326fde06fd7046be08e88c9e2b51d595d24277d3cf303ee90a2329"
+  },
+  {
+    "path": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/05_maquetas/png/pdp.png",
+    "sha256": "8a72f5a473fec56d19186c55b9b7f5be80a764ba3726cb8a9a4d08e1caefdbfa"
+  },
+  {
+    "path": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/05_maquetas/png/details_open.png",
+    "sha256": "087d544967c9a5bc9f6153c1e4a02b986fb549347e680d2f86170f0c3bb69222"
+  },
+  {
+    "path": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/05_maquetas/png/recos.png",
+    "sha256": "6f8fa98d5d76b0e4e160eb2599901dc6f78b3042262b3cd9490f7653e5b7f336"
+  },
+  {
+    "path": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/05_maquetas/png/zoom.png",
+    "sha256": "2321db597ecc57492c90ed6792ea2e4f24a203e7bbab2fb17eb2f2e856448781"
+  },
+  {
+    "path": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/05_maquetas/png/size_selector.png",
+    "sha256": "401e4319dcf20cdd8221194b7685c2f2b67b5b9fc0d1344f69752cc58335d800"
+  }
+]

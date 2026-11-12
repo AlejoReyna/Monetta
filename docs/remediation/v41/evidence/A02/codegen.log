@@ -1,0 +1,29 @@
+  Generating the build script.
+  Compiling the build script.
+  Reading the asset graph.
+  Creating the asset graph.
+  Doing initial build cleanup.
+Found 1 declared outputs which already exist on disk. This is likely because the`.dart_tool/build` folder was deleted, or you are submitting generated files to your source repository.
+
+Delete these files?
+1 - Delete
+2 - Cancel build
+3 - List conflicts
+
+
+You have hit a bug in build_runner
+Please file an issue with reproduction steps at https://github.com/dart-lang/build/issues
+
+
+Null check operator used on a null value
+package:build_runner_core/src/environment/build_environment.dart 109:41  BuildEnvironment.prompt
+package:build_runner_core/src/generate/build_definition.dart 237:41      _Loader._initialBuildCleanup
+package:build_runner_core/src/generate/build_definition.dart 171:13      _Loader.prepareWorkspace
+package:build_runner_core/src/generate/build_series.dart 158:27          BuildSeries.create
+package:build_runner_core/src/generate/build_runner.dart 37:7            BuildRunner.create
+package:build_runner/src/generate/build.dart 111:17                      build
+package:build_runner/src/entrypoint/build.dart 44:18                     BuildCommand._run
+package:args/command_runner.dart 212:13                                  CommandRunner.runCommand
+package:build_runner/src/entrypoint/run.dart 26:18                       run
+.dart_tool/build/entrypoint/build.dart 112:44                            main
+

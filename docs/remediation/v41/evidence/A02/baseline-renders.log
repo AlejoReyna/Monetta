@@ -1,0 +1,50 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/product/preview_and_product_capture_test.dart
+lib/features/catalog/categories_screen.dart:118:16: Error: Undefined name 'kGuideIconCategoryCrossbody'.
+  'crossbody': kGuideIconCategoryCrossbody,
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/catalog/categories_screen.dart:119:11: Error: Undefined name 'kGuideIconCategoryTote'.
+  'tote': kGuideIconCategoryTote,
+          ^^^^^^^^^^^^^^^^^^^^^^
+lib/features/catalog/categories_screen.dart:120:15: Error: Undefined name 'kGuideIconCategoryShoulder'.
+  'shoulder': kGuideIconCategoryShoulder,
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/catalog/categories_screen.dart:121:15: Error: Undefined name 'kGuideIconCategoryHandbags'.
+  'handbags': kGuideIconCategoryHandbags,
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/catalog/categories_screen.dart:122:14: Error: Undefined name 'kGuideIconCategoryWallets'.
+  'wallets': kGuideIconCategoryWallets,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/catalog/categories_screen.dart:123:15: Error: Undefined name 'kGuideIconCategoryPerfumes'.
+  'perfumes': kGuideIconCategoryPerfumes,
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/catalog/categories_screen.dart:124:18: Error: Undefined name 'kGuideIconCategoryAccessories'.
+  'accessories': kGuideIconCategoryAccessories,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+00:00 +0 -1: loading /Users/alexis/theCode/Monetta/test/features/product/preview_and_product_capture_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/product/preview_and_product_capture_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/product/preview_and_product_capture_test.dart: lib/features/catalog/categories_screen.dart:118:16: Error: Undefined name 'kGuideIconCategoryCrossbody'.
+    'crossbody': kGuideIconCategoryCrossbody,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/features/catalog/categories_screen.dart:119:11: Error: Undefined name 'kGuideIconCategoryTote'.
+    'tote': kGuideIconCategoryTote,
+            ^^^^^^^^^^^^^^^^^^^^^^
+  lib/features/catalog/categories_screen.dart:120:15: Error: Undefined name 'kGuideIconCategoryShoulder'.
+    'shoulder': kGuideIconCategoryShoulder,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/features/catalog/categories_screen.dart:121:15: Error: Undefined name 'kGuideIconCategoryHandbags'.
+    'handbags': kGuideIconCategoryHandbags,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/features/catalog/categories_screen.dart:122:14: Error: Undefined name 'kGuideIconCategoryWallets'.
+    'wallets': kGuideIconCategoryWallets,
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/features/catalog/categories_screen.dart:123:15: Error: Undefined name 'kGuideIconCategoryPerfumes'.
+    'perfumes': kGuideIconCategoryPerfumes,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/features/catalog/categories_screen.dart:124:18: Error: Undefined name 'kGuideIconCategoryAccessories'.
+    'accessories': kGuideIconCategoryAccessories,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  .
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/alexis/theCode/Monetta/test/features/product/preview_and_product_capture_test.dart: loading /Users/alexis/theCode/Monetta/test/features/product/preview_and_product_capture_test.dart

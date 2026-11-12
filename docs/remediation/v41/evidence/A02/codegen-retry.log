@@ -1,0 +1,17 @@
+  Generating the build script.
+  Compiling the build script.
+  Reading the asset graph.
+  Creating the asset graph.
+  Doing initial build cleanup.
+  Deleting 1 declared outputs which already existed on disk.
+  Updating the asset graph.
+  Building, full build because there is no valid asset graph.
+  0s source_gen:combining_builder on 1 input; lib/data/local/database.dart
+W SDK language version 3.13.0 is newer than `analyzer` language version 3.11.0. Run `flutter packages upgrade`.
+  0s json_serializable (lazy); lib/data/local/database.dart
+  2s drift_dev (lazy): 3 output; spent 2s analyzing; lib/data/local/tables.dart
+  3s drift_dev (lazy): 5 output; spent 2s analyzing; lib/data/local/database.freezed.dart
+  0s source_gen:combining_builder on 1 input: 1 output
+  Running the post build.
+  Writing the asset graph.
+  Built with build_runner in 11s; wrote 6 outputs.

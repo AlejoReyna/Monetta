@@ -1,0 +1,16 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: common card 390-1x-light
+00:01 +1: quick view 390-1x-light
+00:01 +2: PDP details 390-1x-light
+00:02 +3: zoom 390-1x-light
+00:02 +4: common card 390-1x-dark
+00:02 +5: quick view 390-1x-dark
+00:02 +6: PDP details 390-1x-dark
+00:03 +7: zoom 390-1x-dark
+00:03 +8: common card 320-2x-light
+00:04 +9: quick view 320-2x-light
+00:04 +10: PDP details 320-2x-light
+00:04 +11: zoom 320-2x-light
+00:05 +12: (tearDownAll)
+00:05 +12: All tests passed!

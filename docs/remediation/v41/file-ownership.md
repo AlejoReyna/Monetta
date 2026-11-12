@@ -47,3 +47,5 @@ Stage2 renewed leases after A03 interface acceptance:
 A06 continuation: retain existing isolated checkout and partial commit, same Terra/high model/effort and same owned files. No source integration acceptance yet. Complete missing policy reader/footer/Contact/Wholesale/captures and correct token/primitives drift. A02 retains root check slot; A06 only uses its own checkout/build outputs.
 
 A00 bounded BrandScreen import repair completed: brand_screen.dart now directly imports existing reco/explainer.dart show brandLabel. No feature behavior changed or root checks started. Temporary lease closed; A04 owns file again and must retain import. A02 retains root slot for affected rerun.
+
+A02 final source integrated/frozen, worker retires from active writing. A00 alone coordinates future product/card/DB changes and narrow leases; no new codegen required. A04 NOW exclusively owns root Flutter test/analyzer/render slot after A02 explicit release; A00 starts no root process concurrently. A06 continues isolated. A05/A07/A08 feature wave still waits for Stage2A04/A06 acceptance; no restock PDP lease granted merely because A02 finished.
