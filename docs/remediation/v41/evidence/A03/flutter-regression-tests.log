@@ -1,0 +1,166 @@
+00:00 +0: loading /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/device_identity_test.dart
+00:00 +0: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: profile photo data URL helpers wrap JPEG bytes and decode them back
+00:00 +1: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: profile photo data URL helpers label PNG bytes as PNG and decode them
+00:00 +2: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: profile photo data URL helpers reject anything that is not a base64 JPEG or PNG data URL
+00:00 +3: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService.fetch sends the exact query, a raw token, and parses the metafield
+00:00 +4: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService.fetch parses a customer without the metafield
+00:00 +5: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService.fetch keeps the name when only the metafield read is denied
+00:00 +6: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService.fetch 401 and 403 are sessionExpired and never echo the token
+00:00 +7: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService.fetch an UNAUTHENTICATED GraphQL error is sessionExpired
+00:00 +8: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService.fetch other GraphQL errors and bad statuses are server errors
+00:00 +9: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService.fetch a transport failure is offline and names no token
+00:00 +10: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService.updateFirstName sends customerUpdate with only firstName and returns displayName
+00:00 +11: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService.updateFirstName userErrors become a server error naming only the codes
+00:00 +12: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService photo setPhoto sends metafieldsSet with the exact variables
+00:00 +13: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService photo setPhoto accepts exactly the limit and refuses one more character
+00:00 +14: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService photo an oversized photo sends nothing at all
+00:00 +15: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService photo setPhoto userErrors (definition missing) are a server error
+00:00 +16: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService photo setPhoto 401 is sessionExpired
+00:00 +17: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService photo removePhoto sends metafieldsDelete with the identifiers
+00:00 +18: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_profile_test.dart: HttpCustomerProfileService photo removePhoto userErrors are a server error
+00:00 +19: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_account_config_test.dart: CustomerAccountConfig isUsable is false with empty fields
+00:00 +20: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_orders_test.dart: R6 loads all 0 orders with unique IDs
+00:00 +21: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_orders_test.dart: R6 loads all 0 orders with unique IDs
+00:00 +22: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_orders_test.dart: R6 loads all 0 orders with unique IDs
+00:00 +23: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_orders_test.dart: R6 loads all 0 orders with unique IDs
+00:00 +24: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_orders_test.dart: R6 loads all 0 orders with unique IDs
+00:00 +25: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_orders_test.dart: R6 loads all 0 orders with unique IDs
+00:00 +25: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/device_identity_test.dart: keeps startup usable when secure storage is unavailable
+Secure device id read disabled: Bad state: Keychain unavailable
+Secure device id persistence disabled: Bad state: Keychain unavailable
+00:00 +26: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/device_identity_test.dart: keeps startup usable when secure storage is unavailable
+00:00 +27: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/device_identity_test.dart: keeps startup usable when secure storage is unavailable
+00:00 +28: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/device_identity_test.dart: keeps startup usable when secure storage is unavailable
+00:00 +29: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/device_identity_test.dart: keeps startup usable when secure storage is unavailable
+00:00 +30: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/device_identity_test.dart: keeps startup usable when secure storage is unavailable
+00:00 +31: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/device_identity_test.dart: keeps startup usable when secure storage is unavailable
+00:00 +32: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/device_identity_test.dart: keeps startup usable when secure storage is unavailable
+00:00 +33: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/device_identity_test.dart: keeps startup usable when secure storage is unavailable
+00:00 +34: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/device_identity_test.dart: keeps startup usable when secure storage is unavailable
+00:00 +35: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService sends the access token raw, with no Bearer prefix
+00:00 +36: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService sends the access token raw, with no Bearer prefix
+00:00 +37: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService sends the access token raw, with no Bearer prefix
+00:00 +38: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService discovers the branded GraphQL endpoint once and caches it
+00:00 +39: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_auth_error_test.dart: classifyCustomerAuthError a closed browser is a cancellation, not a failure
+00:00 +40: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_auth_error_test.dart: classifyCustomerAuthError a closed browser is a cancellation, not a failure
+00:00 +41: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_auth_error_test.dart: classifyCustomerAuthError a closed browser is a cancellation, not a failure
+00:00 +42: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService an UNAUTHENTICATED GraphQL error inside a 200 is a rejected token
+00:00 +43: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService an UNAUTHENTICATED GraphQL error inside a 200 is a rejected token
+00:00 +44: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_auth_error_test.dart: classifyCustomerAuthError client-side OAuth errors mean this build is misconfigured
+00:00 +45: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService a 500 is a server error
+00:00 +46: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService a 500 is a server error
+00:00 +47: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService a 500 is a server error
+00:00 +48: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_auth_error_test.dart: classifyCustomerAuthError anything unrecognised is unknown, never a throw
+00:00 +49: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService a transport failure is offline, not a crash
+00:00 +50: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService a 200 with no customer object is a server error, never a null id
+00:00 +51: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService a non-JSON body is a server error
+00:00 +52: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_identity_test.dart: HttpCustomerIdentityService debug details never carry the access token
+00:00 +53: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_session_repository_test.dart: CustomerSessionRepository.login creates an account, a session, and merges device-scoped wishlist/bag
+00:00 +54: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_session_repository_test.dart: CustomerSessionRepository.login logging in twice with the same sub claim reuses the same local account
+00:00 +55: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_session_repository_test.dart: CustomerSessionRepository.login a missing refresh token does not crash — the shopper is signed in without one
+00:00 +56: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_session_repository_test.dart: CustomerSessionRepository.login identity the Customer Account API answer wins over the id token claims
+00:00 +57: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_session_repository_test.dart: CustomerSessionRepository.login identity an offline identity call still signs the shopper in, from claims
+00:01 +58: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_session_repository_test.dart: CustomerSessionRepository.login identity a rejected access token fails the login instead of creating an account
+00:01 +59: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_session_repository_test.dart: CustomerSessionRepository.login identity no identity service and no id token is a failure, not a null id
+00:01 +60: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_session_repository_test.dart: CustomerSessionRepository.accessTokenFor reuses the in-memory token from login instead of refreshing
+00:01 +61: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_session_repository_test.dart: CustomerSessionRepository.accessTokenFor refreshes a token that is already inside the expiry headroom
+00:01 +62: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_session_repository_test.dart: CustomerSessionRepository.accessTokenFor concurrent callers share one refresh (single-flight)
+00:01 +63: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_session_repository_test.dart: CustomerSessionRepository.accessTokenFor a failed refresh does not wedge the latch shut
+00:01 +64: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +65: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +66: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +67: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +68: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +69: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +70: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +71: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +72: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +73: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +74: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +75: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +76: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +77: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +78: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +79: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +80: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +81: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +82: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +83: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +84: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +85: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +86: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +87: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +88: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +89: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +90: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: register persists the account/session and merges guest state
+00:01 +91: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/system_account_session_repository_test.dart: logout revokes the remote token and clears the local session
+00:01 +92: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/account_deletion_client_test.dart: precheck reads only the order ids from a blocked response
+00:01 +93: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/account_deletion_client_test.dart: delete reports Shopify erasure as requested and stale tokens as stale
+00:01 +94: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/account_deletion_client_test.dart: an unfinished Shopify order check is a failure, not permission to delete
+00:01 +95: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/accounts_orders/account_deletion_client_test.dart: reauth and too many orders are distinct from a failed check
+00:01 +96: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository R7 canonical identity enriches once; CAA state and display stay authoritative
+00:01 +97: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository R7 canonical identity enriches once; CAA state and display stay authoritative
+00:01 +98: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository R7 canonical identity enriches once; CAA state and display stay authoritative
+00:01 +99: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository R7 canonical identity enriches once; CAA state and display stay authoritative
+00:01 +100: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository R7 canonical identity enriches once; CAA state and display stay authoritative
+00:01 +101: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository R7 canonical identity enriches once; CAA state and display stay authoritative
+00:01 +102: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository R7 canonical identity enriches once; CAA state and display stay authoritative
+00:01 +103: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository R7 canonical identity enriches once; CAA state and display stay authoritative
+00:01 +104: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository unavailable when neither CAA nor mirror can run
+00:01 +105: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository CAA is primary and merges mirror apartados only
+00:01 +106: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository CAA failure with empty cache is failed, not empty
+00:01 +107: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository CAA failure preserves cache as staleCache
+00:02 +108: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository successful CAA empty list is empty
+00:02 +109: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository mirror-only path still works for legacy sessions
+00:02 +110: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository webhook-only pending transfer keeps the mirror payment method
+00:02 +111: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository app-loaded pending transfer keeps the Customer Account method
+00:02 +112: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository card pending stays Pago en proceso
+00:02 +113: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository missing payment method stays Pago en proceso
+00:02 +114: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository paypal, mercadopago, and unknown gateway stay Pago en proceso
+00:02 +115: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/repositories/order_history_repository_test.dart: OrderHistoryRepository checkout correlation reads both sources and does not touch the cache
+00:02 +116: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/notifications/notification_api_client_test.dart: installation registration is App Check attested and rotates credential
+00:02 +117: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/notifications/notification_api_client_test.dart: preferences use the anonymous device credential, not a customer id
+00:02 +118: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/shopify/editorial_content_repository_test.dart: valid Metaobjects override fallback copy and catalogs
+00:02 +119: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/shopify/editorial_content_repository_test.dart: missing Metaobjects retain the complete offline fallback
+00:02 +120: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/shopify/shop_policy_repository_test.dart: reads published merchant body verbatim by semantic kind
+00:02 +121: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/shopify/shop_policy_repository_test.dart: missing/empty published content is unavailable with no fallback copy
+00:02 +122: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/shopify/shop_policy_repository_test.dart: provider failure differs from unavailable content
+00:02 +123: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/shopify/shop_policy_repository_test.dart: malformed/unsafe policy data fails rather than producing a clickable URL
+00:06 +124: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: presentacion en pesos sin calculo autoritativo
+00:06 +125: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +126: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +127: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +128: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +129: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +130: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +131: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +132: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +133: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +134: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +135: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +136: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +137: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +138: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_section_test.dart: RewardsSection shows unavailable when no backend is wired
+00:06 +139: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:06 +140: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +141: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +142: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +143: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +144: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +145: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +146: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +147: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +148: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +149: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +150: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +151: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +152: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: shows the contract balance and keeps points as placeholders
+00:07 +153: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: a missing reader does not invent a balance
+00:07 +154: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: copy and share wait for a real catalog link
+00:07 +155: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: capture rewards 390.0 light
+00:07 +156: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: capture rewards 390.0 dark
+00:07 +157: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: capture rewards 834.0 light
+00:07 +158: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: capture rewards-share 390.0 light
+00:07 +159: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: capture rewards-share 390.0 dark
+00:07 +160: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_guide_screen_test.dart: capture rewards-share 834.0 light
+00:07 +161: All tests passed!

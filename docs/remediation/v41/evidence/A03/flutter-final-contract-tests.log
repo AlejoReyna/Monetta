@@ -1,0 +1,33 @@
+00:00 +0: loading /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart
+00:00 +0: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/app/notification_controller_test.dart: native permission consent registers announcements once
+00:00 +1: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_data_contract_test.dart: old V1 payload without optional capabilities stays compatible; exact ledger zero is valid
+00:00 +2: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_data_contract_test.dart: missing availableCents fails without manufacturing zero or current time
+00:00 +3: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_data_contract_test.dart: missing pendingCents fails without manufacturing zero or current time
+00:00 +4: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_data_contract_test.dart: missing reservedCents fails without manufacturing zero or current time
+00:00 +5: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: provider order edit rejects a mixed paginated snapshot
+00:00 +6: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: provider order edit rejects a mixed paginated snapshot
+00:00 +7: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: provider order edit rejects a mixed paginated snapshot
+00:00 +8: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: provider order edit rejects a mixed paginated snapshot
+00:00 +9: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: provider order edit rejects a mixed paginated snapshot
+00:00 +10: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: provider order edit rejects a mixed paginated snapshot
+00:00 +11: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: provider order edit rejects a mixed paginated snapshot
+00:00 +12: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: provider order edit rejects a mixed paginated snapshot
+00:00 +13: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: provider order edit rejects a mixed paginated snapshot
+00:00 +14: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: successful but unreadable address write remains uncertain
+00:00 +15: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: addresses paginate, deduplicate, and retain provider default ID
+00:00 +16: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: missing customer is unavailable rather than empty address success
+00:00 +17: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: broken pagination fails rather than publishing truncated address book
+00:00 +18: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: create/update/delete send provider variables once and confirm actual result
+00:00 +19: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: provider denies unauthorized address without leaking message or reporting success
+00:00 +20: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: provider 401 is an auth error, no private body echoed
+00:00 +21: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: provider 403 is an auth error, no private body echoed
+00:00 +22: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: ambiguous mutation failure is single attempt, requires reconciliation
+00:00 +23: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: malformed mutation response is uncertain rather than retryable confirmed failure
+00:00 +24: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: GraphQL denied errors are sanitized, never downgraded to data
+00:00 +25: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: order detail paginates lines and shipments independently of payment
+00:00 +26: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: old summary DTOs need not carry detail; provider null order remains null
+00:00 +27: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: wrong authorized resource ID fails closed
+00:00 +28: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: unsafe provider tracking URL is omitted without manufacturing a replacement
+00:00 +29: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: account changes, logout and A-B-A discard stale in-flight results
+00:00 +30: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart: older same-account read cannot replace a newer confirmed read
+00:00 +31: All tests passed!
