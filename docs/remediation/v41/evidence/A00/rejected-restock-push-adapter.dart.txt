@@ -1,0 +1,26 @@
+/// Push-channel restock submit for G12 until A03 ships variant-aware alerts.
+library;
+
+import '../../app/notification_controller.dart';
+import 'restock_request.dart';
+
+/// Registers the exhausted [payload.variant] via device notifications.
+///
+/// Email is collected in the G12 UI for the authorized channel; today's
+/// transport only registers the variant with the notification service.
+/// Variant id is passed instead of product id (F08).
+Future<RestockSubmitResult> submitRestockViaPushNotifications(
+  NotificationController? controller,
+  RestockRequestPayload payload,
+) async {
+  if (controller == null || !controller.available) {
+    return RestockSubmitResult.unavailable;
+  }
+  final ok = await controller.createRestockAlert(payload.variant.id);
+  if (ok) return RestockSubmitResult.created;
+  final message = controller.lastError?.toLowerCase() ?? '';
+  if (message.contains('ya') && message.contains('registr')) {
+    return RestockSubmitResult.alreadyRegistered;
+  }
+  return RestockSubmitResult.error;
+}

@@ -35,3 +35,5 @@ A03 exclusive producer lease expanded: functions/src/types.ts and functions/src/
 Bounded A07 compile repair granted to A02: home_new_collection_section.dart/home_for_you_section.dart only, use actual MonettaImage(url:, fit:), valid nullable-image branching and imports for existing brandLabel/formatShopperPrice. No layout/business behavior redesign. A00 observed fixes already present and did not overwrite concurrently; authorship confirmation requested. A07 must not concurrently edit this seam until A02 finishes compile repair. Root test/codegen slot remains A02.
 
 Bounded Home repair CLOSED: A07 applied fixes and ended; A02 need not rewrite them. Home files return to A07 stage-held ownership. A02 alone reruns affected widget flow in its existing root slot; further compile blockers go to A00 before cross-owner edits.
+
+A00 bounded restock adapter safety lease: rejected A08's unverified product-endpoint-as-variant mapping in restock_push_adapter.dart, preserved original as evidence/A00/rejected-restock-push-adapter.dart.txt, and removed the legacy submit/success path. File returns to A08 stage-held ownership. No product_screen.dart edits; A02 retains PDP lease.
