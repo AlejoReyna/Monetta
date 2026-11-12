@@ -8,6 +8,9 @@ import '../../app/theme.dart';
 import 'boutique_tokens.dart';
 import 'client_guide_components.dart';
 import 'guide_art.dart';
+import '../help/policy_reader.dart';
+import '../../data/shopify/shop_policy_repository.dart';
+import '../../data/customer_auth/customer_graphql_client.dart';
 
 class ClientGuideEditorial extends StatelessWidget {
   const ClientGuideEditorial({
@@ -124,7 +127,6 @@ class ClientGuideEditorial extends StatelessWidget {
   }
 
   Widget _buildOverlay(BuildContext context, GuideTextSide side) {
-    final palette = context.boutique;
     final onRight = side == GuideTextSide.right;
     final large = MediaQuery.textScalerOf(context).scale(1) > 1.3;
     return LayoutBuilder(
@@ -135,7 +137,7 @@ class ClientGuideEditorial extends StatelessWidget {
         final titleStyle = guideSerifStyle(
           context,
           size: titleSize,
-          color: palette.ink,
+          color: Colors.black,
           height: 1.05,
           letterSpacing: titleSize * 0.02,
         );
@@ -144,20 +146,18 @@ class ClientGuideEditorial extends StatelessWidget {
             Positioned.fill(
               child: GuideArt(
                 asset: imageAsset!,
-                alignment: onRight
-                    ? Alignment.centerLeft
-                    : Alignment.centerRight,
+                alignment:
+                    onRight ? Alignment.centerLeft : Alignment.centerRight,
               ),
             ),
             Positioned.fill(child: GuideScrim(textSide: side)),
             ConstrainedBox(
               constraints: BoxConstraints(minHeight: width / 2.3),
               child: Align(
-                alignment: onRight
-                    ? Alignment.centerRight
-                    : Alignment.centerLeft,
+                alignment:
+                    onRight ? Alignment.centerRight : Alignment.centerLeft,
                 child: SizedBox(
-                  width: width * (large ? 0.7 : 0.5),
+                  width: width * (large ? 1.0 : 0.5),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: MonettaTokens.space[1],
@@ -179,7 +179,7 @@ class ClientGuideEditorial extends StatelessWidget {
                                   style: guideAccentStyle(
                                     context,
                                     size: titleSize * 2.0,
-                                    color: palette.ink,
+                                    color: Colors.black,
                                     underline: true,
                                   ),
                                 ),
@@ -195,7 +195,7 @@ class ClientGuideEditorial extends StatelessWidget {
                           style: guideSerifItalicStyle(
                             context,
                             size: (width * 0.039).clamp(13.0, 19.0),
-                            color: palette.ink,
+                            color: Colors.black,
                             weight: FontWeight.w500,
                           ),
                         ),
@@ -203,7 +203,8 @@ class ClientGuideEditorial extends StatelessWidget {
                           SizedBox(height: MonettaTokens.space[2]),
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 200),
-                            child: action!,
+                            child:
+                                Theme(data: buildLightTheme(), child: action!),
                           ),
                         ],
                       ],
@@ -350,61 +351,66 @@ class ClientGuideServices extends StatelessWidget {
 }
 
 class ClientGuideFooter extends StatelessWidget {
-  const ClientGuideFooter({
-    required this.onContact,
-    required this.onAbout,
-    super.key,
-  });
+  const ClientGuideFooter(
+      {required this.onContact,
+      required this.onAbout,
+      this.onWholesale,
+      super.key});
   final VoidCallback onContact;
+
+  /// Retained for existing callers; not part of the correction 5 footer.
   final VoidCallback onAbout;
+  final VoidCallback? onWholesale;
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.boutique;
+    final controller = PolicyScope.maybeOf(context);
     return Container(
       key: const ValueKey('client-guide-footer'),
-      color: palette.bar,
-      padding: EdgeInsets.all(MonettaTokens.space[4]),
-      child: Column(
-        children: [
-          const MonettaWordmark(height: MonettaTokens.logoHeight),
-          SizedBox(height: MonettaTokens.space[3]),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: MonettaTokens.space[3],
-            children: [
-              TextButton(
-                onPressed: onContact,
-                child: const Text('Ayuda y contacto'),
-              ),
-              TextButton(
-                onPressed: onAbout,
-                child: const Text('Nuestra historia'),
-              ),
-            ],
-          ),
-          SizedBox(height: MonettaTokens.space[1]),
-          Text(
-            'Información de envíos y políticas: pendiente de aprobación.',
-            textAlign: TextAlign.center,
-            style: clientGuideStyle(
-              context,
-              MonettaTokens.navLabel,
-              color: palette.inkMuted,
-            ),
-          ),
-          SizedBox(height: MonettaTokens.space[3]),
-          Text(
-            'Monetta · Todos los derechos reservados',
-            textAlign: TextAlign.center,
-            style: clientGuideStyle(
-              context,
-              MonettaTokens.navLabel,
-              color: palette.inkMuted,
-            ),
-          ),
-        ],
-      ),
+      color: const Color(0xfff5f5f5),
+      padding: const EdgeInsets.all(24),
+      child: Theme(
+          data: buildLightTheme(),
+          child: TextButtonTheme(
+              data: TextButtonThemeData(
+                  style: TextButton.styleFrom(foregroundColor: Colors.black87)),
+              child: Column(children: [
+                const MonettaWordmark(height: MonettaTokens.logoHeight),
+                const SizedBox(height: 16),
+                Wrap(alignment: WrapAlignment.center, spacing: 12, children: [
+                  TextButton(
+                      onPressed: onContact, child: const Text('Contacto')),
+                  for (final entry in const <(ShopPolicyKind, String)>[
+                    (ShopPolicyKind.shipping, 'Envíos'),
+                    (ShopPolicyKind.refund, 'Cambios y devoluciones')
+                  ])
+                    if (controller?.policies?[entry.$1]?.status ==
+                        CapabilityReadStatus.supported)
+                      TextButton(
+                          onPressed: () => openPolicy(context, entry.$1),
+                          child: Text(entry.$2)),
+                  if (onWholesale != null)
+                    TextButton(
+                        onPressed: onWholesale, child: const Text('Mayoreo')),
+                  for (final entry in const <(ShopPolicyKind, String)>[
+                    (ShopPolicyKind.privacy, 'Privacidad'),
+                    (ShopPolicyKind.terms, 'Términos')
+                  ])
+                    if (controller?.policies?[entry.$1]?.status ==
+                        CapabilityReadStatus.supported)
+                      TextButton(
+                          onPressed: () => openPolicy(context, entry.$1),
+                          child: Text(entry.$2)),
+                  if (controller?.failed == true)
+                    TextButton(
+                        onPressed: controller!.refresh,
+                        child: const Text('Reintentar políticas')),
+                ]),
+                const SizedBox(height: 16),
+                const Text('Monetta · Todos los derechos reservados',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.black54)),
+              ]))),
     );
   }
 }

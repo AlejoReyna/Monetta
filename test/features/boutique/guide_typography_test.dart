@@ -272,7 +272,9 @@ void main() {
       ]);
     });
 
-    testWidgets('wholesale: free shipping first, the rest as in the home', (
+    testWidgets(
+        'wholesale uses safe shipping presentation without unapproved threshold',
+        (
       tester,
     ) async {
       await pumpClientGuide(
@@ -281,9 +283,9 @@ void main() {
           child: ClientGuideServices(services: kClientGuideWholesaleServices),
         ),
       );
-      expect(find.text('Envío gratis'), findsOneWidget);
-      expect(find.text(r'En compras mayores a $1,999 MXN'), findsOneWidget);
-      expect(find.text('Envíos seguros'), findsNothing);
+      expect(find.text('Envío gratis'), findsNothing);
+      expect(find.text(r'En compras mayores a $1,999 MXN'), findsNothing);
+      expect(find.text('Envíos seguros'), findsOneWidget);
       expect(find.text('Pagos seguros'), findsOneWidget);
       expect(find.text('Productos 100% originales'), findsOneWidget);
       expect(find.text('Atención personalizada'), findsOneWidget);

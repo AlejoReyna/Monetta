@@ -2,6 +2,9 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../app/monetta_tokens.g.dart';
+import '../../app/theme.dart';
+import '../boutique/client_guide_components.dart';
 
 class HomeAccountInvitation extends StatefulWidget {
   const HomeAccountInvitation({
@@ -12,7 +15,8 @@ class HomeAccountInvitation extends StatefulWidget {
   });
   final VoidCallback? onRegister;
 
-  /// Returns an error message when access cannot continue; never implies signup.
+  /// Returns an error message on failure. Null means the access flow returned,
+  /// including cancellation; it never implies signup. The email remains editable.
   final Future<String?> Function(String email)? onEmailRegister;
   final bool isSignedIn;
   @override
@@ -30,6 +34,7 @@ class _HomeAccountInvitationState extends State<HomeAccountInvitation> {
   }
 
   Future<void> _submit() async {
+    if (_busy || widget.onEmailRegister == null) return;
     final email = _email.text.trim();
     if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) {
       setState(() => _error = 'Introduce un correo válido.');
@@ -52,29 +57,32 @@ class _HomeAccountInvitationState extends State<HomeAccountInvitation> {
   }
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => Theme(
+      data: buildLightTheme(),
+      child: Container(
         key: const ValueKey('home-account-invitation'),
         width: double.infinity,
         padding: const EdgeInsets.all(24),
-        color: const Color(0xfffaf9f6),
+        color: Colors.white,
         child: Column(
           children: [
             Text(
               'Regístrate en MONETTA REWARDS',
               textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: Colors.black),
+              style: clientGuideStyle(context, MonettaTokens.body,
+                  color: Colors.black),
             ),
             const SizedBox(height: 8),
             const Text.rich(
+              style: TextStyle(
+                  fontFamily: 'DM Sans', fontSize: 14, color: Colors.black),
               TextSpan(
                 children: [
                   TextSpan(
                     text: 'ENVÍO GRATIS',
                     style: TextStyle(
-                      color: Color(0xffa47b34),
+                      color: MonettaTokens.gold,
+                      fontSize: 19,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -87,12 +95,15 @@ class _HomeAccountInvitationState extends State<HomeAccountInvitation> {
               textAlign: TextAlign.center,
             ),
             const Text.rich(
+              style: TextStyle(
+                  fontFamily: 'DM Sans', fontSize: 14, color: Colors.black),
               TextSpan(
                 children: [
                   TextSpan(
                     text: 'GANA CASHBACK',
                     style: TextStyle(
-                      color: Color(0xff398157),
+                      color: MonettaTokens.success,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -110,7 +121,10 @@ class _HomeAccountInvitationState extends State<HomeAccountInvitation> {
                 constraints: const BoxConstraints(maxWidth: 420),
                 child: TextField(
                   controller: _email,
+                  enabled: !_busy,
                   keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => _submit(),
                   autofillHints: const [AutofillHints.email],
                   decoration: InputDecoration(
                     labelText: 'Correo electrónico',
@@ -119,31 +133,25 @@ class _HomeAccountInvitationState extends State<HomeAccountInvitation> {
                 ),
               ),
             ],
-            if (widget.onEmailRegister != null ||
-                widget.onRegister != null) ...[
+            if (widget.isSignedIn
+                ? widget.onRegister != null
+                : widget.onEmailRegister != null ||
+                    widget.onRegister != null) ...[
               const SizedBox(height: 16),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xffc8a653).withValues(alpha: .4),
-                      blurRadius: 18,
-                    ),
-                  ],
-                ),
-                child: FilledButton(
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: ClientGuideButton(
                   key: const ValueKey('home-register-button'),
                   onPressed: _busy
                       ? null
                       : (widget.isSignedIn || widget.onEmailRegister == null
                           ? widget.onRegister
                           : _submit),
-                  child:
-                      Text(widget.isSignedIn ? 'Ver mi cuenta' : 'Registrarme'),
+                  label: widget.isSignedIn ? 'Ver mi cuenta' : 'Registrarme',
                 ),
               ),
             ],
           ],
         ),
-      );
+      ));
 }

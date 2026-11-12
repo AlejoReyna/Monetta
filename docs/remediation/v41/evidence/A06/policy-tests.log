@@ -1,0 +1,12 @@
+00:00 +0: loading /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_evidence_test.dart
+00:00 +0: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_evidence_test.dart: footer and policy fixture 320.0 2.0 Brightness.light
+00:00 +1: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_evidence_test.dart: footer and policy fixture 320.0 2.0 Brightness.light
+00:00 +2: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_policy_test.dart: approved FAQ expands and collapses
+00:01 +3: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_evidence_test.dart: footer and policy fixture 390.0 1.0 Brightness.light
+00:01 +4: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_policy_test.dart: withdrawn content becomes unavailable on reopening
+00:01 +5: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_evidence_test.dart: footer and policy fixture 834.0 1.0 Brightness.light
+00:01 +6: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_evidence_test.dart: footer and policy fixture 1440.0 2.0 Brightness.dark
+00:01 +7: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_evidence_test.dart: keyboard route return restores trigger focus
+00:01 +8: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_evidence_test.dart: failed link shows error without navigation
+00:02 +9: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_evidence_test.dart: opaque reduced motion registration remains interactive
+00:02 +10: All tests passed!

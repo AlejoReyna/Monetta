@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:monetta_app/features/contact/contact_links.dart';
 import 'package:monetta_app/features/contact/contact_screen.dart';
+import 'package:monetta_app/features/boutique/guide_art.dart';
 import '../../support/client_guide_capture.dart';
 
 void main() {
@@ -18,6 +18,11 @@ void main() {
       await pumpClientGuide(
         tester,
         ContactScreen(
+          groups: {
+            'grupo-1': Uri.parse('https://fixture.example/group1'),
+            'grupo-2': Uri.parse('https://fixture.example/group2'),
+            'facebook-group': Uri.parse('https://fixture.example/facebook')
+          },
           openUri: (uri) async {
             opened.add(uri);
             return true;
@@ -27,8 +32,8 @@ void main() {
         textScale: scale,
         brightness: brightness,
       );
-      expect(find.text('Tu boutique y proveedor de'), findsOneWidget);
-      expect(find.text('confianza.'), findsOneWidget);
+      expect(find.byWidgetPredicate((w) => w is GuideBanner && w.id == 'B31'),
+          findsOneWidget);
       if (scale == 1) {
         await captureClientGuide(
           tester,
@@ -44,8 +49,9 @@ void main() {
         await tester.pumpAndSettle();
       }
       expect(opened, [
-        ...monettaWhatsAppGroups.map(Uri.parse),
-        Uri.parse(monettaFacebookGroup),
+        Uri.parse('https://fixture.example/group1'),
+        Uri.parse('https://fixture.example/group2'),
+        Uri.parse('https://fixture.example/facebook'),
       ]);
       // «Más ayuda» and the schedule note are not in the guide.
       expect(find.text('Más ayuda'), findsNothing);
@@ -65,10 +71,10 @@ void main() {
     final row = find.byKey(const ValueKey('contact-channel-whatsapp'));
     await tester.ensureVisible(row);
     await tester.tap(row);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('No se pudo abrir el enlace.'), findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('Redes sociales: enlaces pendientes.'),
+      find.text('Síguenos en redes'),
       300,
     );
     expect(

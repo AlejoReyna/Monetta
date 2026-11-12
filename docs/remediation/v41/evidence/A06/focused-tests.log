@@ -1,0 +1,37 @@
+00:00 +0: loading /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/contact_screen_test.dart
+00:00 +0: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/home/a06_invitation_test.dart: (setUpAll)
+00:00 +0: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/home/home_account_invitation_test.dart: presents the Correction 5 invitation and real access callback
+00:00 +1: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/home/a06_invitation_test.dart: validates and retains email after access failure
+00:00 +2: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/home/a06_invitation_test.dart: validates and retains email after access failure
+00:00 +3: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/home/a06_invitation_test.dart: validates and retains email after access failure
+00:01 +4: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/contact_presentation_test.dart: configured communities and contact at Size(390.0, 1100.0) / 1.0 / Brightness.light
+00:01 +5: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/contact_presentation_test.dart: configured communities and contact at Size(390.0, 1100.0) / 1.0 / Brightness.light
+00:01 +6: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/contact_presentation_test.dart: configured communities and contact at Size(390.0, 1100.0) / 1.0 / Brightness.light
+00:01 +7: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/contact_presentation_test.dart: configured communities and contact at Size(390.0, 1100.0) / 1.0 / Brightness.light
+00:01 +8: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/contact_screen_test.dart: configured channels open only on tap with accessible social labels
+00:01 +9: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/contact_presentation_test.dart: configured communities and contact at Size(320.0, 568.0) / 2.0 / Brightness.light
+00:01 +10: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/contact_screen_test.dart: a failed open explains itself
+00:01 +11: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/contact_presentation_test.dart: configured communities and contact at Size(834.0, 1194.0) / 1.0 / Brightness.light
+00:01 +12: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/contact_presentation_test.dart: configured communities and contact at Size(390.0, 1100.0) / 1.0 / Brightness.dark
+00:01 +13: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/contact_presentation_test.dart: missing social config stays empty, thrown launcher is explained
+00:01 +14: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_policy_test.dart: failure retries, unpublished is hidden, safe policy links return
+00:02 +15: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_policy_test.dart: failure retries, unpublished is hidden, safe policy links return
+00:02 +16: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_policy_test.dart: failure retries, unpublished is hidden, safe policy links return
+00:02 +17: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_policy_test.dart: failure retries, unpublished is hidden, safe policy links return
+00:02 +18: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_policy_test.dart: failure retries, unpublished is hidden, safe policy links return
+00:02 +19: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/help/a06_policy_test.dart: failure retries, unpublished is hidden, safe policy links return
+00:02 +20: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: families COACH is upright Cormorant and TOTES is italic
+00:02 +21: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: families COACH is upright Cormorant and TOTES is italic
+00:02 +22: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: families COACH is upright Cormorant and TOTES is italic
+00:02 +23: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: families COACH is upright Cormorant and TOTES is italic
+00:02 +24: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: families COACH is upright Cormorant and TOTES is italic
+00:02 +25: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: families COACH is upright Cormorant and TOTES is italic
+00:02 +26: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: families COACH is upright Cormorant and TOTES is italic
+00:03 +27: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: families home banner: Compra in italic serif, fácil in script
+00:03 +28: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: families Comparte y gana: script word, serif «y gana» and body
+00:03 +29: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: families B04 preserves delivered lettering rather than reconstructing fonts
+00:03 +30: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: GuidePillButton keeps its key and callback and a 48 px target
+00:03 +31: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: GuidePillButton without a callback it is disabled
+00:03 +32: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: services row home: the guide texts with the four gold icons
+00:03 +33: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/boutique/guide_typography_test.dart: services row wholesale uses safe shipping presentation without unapproved threshold
+00:03 +34: All tests passed!

@@ -5,6 +5,7 @@ import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/wholesale/wholesale_content.dart';
 import 'package:monetta_app/features/wholesale/wholesale_screen.dart';
+import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/main.dart';
 import '../../support/client_guide_capture.dart';
 
@@ -12,9 +13,7 @@ void main() {
   test('quote asks for terms without pre-accepting amounts or minimums', () {
     final uri = wholesaleQuoteUri();
     expect(uri.host, 'wa.me');
-    expect(uri.queryParameters['text'], isNot(contains(r'$800')));
-    expect(uri.queryParameters['text'], isNot(contains('3 modelos')));
-    expect(uri.queryParameters['text'], contains('condiciones vigentes'));
+    expect(uri.query, isEmpty);
   });
 
   for (final (size, scale, brightness) in [
@@ -48,7 +47,8 @@ void main() {
         textScale: scale,
         brightness: brightness,
       );
-      expect(find.text('MAYOREO'), findsOneWidget);
+      expect(find.byWidgetPredicate((w) => w is GuideBanner && w.id == 'B32'),
+          findsOneWidget);
       expect(tester.takeException(), isNull);
       if (scale == 1) {
         await captureClientGuide(
@@ -63,8 +63,8 @@ void main() {
         scrollable: scroll,
       );
       expect(find.text(WholesalePresentation.minimum), findsOneWidget);
-      // The guide's reservation line is shown as it is.
-      expect(find.textContaining(r'$800'), findsOneWidget);
+      // Received terms are not published without commercial approval.
+      expect(find.textContaining(r'$800'), findsNothing);
       expect(find.textContaining('pendiente de confirmación'), findsNothing);
       expect(find.textContaining('pendientes de confirmación'), findsNothing);
       final catalog = find.byKey(const ValueKey('wholesale-catalog-perfume'));

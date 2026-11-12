@@ -22,9 +22,10 @@ const List<({String file, String literal, String why})> _exceptions = [
     why: 'Rewards benefit from the client guide, not an amount threshold',
   ),
   (
-    file: 'lib/features/boutique/client_guide_sections.dart',
-    literal: 'Envío gratis',
-    why: 'wholesale terms from the client guide (\$1,999), not the store',
+    file: 'lib/features/home/home_account_invitation.dart',
+    literal: 'ENVÍO GRATIS',
+    why:
+        'Correction 5 presentation; checkout still requires an authenticated account',
   ),
   (
     file: 'lib/features/wholesale/wholesale_content.dart',
