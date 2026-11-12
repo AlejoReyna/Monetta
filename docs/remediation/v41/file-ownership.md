@@ -37,3 +37,9 @@ Bounded A07 compile repair granted to A02: home_new_collection_section.dart/home
 Bounded Home repair CLOSED: A07 applied fixes and ended; A02 need not rewrite them. Home files return to A07 stage-held ownership. A02 alone reruns affected widget flow in its existing root slot; further compile blockers go to A00 before cross-owner edits.
 
 A00 bounded restock adapter safety lease: rejected A08's unverified product-endpoint-as-variant mapping in restock_push_adapter.dart, preserved original as evidence/A00/rejected-restock-push-adapter.dart.txt, and removed the legacy submit/success path. File returns to A08 stage-held ownership. No product_screen.dart edits; A02 retains PDP lease.
+
+Stage2 renewed leases after A03 interface acceptance:
+- A02: current product/cache/PDP ownership and exclusive root test slot unchanged until final release.
+- A04: taxonomy/discovery/catalog_query/categories/brands/collection/brand/sidebar/guide_drawer; existing shared-root diff retained. Own tests/evidence/handoff, no root tests until A02 releases; no common product widgets or service/global wiring.
+- A06: plan-assigned Terra/high new isolated worker; earlier user-launched A06 paused before product edits, only local dependency setup/handoff retained outside integration. Own Contact/Wholesale/home_account_invitation/client_guide_sections/footer/help/policy-reader/purchase_notices UI and own tests; consume integrated A01/A03, no second policy transport/provider model. No main/global wiring.
+- A03: finished package retired from active slots; retains API/service ownership for sequential later follow-up. No A05/A07/A08 feature integration before Stage2 acceptance.
