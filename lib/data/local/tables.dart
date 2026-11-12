@@ -54,6 +54,8 @@ class CachedVariants extends Table {
   RealColumn get compareAtPrice => real().nullable()();
   BoolColumn get available => boolean()();
   TextColumn get sku => text().nullable()();
+  TextColumn get selectedOptions => text().withDefault(const Constant('{}'))();
+  TextColumn get imageUrls => text().withDefault(const Constant('[]'))();
 
   @override
   Set<Column> get primaryKey => {id};

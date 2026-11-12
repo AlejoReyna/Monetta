@@ -26,6 +26,7 @@ ProductVariant _variant(
   double price = 1000,
   double? compare,
   bool available = true,
+  Map<String, String> options = const {},
 }) {
   return ProductVariant(
     id: id ?? 'v-$title',
@@ -33,6 +34,7 @@ ProductVariant _variant(
     price: price,
     compareAtPrice: compare,
     available: available,
+    selectedOptions: options,
   );
 }
 
@@ -73,7 +75,11 @@ void main() {
       variants: [_variant('Negro'), _variant('Gris', available: false)],
     );
     expect(selectedVariant(product, 9)?.title, 'Negro');
-    expect(selectedVariant(product, -1)?.title, 'Negro');
+    expect(
+      selectedVariant(product, -1),
+      isNull,
+      reason: 'G35 missing combinations must not select another variant',
+    );
     expect(selectionInStock(product, 1), isFalse);
   });
 
@@ -98,9 +104,17 @@ void main() {
 
   test('swatches only when every option maps reliably', () {
     final reliable = _product(
-      variants: [_variant('Azul Oscuro'), _variant('Gris')],
+      variants: [
+        _variant('Azul Oscuro', options: {'Color': 'Azul'}),
+        _variant('Gris', options: {'Color': 'Gris'}),
+      ],
     );
     expect(hasReliableColorOptions(reliable), isTrue);
+    expect(
+      hasReliableColorOptions(_product(variants: [_variant('Negro')])),
+      false,
+      reason: 'titles are not authoritative option metadata',
+    );
 
     final mixed = _product(
       variants: [_variant('Negro'), _variant('Cafe/Dorado')],

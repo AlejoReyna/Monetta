@@ -314,6 +314,10 @@ class CatalogCacheStore {
       available: row.available,
       compareAtPrice: row.compareAtPrice,
       sku: row.sku,
+      selectedOptions: Map<String, String>.from(
+        jsonDecode(row.selectedOptions) as Map,
+      ),
+      imageUrls: _decodeStringList(row.imageUrls),
     );
   }
 
@@ -329,6 +333,8 @@ class CatalogCacheStore {
       available: variant.available,
       compareAtPrice: Value(variant.compareAtPrice),
       sku: Value(variant.sku),
+      selectedOptions: Value(jsonEncode(variant.selectedOptions)),
+      imageUrls: Value(_encodeStringList(variant.imageUrls)),
     );
   }
 

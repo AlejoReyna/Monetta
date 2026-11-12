@@ -102,6 +102,8 @@ class ProductVariant {
     required this.available,
     this.compareAtPrice,
     this.sku,
+    this.selectedOptions = const {},
+    this.imageUrls = const [],
   });
 
   /// Canonical Shopify GID (`gid://shopify/ProductVariant/<legacy id>`).
@@ -114,7 +116,22 @@ class ProductVariant {
   /// Null for every variant on this store today — do not build logic on it.
   final String? sku;
 
+  /// Exact option names/values from Shopify, never inferred from the title.
+  final Map<String, String> selectedOptions;
+
+  /// Only photographs explicitly associated with this variant by the source.
+  /// Storefront currently exposes one image; other sources may supply more.
+  final List<String> imageUrls;
+
   /// Shopify's placeholder title for single-variant products. Such products
   /// should not render a variant picker.
   bool get isDefault => title == 'Default Title';
+}
+
+/// Never assign a product photograph to an arbitrary colour/size. A product
+/// gallery is unambiguous only when the product has a single variant.
+List<String> imagesForVariant(Product product, ProductVariant? variant) {
+  if (variant == null) return const [];
+  if (variant.imageUrls.isNotEmpty) return variant.imageUrls;
+  return product.variants.length == 1 ? product.images : const [];
 }

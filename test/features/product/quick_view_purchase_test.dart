@@ -192,14 +192,13 @@ void main() {
     });
 
     testWidgets(
-        'QUICK-05 a sold-out piece offers "Avísame cuando vuelva" and no add',
+        'G09/G12 hides unsupported exact-variant restock and prevents add',
         (tester) async {
       final (store, _) = await _open(tester, product: soldOutProduct());
 
-      expect(inPrimary(find.text(kRestockLabel)), findsOneWidget);
+      expect(primaryButton(), findsNothing);
+      expect(find.text(kRestockLabel), findsNothing);
       expect(find.text(kAddLabel), findsNothing);
-      await tester.tap(primaryButton());
-      await tester.pumpAndSettle();
       expect(store.addCalls, 0);
       expect(store.bagQuantity, 0);
     });
@@ -260,8 +259,13 @@ void main() {
         expect(store.addCalls, 1);
         expect(store.bagLines.single.variant.id, 'v-mediana');
         expect(store.bagLines.single.quantity, 1);
-        expect(_close(), findsNothing, reason: 'success closes the sheet');
-        expect(_inMiniCart(), findsOneWidget);
+        expect(
+          _close(),
+          findsOneWidget,
+          reason: 'G09 confirms in the same layer',
+        );
+        expect(find.text('Agregado al carrito'), findsOneWidget);
+        expect(_inMiniCart(), findsNothing);
         await flush(tester);
       });
     });
@@ -308,7 +312,8 @@ void main() {
         expect(store.addCalls, 2);
         expect(store.bagQuantity, 1, reason: 'one unit, not two');
         expect(store.bagLines.single.variant.id, second.id);
-        expect(_close(), findsNothing);
+        expect(_close(), findsOneWidget);
+        expect(find.text('Agregado al carrito'), findsOneWidget);
         expect(error, findsNothing);
         await flush(tester);
       });
@@ -317,7 +322,7 @@ void main() {
 
   group('TYPE-01e the piece name', () {
     testWidgets(
-        'TYPE-01e the brand is the editorial serif w700 22 and the name Inter '
+        'v4.1 the brand is DM Sans w600 18 and the name DM Sans '
         'w400 15 in ink', (tester) async {
       final (_, product) = await _open(tester);
 
@@ -336,9 +341,9 @@ void main() {
       final brand = find.byKey(const Key('quick-view-brand'));
       if (brand.evaluate().isNotEmpty) {
         final brandStyle = styleOf(tester, brand);
-        expect(brandStyle.fontFamily, kBoutiqueSerifFamily);
-        expect(brandStyle.fontWeight, FontWeight.w700);
-        expect(brandStyle.fontSize, 22);
+        expect(brandStyle.fontFamily, kBoutiqueSansFamily);
+        expect(brandStyle.fontWeight, FontWeight.w600);
+        expect(brandStyle.fontSize, 18);
       }
     });
   });

@@ -62,7 +62,7 @@ export 'product_tile.dart'
         productTileExtent,
         tilePriceLinesFor;
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends StatefulWidget {
   const ProductCard({
     required this.product,
     this.urgency,
@@ -73,6 +73,9 @@ class ProductCard extends StatelessWidget {
     this.showViewProduct = true,
     this.onQuickView,
     this.onTap,
+    this.initialVariantId,
+    this.onVariantChanged,
+    this.openDirectly = false,
     super.key,
   });
 
@@ -109,9 +112,94 @@ class ProductCard extends StatelessWidget {
   /// Overrides the default tap, which opens the quick view (or selects the
   /// product in a tablet detail pane).
   final VoidCallback? onTap;
+  final String? initialVariantId;
+  final ValueChanged<String?>? onVariantChanged;
+  final bool openDirectly;
 
-  void _openQuickView(BuildContext context) =>
-      unawaited(showProductQuickView(context, product));
+  @override
+  State<ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard> {
+  late String? _selectedId =
+      widget.initialVariantId ?? selectedVariant(widget.product, 0)?.id;
+  Product get product => widget.product;
+  ProductTileDensity get density => widget.density;
+  VoidCallback? get onQuickView => widget.onQuickView;
+  VoidCallback? get onTap => widget.onTap;
+  bool get showWishlist => widget.showWishlist;
+  bool get showViewProduct => widget.showViewProduct;
+  String? get urgency => widget.urgency;
+
+  @override
+  void didUpdateWidget(covariant ProductCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.product.id != product.id ||
+        oldWidget.initialVariantId != widget.initialVariantId) {
+      _selectedId = widget.initialVariantId ?? selectedVariant(product, 0)?.id;
+    }
+  }
+
+  void _openPdp(BuildContext context) => openProduct(
+        context,
+        product,
+        initialVariantId: _selectedId,
+        initialVariantIndex: _selectedId == null ? -1 : 0,
+      );
+
+  Widget? _options() {
+    final choices = selectableVariants(product);
+    if (choices.length < 2) return null;
+    final selected = selectedVariant(
+      product,
+      variantIndexForId(product, _selectedId, fallback: -1),
+    );
+    return PopupMenuButton<String>(
+      tooltip: 'Elegir opción',
+      initialValue: _selectedId,
+      onSelected: (id) {
+        setState(() => _selectedId = id);
+        widget.onVariantChanged?.call(id);
+      },
+      itemBuilder: (_) => [
+        for (final variant in choices)
+          PopupMenuItem(
+            value: variant.id,
+            child: Text(
+              '${variant.title}${variant.available ? '' : ' · Agotado'}',
+            ),
+          ),
+      ],
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                selected?.title ?? 'Elegir opción',
+                softWrap: true,
+                style: boutiqueText(size: 12, height: 1.3),
+              ),
+            ),
+            const Icon(Icons.expand_more, size: 18),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openQuickView(BuildContext context) => unawaited(
+        showProductQuickView(
+          context,
+          product,
+          initialVariantId: _selectedId,
+          initialVariantIndex: _selectedId == null ? -1 : 0,
+          onVariantChanged: (id) {
+            if (mounted) setState(() => _selectedId = id);
+            widget.onVariantChanged?.call(id);
+          },
+        ),
+      );
 
   /// A long press: the caller's [onQuickView] when given, the quick view
   /// otherwise.
@@ -128,10 +216,14 @@ class ProductCard extends StatelessWidget {
       onTap!();
       return;
     }
+    if (widget.openDirectly) {
+      _openPdp(context);
+      return;
+    }
     // A tablet detail pane keeps selecting the product beside the list.
     if (BrowseDetailScope.maybeOf(context) != null &&
         context.findAncestorWidgetOfExactType<ProductScreen>() == null) {
-      openProduct(context, product);
+      _openPdp(context);
       return;
     }
     _openQuickView(context);
@@ -142,7 +234,15 @@ class ProductCard extends StatelessWidget {
     final store = StoreScope.of(context);
     final facets = store.facetsFor(product.id);
     final wishlisted = store.wishlist.contains(product.id);
-    final data = ProductTileData.fromProduct(product, facets: facets);
+    final data = ProductTileData.fromProduct(
+      product,
+      facets: facets,
+      variant: selectedVariant(
+        product,
+        variantIndexForId(product, _selectedId, fallback: -1),
+      ),
+      selectDefaultVariant: false,
+    );
     // Beside the bag a long press lifts the card instead of opening the card.
     final lifts = DuoWorkspace.isDual(context, listen: true) &&
         DuoWorkspace.regionOf(context) == DuoRegion.browse;
@@ -155,6 +255,7 @@ class ProductCard extends StatelessWidget {
           data: data,
           density: density,
           eyebrow: urgency,
+          optionControl: _options(),
           wishlisted: wishlisted,
           onToggleWishlist:
               showWishlist ? () => store.toggleWishlist(product.id) : null,
@@ -162,10 +263,11 @@ class ProductCard extends StatelessWidget {
           footer: showViewProduct
               ? TileViewProductButton(
                   key: Key('view-product-${product.id}'),
-                  onPressed: () => openProduct(context, product),
+                  onPressed: () => _openPdp(context),
                 )
               : null,
-          semanticHint: 'Abre la vista previa',
+          semanticHint:
+              widget.openDirectly ? 'Abre el producto' : 'Abre la vista previa',
           onTap: () => _tap(context),
         ),
       ),
@@ -250,8 +352,14 @@ void openProduct(
   BuildContext context,
   Product product, {
   int initialVariantIndex = 0,
+  String? initialVariantId,
 }) {
   final store = StoreScope.of(context);
+  initialVariantIndex = variantIndexForId(
+    product,
+    initialVariantId,
+    fallback: initialVariantIndex,
+  );
   // One key wherever the page is drawn: a window that opens moves it to its
   // right side with its state.
   final key = GlobalKey(debugLabel: 'product ${product.id}');
@@ -261,6 +369,7 @@ void openProduct(
           key: key,
           productId: product.id,
           initialVariantIndex: initialVariantIndex,
+          initialVariantId: initialVariantId,
         ),
       );
   final beside = DuoPanePage(

@@ -1,16 +1,6 @@
-/// Shared purchase selection for package C (Fig.07 ficha + Fig.06 quick-view).
-///
-/// Both surfaces select from the *same* Shopify variants and add the *same*
-/// variant id to the bag. This file owns that logic so the two widgets cannot
-/// drift: the ficha and the sheet only render.
-///
-/// Colour rule (brief: "swatches solo con mapeo fiable"): a variant title maps
-/// to a swatch only when it names exactly one canonical colour — no `/`, no
-/// second colour word, no invented hex. Anything else (`Cafe/Dorado`,
-/// `Arena/Beige Dorado Signature Canvas`, `Marrón` which has no alias) returns
-/// null and the UI falls back to neutral text chips. Stock urgency
-/// (`Últimas piezas`) is never fabricated here either: the catalog carries
-/// only an `available` bool, so there is no quantity to render.
+/// Shared product selection and guarded purchase actions.
+/// Named options come only from selectedOptions; legacy variant titles remain
+/// neutral labels. Missing combinations resolve to -1, never another variant.
 library;
 
 import 'package:flutter/material.dart';
@@ -21,6 +11,9 @@ import '../../main.dart';
 import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart' show openBag;
 import '../checkout/mini_cart.dart' show showMiniCart;
+import 'variant_selection.dart';
+
+export 'variant_selection.dart';
 
 // ---------------------------------------------------------------------------
 // Selection
@@ -29,10 +22,11 @@ import '../checkout/mini_cart.dart' show showMiniCart;
 /// Variants the shopper can choose from. Single-variant `Default Title`
 /// products have no meaningful choice and return empty.
 List<ProductVariant> selectableVariants(Product product) {
-  return product.variants.where((v) => !v.isDefault).toList();
+  return productChoices(product);
 }
 
 ProductVariant? selectedVariant(Product product, int index) {
+  if (index < 0) return null;
   final selectable = selectableVariants(product);
   if (selectable.isEmpty) {
     return product.variants.isEmpty ? null : product.variants.first;
@@ -46,8 +40,7 @@ double selectionPrice(Product product, int index) {
 }
 
 double? selectionCompareAt(Product product, int index) {
-  return selectedVariant(product, index)?.compareAtPrice ??
-      product.compareAtPrice;
+  return selectedVariant(product, index)?.compareAtPrice;
 }
 
 /// True only when the data carries a real `compare_at` above price.
@@ -67,7 +60,7 @@ int selectionDiscountPercent(Product product, int index) {
 }
 
 bool selectionInStock(Product product, int index) {
-  return selectedVariant(product, index)?.available ?? product.isInStock;
+  return selectedVariant(product, index)?.available ?? false;
 }
 
 // ---------------------------------------------------------------------------
@@ -203,7 +196,11 @@ bool hasReliableColorOptions(Product product) {
   final selectable = selectableVariants(product);
   if (selectable.isEmpty) return false;
   for (final variant in selectable) {
-    final slug = reliableColorSlug(variant.title);
+    final color = variant.selectedOptions.entries.where(
+      (e) => const ['color', 'colour', 'colores'].contains(fold(e.key)),
+    );
+    if (color.length != 1) return false;
+    final slug = _colorAliasToSlug[fold(color.single.value)];
     if (slug == null) return false;
     if (slug == 'multicolor') return false;
     if (!kProductSwatchFills.containsKey(slug)) return false;
@@ -330,7 +327,7 @@ Future<void> testOnlyAdd(
 ///   alone).
 /// * Anything else → neutral text chips.
 /// * Single-variant products → nothing (no fake choice).
-class ProductOptionSelector extends StatelessWidget {
+class ProductOptionSelector extends StatefulWidget {
   const ProductOptionSelector({
     required this.product,
     required this.selectedIndex,
@@ -341,82 +338,123 @@ class ProductOptionSelector extends StatelessWidget {
   });
 
   final Product product;
-
-  /// Label above the swatches when the options are colours.
-  final String colorHeading;
-
-  /// Appends the chosen colour to the label («Color: Negro»). The preview
-  /// turns it off and prints a bare «Colores».
-  final bool showSelectedName;
-
-  /// The chosen option. Null means none is chosen yet (the quick view opened
-  /// to make the shopper pick); an out-of-range index falls back to the first.
   final int? selectedIndex;
   final ValueChanged<int> onSelect;
+  final String colorHeading;
+  final bool showSelectedName;
+
+  @override
+  State<ProductOptionSelector> createState() => _ProductOptionSelectorState();
+}
+
+class _ProductOptionSelectorState extends State<ProductOptionSelector> {
+  Map<String, String> _values = {};
+
+  void _readSelection() {
+    _values = Map.of(
+      widget.selectedIndex == null
+          ? const <String, String>{}
+          : selectedVariant(widget.product, widget.selectedIndex!)
+                  ?.selectedOptions ??
+              const <String, String>{},
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _readSelection();
+  }
+
+  @override
+  void didUpdateWidget(covariant ProductOptionSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.product.id != widget.product.id ||
+        (oldWidget.selectedIndex != widget.selectedIndex &&
+            widget.selectedIndex != -1)) {
+      _readSelection();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final selectable = selectableVariants(product);
-    if (selectable.isEmpty) return const SizedBox.shrink();
-    final chosen = selectedIndex;
-    final int? safeIndex = chosen == null
-        ? null
-        : (chosen < 0 || chosen >= selectable.length)
-            ? 0
-            : chosen;
-
-    if (hasReliableColorOptions(product)) {
-      final selectedTitle =
-          safeIndex == null ? null : selectable[safeIndex].title;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final choices = selectableVariants(widget.product);
+    if (choices.isEmpty) return const SizedBox.shrink();
+    final groups = productOptionValues(widget.product);
+    // Old snapshots with no selectedOptions retain honest, complete labels.
+    // Never turn the variant title into a fabricated colour or size.
+    if (groups.isEmpty) {
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
         children: [
-          Text(
-            showSelectedName && selectedTitle != null
-                ? '$colorHeading: $selectedTitle'
-                : colorHeading,
-            style: boutiqueText(size: 14, color: palette.ink, height: 1.3),
-          ),
-          const SizedBox(height: BoutiqueSpace.xs),
-          Wrap(
-            children: [
-              for (var i = 0; i < selectable.length; i++)
-                _Swatch(
-                  fill: kProductSwatchFills[
-                      reliableColorSlug(selectable[i].title)]!,
-                  selected: i == safeIndex,
-                  available: selectable[i].available,
-                  label: selectable[i].title,
-                  onTap: () => onSelect(i),
-                ),
-            ],
-          ),
+          for (var i = 0; i < choices.length; i++)
+            _OptionChip(
+              label: choices[i].title,
+              selected: widget.selectedIndex == i,
+              available: choices[i].available,
+              onTap: () => widget.onSelect(i),
+            ),
         ],
       );
     }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Opción',
-          style: boutiqueText(size: 14, color: palette.ink, height: 1.3),
-        ),
-        const SizedBox(height: BoutiqueSpace.sm),
-        Wrap(
-          spacing: BoutiqueSpace.sm,
-          runSpacing: BoutiqueSpace.sm,
-          children: [
-            for (var i = 0; i < selectable.length; i++)
-              _OptionChip(
-                label: selectable[i].title,
-                selected: i == safeIndex,
-                available: selectable[i].available,
-                onTap: () => onSelect(i),
-              ),
-          ],
-        ),
+        for (final group in groups.entries) ...[
+          Text(
+            _values[group.key] == null || !widget.showSelectedName
+                ? group.key
+                : '${group.key}: ${_values[group.key]}',
+            style: boutiqueText(size: 14, color: palette.ink, height: 1.3),
+          ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              for (final value in group.value)
+                Builder(
+                  builder: (context) {
+                    final next = {..._values, group.key: value};
+                    final index = indexForOptions(widget.product, next);
+                    final available = index >= 0 && choices[index].available;
+                    final isColor = const ['color', 'colour', 'colores']
+                        .contains(fold(group.key));
+                    final slug =
+                        isColor ? _colorAliasToSlug[fold(value)] : null;
+                    void select() {
+                      setState(() => _values = next);
+                      widget.onSelect(index);
+                    }
+
+                    if (slug != null && kProductSwatchFills.containsKey(slug)) {
+                      return _Swatch(
+                        fill: kProductSwatchFills[slug]!,
+                        selected: _values[group.key] == value,
+                        available: available,
+                        label: value,
+                        onTap: select,
+                      );
+                    }
+                    return _OptionChip(
+                      label: value,
+                      selected: _values[group.key] == value,
+                      available: available,
+                      onTap: select,
+                    );
+                  },
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
+        if (widget.selectedIndex == -1)
+          Text(
+            'Esta combinación no está disponible.',
+            key: const Key('product-combination-unavailable'),
+            style: boutiqueText(size: 13, color: palette.inkMuted),
+          ),
       ],
     );
   }
@@ -447,9 +485,9 @@ class _Swatch extends StatelessWidget {
       button: true,
       selected: selected,
       label: 'Color $label${available ? '' : ', no disponible'}',
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
+      child: TextButton(
+        onPressed: onTap,
+        style: TextButton.styleFrom(padding: EdgeInsets.zero),
         child: SizedBox(
           width: BoutiqueSpace.tapTarget,
           height: BoutiqueSpace.tapTarget,
@@ -505,14 +543,14 @@ class _OptionChip extends StatelessWidget {
       button: true,
       selected: selected,
       label: 'Opción $label${available ? '' : ', no disponible'}',
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
+      child: TextButton(
+        onPressed: onTap,
+        style: TextButton.styleFrom(padding: EdgeInsets.zero),
         child: Opacity(
           opacity: available ? 1 : 0.45,
           child: Container(
             constraints: const BoxConstraints(
-              minHeight: 44,
+              minHeight: 48,
               maxWidth: 220,
             ),
             padding: const EdgeInsets.symmetric(
@@ -537,8 +575,6 @@ class _OptionChip extends StatelessWidget {
                 Flexible(
                   child: Text(
                     label.toUpperCase(),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                     style: boutiqueEyebrow(size: 10, color: palette.ink),
                   ),
                 ),

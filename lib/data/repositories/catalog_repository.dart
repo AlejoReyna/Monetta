@@ -356,6 +356,25 @@ Product productFromCatalogSnapshot(Map<String, dynamic> json) => Product(
           compareAtPrice: variant['compare_at_price'] == null
               ? null
               : double.parse(variant['compare_at_price'] as String),
+          selectedOptions: {
+            for (final option
+                in (variant['selectedOptions'] as List? ?? const [])
+                    .whereType<Map<String, dynamic>>())
+              if (option['name'] is String && option['value'] is String)
+                option['name'] as String: option['value'] as String,
+            // Ajax option positions are meaningful only with their actual
+            // product option names. The trimmed legacy snapshot lacks both.
+            for (var i = 0;
+                i < (json['options'] as List? ?? const []).length;
+                i++)
+              if ((json['options'] as List)[i] case {'name': final String name})
+                if (variant['option${i + 1}'] case final String value)
+                  name: value,
+          },
+          imageUrls: [
+            if (variant['featured_image'] case {'src': final String src}) src,
+            if (variant['image'] case {'url': final String url}) url,
+          ],
         );
       }).toList(),
     );

@@ -8,6 +8,7 @@ import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/domain/product.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/features/catalog/product_tile.dart';
+import 'package:monetta_app/features/catalog/product_controls.dart';
 import 'package:monetta_app/main.dart';
 
 Product _product({
@@ -232,8 +233,8 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byIcon(Icons.favorite_border), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.favorite_border));
+    expect(find.byType(ProductFavoriteButton), findsOneWidget);
+    await tester.tap(find.byType(ProductFavoriteButton));
     await tester.pumpAndSettle();
 
     expect(opened, 0, reason: 'the heart must not open the product page');
