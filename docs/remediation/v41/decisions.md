@@ -23,3 +23,5 @@ A03 attempt failed with Codex usage-limit response before complete capability ha
 - D07 policies: published merchant shop policy fields can supply approved text; no FAQ/ad schema inferred. Missing or withdrawn published content hides corresponding links; transport errors remain retryable errors.
 
 Evidence snapshot: evidence/A00/A03-capability-proposal-v1.md. No secrets or live calls.
+
+A06 continuation was interrupted by Codex usage limit (retry time reported 23:25 local). This is an execution limitation, not new owner authority. Partial code remains unintegrated. After user continuation at23:31 local, retry same Terra/high; no silent provider/model fallback.
