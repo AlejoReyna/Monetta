@@ -1,0 +1,24 @@
+[
+  {
+    "id": "B31",
+    "source": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/03_banners/svg/B31_contacto.svg",
+    "source_sha256": "e632e79bdfcd293d3cb30e317cdb29690debb93bdb758f4dfbcdea7c531abc94",
+    "output": "assets/images/v41/banners/B31_photo.png",
+    "sha256": "f1257f41528cdcc8f18c768b259ee2d320f3139044e329a7d9edc47bd9f1a51c",
+    "pixels": [
+      1942,
+      809
+    ]
+  },
+  {
+    "id": "B32",
+    "source": "/Users/alexis/Downloads/MONETTA_Entrega_Final_v4.1/03_banners/svg/B32_mayoreo.svg",
+    "source_sha256": "3622346cd63c9684cbf472ae1134bfae3dbe6174f58b8b3294c37f1215269882",
+    "output": "assets/images/v41/banners/B32_photo.png",
+    "sha256": "3a598c767dd858ff968a6be67124ee8d8da09f233663b2fd20bce7cf04dd2514",
+    "pixels": [
+      1942,
+      809
+    ]
+  }
+]

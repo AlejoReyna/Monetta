@@ -1,0 +1,643 @@
+Analyzing 7 items...                                            
+
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/app/theme.dart:951:79 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/app/theme.dart:954:62 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/app/theme.dart:959:46 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/app/theme.dart:959:47 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/app/theme.dart:962:53 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/app/theme.dart:965:63 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/boutique_tokens.dart:154:71 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:76:20 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:76:21 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:90:10 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:102:16 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:114:21 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:120:78 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:125:57 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:134:35 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:134:36 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:134:37 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:143:16 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:162:60 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:163:42 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:163:43 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:164:12 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/client_guide_components.dart:164:13 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:44:16 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:56:69 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:61:39 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:63:67 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:96:49 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:96:50 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:98:66 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:109:66 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:119:61 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:119:62 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:122:78 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:123:44 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:123:45 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:123:46 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:129:69 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:133:69 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:134:38 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:134:39 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:134:40 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:134:41 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:135:14 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:135:15 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:140:64 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:140:65 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:147:68 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:148:10 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:160:8 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:161:6 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:600:49 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:600:50 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:603:76 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:610:79 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:613:14 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:618:76 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:618:77 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:632:38 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:632:39 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:633:18 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:633:19 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:634:8 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/boutique/guide_art.dart:635:6 • require_trailing_commas
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:6:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:6:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:6:86 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:6:116 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:6:126 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:7:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:7:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:7:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:7:119 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:7:129 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:8:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:8:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:8:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:8:134 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:8:144 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:9:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:9:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:9:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:9:141 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:9:151 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:10:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:10:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:10:85 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:10:108 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:10:118 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:11:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:11:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:11:76 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:11:86 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:11:96 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:12:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:12:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:12:76 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:12:86 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:12:96 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:13:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:13:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:13:76 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:13:86 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:13:96 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:14:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:14:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:14:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:14:106 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:14:116 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:15:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:15:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:15:80 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:15:94 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:15:104 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:16:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:16:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:16:77 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:16:88 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:16:98 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:17:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:17:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:17:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:17:106 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:17:116 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:18:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:18:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:18:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:18:103 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:18:113 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:19:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:19:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:19:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:19:104 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:19:114 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:20:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:20:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:20:80 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:20:94 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:20:104 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:21:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:21:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:21:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:21:96 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:21:106 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:22:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:22:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:22:80 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:22:94 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:22:104 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:23:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:23:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:23:79 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:23:92 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:23:102 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:24:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:24:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:24:74 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:24:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:24:93 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:25:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:25:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:25:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:25:104 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:25:114 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:26:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:26:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:26:78 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:26:90 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:26:100 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:27:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:27:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:27:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:27:100 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:27:110 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:28:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:28:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:28:90 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:28:102 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:28:112 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:29:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:29:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:29:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:29:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:29:94 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:30:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:30:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:30:80 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:30:95 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:30:105 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:31:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:31:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:31:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:31:97 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:31:107 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:32:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:32:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:32:80 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:32:95 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:32:105 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:33:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:33:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:33:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:33:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:33:94 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:34:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:34:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:34:82 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:34:99 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:34:109 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:35:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:35:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:35:82 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:35:99 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:35:109 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:36:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:36:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:36:78 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:36:248 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:36:258 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:37:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:37:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:37:77 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:37:176 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:37:186 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:38:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:38:42 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:38:116 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:38:161 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:38:171 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:39:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:39:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:39:90 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:39:107 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:39:120 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:40:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:40:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:40:90 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:40:107 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:40:120 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:41:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:41:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:41:88 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:41:103 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:41:116 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:42:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:42:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:42:91 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:42:109 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:42:122 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:43:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:43:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:43:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:43:101 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:43:114 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:44:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:44:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:44:90 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:44:107 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:44:120 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:45:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:45:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:45:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:45:93 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:45:106 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:46:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:46:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:46:85 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:46:97 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:46:110 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:47:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:47:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:47:91 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:47:109 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:47:122 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:48:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:48:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:48:86 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:48:99 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:48:112 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:49:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:49:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:49:92 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:49:111 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:49:124 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:50:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:50:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:50:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:50:93 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:50:106 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:51:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:51:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:51:91 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:51:109 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:51:122 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:52:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:52:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:52:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:52:101 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:52:114 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:53:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:53:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:53:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:53:101 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:53:114 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:54:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:54:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:54:90 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:54:107 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:54:120 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:55:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:55:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:55:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:55:89 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:55:102 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:56:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:56:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:56:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:56:101 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:56:114 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:57:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:57:33 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:57:71 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:57:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:57:89 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:58:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:58:39 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:58:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:58:99 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:58:107 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:59:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:59:36 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:59:77 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:59:90 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:59:98 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:60:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:60:31 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:60:67 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:60:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:60:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:61:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:61:34 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:61:73 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:61:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:61:92 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:62:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:62:36 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:62:77 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:62:90 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:62:98 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:63:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:63:40 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:63:85 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:63:102 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:63:110 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:64:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:64:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:64:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:64:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:64:95 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:65:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:65:41 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:65:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:65:105 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:65:113 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:66:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:66:37 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:66:79 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:66:93 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:66:101 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:67:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:67:44 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:67:93 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:67:114 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:67:122 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:68:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:68:37 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:68:79 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:68:93 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:68:101 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:69:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:69:42 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:69:89 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:69:108 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:69:116 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:70:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:70:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:70:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:70:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:70:95 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:71:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:71:41 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:71:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:71:105 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:71:113 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:72:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:72:42 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:72:89 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:72:108 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:72:116 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:73:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:73:34 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:73:73 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:73:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:73:92 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:74:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:74:40 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:74:85 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:74:102 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:74:110 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:75:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:75:36 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:75:77 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:75:90 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:75:98 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:76:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:76:33 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:76:71 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:76:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:76:89 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:77:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:77:41 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:77:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:77:105 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:77:113 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:78:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:78:37 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:78:79 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:78:93 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:78:101 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:79:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:79:33 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:79:71 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:79:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:79:89 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:80:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:80:34 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:80:73 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:80:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:80:92 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:81:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:81:33 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:81:71 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:81:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:81:89 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:82:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:82:43 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:82:91 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:82:111 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:82:119 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:83:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:83:33 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:83:71 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:83:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:83:89 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:84:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:84:34 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:84:73 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:84:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:84:92 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:85:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:85:36 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:85:77 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:85:90 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:85:98 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:86:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:86:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:86:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:86:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:86:95 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:87:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:87:33 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:87:71 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:87:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:87:89 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:88:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:88:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:88:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:88:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:88:95 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:89:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:89:33 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:89:71 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:89:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:89:89 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:90:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:90:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:90:69 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:90:78 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:90:86 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:91:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:91:37 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:91:79 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:91:93 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:91:101 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:92:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:92:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:92:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:92:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:92:95 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:93:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:93:34 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:93:73 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:93:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:93:92 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:94:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:94:33 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:94:71 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:94:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:94:89 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:95:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:95:36 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:95:77 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:95:90 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:95:98 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:96:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:96:34 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:96:73 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:96:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:96:92 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:97:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:97:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:97:69 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:97:78 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:97:86 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:98:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:98:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:98:69 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:98:78 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:98:86 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:99:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:99:34 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:99:73 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:99:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:99:92 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:100:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:100:34 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:100:73 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:100:84 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:100:92 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:101:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:101:35 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:101:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:101:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:101:95 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:102:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:102:31 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:102:67 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:102:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:102:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:103:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:103:31 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:103:67 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:103:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:103:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:104:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:104:31 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:104:67 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:104:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:104:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:105:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:105:31 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:105:67 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:105:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:105:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:106:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:106:33 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:106:71 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:106:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:106:89 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:107:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:107:31 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:107:67 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:107:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:107:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:108:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:108:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:108:69 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:108:78 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:108:86 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:109:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:109:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:109:69 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:109:78 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:109:86 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:110:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:110:31 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:110:67 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:110:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:110:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:111:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:111:31 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:111:67 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:111:75 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:111:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:112:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:112:32 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:112:69 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:112:78 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:112:86 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:113:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:113:44 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:113:93 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:113:114 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:113:122 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:114:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:114:41 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:114:87 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:114:105 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:114:113 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:115:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:115:43 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:115:91 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:115:111 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:115:119 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:116:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:116:39 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:116:83 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:116:99 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:116:107 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:117:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:117:38 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:117:81 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:117:96 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:117:104 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:118:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:118:42 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:118:105 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:119:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:119:47 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:119:115 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:120:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:120:42 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:120:105 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:121:3 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:121:47 • prefer_single_quotes
+   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/features/boutique/guide_assets.g.dart:121:115 • prefer_single_quotes
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/guide_chrome.dart:42:55 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/guide_chrome.dart:50:57 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/guide_chrome.dart:62:55 • require_trailing_commas
+
+639 issues found. (ran in 1.3s)

@@ -27,3 +27,5 @@ Root Flutter test/codegen slot: A01 finishes current focused foundation checks f
 A04/A05/A06/A07/A08: preserve existing edits, stop dependent integration and root test/codegen until foundation gate and renewed stage lease. A06 isolated edits must await A01 release of client_guide_sections.dart. A08 has no product_screen.dart lease until A02 releases it.
 
 A01 early release acknowledged: client_guide_sections.dart now belongs exclusively to A06 for registration/footer/editorial composition; no A01 rewrites. A06 remains stage-held until renewed work lease. A01 retains current root test slot pending explicit release. A02 next for codegen. A00 took a bounded repair lease for home_v41_catalog.dart missing foundation import and Favorites void navigation expression; fixes completed without changing feature behavior. These files return to A07, which remains stage-held.
+
+A01 final release: no active Flutter process; A02 now exclusively owns root codegen/test slot. A01 implementation files frozen for A00 integration review. A06 retains released sections composition lease but remains stage-held pending A03 capabilities.

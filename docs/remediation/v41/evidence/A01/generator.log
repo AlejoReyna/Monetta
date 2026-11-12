@@ -1,0 +1,22 @@
+ok   15.27:1 (min 4.5)  ink on canvas — texto sobre blanco puro
+ok   14.08:1 (min 4.5)  ink on surfaceWarm — texto sobre superficie tenue (pie gris)
+ok   12.78:1 (min 4.5)  ink on surfaceTile — etiqueta de navegación activa sobre su cápsula
+ok    6.72:1 (min 4.5)  inkMuted on canvas — texto secundario
+ok    6.20:1 (min 4.5)  inkMuted on surfaceWarm — texto secundario en el pie
+ok    5.63:1 (min 4.5)  inkMuted on surfaceTile — texto secundario en cápsulas
+ok   15.27:1 (min 4.5)  onActionPrimary on actionPrimary — botón Glass con halo C: texto oscuro sobre blanco
+ok   15.27:1 (min 4.5)  onActionDark on actionDark — botón oscuro
+ok   15.27:1 (min 4.5)  accentText on canvas — texto de énfasis pequeño (oro no sirve para texto pequeño, §109)
+ok    3.57:1 (min 3)  goldLarge on canvas — oro solo en texto grande/bold ≥20px (ENVÍO GRATIS del registro) e iconos
+ok   12.78:1 (min 4.5)  navigationActive on surfaceTile — destino activo: texto oscuro sobre cápsula
+ok   15.27:1 (min 4.5)  navigationInactive on bar — destino inactivo
+ok    6.60:1 (min 4.5)  sale on canvas — error / X de rechazo #A63535
+ok    5.53:1 (min 4.5)  sale on saleSurface — aviso de error sobre superficie
+ok    5.92:1 (min 4.5)  success on canvas — saldo disponible y check verde
+ok    5.16:1 (min 4.5)  success on successSurface — aviso de éxito
+ok   18.88:1 (min 4.5)  onSoldBadge on soldBadge — etiqueta AGOTADO negra/blanca
+ok    3.22:1 (min 3)  borderControl on canvas — contorno de campo (WCAG 1.4.11)
+ok   16.21:1 (min 3)  focus on canvas — anillo de foco 2px
+ok    3.57:1 (min 1)  gold on canvas — oro decorativo/iconos; registrado para constancia
+unchanged lib/app/monetta_tokens.g.dart
+wrote lib/features/boutique/guide_assets.g.dart

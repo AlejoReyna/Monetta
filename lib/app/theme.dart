@@ -947,15 +947,22 @@ ThemeData buildTheme({Brightness brightness = Brightness.light}) {
       fillColor: colors.inputFill,
       labelStyle: sans(size: 12.5, color: colors.contentMuted),
       hintStyle: sans(size: 12.5, color: colors.contentMuted),
-      enabledBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: colors.borderControl),
-      ),
-      focusedBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: colors.contentPrimary),
-      ),
-      errorBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: colors.sale),
-      ),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(24),
+          borderSide: BorderSide(color: colors.borderControl)),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(24),
+          borderSide: const BorderSide(
+              color: MonettaTokens.focusColor,
+              width: MonettaTokens.focusWidth)),
+      errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(24),
+          borderSide: BorderSide(color: colors.sale)),
+      focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(24),
+          borderSide: BorderSide(color: colors.sale, width: 2)),
     ),
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith(

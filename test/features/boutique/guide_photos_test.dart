@@ -154,7 +154,7 @@ void main() {
         Align(
           alignment: Alignment.topLeft,
           child: GuideHero(
-            asset: kGuideWholesaleHero,
+            asset: kGuideWholesaleBags,
             title: 'MAYOREO',
             textSide: side,
           ),
@@ -199,7 +199,7 @@ void main() {
           (scrim.decoration as BoxDecoration).gradient! as LinearGradient;
       expect(gradient.begin, Alignment.centerRight);
       expect(gradient.end, Alignment.centerLeft);
-      expect(findAssetImage(kGuideWholesaleHero), findsOneWidget);
+      expect(findAssetImage(kGuideWholesaleBags), findsOneWidget);
     });
   });
 }

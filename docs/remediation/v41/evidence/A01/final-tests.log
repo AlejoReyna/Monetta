@@ -1,0 +1,198 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart
+00:00 +0: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: all supplied assets resolve by ID with matching hashes and dimensions
+00:00 +1: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: button wraps enlarged copy and supports keyboard activation
+lib/features/home/home_v41_catalog.dart:34:2: Error: Undefined name 'immutable'.
+@immutable
+ ^^^^^^^^^
+test/features/boutique/guide_typography_test.dart:134:52: Error: No named parameter with the name 'onOpenNew'.
+          body: HomeEditorialBanner(playing: true, onOpenNew: () {}),
+                                                   ^^^^^^^^^
+lib/features/home/home_boutique_sections.dart:112:9: Context: Found this candidate, but the arguments don't match.
+  const HomeEditorialBanner({
+        ^^^^^^^^^^^^^^^^^^^
+lib/data/local/catalog_cache_store.dart:318:24: Error: The getter 'selectedOptions' isn't defined for the type 'CachedVariant'.
+ - 'CachedVariant' is from 'package:monetta_app/data/local/database.dart' ('lib/data/local/database.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'selectedOptions'.
+        jsonDecode(row.selectedOptions) as Map,
+                       ^^^^^^^^^^^^^^^
+lib/data/local/catalog_cache_store.dart:320:40: Error: The getter 'imageUrls' isn't defined for the type 'CachedVariant'.
+ - 'CachedVariant' is from 'package:monetta_app/data/local/database.dart' ('lib/data/local/database.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'imageUrls'.
+      imageUrls: _decodeStringList(row.imageUrls),
+                                       ^^^^^^^^^
+lib/data/local/catalog_cache_store.dart:336:7: Error: No named parameter with the name 'selectedOptions'.
+      selectedOptions: Value(jsonEncode(variant.selectedOptions)),
+      ^^^^^^^^^^^^^^^
+lib/data/local/database.g.dart:950:3: Context: Found this candidate, but the arguments don't match.
+  CachedVariantsCompanion.insert({
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/favorites/favorites_screen.dart:102:19: Error: This expression has type 'void' and can't be used.
+                  openCatalogBrowse(
+                  ^
+lib/features/home/home_for_you_section.dart:112:41: Error: Expected ',' before this.
+                                        case final url?
+                                        ^^^^
+lib/features/home/home_for_you_section.dart:112:41: Error: 'case' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+                                        case final url?
+                                        ^^^^
+lib/features/home/home_for_you_section.dart:112:46: Error: Expected ')' before this.
+                                        case final url?
+                                             ^^^^^
+lib/features/home/home_for_you_section.dart:106:46: Error: Too many positional arguments: 0 allowed, but 1 found.
+Try removing the extra positional arguments.
+                              GestureDetector(
+                                             ^
+/opt/homebrew/share/flutter/packages/flutter/lib/src/widgets/gesture_detector.dart:237:3: Context: Found this candidate, but the arguments don't match.
+  GestureDetector({
+  ^^^^^^^^^^^^^^^
+lib/features/home/home_for_you_section.dart:176:35: Error: The method 'brandLabel' isn't defined for the type '_HomeForYouSectionState'.
+ - '_HomeForYouSectionState' is from 'package:monetta_app/features/home/home_for_you_section.dart' ('lib/features/home/home_for_you_section.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+                                  brandLabel(brand),
+                                  ^^^^^^^^^^
+lib/features/home/home_for_you_section.dart:196:33: Error: The method 'formatShopperPrice' isn't defined for the type '_HomeForYouSectionState'.
+ - '_HomeForYouSectionState' is from 'package:monetta_app/features/home/home_for_you_section.dart' ('lib/features/home/home_for_you_section.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'formatShopperPrice'.
+                                formatShopperPrice(price),
+                                ^^^^^^^^^^^^^^^^^^
+lib/features/home/home_new_collection_section.dart:116:46: Error: Member not found: 'MonettaImage.network'.
+                                MonettaImage.network(
+                                             ^^^^^^^
+lib/features/home/home_new_collection_section.dart:170:41: Error: The method 'brandLabel' isn't defined for the type '_HomeNewCollectionSectionState'.
+ - '_HomeNewCollectionSectionState' is from 'package:monetta_app/features/home/home_new_collection_section.dart' ('lib/features/home/home_new_collection_section.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+                                        brandLabel(brand),
+                                        ^^^^^^^^^^
+lib/features/home/home_new_collection_section.dart:196:37: Error: The method 'formatShopperPrice' isn't defined for the type '_HomeNewCollectionSectionState'.
+ - '_HomeNewCollectionSectionState' is from 'package:monetta_app/features/home/home_new_collection_section.dart' ('lib/features/home/home_new_collection_section.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'formatShopperPrice'.
+                                    formatShopperPrice(price),
+                                    ^^^^^^^^^^^^^^^^^^
+lib/features/home/home_new_collection_section.dart:205:39: Error: The method 'formatShopperPrice' isn't defined for the type '_HomeNewCollectionSectionState'.
+ - '_HomeNewCollectionSectionState' is from 'package:monetta_app/features/home/home_new_collection_section.dart' ('lib/features/home/home_new_collection_section.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'formatShopperPrice'.
+                                      formatShopperPrice(compare),
+                                      ^^^^^^^^^^^^^^^^^^
+00:00 +2: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: shared assets and opaque reduced-motion controls render
+00:01 +3: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 320.0/1.0
+00:01 +4: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 320.0/2.0
+00:01 +5: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 768.0/1.0
+00:01 +6: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 768.0/2.0
+00:01 +7: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 1440.0/1.0
+00:01 +8: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 1440.0/2.0
+00:02 +9 -1: loading /Users/alexis/theCode/Monetta/test/features/boutique/guide_typography_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/boutique/guide_typography_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/boutique/guide_typography_test.dart: lib/features/home/home_v41_catalog.dart:34:2: Error: Undefined name 'immutable'.
+  @immutable
+   ^^^^^^^^^
+  test/features/boutique/guide_typography_test.dart:134:52: Error: No named parameter with the name 'onOpenNew'.
+            body: HomeEditorialBanner(playing: true, onOpenNew: () {}),
+                                                     ^^^^^^^^^
+  lib/features/home/home_boutique_sections.dart:112:9: Context: Found this candidate, but the arguments don't match.
+    const HomeEditorialBanner({
+          ^^^^^^^^^^^^^^^^^^^
+  lib/data/local/catalog_cache_store.dart:318:24: Error: The getter 'selectedOptions' isn't defined for the type 'CachedVariant'.
+   - 'CachedVariant' is from 'package:monetta_app/data/local/database.dart' ('lib/data/local/database.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'selectedOptions'.
+          jsonDecode(row.selectedOptions) as Map,
+                         ^^^^^^^^^^^^^^^
+  lib/data/local/catalog_cache_store.dart:320:40: Error: The getter 'imageUrls' isn't defined for the type 'CachedVariant'.
+   - 'CachedVariant' is from 'package:monetta_app/data/local/database.dart' ('lib/data/local/database.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'imageUrls'.
+        imageUrls: _decodeStringList(row.imageUrls),
+                                         ^^^^^^^^^
+  lib/data/local/catalog_cache_store.dart:336:7: Error: No named parameter with the name 'selectedOptions'.
+        selectedOptions: Value(jsonEncode(variant.selectedOptions)),
+        ^^^^^^^^^^^^^^^
+  lib/data/local/database.g.dart:950:3: Context: Found this candidate, but the arguments don't match.
+    CachedVariantsCompanion.insert({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/features/favorites/favorites_screen.dart:102:19: Error: This expression has type 'void' and can't be used.
+                    openCatalogBrowse(
+                    ^
+  lib/features/home/home_for_you_section.dart:112:41: Error: Expected ',' before this.
+                                          case final url?
+                                          ^^^^
+  lib/features/home/home_for_you_section.dart:112:41: Error: 'case' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+                                          case final url?
+                                          ^^^^
+  lib/features/home/home_for_you_section.dart:112:46: Error: Expected ')' before this.
+                                          case final url?
+                                               ^^^^^
+  lib/features/home/home_for_you_section.dart:106:46: Error: Too many positional arguments: 0 allowed, but 1 found.
+  Try removing the extra positional arguments.
+                                GestureDetector(
+                                               ^
+  /opt/homebrew/share/flutter/packages/flutter/lib/src/widgets/gesture_detector.dart:237:3: Context: Found this candidate, but the arguments don't match.
+    GestureDetector({
+    ^^^^^^^^^^^^^^^
+  lib/features/home/home_for_you_section.dart:176:35: Error: The method 'brandLabel' isn't defined for the type '_HomeForYouSectionState'.
+   - '_HomeForYouSectionState' is from 'package:monetta_app/features/home/home_for_you_section.dart' ('lib/features/home/home_for_you_section.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+                                    brandLabel(brand),
+                                    ^^^^^^^^^^
+  lib/features/home/home_for_you_section.dart:196:33: Error: The method 'formatShopperPrice' isn't defined for the type '_HomeForYouSectionState'.
+   - '_HomeForYouSectionState' is from 'package:monetta_app/features/home/home_for_you_section.dart' ('lib/features/home/home_for_you_section.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'formatShopperPrice'.
+                                  formatShopperPrice(price),
+                                  ^^^^^^^^^^^^^^^^^^
+  lib/features/home/home_new_collection_section.dart:116:46: Error: Member not found: 'MonettaImage.network'.
+                                  MonettaImage.network(
+                                               ^^^^^^^
+  lib/features/home/home_new_collection_section.dart:170:41: Error: The method 'brandLabel' isn't defined for the type '_HomeNewCollectionSectionState'.
+   - '_HomeNewCollectionSectionState' is from 'package:monetta_app/features/home/home_new_collection_section.dart' ('lib/features/home/home_new_collection_section.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+                                          brandLabel(brand),
+                                          ^^^^^^^^^^
+  lib/features/home/home_new_collection_section.dart:196:37: Error: The method 'formatShopperPrice' isn't defined for the type '_HomeNewCollectionSectionState'.
+   - '_HomeNewCollectionSectionState' is from 'package:monetta_app/features/home/home_new_collection_section.dart' ('lib/features/home/home_new_collection_section.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'formatShopperPrice'.
+                                      formatShopperPrice(price),
+                                      ^^^^^^^^^^^^^^^^^^
+  lib/features/home/home_new_collection_section.dart:205:39: Error: The method 'formatShopperPrice' isn't defined for the type '_HomeNewCollectionSectionState'.
+   - '_HomeNewCollectionSectionState' is from 'package:monetta_app/features/home/home_new_collection_section.dart' ('lib/features/home/home_new_collection_section.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'formatShopperPrice'.
+                                        formatShopperPrice(compare),
+                                        ^^^^^^^^^^^^^^^^^^
+  .
+00:03 +9 -1: /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: every owner photograph constant points at a shipped file
+00:03 +10 -1: /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: guideCollectionPhoto resolves the six brands with the side that carries the text
+00:03 +11 -1: /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: guideCollectionPhoto accepts display names and hyphenated handles for a brand
+00:03 +12 -1: /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: guideCollectionPhoto resolves silhouettes
+00:03 +13 -1: /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: guideCollectionPhoto resolves categories, the watch still serving accessories
+00:03 +14 -1: /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: guideCollectionPhoto brand beats silhouette and silhouette beats category
+00:03 +15 -1: /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: guideCollectionPhoto returns null when nothing matches
+00:03 +16 -1: /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: GuideHero text side left (the default) puts the title in the left half
+00:03 +17 -1: /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: GuideHero text side right puts the title in the right half and flips the scrim
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: a value greater than <195.0>
+  Actual: <96.75200653076172>
+   Which: is not a value greater than <195.0>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart:188:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart line 188
+The test description was:
+  right puts the title in the right half and flips the scrim
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:03 +17 -2: /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: GuideHero text side right puts the title in the right half and flips the scrim [E]
+  Test failed. See exception logs above.
+  The test description was: right puts the title in the right half and flips the scrim
+  
+00:03 +17 -2: Some tests failed.
+
+Failing tests:
+  /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: GuideHero text side right puts the title in the right half and flips the scrim
+  /Users/alexis/theCode/Monetta/test/features/boutique/guide_typography_test.dart: loading /Users/alexis/theCode/Monetta/test/features/boutique/guide_typography_test.dart

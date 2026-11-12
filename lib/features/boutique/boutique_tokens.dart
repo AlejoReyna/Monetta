@@ -100,8 +100,9 @@ TextStyle _serifRole(
           ? role.compact
           : role.sizeFor(MediaQuery.sizeOf(context).width));
   return TextStyle(
-    fontFamily: kBoutiqueSerifFamily,
-    fontFamilyFallback: kBoutiqueSerifFallback,
+    fontFamily: role.serif ? kBoutiqueSerifFamily : kBoutiqueSansFamily,
+    fontFamilyFallback:
+        role.serif ? kBoutiqueSerifFallback : kBoutiqueSansFallback,
     fontSize: resolved,
     fontWeight: FontWeight.values[(role.weight ~/ 100) - 1],
     letterSpacing: resolved * role.tracking,
@@ -141,13 +142,19 @@ TextStyle boutiqueSectionHeading({
 }) =>
     _serifRole(MonettaTokens.sectionTitle, size, color, context);
 
-/// Row label of the account, menu and settings lists: serif (18 / 19 / 20).
+/// Row label of the account, menu and settings lists: DM Sans (18 / 19 / 20).
 TextStyle boutiqueRowLabel({
   Color? color,
   double? size,
   BuildContext? context,
 }) =>
-    _serifRole(MonettaTokens.accountRow, size, color, context);
+    boutiqueText(
+      size: size ??
+          MonettaTokens.accountRow.sizeFor(
+              context == null ? 390 : MediaQuery.sizeOf(context).width),
+      color: color,
+      height: MonettaTokens.accountRow.lineHeight,
+    );
 
 /// Running copy, labels, prices. Floor of 12 for secondary, 14 for body.
 TextStyle boutiqueText({

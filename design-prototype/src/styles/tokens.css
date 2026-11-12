@@ -99,12 +99,12 @@
   --type-section-title-lh: 1.15;
   --type-section-title-track: -0.01em;
   --type-section-title-size: 23px;
-  --type-product-name-font: var(--font-serif);
+  --type-product-name-font: var(--font-sans);
   --type-product-name-weight: 400;
   --type-product-name-lh: 1.15;
   --type-product-name-track: -0.01em;
   --type-product-name-size: 25px;
-  --type-account-row-font: var(--font-serif);
+  --type-account-row-font: var(--font-sans);
   --type-account-row-weight: 400;
   --type-account-row-lh: 1.25;
   --type-account-row-track: 0em;

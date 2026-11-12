@@ -23,3 +23,7 @@ client_guide_sections.dart foundation diff reviewed: three-line B04-editorial ma
 Assets: packaged banners 1280×533 differ from source manifest 1920×800; provenance/dimension distinction retained in A01 handoff. No assertion of pixel-identical export dimensions.
 
 Dependency review: flutter_svg 2.3.4 plus vector_graphics/path_parsing support added. Solver also updated intl/matcher/meta/test/test_api/test_core/vector_math. A00 will review/preserve compatible lock resolution after active tests; no further worker lock edits.
+
+A01 final local package accepted for integration: 28 focused tests passed; 13 after captures plus labeled before/provenance retained. A00 inspected Contact 320/200%, Wholesale 768/100% and shared assets/opaque controls. Text is readable and grows without scaleDown. These are fixture captures, not installed-app/device or complete-route evidence. Cross-feature regressions and F01/F16 closure remain open. Scoped analysis: zero errors/warnings, 639 informational lint findings retained for cleanup. Generator check passed.
+
+Lock resolution accepted by A00: local Flutter SDK now requires matcher 0.12.20, test_api 0.7.12, meta ^1.18.3, vector_math ^2.4.0 and localization intl ^0.20.3. Solver movement from older lock is therefore compatible with current SDK, not arbitrary upgrades to revert. flutter_svg and its vector/path dependencies are required for supplied SVG icons. No package-resolution command was run by A00 while A02 owns codegen.

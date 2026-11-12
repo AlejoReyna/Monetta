@@ -238,7 +238,7 @@
         }
       },
       "productName": {
-        "family": "serif",
+        "family": "sans",
         "weight": 400,
         "lineHeight": 1.15,
         "tracking": -0.01,
@@ -249,7 +249,7 @@
         }
       },
       "accountRow": {
-        "family": "serif",
+        "family": "sans",
         "weight": 400,
         "lineHeight": 1.25,
         "tracking": 0,

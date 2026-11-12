@@ -163,32 +163,28 @@ void main() {
     });
 
     testWidgets(
-        '«PRECIOS DE mayoreo»: serif title, script accent, italic '
-        'body', (tester) async {
+        'B04 preserves delivered lettering rather than reconstructing fonts',
+        (tester) async {
       await pumpClientGuide(
-        tester,
-        const SingleChildScrollView(
-          child: ClientGuideEditorial(
+          tester,
+          const SingleChildScrollView(
+              child: ClientGuideEditorial(
             title: 'PRECIOS DE',
             titleAccent: 'mayoreo',
             subtitle: 'A partir de 3 piezas',
             imageAsset: kGuideHomeWholesale,
             overlaySide: GuideTextSide.right,
-          ),
-        ),
-      );
-      final accent = _spanStyle(tester, 'mayoreo')!;
-      expect(accent.fontFamily, kGuideScriptFamily);
-      expect(accent.decoration, TextDecoration.underline);
-      expect(_spanStyle(tester, 'PRECIOS DE')!.fontFamily, kGuideSerifFamily);
-      final body = _textStyle(tester, 'A partir de 3 piezas');
-      expect(body.fontFamily, kGuideSerifFamily);
-      expect(body.fontStyle, FontStyle.italic);
+          )));
+      expect(find.byType(GuideBanner), findsOneWidget);
+      expect(find.text('PRECIOS DE'), findsNothing);
+      final image = tester.widget<Image>(find.byType(Image));
+      expect((image.image as AssetImage).assetName,
+          guideAsset('banner:B04-editorial')!.path);
     });
   });
 
   group('GuidePillButton', () {
-    testWidgets('keeps its key and callback and a 44 px target', (
+    testWidgets('keeps its key and callback and a 48 px target', (
       tester,
     ) async {
       var taps = 0;
@@ -206,25 +202,19 @@ void main() {
         ),
       );
       final size = tester.getSize(find.byKey(const ValueKey('pill')));
-      expect(size.height, greaterThanOrEqualTo(44));
-      expect(size.width, greaterThanOrEqualTo(44));
+      expect(size.height, greaterThanOrEqualTo(48));
+      expect(size.width, greaterThanOrEqualTo(48));
       // The label is set in capitals of the guide serif.
       expect(find.text('VER CATÁLOGO'), findsOneWidget);
-      expect(_textStyle(tester, 'VER CATÁLOGO').fontFamily, kGuideSerifFamily);
-      // The painted pill is lower than the target.
-      final painted = tester.getSize(
-        find.descendant(
-          of: find.byKey(const ValueKey('pill')),
-          matching: find.byType(DecoratedBox),
-        ),
-      );
-      expect(painted.height, lessThan(44));
-      // A tap on the target, outside the painted pill, still counts.
-      final center = tester.getCenter(find.byKey(const ValueKey('pill')));
-      await tester.tapAt(center.translate(0, 21));
-      expect(taps, 1);
+      expect(
+          tester
+              .widget<OutlinedButton>(find.byType(OutlinedButton))
+              .style!
+              .textStyle!
+              .resolve({})!.fontFamily,
+          'DM Sans');
       await tester.tap(find.byKey(const ValueKey('pill')));
-      expect(taps, 2);
+      expect(taps, 1);
     });
 
     testWidgets('without a callback it is disabled', (tester) async {
@@ -242,7 +232,7 @@ void main() {
         ),
       );
       final semantics = tester.ensureSemantics();
-      final node = tester.getSemantics(find.byKey(const ValueKey('pill')));
+      final node = tester.getSemantics(find.byType(OutlinedButton));
       expect(node.flagsCollection.isEnabled, ui.Tristate.isFalse);
       semantics.dispose();
     });

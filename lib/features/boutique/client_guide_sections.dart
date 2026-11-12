@@ -32,6 +32,9 @@ class ClientGuideEditorial extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (imageAsset == kGuideHomeWholesale) {
+      return GuideBanner(id: 'B04-editorial', action: action);
+    }
     final palette = context.boutique;
     final side = overlaySide;
     if (side != null && imageAsset != null) {
