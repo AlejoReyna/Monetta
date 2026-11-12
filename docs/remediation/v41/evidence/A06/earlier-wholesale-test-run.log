@@ -51,7 +51,7 @@ The test description was:
 00:02 +4 -1: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/contact_screen_test.dart: a failed open explains itself [E]
   Test failed. See exception logs above.
   The test description was: a failed open explains itself
-  
+
 00:02 +5 -1: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/wholesale/wholesale_screen_test.dart: wholesale placeholders, continuity and links at Size(834.0, 1194.0) / 1.0 / Brightness.light
 00:02 +6 -1: /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/wholesale/wholesale_screen_test.dart: wholesale placeholders, continuity and links at Size(390.0, 1100.0) / 1.0 / Brightness.dark
 00:02 +7 -1: Some tests failed.

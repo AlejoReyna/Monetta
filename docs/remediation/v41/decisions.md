@@ -25,3 +25,5 @@ A03 attempt failed with Codex usage-limit response before complete capability ha
 Evidence snapshot: evidence/A00/A03-capability-proposal-v1.md. No secrets or live calls.
 
 A06 continuation was interrupted by Codex usage limit (retry time reported 23:25 local). This is an execution limitation, not new owner authority. Partial code remains unintegrated. After user continuation at23:31 local, retry same Terra/high; no silent provider/model fallback.
+
+D08 A06 residual presentation: community illustration lacks identified standalone approved source; investigate original supplied assets before treating it as an owner question. Received wholesale benefits/copy remain visible only in review mode where operational claims lack authority. Rendering them as live eligibility/guarantee is not approved. Approved official group/social bindings remain missing; fixture URLs are not production destinations. This does not block policy/registration UI or safe merchant-content transport work.
