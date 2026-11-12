@@ -50,7 +50,7 @@ List<ContactChannel> monettaContactChannels({
       key: 'whatsapp',
       icon: Icons.chat_outlined,
       iconAsset: kGuideIconContactWhatsApp,
-      title: 'WhatsApp',
+      title: 'Enviar Whatsapp al 826 106 6868',
       // The guide shows the number with its country code.
       subtitle: '+52 $kWhatsAppNumberDisplay',
       uri: conciergeWhatsAppUri(),
@@ -214,6 +214,14 @@ class ContactScreen extends StatelessWidget {
                 ),
                 SizedBox(height: MonettaTokens.space[3]),
                 for (final channel in primary) ...[
+                  if (channel.key == 'grupo-1') ...[
+                    const SizedBox(height: 24),
+                    Text('Únete',
+                        style: clientGuideStyle(
+                            context, MonettaTokens.sectionTitle)),
+                    Text('A nuestros grupos de emprendedores',
+                        style: clientGuideStyle(context, MonettaTokens.body)),
+                  ],
                   _ChannelRow(
                     channel: channel,
                     onTap: () => _open(context, channel.uri),

@@ -2,8 +2,10 @@
 library;
 
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../app/monetta_tokens.g.dart';
 import '../../domain/editorial_content.dart';
 import '../../main.dart';
@@ -26,10 +28,11 @@ class WholesaleScreen extends StatelessWidget {
 
   Future<void> _quote(BuildContext context) async {
     try {
-      final ok = await (openUri ??
-          ((uri) => launchUrl(uri, mode: LaunchMode.externalApplication)))(
-        wholesaleQuoteUri(),
-      );
+      final ok =
+          await (openUri ??
+              ((uri) => launchUrl(uri, mode: LaunchMode.externalApplication)))(
+            wholesaleQuoteUri(),
+          );
       if (ok || !context.mounted) return;
     } on Exception {
       if (!context.mounted) return;
@@ -44,20 +47,19 @@ class WholesaleScreen extends StatelessWidget {
   }
 
   void _catalog(BuildContext context, {String? category}) => openCollection(
-        context,
-        CollectionScreen(
-          title: category == 'perfume'
-              ? 'Perfumes'
-              : category == 'bolsa'
-                  ? 'Bolsas y carteras'
-                  : 'Catálogo',
-          filter: CollectionFilter(
-            queryTerms:
-                category == 'bolsa' ? const ['bolsa', 'cartera'] : const [],
-            category: category == 'perfume' ? category : null,
-          ),
-        ),
-      );
+    context,
+    CollectionScreen(
+      title: category == 'perfume'
+          ? 'Perfumes'
+          : category == 'bolsa'
+          ? 'Bolsas y carteras'
+          : 'Catálogo',
+      filter: CollectionFilter(
+        queryTerms: category == 'bolsa' ? const ['bolsa', 'cartera'] : const [],
+        category: category == 'perfume' ? category : null,
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -78,8 +80,7 @@ class WholesaleScreen extends StatelessWidget {
               36.0,
               64.0,
             ),
-            subtitle:
-                'Obtén precios especiales en productos originales importados de tus',
+            subtitle: 'Obtén precios especiales en productos originales importados de tus',
             subtitleAccent: 'marcas favoritas',
             imageAlignment: const Alignment(0.5, 0),
             textWidthFactor: 0.55,
@@ -98,8 +99,7 @@ class WholesaleScreen extends StatelessWidget {
                 SizedBox(height: MonettaTokens.space[3]),
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final columns =
-                        MediaQuery.textScalerOf(context).scale(1) > 1.3 ? 1 : 3;
+                    final columns = 3;
                     final gap = MonettaTokens.space[1];
                     const steps = [
                       (
@@ -109,77 +109,81 @@ class WholesaleScreen extends StatelessWidget {
                       ),
                       (
                         Icons.shopping_cart_outlined,
-                        'Agrega mínimo 3 piezas',
+                        'Agrega tus piezas',
                         WholesalePresentation.minimum,
                       ),
                       (
                         Icons.credit_card_outlined,
-                        'Liquida o aparta',
+                        'Consulta las opciones de pago',
                         WholesalePresentation.reservation,
                       ),
                     ];
-                    return Wrap(
-                      spacing: gap,
-                      runSpacing: gap,
-                      children: [
-                        for (var i = 0; i < steps.length; i++)
-                          SizedBox(
-                            width:
-                                (constraints.maxWidth - gap * (columns - 1)) /
-                                    columns,
-                            child: Container(
-                              padding: EdgeInsets.all(MonettaTokens.space[2]),
-                              decoration: BoxDecoration(
-                                color: palette.surface,
-                                borderRadius: BorderRadius.circular(
-                                  MonettaTokens.radiusCard,
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (var i = 0; i < steps.length; i++)
+                            SizedBox(
+                              width:
+                                  ((constraints.maxWidth -
+                                              gap * (columns - 1)) /
+                                          columns)
+                                      .clamp(220.0, 360.0),
+                              child: Container(
+                                padding: EdgeInsets.all(MonettaTokens.space[2]),
+                                decoration: BoxDecoration(
+                                  color: palette.surface,
+                                  borderRadius: BorderRadius.circular(
+                                    MonettaTokens.radiusCard,
+                                  ),
+                                  border: Border.all(color: palette.hairline),
                                 ),
-                                border: Border.all(color: palette.hairline),
-                              ),
-                              child: Column(
-                                children: [
-                                  CircleAvatar(
-                                    radius: MonettaTokens.space[2],
-                                    backgroundColor: palette.action,
-                                    child: Text(
-                                      '${i + 1}',
+                                child: Column(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: MonettaTokens.space[2],
+                                      backgroundColor: palette.action,
+                                      child: Text(
+                                        '${i + 1}',
+                                        style: clientGuideStyle(
+                                          context,
+                                          MonettaTokens.navLabel,
+                                          color: palette.onAction,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: MonettaTokens.space[2]),
+                                    Icon(
+                                      steps[i].$1,
+                                      size: MonettaTokens.space[5],
+                                      color: palette.goldText,
+                                    ),
+                                    SizedBox(height: MonettaTokens.space[2]),
+                                    Text(
+                                      steps[i].$2,
+                                      textAlign: TextAlign.center,
+                                      style: clientGuideStyle(
+                                        context,
+                                        MonettaTokens.accountRow,
+                                      ),
+                                    ),
+                                    SizedBox(height: MonettaTokens.space[1]),
+                                    Text(
+                                      steps[i].$3,
+                                      textAlign: TextAlign.center,
                                       style: clientGuideStyle(
                                         context,
                                         MonettaTokens.navLabel,
-                                        color: palette.onAction,
+                                        color: palette.inkMuted,
                                       ),
                                     ),
-                                  ),
-                                  SizedBox(height: MonettaTokens.space[2]),
-                                  Icon(
-                                    steps[i].$1,
-                                    size: MonettaTokens.space[5],
-                                    color: palette.goldText,
-                                  ),
-                                  SizedBox(height: MonettaTokens.space[2]),
-                                  Text(
-                                    steps[i].$2,
-                                    textAlign: TextAlign.center,
-                                    style: clientGuideStyle(
-                                      context,
-                                      MonettaTokens.accountRow,
-                                    ),
-                                  ),
-                                  SizedBox(height: MonettaTokens.space[1]),
-                                  Text(
-                                    steps[i].$3,
-                                    textAlign: TextAlign.center,
-                                    style: clientGuideStyle(
-                                      context,
-                                      MonettaTokens.navLabel,
-                                      color: palette.inkMuted,
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -251,9 +255,10 @@ class WholesaleScreen extends StatelessWidget {
             onAbout: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => AboutMonettaScreen(
-                  content: (EditorialContentScope.maybeOf(context)?.content ??
-                          MonettaEditorialContent.fallback)
-                      .about,
+                  content:
+                      (EditorialContentScope.maybeOf(context)?.content ??
+                              MonettaEditorialContent.fallback)
+                          .about,
                   onOpenCatalog: () => _catalog(context),
                   onOpenPartner: () => Navigator.of(context).pop(),
                 ),

@@ -10,7 +10,7 @@ abstract final class WholesalePresentation {
       'WhatsApp.';
 
   /// Step 3 of «¿Cómo comprar?». The title is «Liquida o aparta».
-  static const reservation = 'Aparta por 20 días con \$800 pesos por pedido.';
+  static const reservation = 'Consulta las condiciones vigentes por WhatsApp.';
 
   /// Shipping line. The services row repeats it as «Envío gratis».
   static const shipping = 'Envío gratis en compras mayores a \$1,999 MXN.';
@@ -18,6 +18,5 @@ abstract final class WholesalePresentation {
 
 /// Reuses the configured channel without pre-accepting any commercial terms.
 Uri wholesaleQuoteUri() => Uri.https('wa.me', '/$kWhatsAppE164', {
-      'text':
-          'Hola Monetta, quisiera información sobre mayoreo y sus condiciones vigentes.',
-    });
+  'text': 'Hola Monetta, quisiera información sobre mayoreo y sus condiciones vigentes.',
+});

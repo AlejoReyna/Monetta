@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
+
 import '../../app/monetta_tokens.g.dart';
 import '../../app/theme.dart';
 import 'boutique_tokens.dart';
@@ -143,16 +144,18 @@ class ClientGuideEditorial extends StatelessWidget {
             Positioned.fill(
               child: GuideArt(
                 asset: imageAsset!,
-                alignment:
-                    onRight ? Alignment.centerLeft : Alignment.centerRight,
+                alignment: onRight
+                    ? Alignment.centerLeft
+                    : Alignment.centerRight,
               ),
             ),
             Positioned.fill(child: GuideScrim(textSide: side)),
             ConstrainedBox(
               constraints: BoxConstraints(minHeight: width / 2.3),
               child: Align(
-                alignment:
-                    onRight ? Alignment.centerRight : Alignment.centerLeft,
+                alignment: onRight
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
                 child: SizedBox(
                   width: width * (large ? 0.7 : 0.5),
                   child: Padding(
@@ -259,8 +262,8 @@ const List<ClientGuideService> kClientGuideHomeServices = [
 final List<ClientGuideService> kClientGuideWholesaleServices = [
   const ClientGuideService(
     iconAsset: kGuideIconServiceShipping,
-    title: 'Envío gratis',
-    subtitle: 'En compras mayores a \$1,999 MXN',
+    title: 'Envíos seguros',
+    subtitle: 'Seguros y garantizados a todo México',
   ),
   ...kClientGuideHomeServices.skip(1),
 ];
