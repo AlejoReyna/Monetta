@@ -45,3 +45,5 @@ Stage2 renewed leases after A03 interface acceptance:
 - A03: finished package retired from active slots; retains API/service ownership for sequential later follow-up. No A05/A07/A08 feature integration before Stage2 acceptance.
 
 A06 continuation: retain existing isolated checkout and partial commit, same Terra/high model/effort and same owned files. No source integration acceptance yet. Complete missing policy reader/footer/Contact/Wholesale/captures and correct token/primitives drift. A02 retains root check slot; A06 only uses its own checkout/build outputs.
+
+A00 bounded BrandScreen import repair completed: brand_screen.dart now directly imports existing reco/explainer.dart show brandLabel. No feature behavior changed or root checks started. Temporary lease closed; A04 owns file again and must retain import. A02 retains root slot for affected rerun.
