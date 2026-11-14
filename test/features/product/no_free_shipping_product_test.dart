@@ -37,8 +37,9 @@ void main() {
   setUpAll(mockPathProvider);
 
   testWidgets(
-    'SHIP-04 ficha has no free-shipping copy, names shipping to all Mexico '
-    'in its shipping accordion and keeps the plain availability line',
+    'SHIP-04 the ficha says ENVÍO GRATIS only in the UI v4.1 services row '
+    '(approved copy; checkout still requires an account) and never a '
+    'threshold by amount',
     (tester) async {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -51,24 +52,15 @@ void main() {
       );
       await _pumpFicha(tester, store, product.id);
 
-      expect(find.textContaining(_freeShippingCopy), findsNothing);
-      expect(find.text('Disponible · envío 3 a 5 días'), findsOneWidget);
-      expect(find.textContaining('Entrega estimada'), findsWidgets);
-
-      // The accordion hides its copy until opened: open it and look again.
-      await scrollTo(tester, find.text('Envíos y devoluciones'));
-      await tester.tap(find.text('Envíos y devoluciones'));
-      await tester.pump();
-      expect(
-        find.textContaining('Envío a todo México en 3 a 5 días hábiles'),
-        findsOneWidget,
-        reason: 'the shipping accordion must be open for this check',
-      );
-      expect(find.textContaining(_freeShippingCopy), findsNothing);
-      expect(
-        find.textContaining(RegExp('gratis', caseSensitive: false)),
-        findsNothing,
-      );
+      expect(find.textContaining(RegExp('gratis desde', caseSensitive: false)),
+          findsNothing);
+      final services = find.byKey(const Key('product-trust-row'));
+      await scrollTo(tester, services);
+      final anywhere = find.textContaining(_freeShippingCopy);
+      final inServices = find.descendant(of: services, matching: anywhere);
+      expect(inServices, findsOneWidget);
+      expect(anywhere.evaluate().length, inServices.evaluate().length);
+      expect(find.text('Disponible'), findsOneWidget);
     },
   );
 }

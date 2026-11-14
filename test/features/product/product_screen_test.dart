@@ -7,8 +7,6 @@ import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/product/product_screen.dart';
 import 'package:monetta_app/main.dart';
 
-import '../../support/product_screen_harness.dart';
-
 Future<CatalogStore> _loadedStore() async {
   final store = CatalogStore(database: openTestDatabase());
   await store.loadFromAsset();
@@ -67,22 +65,15 @@ void main() {
 
     expect(find.text(product.title), findsWidgets);
     expect(find.text('Agregar al carrito'), findsOneWidget);
-    // "Apartar" lives in the secondary purchase section, below the fold.
-    await scrollTo(tester, find.text('Apartar'));
-    expect(find.text('Apartar'), findsOneWidget);
-    expect(
-      find.text(
-        'Escríbenos por WhatsApp para solicitar apartado (\$400 MXN · 20 días). Abrir el chat no reserva stock ni confirma el anticipo.',
-      ),
-      findsOneWidget,
-    );
-    expect(find.text('Escribir por WhatsApp'), findsOneWidget);
+    expect(find.text('Comprar ahora'), findsOneWidget);
+    // UI v4.1: apartados wait for confirmed rules; the ficha offers none.
+    expect(find.text('Apartar'), findsNothing);
     expect(find.text('Gama'), findsNothing);
     expect(find.text('extracted'), findsNothing);
     expect(find.textContaining('Popular ahora'), findsNothing);
   });
 
-  testWidgets('add to bag opens the mini-cart instead of a toast', (
+  testWidgets('add to bag confirms on the ficha without opening the cart', (
     tester,
   ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -109,8 +100,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(store.bagQuantity, 1);
-    expect(find.text('En tu bolsa'), findsOneWidget);
-    expect(find.text('VER BOLSA'), findsOneWidget);
-    expect(find.text('Agregado a la bolsa'), findsNothing);
+    // UI v4.1: «Agregar conserva PDP» — the confirmation stays on the page.
+    expect(find.text('Agregado al carrito'), findsOneWidget);
+    expect(find.text('En tu bolsa'), findsNothing);
+    expect(find.byType(ProductScreen), findsOneWidget);
   });
 }

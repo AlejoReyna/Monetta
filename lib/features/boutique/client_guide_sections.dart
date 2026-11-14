@@ -240,8 +240,29 @@ class ClientGuideService {
   final String subtitle;
 }
 
-/// Services row of the guide's home («PÁGINA PRINCIPAL (SEGUIMIENTO)»).
+/// Services row of UI v4.1 (home and product page), with the copy the client
+/// delivered (master document, «Servicios recibidos»). Paga a Meses Sin
+/// Intereses stays a service line, never a new guarantee.
 const List<ClientGuideService> kClientGuideHomeServices = [
+  ClientGuideService(
+    iconAsset: 'assets/images/v41/icons/envio-avion.svg',
+    title: 'ENVÍO GRATIS',
+    subtitle: '5 - 7 días hábiles',
+  ),
+  ClientGuideService(
+    iconAsset: 'assets/images/v41/icons/originales.svg',
+    title: 'Producto Original',
+    subtitle: 'Importado desde E.U.A',
+  ),
+  ClientGuideService(
+    iconAsset: 'assets/images/v41/icons/pagos.svg',
+    title: 'Paga a Meses',
+    subtitle: 'Sin Intereses',
+  ),
+];
+
+/// Services row of the guide's wholesale page.
+const List<ClientGuideService> kClientGuideWholesaleServices = [
   ClientGuideService(
     iconAsset: kGuideIconServiceShipping,
     title: 'Envíos seguros',
@@ -264,17 +285,6 @@ const List<ClientGuideService> kClientGuideHomeServices = [
   ),
 ];
 
-/// Services row of the guide's wholesale page: the first entry is the free
-/// shipping threshold; the other three match the home.
-final List<ClientGuideService> kClientGuideWholesaleServices = [
-  const ClientGuideService(
-    iconAsset: kGuideIconServiceShipping,
-    title: 'Envíos seguros',
-    subtitle: 'Seguros y garantizados a todo México',
-  ),
-  ...kClientGuideHomeServices.skip(1),
-];
-
 class ClientGuideServices extends StatelessWidget {
   const ClientGuideServices({
     this.services = kClientGuideHomeServices,
@@ -291,7 +301,7 @@ class ClientGuideServices extends StatelessWidget {
         // Four across, as in the guide; two at large text sizes so the
         // captions keep their words whole.
         final large = MediaQuery.textScalerOf(context).scale(1) > 1.3;
-        final columns = large ? 2 : 4;
+        final columns = large ? 2 : services.length.clamp(1, 4);
         final gap = MonettaTokens.space[2];
         final cell = (constraints.maxWidth - gap * 2) / columns;
         final iconSize = (cell * 0.62).clamp(40.0, 72.0);
@@ -315,15 +325,23 @@ class ClientGuideServices extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          Image.asset(
-                            service.iconAsset,
-                            height: iconSize,
-                            width: iconSize,
-                            fit: BoxFit.contain,
-                            excludeFromSemantics: true,
-                            errorBuilder: (_, __, ___) =>
-                                SizedBox.square(dimension: iconSize),
-                          ),
+                          if (service.iconAsset.endsWith('.svg'))
+                            SvgPicture.asset(
+                              service.iconAsset,
+                              height: iconSize * 0.7,
+                              width: iconSize * 0.7,
+                              excludeFromSemantics: true,
+                            )
+                          else
+                            Image.asset(
+                              service.iconAsset,
+                              height: iconSize,
+                              width: iconSize,
+                              fit: BoxFit.contain,
+                              excludeFromSemantics: true,
+                              errorBuilder: (_, __, ___) =>
+                                  SizedBox.square(dimension: iconSize),
+                            ),
                           SizedBox(height: MonettaTokens.space[1]),
                           Text(
                             service.title,

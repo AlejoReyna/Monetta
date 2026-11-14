@@ -17,15 +17,16 @@ import 'package:monetta_app/domain/admin_control.dart';
 /// that says "gratis" in lib/ fails SHIP-07.
 const List<({String file, String literal, String why})> _exceptions = [
   (
-    file: 'lib/features/rewards/rewards_guide_screen.dart',
-    literal: 'Envío gratis',
-    why: 'Rewards benefit from the client guide, not an amount threshold',
-  ),
-  (
     file: 'lib/features/home/home_account_invitation.dart',
     literal: 'ENVÍO GRATIS',
     why:
         'Correction 5 presentation; checkout still requires an authenticated account',
+  ),
+  (
+    file: 'lib/features/boutique/client_guide_sections.dart',
+    literal: 'ENVÍO GRATIS',
+    why: 'UI v4.1 services row (CONFIRMADO copy, «5 - 7 días hábiles»); '
+        'checkout still requires an authenticated account',
   ),
   (
     file: 'lib/features/wholesale/wholesale_content.dart',

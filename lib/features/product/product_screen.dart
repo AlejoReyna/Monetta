@@ -24,6 +24,7 @@ import '../../reco/events.dart';
 import '../../reco/explainer.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
+import '../boutique/client_guide_sections.dart';
 import '../catalog/categories_screen.dart';
 import '../catalog/product_card.dart';
 import '../catalog/product_tile.dart' show PackshotBlend;
@@ -501,7 +502,9 @@ class _ProductScreenState extends State<ProductScreen> {
                           child: const Text('Agregado al carrito'),
                         ),
                       const SizedBox(height: BoutiqueSpace.lg),
-                      const _TrustRow(),
+                      const ClientGuideServices(
+                        key: Key('product-trust-row'),
+                      ),
                       if (!inStock &&
                           selected != null &&
                           widget.onRestock != null)
@@ -959,113 +962,6 @@ class _AvailabilityLine extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Narrowest width that still holds the three guarantees side by side.
-const double _kTrustRowMin = 340;
-
-class _TrustRow extends StatelessWidget {
-  const _TrustRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    // Three guarantees of the guide. The delivery days are the ones the
-    // availability line below already states (3 a 5 días).
-    const items = <(IconData, String, String)>[
-      (
-        Icons.verified_user_outlined,
-        'Productos originales',
-        'Garantía de autenticidad',
-      ),
-      (Icons.credit_card_outlined, 'Pago seguro', 'Compra con confianza'),
-    ];
-
-    Widget item(int i) => Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(items[i].$1, size: 26, color: palette.ink),
-            const SizedBox(width: BoutiqueSpace.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    items[i].$2,
-                    style: boutiqueText(
-                      size: 12,
-                      weight: FontWeight.w600,
-                      color: palette.ink,
-                      height: 1.25,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    items[i].$3,
-                    style: boutiqueText(
-                      size: 11.5,
-                      color: palette.inkMuted,
-                      height: 1.25,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-
-    final stacked = Column(
-      key: const Key('product-trust-row'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (var i = 0; i < items.length; i++) ...[
-          if (i > 0) const SizedBox(height: BoutiqueSpace.md),
-          item(i),
-        ],
-      ],
-    );
-    // With enlarged text three columns would truncate the copy: stack them.
-    if (StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))) {
-      return stacked;
-    }
-    // So would a narrow column, such as a two-sided window's right side,
-    // where «autenticidad» no longer fits a third of the width.
-    return LayoutBuilder(
-      builder: (context, constraints) => constraints.maxWidth < _kTrustRowMin
-          ? stacked
-          : _trustColumns(palette, items.length, item),
-    );
-  }
-
-  Widget _trustColumns(
-    BoutiquePalette palette,
-    int count,
-    Widget Function(int) item,
-  ) {
-    return IntrinsicHeight(
-      key: const Key('product-trust-row'),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < count; i++) ...[
-            if (i > 0)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: BoutiqueSpace.sm,
-                ),
-                child: VerticalDivider(
-                  width: 1,
-                  thickness: 1,
-                  color: palette.hairline,
-                ),
-              ),
-            Expanded(child: item(i)),
-          ],
-        ],
-      ),
     );
   }
 }

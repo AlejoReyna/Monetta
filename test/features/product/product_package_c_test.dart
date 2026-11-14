@@ -12,6 +12,7 @@ import 'package:monetta_app/features/product/quick_view.dart';
 import 'package:monetta_app/main.dart';
 
 import '../../support/product_screen_harness.dart';
+import '../../support/quick_add_harness.dart';
 
 Future<CatalogStore> _loadedStore() async {
   final store = CatalogStore(database: openTestDatabase());
@@ -73,27 +74,27 @@ void main() {
     expect(find.byTooltip('Guardar en favoritos'), findsWidgets);
     expect(find.byTooltip('Compartir'), findsOneWidget);
 
-    // Trust row from the reference strip.
-    // Guide v2 guarantees: delivery, originals, secure payment.
-    expect(find.text('Entrega estimada'), findsOneWidget);
-    expect(find.text('3 a 5 días'), findsOneWidget);
-    expect(find.text('Productos originales'), findsOneWidget);
-    expect(find.text('Garantía de autenticidad'), findsOneWidget);
-    expect(find.text('Pago seguro'), findsOneWidget);
-    expect(find.text('Compra con confianza'), findsOneWidget);
-
-    // Shipping facts already in the app, never an invented threshold.
-    expect(
-      find.textContaining(RegExp('gratis', caseSensitive: false)),
-      findsNothing,
-    );
-    expect(find.text('Entrega estimada'), findsWidgets);
+    // UI v4.1 services under the purchase buttons, with the delivered copy.
+    final services = find.byKey(const Key('product-trust-row'));
+    await scrollTo(tester, services);
+    for (final text in [
+      'ENVÍO GRATIS',
+      '5 - 7 días hábiles',
+      'Producto Original',
+      'Importado desde E.U.A',
+      'Paga a Meses',
+      'Sin Intereses',
+    ]) {
+      expect(
+        find.descendant(of: services, matching: find.text(text)),
+        findsOneWidget,
+        reason: text,
+      );
+    }
 
     expect(find.text('Agregar al carrito'), findsOneWidget);
     await scrollTo(tester, find.text('Comprar ahora'));
     expect(find.text('Comprar ahora'), findsOneWidget);
-    await scrollTo(tester, find.text('Apartar'));
-    expect(find.text('Apartar'), findsOneWidget);
   });
 
   testWidgets('descuento solo con compare_at real', (tester) async {
@@ -129,7 +130,9 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
 
     final store = await _loadedStore();
-    final reliable = store.products.firstWhere(hasReliableColorOptions);
+    // The bundled catalog names no colour option; a synthetic piece does.
+    final reliable = swatchProduct();
+    addProducts(store, [reliable]);
     await _pumpFicha(tester, store, reliable.id);
     // «Color: Negro»: the label carries the chosen colour.
     expect(find.textContaining('Color: '), findsOneWidget);
@@ -140,11 +143,17 @@ void main() {
           selectableVariants(item).isNotEmpty && !hasReliableColorOptions(item),
     );
     await _pumpFicha(tester, store, composed.id);
-    expect(find.text('Opción'), findsOneWidget);
+    // Without named options the variant titles are plain chips, no colour.
+    expect(
+      find.text(selectableVariants(composed).first.title.toUpperCase()),
+      findsWidgets,
+    );
     expect(find.textContaining('Color: '), findsNothing);
   });
 
-  testWidgets('acordeones Descripción, Detalles y Envíos', (tester) async {
+  testWidgets(
+      'acordeones Otras formas de comprar, Envíos y Cambios y devoluciones',
+      (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1.0;
@@ -153,15 +162,19 @@ void main() {
     final product = store.products.firstWhere((item) => item.isInStock);
     await _pumpFicha(tester, store, product.id);
 
-    for (final label in ['Descripción', 'Detalles', 'Envíos y devoluciones']) {
+    // UI v4.1 order. Descripción, Envíos and Cambios y devoluciones appear
+    // only with content (published policies); here none is published.
+    expect(find.text('Envíos'), findsNothing);
+    expect(find.text('Cambios y devoluciones'), findsNothing);
+    for (final label in ['Otras formas de comprar']) {
       expect(find.text(label), findsOneWidget);
       await tester.ensureVisible(find.text(label));
       await tester.pump();
       await tester.tap(find.text(label));
       await tester.pump();
     }
-    // Shipping terms open; internal slugs never leak.
-    expect(find.textContaining('DHL'), findsOneWidget);
+    // The WhatsApp apartado appears only inside «Otras formas de comprar».
+    expect(find.text('Solicitar apartado por WhatsApp'), findsOneWidget);
     expect(find.text('Gama'), findsNothing);
   });
 
@@ -187,7 +200,9 @@ void main() {
     expect(find.byType(ProductScreen), findsOneWidget);
   });
 
-  testWidgets('variante no disponible se distingue y avisa', (tester) async {
+  testWidgets(
+      'variante no disponible se distingue; sin servicio de reposición no '
+      'ofrece aviso', (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1.0;
@@ -204,7 +219,8 @@ void main() {
     await tester.tap(find.text(unavailable.title.toUpperCase()));
     await tester.pump();
     expect(find.text('AGOTADO'), findsWidgets);
-    expect(find.text('Avísame cuando vuelva'), findsOneWidget);
+    // The restock alert waits for a real service (hidden, never inert).
+    expect(find.text('Avísame cuando vuelva'), findsNothing);
     expect(find.text('Agregar al carrito'), findsNothing);
   });
 
@@ -273,24 +289,28 @@ void main() {
     await tester.tap(find.text('ABRIR'));
     await tester.pumpAndSettle();
 
-    // Centred card: back and close over the photo, brand–name–price, no fake
-    // urgency.
+    // Centred card: an accessible X and no back arrow (UI v4.1), brand–
+    // name–price, no fake urgency.
     expect(find.byKey(const Key('quick-view-card')), findsOneWidget);
     expect(find.byTooltip('Cerrar vista previa'), findsOneWidget);
-    expect(find.byTooltip('Regresar'), findsOneWidget);
-    expect(find.text('Agregar al carrito'), findsOneWidget);
-    expect(find.text('VER PRODUCTO'), findsOneWidget);
+    expect(find.byTooltip('Regresar'), findsNothing);
+    expect(find.text('Ver producto'), findsOneWidget);
     expect(find.textContaining('Últimas'), findsNothing);
 
-    // Same add-to-bag as the ficha: closes, then confirms with mini-cart.
-    await tester.tap(find.byKey(const Key('quick-view-primary')));
+    // Add confirms in place and leaves the cart shut.
+    final primary = find.byKey(const Key('quick-view-primary'));
+    if (selectableVariants(product).length > 1) {
+      await pickVariant(tester, product, selectableVariants(product).first);
+    }
+    expect(find.text('Agregar al carrito'), findsOneWidget);
+    await tester.tap(primary);
     await tester.pumpAndSettle();
     expect(store.bagQuantity, 1);
-    expect(find.text('En tu bolsa'), findsOneWidget);
-    expect(find.text('VER BOLSA'), findsOneWidget);
+    expect(find.text('Agregado al carrito'), findsOneWidget);
+    expect(find.text('En tu bolsa'), findsNothing);
   });
 
-  testWidgets('quick-view VER PRODUCTO abre la ficha', (tester) async {
+  testWidgets('quick-view «Ver producto» abre la ficha', (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1200);
     tester.view.devicePixelRatio = 1.0;
@@ -321,7 +341,7 @@ void main() {
     await tester.tap(find.text('ABRIR'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('VER PRODUCTO'));
+    await tester.tap(find.text('Ver producto'));
     await tester.pumpAndSettle();
     expect(find.byType(ProductScreen), findsOneWidget);
     await scrollTo(tester, find.text('Comprar ahora'));

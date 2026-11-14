@@ -150,8 +150,14 @@ void main() {
     );
     await mount(tester, store, ProductScreen(productId: product.id));
     final state = tester.state(find.byType(ProductScreen));
-    await tester.tap(find.byKey(const Key('product-gallery-next')));
-    await tester.pumpAndSettle();
+    // The gallery shows the active variant's photos: arrows only when it has
+    // more than one.
+    final next = find.byKey(const Key('product-gallery-next'));
+    final expectedPage = next.evaluate().isNotEmpty ? 1 : 0;
+    if (expectedPage == 1) {
+      await tester.tap(next);
+      await tester.pumpAndSettle();
+    }
     await scrollTo(tester, find.byType(ProductOptionSelector));
     tester
         .widget<ProductOptionSelector>(find.byType(ProductOptionSelector))
@@ -176,11 +182,14 @@ void main() {
         variantId,
       );
       final gallery = tester.widget<PageView>(find.byType(PageView).first);
-      expect(gallery.controller?.page?.round(), 1);
+      expect(gallery.controller?.page?.round() ?? 0, expectedPage);
       final accordion = find
           .ancestor(
             of: find.text('Descripción'),
-            matching: find.byType(Semantics),
+            matching: find.byWidgetPredicate(
+              (widget) =>
+                  widget is Semantics && widget.properties.expanded != null,
+            ),
           )
           .first;
       expect(tester.widget<Semantics>(accordion).properties.expanded, isTrue);
@@ -363,27 +372,17 @@ void main() {
         .ensureVisible(find.byKey(const Key('collection-filter-button')));
     await tester.tap(find.byKey(const Key('collection-filter-button')));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(
-      find.byKey(const Key('collection-filter-sort-priceAsc')),
-    );
-    await tester.tap(find.byKey(const Key('collection-filter-sort-priceAsc')));
+    // Sorting has its own control since UI v4.1; the panel keeps filters.
+    // Availability is a direct toggle in the v4.1 panel.
     await tester
-        .ensureVisible(find.byKey(const Key('collection-filter-availability')));
-    await tester.tap(find.byKey(const Key('collection-filter-availability')));
-    await tester.pump();
+        .ensureVisible(find.byKey(const Key('collection-filter-stock')));
     await tester.tap(find.byKey(const Key('collection-filter-stock')));
     await tester.pump();
     bool? stockSelected() => tester
-        .widget<Semantics>(
-          find
-              .descendant(
-                of: find.byKey(const Key('collection-filter-stock')),
-                matching: find.byType(Semantics),
-              )
-              .first,
+        .widget<CheckboxListTile>(
+          find.byKey(const Key('collection-filter-stock')),
         )
-        .properties
-        .selected;
+        .value;
     expect(stockSelected(), isTrue);
     await resize(tester, const Size(1024, 768));
     expect(stockSelected(), isTrue);
@@ -451,24 +450,6 @@ void main() {
           .data,
       resultLabel,
     );
-    expect(
-      tester
-          .widget<Semantics>(
-            find
-                .descendant(
-                  of: find.byKey(const Key('collection-filter-sort-priceAsc')),
-                  matching: find.byType(Semantics),
-                )
-                .first,
-          )
-          .properties
-          .selected,
-      isTrue,
-    );
-    await tester
-        .ensureVisible(find.byKey(const Key('collection-filter-availability')));
-    await tester.tap(find.byKey(const Key('collection-filter-availability')));
-    await tester.pump();
     expect(stockSelected(), isTrue);
     expect(tester.takeException(), isNull);
   });

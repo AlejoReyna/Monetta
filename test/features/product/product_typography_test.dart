@@ -68,27 +68,23 @@ void main() {
       );
     }
 
-    testWidgets('TYPE-01d the main name is serif w400, 25', (tester) async {
+    testWidgets('TYPE-01d the main name is DM Sans (UI v4.1 product type)',
+        (tester) async {
       final ficha = await mount(tester);
 
       await scrollTo(tester, contentNameText(ficha.name));
       final style = styleOf(tester, contentNameText(ficha.name));
-      _expectSerif(style, reason: 'main name');
-      expect(style.fontSize, MonettaTokens.productName.compact);
+      expect(style.fontFamily, kBoutiqueSansFamily, reason: 'main name');
     });
 
-    testWidgets('TYPE-01d the three accordion labels are serif w400, 18',
-        (tester) async {
+    testWidgets('TYPE-01d the accordion labels are 18', (tester) async {
       await mount(tester);
 
-      for (final label in [
-        'Descripción',
-        'Detalles',
-        'Envíos y devoluciones',
-      ]) {
+      // Envíos and Cambios y devoluciones appear only with published
+      // policies; Otras formas de comprar is always there.
+      for (final label in ['Otras formas de comprar']) {
         await scrollTo(tester, find.text(label));
         final style = styleOf(tester, find.text(label));
-        _expectSerif(style, reason: 'accordion "$label"');
         expect(style.fontSize, 18, reason: 'accordion "$label": size');
       }
     });
@@ -99,24 +95,13 @@ void main() {
 
       await _expectSectionHeading(
         tester,
-        find.text('Productos relacionados'),
+        find.text('Relacionados'),
         reason: 'related rail',
       );
       await _expectSectionHeading(
         tester,
-        find.text('Vistas hace un momento'),
+        find.text('Vistos hace un momento'),
         reason: 'viewed rail',
-      );
-    });
-
-    testWidgets('TYPE-01d "Otras formas de comprar" is a section heading',
-        (tester) async {
-      await mount(tester);
-
-      await _expectSectionHeading(
-        tester,
-        find.text('Otras formas de comprar'),
-        reason: 'purchase section',
       );
     });
   });
@@ -133,13 +118,13 @@ void main() {
       await pumpExternal(tester, item: item);
     }
 
-    testWidgets('TYPE-01d the main name is serif w400, 25', (tester) async {
+    testWidgets('TYPE-01d the main name is DM Sans (UI v4.1 product type)',
+        (tester) async {
       await mount(tester);
 
       await scrollTo(tester, contentNameText(name));
       final style = styleOf(tester, contentNameText(name));
-      _expectSerif(style, reason: 'main name');
-      expect(style.fontSize, MonettaTokens.productName.compact);
+      expect(style.fontFamily, kBoutiqueSansFamily, reason: 'main name');
     });
 
     testWidgets('TYPE-01d "Descripción del producto" is a section heading',

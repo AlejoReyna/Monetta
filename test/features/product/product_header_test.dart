@@ -260,7 +260,7 @@ void main() {
       await tester.tap(heart);
       await tester.pump();
       expect(store.wishlist.contains(product.id), isTrue);
-      expect(find.byTooltip('Quitar de guardados'), findsWidgets);
+      expect(find.byTooltip('Quitar de favoritos'), findsWidgets);
 
       await tester.tap(heart);
       await tester.pump();
@@ -299,7 +299,10 @@ void main() {
         (widget) => widget is ProductCard && widget.product.id == other.id,
       );
       await scrollTo(tester, card);
+      // A recommendation is a common card: quick view, then «Ver producto».
       await tester.tap(card.first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ver producto'));
       await tester.pumpAndSettle();
 
       expect(find.text(nameB), findsWidgets);
@@ -364,8 +367,10 @@ void main() {
       await tester.pump();
       expect(find.text('Productos'), findsOneWidget);
 
-      // «VER PRODUCTO» opens the ficha (tapping the card opens the quick view).
-      await tester.tap(find.text('VER PRODUCTO').first);
+      // The card opens the quick view; its «Ver producto» opens the ficha.
+      await tester.tap(find.byType(MonettaProductTile).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ver producto'));
       await tester.pumpAndSettle();
       expect(find.byType(ProductScreen), findsOneWidget);
 
@@ -394,9 +399,11 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.text('BOLSAS'), findsOneWidget);
+      expect(find.text('Bolsas'), findsWidgets);
 
-      await tester.tap(find.text('VER PRODUCTO').first);
+      await tester.tap(find.byType(MonettaProductTile).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ver producto'));
       await tester.pumpAndSettle();
       expect(find.byType(ProductScreen), findsOneWidget);
 
@@ -408,7 +415,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(ProductScreen), findsNothing);
-      expect(find.text('BOLSAS'), findsOneWidget);
+      expect(find.text('Bolsas'), findsWidgets);
     });
   });
 }
