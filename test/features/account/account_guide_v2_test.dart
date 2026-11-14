@@ -15,7 +15,6 @@ import 'package:monetta_app/features/contact/contact_screen.dart';
 import 'package:monetta_app/features/personalization/personalization_screen.dart';
 import 'package:monetta_app/features/rewards/rewards_models.dart';
 import 'package:monetta_app/features/rewards/rewards_section.dart';
-import 'package:monetta_app/features/wholesale/wholesale_screen.dart';
 import 'package:monetta_app/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -85,7 +84,8 @@ void main() {
     addTearDown(controller.dispose);
     await _pump(tester, controller, store);
 
-    // Identity, then the Rewards row, then the eight rows.
+    // Identity, then the Rewards card, then the rows (UI v4.1). Direcciones
+    // waits for a real address service; Modo Mayoreo and Comparte left.
     final tops = <double>[];
     for (final key in const [
       'account-identity',
@@ -93,12 +93,8 @@ void main() {
       'account-open-orders',
       'account-open-favorites',
       'account-open-notifications',
-      'account-open-addresses',
-      'account-open-payments',
       'account-open-personalization',
-      'account-open-wholesale',
       'account-open-contact',
-      'account-share-catalog',
       'account-logout',
     ]) {
       tops.add(tester.getTopLeft(find.byKey(ValueKey(key))).dy);
@@ -110,16 +106,14 @@ void main() {
       'Mis pedidos',
       'Favoritos',
       'Notificaciones',
-      'Direcciones',
-      'Métodos de pago',
       'Preferencias',
-      'Modo Mayoreo',
-      'Ayuda y contacto',
+      'Contacto',
     ]) {
       expect(find.text(title), findsOneWidget, reason: title);
     }
-    expect(find.text('Desde 3 piezas'), findsOneWidget);
-    expect(find.text('Comparte'), findsOneWidget);
+    for (final gone in ['Modo Mayoreo', 'Comparte', 'Métodos de pago']) {
+      expect(find.text(gone), findsNothing, reason: gone);
+    }
 
     // What the guide dropped.
     expect(find.text('Mis pedidos recientes'), findsNothing);
@@ -149,47 +143,7 @@ void main() {
     expect(find.text('Eliminar mi cuenta'), findsOneWidget);
   });
 
-  testWidgets('ACC-GUIDE informational sheets: exact text, no wallets',
-      (tester) async {
-    final db = openTestDatabase();
-    final store = await _store(db);
-    addTearDown(() async {
-      store.dispose();
-      await db.close();
-    });
-    final controller = _controller(db);
-    addTearDown(controller.dispose);
-    await _pump(tester, controller, store);
-
-    await tester.tap(find.byKey(const ValueKey('account-open-addresses')));
-    await tester.pumpAndSettle();
-    expect(
-      find.text(
-        'Tus direcciones se capturan en el checkout seguro de Shopify al pagar.',
-      ),
-      findsOneWidget,
-    );
-    await tester.tap(find.byKey(const ValueKey('account-info-sheet-close')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('account-info-sheet')), findsNothing);
-
-    await tester.tap(find.byKey(const ValueKey('account-open-payments')));
-    await tester.pumpAndSettle();
-    expect(
-      find.text(
-        'Aceptamos tarjeta de crédito o débito y transferencia bancaria.',
-      ),
-      findsOneWidget,
-    );
-    for (final forbidden in ['PayPal', 'Apple Pay', 'Google Pay']) {
-      expect(find.textContaining(forbidden), findsNothing, reason: forbidden);
-    }
-    // Information only: nothing to type, nothing saved.
-    expect(find.byType(TextFormField), findsNothing);
-    expect(find.byType(TextField), findsNothing);
-  });
-
-  testWidgets('ACC-GUIDE Preferencias, Mayoreo and Ayuda open their screens',
+  testWidgets('ACC-GUIDE Preferencias and Contacto open their screens',
       (tester) async {
     SharedPreferences.setMockInitialValues({});
     final db = openTestDatabase();
@@ -204,7 +158,6 @@ void main() {
 
     for (final (key, screen) in [
       ('account-open-personalization', PersonalizationScreen),
-      ('account-open-wholesale', WholesaleScreen),
       ('account-open-contact', ContactScreen),
     ]) {
       final row = find.byKey(ValueKey(key));
@@ -291,7 +244,7 @@ void main() {
         (tester) async {
       final (controller, reader) = await mount(tester);
       expect(reader.calls, 1);
-      expect(balance(tester), 'Ver saldo');
+      expect(balance(tester), 'Consultando tu saldo…');
 
       switchTo(controller, accountOf('B'));
       await tester.pump();
@@ -299,7 +252,7 @@ void main() {
 
       reader.complete(0, 11100); // A answers late.
       await settle(tester);
-      expect(balance(tester), 'Ver saldo');
+      expect(balance(tester), 'Consultando tu saldo…');
       expect(find.textContaining('111'), findsNothing);
 
       reader.complete(1, 22200); // B's own answer.
@@ -316,7 +269,7 @@ void main() {
 
       switchTo(controller, accountOf('B'));
       await tester.pump();
-      expect(balance(tester), 'Ver saldo');
+      expect(balance(tester), 'Consultando tu saldo…');
       expect(find.textContaining('184'), findsNothing);
       expect(reader.calls, 2);
 
@@ -343,7 +296,7 @@ void main() {
       // Signing in again never repaints the old amount.
       switchTo(controller, accountOf('B'));
       await tester.pump();
-      expect(balance(tester), 'Ver saldo');
+      expect(balance(tester), 'Consultando tu saldo…');
       expect(reader.calls, 2);
     });
   });

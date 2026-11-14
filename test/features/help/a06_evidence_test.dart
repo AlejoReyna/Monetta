@@ -49,8 +49,8 @@ void main() {
         'Envíos',
         'Cambios y devoluciones',
         'Mayoreo',
-        'Privacidad',
-        'Términos'
+        'Aviso de privacidad',
+        'Términos y condiciones'
       ]) {
         expect(find.text(label), findsOneWidget);
       }

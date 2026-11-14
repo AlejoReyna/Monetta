@@ -100,7 +100,8 @@ void main() {
       expect(find.textContaining('320'), findsNothing);
     });
 
-    testWidgets('rewards row says «Ver saldo» without a backend, never pts', (
+    testWidgets(
+        'rewards row says «Saldo no disponible» without a backend, never pts', (
       tester,
     ) async {
       final db = openTestDatabase();
@@ -112,8 +113,8 @@ void main() {
       await tester.pumpWidget(_host(controller));
       await tester.pumpAndSettle();
 
-      expect(find.text('Monetta Rewards'), findsOneWidget);
-      expect(find.text('Ver saldo'), findsOneWidget);
+      expect(find.text('MONETTA REWARDS'), findsOneWidget);
+      expect(find.text('Saldo no disponible'), findsOneWidget);
       expect(find.textContaining('pts'), findsNothing);
       // The duplicated Rewards card is gone from Cuenta.
       expect(find.byKey(const ValueKey('rewards-section')), findsNothing);

@@ -12,7 +12,7 @@ import '../boutique/boutique_tokens.dart';
 import 'rewards_models.dart';
 
 // ---------------------------------------------------------------------------
-// Resumen de saldo: "Tienes $184 Monetta disponibles".
+// Resumen de saldo: «Saldo disponible $184» en verde.
 // ---------------------------------------------------------------------------
 
 /// Bloque disponible/pendiente + próximo vencimiento + movimientos.

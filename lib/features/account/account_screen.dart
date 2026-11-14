@@ -705,7 +705,9 @@ class _IdentityCardState extends State<_IdentityCard> {
                   color: palette.ink,
                 ),
               ),
-              Text('Miembro · Nivel no disponible',
+              // The level appears only when the Rewards service reports one;
+              // until then nothing hints at a missing figure.
+              Text('Miembro',
                   style: boutiqueText(size: 13, color: palette.inkMuted)),
               if (account.displayName != null && account.email != null) ...[
                 const SizedBox(height: 2),
@@ -1081,8 +1083,9 @@ class _ProfileEditorSheetState extends State<_ProfileEditorSheet> {
 /// «Monetta Rewards» row with the balance the server reports on the right.
 ///
 /// The amount is read from the Rewards contract and shown as the server
-/// returns it; without a reader, while loading or on any failure the row says
-/// «Ver saldo». A late answer for another account is discarded.
+/// returns it, in green. Otherwise the row says what is happening —
+/// «Consultando tu saldo…», «Saldo no disponible», or «No pudimos consultar tu
+/// saldo» with a retry. A late answer for another account is discarded.
 class _RewardsRow extends StatefulWidget {
   const _RewardsRow({required this.controller, required this.reader});
 
@@ -1135,7 +1138,12 @@ class _RewardsRowState extends State<_RewardsRow> {
     if (current == _trackedAccount || !mounted) return;
     _trackedAccount = current;
     setState(() => _balance = null);
-    _request();
+    // Cuenta remounts its subtree per owner: when this row is replaced in the
+    // same frame the new one asks on its own, so ask only if still here.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _trackedAccount != current) return;
+      setState(_request);
+    });
   }
 
   void _resolveReader() {
@@ -1201,7 +1209,7 @@ class _RewardsRowState extends State<_RewardsRow> {
     final palette = context.boutique;
     return Semantics(
       button: true,
-      label: 'Monetta Rewards. ${_balance ?? 'Ver saldo'}',
+      label: 'Monetta Rewards. ${_balance ?? 'Saldo no disponible'}',
       excludeSemantics: true,
       child: Material(
         color: palette.surface,

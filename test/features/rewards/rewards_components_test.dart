@@ -49,10 +49,10 @@ void main() {
     await tester.pumpWidget(_app(RewardsBalanceCard(summary: _summary())));
     await tester.pump();
     expect(find.byKey(const ValueKey('rewards-balance-card')), findsOneWidget);
-    expect(
-      find.text('Tienes \$184 Monetta disponibles'),
-      findsOneWidget,
-    );
+    final available = tester
+        .widget<Text>(find.byKey(const ValueKey('rewards-balance-available')))
+        .data;
+    expect(available, 'Saldo disponible\n\$184 Monetta');
     expect(find.textContaining('pendientes de entrega'), findsOneWidget);
   });
 
