@@ -343,9 +343,6 @@ OrderDisplayStatus? _fulfillmentStatus(OrderSummary order) {
   }
 }
 
-bool _isPaid(OrderSummary order) =>
-    _normalizeFinancial(order.status) == 'paid' && !_isShopifyCancelled(order);
-
 bool _isDelivered(OrderSummary order) =>
     order.source != 'whatsapp_apartado' &&
     !_fulfillmentBlockedByTerminalPayment(order) &&

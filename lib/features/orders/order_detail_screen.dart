@@ -22,6 +22,7 @@ import '../../data/local/database.dart' show OrderSummary;
 import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
 import '../rewards/rewards_section.dart';
+import '../checkout/purchase_notices.dart';
 import 'order_fulfillment_progress.dart';
 import 'order_status.dart';
 
@@ -334,14 +335,13 @@ class OrderDetailScreen extends StatelessWidget {
                     ..._timeline(context),
                     const SizedBox(height: BoutiqueSpace.sm),
                     Text(
-                      'Sin número de guía no mostramos fechas estimadas. '
-                      'Envíos: contenido pendiente de aprobación. '
-                      'Devoluciones y garantía: contenido pendiente de aprobación.',
+                      'Sin número de guía no mostramos fechas estimadas.',
                       style: boutiqueText(
                         size: 12,
                         color: palette.inkMuted,
                       ),
                     ),
+                    const PurchasePolicyNotice(),
                   ],
                 ),
                 if (order.source == 'whatsapp_apartado') ...[
@@ -407,10 +407,10 @@ class OrderDetailScreen extends StatelessWidget {
         'Registrado el ${orderDateLabel(order.placedAt)}.',
       ),
     ];
-  final payment = orderPaymentStatus(order);
-  final terminalPayment = payment.key == 'refunded' ||
-      payment.key == 'cancelled' ||
-      payment.key == 'voided';
+    final payment = orderPaymentStatus(order);
+    final terminalPayment = payment.key == 'refunded' ||
+        payment.key == 'cancelled' ||
+        payment.key == 'voided';
     if (order.source != 'whatsapp_apartado') {
       if (payment.key == 'confirmed') {
         events.add(('Pago confirmado', 'Shopify registró el pago.'));

@@ -26,9 +26,13 @@ Map<String, List<String>> productOptionValues(Product product) {
 /// Resolves the exact combination, including exhausted variants. Missing
 /// combinations stay missing; another size/colour is never substituted.
 int indexForOptions(Product product, Map<String, String> options) =>
-    productChoices(product).indexWhere((v) =>
-        v.selectedOptions.length == options.length &&
-        options.entries.every((e) => v.selectedOptions[e.key] == e.value),);
+    productChoices(product).indexWhere(
+      (v) =>
+          v.selectedOptions.length == options.length &&
+          options.entries.every((e) => v.selectedOptions[e.key] == e.value),
+    );
 
 typedef ProductRestockAction = void Function(
-    Product product, ProductVariant variant,);
+  Product product,
+  ProductVariant variant,
+);

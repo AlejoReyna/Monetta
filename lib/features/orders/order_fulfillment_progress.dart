@@ -6,9 +6,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import '../../app/monetta_tokens.g.dart';
 import '../../data/local/database.dart' show OrderSummary;
-import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
 import 'order_status.dart';
 
@@ -140,9 +138,8 @@ class OrderFulfillmentProgressBar extends StatelessWidget {
                     child: Container(
                       height: 2,
                       margin: const EdgeInsets.only(bottom: 28),
-                      color: i < activeIndex
-                          ? palette.goldText
-                          : palette.hairline,
+                      color:
+                          i < activeIndex ? palette.goldText : palette.hairline,
                     ),
                   ),
               ],

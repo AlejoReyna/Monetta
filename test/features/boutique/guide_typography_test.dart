@@ -125,24 +125,6 @@ void main() {
       expect(totes.fontStyle, FontStyle.italic);
     });
 
-    testWidgets('home banner: Compra in italic serif, fácil in script', (
-      tester,
-    ) async {
-      await pumpClientGuide(
-        tester,
-        Scaffold(
-          body: HomeEditorialBanner(playing: true, onOpenNew: () {}),
-        ),
-      );
-      final compra = _spanStyle(tester, 'Compra ')!;
-      expect(compra.fontFamily, kGuideSerifFamily);
-      expect(compra.fontStyle, FontStyle.italic);
-      expect(_spanStyle(tester, 'fácil')!.fontFamily, kGuideScriptFamily);
-      final desde = _textStyle(tester, 'desde México');
-      expect(desde.fontFamily, kGuideSerifFamily);
-      expect(desde.fontStyle, FontStyle.italic);
-    });
-
     testWidgets('Comparte y gana: script word, serif «y gana» and body', (
       tester,
     ) async {

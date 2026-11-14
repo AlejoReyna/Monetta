@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../app/monetta_tokens.g.dart';
 import '../../app/theme.dart';
 import '../../domain/editorial_content.dart';
+import '../../domain/home_content.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../about/about_monetta_screen.dart';
@@ -348,6 +349,8 @@ class WholesaleScreen extends StatelessWidget {
               builder: (footerContext) => ClientGuideFooter(
                     onWholesale: () =>
                         Scrollable.of(footerContext).position.jumpTo(0),
+                    socialLinks: HomeContent.fallback.socialLinks,
+                    openUri: openUri,
                     onContact: () => unawaited(
                         openContact(context, groups: groups, openUri: openUri)),
                     onAbout: () => Navigator.of(context).push(

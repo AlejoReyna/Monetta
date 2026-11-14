@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../boutique/boutique_tokens.dart';
 import '../boutique/client_guide_components.dart';
 import '../boutique/guide_art.dart';
-import '../catalog/collection_screen.dart';
 import 'home_v41_catalog.dart';
 
 class HomeCategoryPhotoRail extends StatelessWidget {
@@ -21,7 +20,8 @@ class HomeCategoryPhotoRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardWidth = (MediaQuery.sizeOf(context).width * 0.42).clamp(140.0, 200.0);
+    final cardWidth =
+        (MediaQuery.sizeOf(context).width * 0.42).clamp(140.0, 200.0);
     return Column(
       key: const ValueKey('home-section-category-photos'),
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,9 +36,11 @@ class HomeCategoryPhotoRail extends StatelessWidget {
           child: ListView.separated(
             key: const ValueKey('home-category-photo-rail'),
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
+            padding:
+                const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
             itemCount: kHomeCategoryPhotoEntries.length,
-            separatorBuilder: (_, __) => const SizedBox(width: BoutiqueSpace.md),
+            separatorBuilder: (_, __) =>
+                const SizedBox(width: BoutiqueSpace.md),
             itemBuilder: (context, index) {
               final entry = kHomeCategoryPhotoEntries[index];
               return SizedBox(

@@ -45,7 +45,8 @@ class HomeMostWantedSection extends StatelessWidget {
             key: const ValueKey('home-most-wanted-rail'),
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
-            padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
+            padding:
+                const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
             itemCount: products.length,
             separatorBuilder: (_, __) =>
                 const SizedBox(width: BoutiqueSpace.md),

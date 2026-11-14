@@ -5,7 +5,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../app/catalog_store.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart' show formatShopperPrice;
@@ -17,7 +16,6 @@ import '../boutique/client_guide_components.dart';
 import '../catalog/product_card.dart';
 import '../catalog/product_tile.dart';
 import '../product/product_selection.dart';
-import 'home_v41_catalog.dart';
 
 class HomeNewCollectionSection extends StatefulWidget {
   const HomeNewCollectionSection({
@@ -122,8 +120,8 @@ class _HomeNewCollectionSectionState extends State<HomeNewCollectionSection> {
                                 right: 0,
                                 child: _HomeWishlistControl(
                                   wishlisted: wishlisted,
-                                  onPressed: () =>
-                                      unawaited(store.toggleWishlist(product.id)),
+                                  onPressed: () => unawaited(
+                                      store.toggleWishlist(product.id)),
                                 ),
                               ),
                               if (products.length > 1) ...[
@@ -176,9 +174,10 @@ class _HomeNewCollectionSectionState extends State<HomeNewCollectionSection> {
                                     Text(
                                       cardPieceName(
                                         title: product.title,
-                                        colorSlug: facets?.colors.isEmpty ?? true
-                                            ? null
-                                            : facets!.colors.first.value,
+                                        colorSlug:
+                                            facets?.colors.isEmpty ?? true
+                                                ? null
+                                                : facets!.colors.first.value,
                                       ),
                                       style: boutiqueTitle(
                                         size: 18,
@@ -263,7 +262,8 @@ class _HomeNewCollectionSectionState extends State<HomeNewCollectionSection> {
           child: ListView.separated(
             key: const ValueKey('home-new-products-rail'),
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
+            padding:
+                const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
             itemCount: products.length,
             separatorBuilder: (_, __) =>
                 const SizedBox(width: BoutiqueSpace.md),

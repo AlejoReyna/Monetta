@@ -5,7 +5,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../app/catalog_store.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart' show formatShopperPrice;
@@ -49,11 +48,13 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
-  final editorial = store.profile.isEmpty;
-    final products = uniqueFeedProducts(store, limit: kHomeNewCollectionProductLimit);
+    final editorial = store.profile.isEmpty;
+    final products =
+        uniqueFeedProducts(store, limit: kHomeNewCollectionProductLimit);
     if (products.isEmpty) return const SizedBox.shrink();
     final palette = context.boutique;
-    final panelWidth = (MediaQuery.sizeOf(context).width * 0.72).clamp(240.0, 320.0);
+    final panelWidth =
+        (MediaQuery.sizeOf(context).width * 0.72).clamp(240.0, 320.0);
 
     return Column(
       key: const ValueKey('home-section-for-you'),
@@ -68,7 +69,8 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
           child: ListView.separated(
             key: const ValueKey('home-for-you-rail'),
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
+            padding:
+                const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
             itemCount: products.length,
             separatorBuilder: (_, __) =>
                 const SizedBox(width: BoutiqueSpace.md),
@@ -107,14 +109,15 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
                             children: [
                               GestureDetector(
                                 onTap: () => setState(
-                                  () => _expandedIndex =
-                                      expanded ? null : index,
+                                  () =>
+                                      _expandedIndex = expanded ? null : index,
                                 ),
                                 child: Builder(
                                   builder: (context) {
                                     final url =
                                         _panelImage(product, variantIndex);
-                                    if (url == null) return const SizedBox.shrink();
+                                    if (url == null)
+                                      return const SizedBox.shrink();
                                     return MonettaImage(
                                       url: url,
                                       fit: BoxFit.contain,
@@ -139,7 +142,8 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
                                   enabled: inStock,
                                   adding: adding,
                                   onAdd: () async {
-                                    if (selectableVariants(product).length > 1 &&
+                                    if (selectableVariants(product).length >
+                                            1 &&
                                         !hasReliableColorOptions(product)) {
                                       if (!context.mounted) return;
                                       await showProductQuickView(

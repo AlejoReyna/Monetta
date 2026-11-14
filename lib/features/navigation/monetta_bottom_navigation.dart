@@ -199,29 +199,13 @@ class MonettaBottomNavigation extends StatelessWidget {
         ],
       );
     }
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
-      return _buildGlassCapsule(context, colors, unread);
-    }
-    return DecoratedBox(
-      key: const Key('bottom-nav-surface'),
-      decoration: BoxDecoration(
-        color: colors.navigationSurface,
-        border: Border(top: BorderSide(color: colors.divider, width: 0.5)),
-      ),
-      // Ink and focus paint on the bar's surface.
-      child: Material(
-        type: MaterialType.transparency,
-        child: SafeArea(
-          top: false,
-          maintainBottomViewPadding: true,
-          child: _buildHorizontalContent(context, unread: unread),
-        ),
-      ),
-    );
+    // UI v4.1: the floating glass capsule with halo C on every platform.
+    return _buildGlassCapsule(context, colors, unread);
   }
 
-  /// Floating translucent capsule used on iOS. The blur is dropped under high
-  /// contrast and the fill becomes opaque.
+  /// Floating translucent capsule (UI v4.1 on iOS, Android and web) ringed
+  /// by halo C: gold at 18 %, 10 px blur, 2 px spread, transparent centre.
+  /// The blur is dropped under high contrast and the fill becomes opaque.
   Widget _buildGlassCapsule(
       BuildContext context, MonettaColors colors, int unread) {
     final highContrast = MediaQuery.highContrastOf(context);
@@ -286,6 +270,11 @@ class MonettaBottomNavigation extends StatelessWidget {
                         .withValues(alpha: _kGlassShadowAlpha),
                     blurRadius: _kGlassShadowBlur,
                     offset: _kGlassShadowOffset,
+                  ),
+                  const BoxShadow(
+                    color: MonettaTokens.haloColor,
+                    blurRadius: MonettaTokens.haloBlur,
+                    spreadRadius: MonettaTokens.haloSpread,
                   ),
                 ],
               ),

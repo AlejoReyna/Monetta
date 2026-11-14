@@ -1,8 +1,6 @@
 /// «Basado en tus gustos»: two progressive horizontal rows.
 library;
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../app/catalog_store.dart';

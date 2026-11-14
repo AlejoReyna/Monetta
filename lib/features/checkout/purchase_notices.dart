@@ -9,9 +9,6 @@ import '../boutique/boutique_tokens.dart';
 import '../boutique/client_guide_components.dart';
 import '../help/policy_reader.dart';
 
-const purchasePolicyPlaceholder =
-    'Envíos, devoluciones y garantía: contenido pendiente de aprobación.';
-
 class PurchasePolicyNotice extends StatelessWidget {
   const PurchasePolicyNotice({super.key});
   @override

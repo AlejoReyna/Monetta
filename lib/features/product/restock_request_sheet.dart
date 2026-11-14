@@ -132,7 +132,8 @@ class _RestockRequestSheetState extends State<RestockRequestSheet> {
         case RestockSubmitResult.created:
           setState(() {
             _terminalResult = result;
-            _statusMessage = 'Listo. Te avisaremos cuando esta variante vuelva.';
+            _statusMessage =
+                'Listo. Te avisaremos cuando esta variante vuelva.';
           });
         case RestockSubmitResult.alreadyRegistered:
           setState(() {
@@ -215,7 +216,8 @@ class _RestockRequestSheetState extends State<RestockRequestSheet> {
                         width: 72,
                         height: 72,
                         child: MonettaImage(
-                          url: MediaUrl.sized(thumb, width: MediaUrl.thumbWidth),
+                          url:
+                              MediaUrl.sized(thumb, width: MediaUrl.thumbWidth),
                           fit: BoxFit.contain,
                           cacheWidth: MediaUrl.thumbWidth,
                         ),

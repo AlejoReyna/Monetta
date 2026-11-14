@@ -13,23 +13,39 @@ const int kFavoritesTasteProductLimit = 60;
 /// Home-only category photograph carousel (F01–F18), in delivery order.
 const List<HomeCategoryPhotoEntry> kHomeCategoryPhotoEntries =
     <HomeCategoryPhotoEntry>[
-  HomeCategoryPhotoEntry('F01', 'Calzado de dama', CollectionFilter(category: 'calzado')),
-  HomeCategoryPhotoEntry('F02', 'Bolsos de hombro', CollectionFilter(category: 'bolsa', silhouette: 'shoulder')),
-  HomeCategoryPhotoEntry('F03', 'Bolsos de mano', CollectionFilter(category: 'bolsa', silhouette: 'hand')),
-  HomeCategoryPhotoEntry('F04', 'Calzado de hombre', CollectionFilter(category: 'calzado')),
-  HomeCategoryPhotoEntry('F05', 'Accesorios', CollectionFilter(category: 'accesorio')),
-  HomeCategoryPhotoEntry('F06', 'Bolsos de hombre', CollectionFilter(category: 'bolsa')),
+  HomeCategoryPhotoEntry(
+      'F01', 'Calzado de dama', CollectionFilter(category: 'calzado')),
+  HomeCategoryPhotoEntry('F02', 'Bolsos de hombro',
+      CollectionFilter(category: 'bolsa', silhouette: 'shoulder')),
+  HomeCategoryPhotoEntry('F03', 'Bolsos de mano',
+      CollectionFilter(category: 'bolsa', silhouette: 'hand')),
+  HomeCategoryPhotoEntry(
+      'F04', 'Calzado de hombre', CollectionFilter(category: 'calzado')),
+  HomeCategoryPhotoEntry(
+      'F05', 'Accesorios', CollectionFilter(category: 'accesorio')),
+  HomeCategoryPhotoEntry(
+      'F06', 'Bolsos de hombre', CollectionFilter(category: 'bolsa')),
   HomeCategoryPhotoEntry('F07', 'Bolsos', CollectionFilter(category: 'bolsa')),
-  HomeCategoryPhotoEntry('F08', 'Carteras', CollectionFilter(category: 'cartera')),
-  HomeCategoryPhotoEntry('F09', 'Carteras de mujer', CollectionFilter(category: 'cartera')),
-  HomeCategoryPhotoEntry('F10', 'Crossbody', CollectionFilter(category: 'bolsa', silhouette: 'crossbody')),
-  HomeCategoryPhotoEntry('F11', 'Carteras de hombre', CollectionFilter(category: 'cartera')),
-  HomeCategoryPhotoEntry('F12', 'Lentes', CollectionFilter(category: 'accesorio', queryTerms: const ['lente'])),
-  HomeCategoryPhotoEntry('F13', 'Relojes de hombre', CollectionFilter(category: 'reloj')),
-  HomeCategoryPhotoEntry('F14', 'Tarjeteros', CollectionFilter(category: 'cartera', queryTerms: const ['tarjetero'])),
-  HomeCategoryPhotoEntry('F15', 'Muñequeras', CollectionFilter(category: 'cartera', queryTerms: const ['muñequera'])),
-  HomeCategoryPhotoEntry('F16', 'Relojes de mujer', CollectionFilter(category: 'reloj')),
-  HomeCategoryPhotoEntry('F17', 'Tote', CollectionFilter(category: 'bolsa', silhouette: 'tote')),
+  HomeCategoryPhotoEntry(
+      'F08', 'Carteras', CollectionFilter(category: 'cartera')),
+  HomeCategoryPhotoEntry(
+      'F09', 'Carteras de mujer', CollectionFilter(category: 'cartera')),
+  HomeCategoryPhotoEntry('F10', 'Crossbody',
+      CollectionFilter(category: 'bolsa', silhouette: 'crossbody')),
+  HomeCategoryPhotoEntry(
+      'F11', 'Carteras de hombre', CollectionFilter(category: 'cartera')),
+  HomeCategoryPhotoEntry('F12', 'Lentes',
+      CollectionFilter(category: 'accesorio', queryTerms: const ['lente'])),
+  HomeCategoryPhotoEntry(
+      'F13', 'Relojes de hombre', CollectionFilter(category: 'reloj')),
+  HomeCategoryPhotoEntry('F14', 'Tarjeteros',
+      CollectionFilter(category: 'cartera', queryTerms: const ['tarjetero'])),
+  HomeCategoryPhotoEntry('F15', 'Muñequeras',
+      CollectionFilter(category: 'cartera', queryTerms: const ['muñequera'])),
+  HomeCategoryPhotoEntry(
+      'F16', 'Relojes de mujer', CollectionFilter(category: 'reloj')),
+  HomeCategoryPhotoEntry(
+      'F17', 'Tote', CollectionFilter(category: 'bolsa', silhouette: 'tote')),
   HomeCategoryPhotoEntry('F18', 'Bolsos', CollectionFilter(category: 'bolsa')),
 ];
 
@@ -43,9 +59,11 @@ class HomeCategoryPhotoEntry {
 }
 
 /// Newest unique products up to [limit], without padding duplicates.
-List<Product> uniqueNewestProducts(CatalogStore store, {int limit = kHomeNewCollectionProductLimit}) {
+List<Product> uniqueNewestProducts(CatalogStore store,
+    {int limit = kHomeNewCollectionProductLimit}) {
   if (!store.ready) return const [];
-  final sorted = [...store.products]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  final sorted = [...store.products]
+    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   final seen = <String>{};
   final out = <Product>[];
   for (final product in sorted) {
@@ -81,6 +99,7 @@ List<Product> uniqueFeedProducts(
 }
 
 /// Taste recommendations for Favorites: ranked first, then editorial newest.
-List<Product> uniqueTasteProducts(CatalogStore store, {int limit = kFavoritesTasteProductLimit}) {
+List<Product> uniqueTasteProducts(CatalogStore store,
+    {int limit = kFavoritesTasteProductLimit}) {
   return uniqueFeedProducts(store, limit: limit);
 }

@@ -49,7 +49,7 @@ void main() {
     );
     expect(
       find.textContaining('contenido pendiente de aprobación'),
-      findsWidgets,
+      findsNothing,
     );
     // Guardar para después = favorito.
     expect(find.text('Guardar para después'), findsOneWidget);

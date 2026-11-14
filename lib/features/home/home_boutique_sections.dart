@@ -10,7 +10,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../app/monetta_tokens.g.dart';
 import '../../app/theme.dart';
 import '../../domain/campaign.dart';
 import '../../domain/product.dart';
@@ -265,67 +264,6 @@ class _HomeEditorialBannerState extends State<HomeEditorialBanner> {
                 child: _HeroDots(
                   count: HomeEditorialBanner.slideCount,
                   active: _page,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// One carousel slide: a guide still, a cream wash on the text side and the
-/// copy aligned to that side. The copy scales down instead of overflowing.
-class _BannerSlide extends StatelessWidget {
-  const _BannerSlide({
-    required this.photo,
-    required this.focus,
-    required this.gutter,
-    required this.children,
-    this.onTap,
-    this.actionKey,
-    super.key,
-  });
-
-  final GuidePhoto photo;
-  final Alignment focus;
-  final double gutter;
-  final List<Widget> children;
-  final VoidCallback? onTap;
-  final Key? actionKey;
-
-  @override
-  Widget build(BuildContext context) {
-    final onRight = photo.textSide == GuideTextSide.right;
-    return GestureDetector(
-      key: actionKey,
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          GuideArt(asset: photo.asset, alignment: focus),
-          GuideScrim(textSide: photo.textSide),
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              gutter,
-              BoutiqueSpace.lg,
-              gutter,
-              BoutiqueSpace.xl,
-            ),
-            child: Align(
-              alignment: onRight ? Alignment.centerRight : Alignment.centerLeft,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment:
-                    onRight ? Alignment.centerRight : Alignment.centerLeft,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: onRight
-                      ? CrossAxisAlignment.end
-                      : CrossAxisAlignment.start,
-                  children: children,
                 ),
               ),
             ),

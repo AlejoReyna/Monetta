@@ -406,7 +406,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       playing: playing,
                       onOpenProducts: _openFullCatalog,
                       onOpenBrands: () => unawaited(openBrands(context)),
-                      onOpenCategories: () => unawaited(openCategories(context)),
+                      onOpenCategories: () =>
+                          unawaited(openCategories(context)),
                     ),
                   )
                 else
@@ -495,6 +496,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 openContact(context, socialLinks: homeContent.socialLinks),
               ),
               onAbout: _openAbout,
+              onWholesale: _openWholesale,
+              socialLinks: homeContent.socialLinks,
             ),
             for (var index = 0; index < tail.length; index++)
               _buildHomeSection(
@@ -736,26 +739,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ),
     );
   }
-}
-
-class _HomeOffersSection extends StatelessWidget {
-  const _HomeOffersSection({required this.onOpenPartner});
-  final VoidCallback onOpenPartner;
-
-  @override
-  Widget build(BuildContext context) => ClientGuideEditorial(
-        key: const ValueKey('home-section-offers'),
-        title: 'PRECIOS DE',
-        titleAccent: 'mayoreo',
-        subtitle: 'A partir de 3 piezas',
-        imageAsset: kGuideHomeWholesale,
-        overlaySide: GuideTextSide.right,
-        action: GuidePillButton(
-          key: const ValueKey('home-wholesale-button'),
-          label: 'CONOCE MÁS',
-          onPressed: onOpenPartner,
-        ),
-      );
 }
 
 /// «Colecciones», between «Compra por estilo» and «Tus marcas favoritas»: the
