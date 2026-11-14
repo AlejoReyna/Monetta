@@ -7,7 +7,6 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/shopper_copy.dart';
@@ -18,6 +17,7 @@ import '../../main.dart';
 import '../account/account_screen.dart';
 import '../about/about_monetta_screen.dart';
 import '../catalog/categories_screen.dart';
+import '../catalog/brands_screen.dart';
 import '../catalog/collection_screen.dart';
 import '../catalog/search_screen.dart';
 import '../contact/contact_screen.dart';
@@ -28,11 +28,22 @@ import 'monetta_side_menu.dart';
 Widget guideDrawer(BuildContext context) {
   final content = HomeContentScope.maybeOf(context)?.content;
   final accountScope = AccountScope.maybeOf(context);
-  Future<void> openExternal(Uri uri) =>
-      launchUrl(uri, mode: LaunchMode.externalApplication);
+  Future<void> openExternal(Uri uri) async {
+    try {
+      final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (opened) return;
+    } catch (_) {/* show the same recoverable launcher failure */}
+    if (context.mounted) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(
+          content: Text('No pudimos abrir el enlace. Inténtalo de nuevo.'),
+        ),
+      );
+    }
+  }
+
   return MonettaSideMenu(
-    // Same bell, share action, WhatsApp and networks as the Inicio menu, so
-    // the guide's menu reads the same on every screen that opens it.
+    // Owner-configured navigation; no retired catalog-sharing control.
     onNotifications: () => unawaited(
       openNotifications(
         context,
@@ -41,7 +52,11 @@ Widget guideDrawer(BuildContext context) {
         accountController: accountScope,
       ),
     ),
-    onShare: () => unawaited(Share.share('Únete al mundo de Monetta')),
+    identityName: accountScope?.account?.displayName,
+    onAccount: accountScope == null
+        ? null
+        : () => unawaited(openAccount(context, controller: accountScope)),
+    onAllBrands: () => unawaited(openBrands(context)),
     onWhatsApp: () => unawaited(openExternal(conciergeWhatsAppUri())),
     socialLinks: content?.socialLinks ?? HomeContent.fallback.socialLinks,
     onOpenSocial: (uri) => unawaited(openExternal(uri)),

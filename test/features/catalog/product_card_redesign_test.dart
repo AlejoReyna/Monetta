@@ -4,6 +4,7 @@
 // «Categorías», a shopping cart and no underline.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
 import 'package:monetta_app/app/theme.dart';
@@ -125,7 +126,7 @@ void main() {
         ),
       );
       expect(grounds, findsOneWidget, reason: 'a single container, no frame');
-      expect(palette.surfaceDeep, const Color(0xFFF3EADF));
+      expect(palette.surfaceDeep, MonettaTokens.surfaceWarm);
       final decoration =
           tester.widget<DecoratedBox>(grounds).decoration as BoxDecoration;
       expect(decoration.borderRadius, kProductCardRadius);
@@ -136,8 +137,7 @@ void main() {
         find.text(data.brand!),
         find.text(data.title),
         find.text(data.priceLabel),
-        find.text('VER PRODUCTO'),
-        find.byTooltip('Guardar'),
+        find.byTooltip('Guardar en favoritos'),
       ]) {
         expect(
           find.descendant(of: grounds, matching: inside),
@@ -147,15 +147,17 @@ void main() {
       }
       expect(data.priceLabel, matches(_priceFormat));
 
+      // UI v4.1: no «VER PRODUCTO» pill on the card; the quick view has it.
+      expect(find.descendant(of: grounds, matching: find.text('VER PRODUCTO')),
+          findsNothing);
       expect(find.byWidgetPredicate(_isQuickAddKey), findsNothing);
       expect(find.byIcon(Icons.add), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets(
-        'CARD-01 brand and price are Playfair Display bold, the name '
-        'Playfair regular in ink; the pill is Inter 400 13 on the action '
-        'colour', (tester) async {
+        'CARD-01 brand, name and price are DM Sans in ink (UI v4.1); '
+        'brand and price bold, the name regular', (tester) async {
       setPhoneView(tester, height: 1600);
       final store = await scriptedStore();
       addTearDown(store.dispose);
@@ -172,41 +174,18 @@ void main() {
           .style!;
 
       final brand = styleOf(data.brand!);
-      expect(brand.fontFamily, kBoutiqueSerifFamily);
+      expect(brand.fontFamily, kBoutiqueSansFamily);
       expect(brand.fontWeight, FontWeight.w700);
-      expect(brand.fontSize, 15);
       expect(brand.color, palette.ink);
 
       final name = styleOf(data.title);
-      expect(name.fontFamily, kBoutiqueSerifFamily);
+      expect(name.fontFamily, kBoutiqueSansFamily);
       expect(name.fontWeight, FontWeight.w400);
-      expect(name.fontSize, 14);
       expect(name.color, palette.ink);
 
       final price = styleOf(data.priceLabel);
-      expect(price.fontFamily, kBoutiqueSerifFamily);
+      expect(price.fontFamily, kBoutiqueSansFamily);
       expect(price.fontWeight, FontWeight.w700);
-      expect(price.fontSize, 15);
-
-      final pill = styleOf('VER PRODUCTO');
-      expect(pill.fontFamily, kBoutiqueSansFamily);
-      expect(pill.fontWeight, FontWeight.w400);
-      expect(pill.fontSize, 13);
-      expect(pill.letterSpacing, 0.5);
-      expect(pill.color, palette.onAction);
-      final button = find.descendant(
-        of: tile,
-        matching: find.byType(TileViewProductButton),
-      );
-      expect(tester.getSize(button).height, 40);
-      expect(
-        tester
-            .widget<Material>(
-              find.descendant(of: button, matching: find.byType(Material)),
-            )
-            .color,
-        palette.action,
-      );
     });
 
     testWidgets('CARD-01 the photo is square and the grid gaps are 8 and 8',
@@ -252,14 +231,15 @@ void main() {
         isTrue,
       );
       expect(find.byWidgetPredicate(_isQuickAddKey), findsNothing);
-      expect(find.text('VER PRODUCTO'), findsWidgets);
+      expect(find.text('VER PRODUCTO'), findsNothing);
     });
   });
 
   group('CARD-02 interaction', () {
     testWidgets(
-        'CARD-02 tapping the photo opens the quick view, the pill opens the '
-        'ficha, the card reads as a button with its hint', (tester) async {
+        'CARD-02 tapping the photo opens the quick view and its «Ver '
+        'producto» opens the ficha; the card reads as a button with its hint',
+        (tester) async {
       setPhoneView(tester, height: 1600);
       final store = await scriptedStore();
       addTearDown(store.dispose);
@@ -278,7 +258,6 @@ void main() {
       );
       final node = tester.getSemantics(hinted.first);
       expect(node.getSemanticsData().hint, 'Abre la vista previa');
-      expect(find.bySemanticsLabel('Ver producto'), findsWidgets);
       semantics.dispose();
 
       await tester.tap(
@@ -288,14 +267,8 @@ void main() {
       expect(find.text(kAddLabel), findsOneWidget);
       expect(find.byType(ProductScreen), findsNothing);
 
-      // Close the sheet and open the ficha from the pill.
-      await tester.tapAt(const Offset(8, 40));
-      await tester.pumpAndSettle();
-      expect(find.text(kAddLabel), findsNothing);
-
-      await tester.tap(
-        find.descendant(of: tile, matching: find.text('VER PRODUCTO')).first,
-      );
+      // «Ver producto» in the quick view opens the ficha.
+      await tester.tap(find.text('Ver producto'));
       await tester.pumpAndSettle();
       expect(find.byType(ProductScreen), findsOneWidget);
     });
@@ -387,10 +360,6 @@ void main() {
       await tester.pumpAndSettle();
       expect(selected, [(product.id, 0)]);
       expect(find.text(kAddLabel), findsNothing);
-
-      await tester.tap(find.text('VER PRODUCTO'));
-      await tester.pumpAndSettle();
-      expect(selected.length, 2, reason: 'the pill selects in the pane too');
       expect(find.byType(ProductScreen), findsNothing);
     });
 

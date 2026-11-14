@@ -92,8 +92,15 @@ ProductVariant syntheticVariant({
   String title = 'Default Title',
   double price = 1299,
   bool available = true,
+  Map<String, String> selectedOptions = const {},
 }) =>
-    ProductVariant(id: id, title: title, price: price, available: available);
+    ProductVariant(
+      id: id,
+      title: title,
+      price: price,
+      available: available,
+      selectedOptions: selectedOptions,
+    );
 
 /// A product that exists only in the test. [variants] defaults to a single
 /// `Default Title` variant with [available] stock.

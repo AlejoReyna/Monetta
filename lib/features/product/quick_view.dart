@@ -1,28 +1,12 @@
-/// Quick-view Fig.06 — vista previa centrada sobre la pantalla atenuada.
-///
-/// Una tarjeta centrada (≈ 79 % del ancho, máximo 440) con «‹» y «×» sobre la
-/// foto, fila de miniaturas, marca–nombre–precio (con anterior y `-%` solo con
-/// dato real), colores con la misma [ProductOptionSelector] de la ficha,
-/// «Stock» (Disponible o Agotado) — **sin** línea de `Últimas piezas`: el
-/// catálogo no trae cantidades, solo `available`, y la urgencia nunca se
-/// fabrica —, y «AGREGAR A BOLSA» + «VER PRODUCTO» con la misma selección y el
-/// mismo add-to-bag de la ficha ([tryAddSelectionToBag]). Si no cabe (texto
-/// grande, pantallas bajas) el contenido de la tarjeta se desplaza por dentro.
-///
-/// No toca `product_card.dart` (dueño B): esa tarjeta ya expone `onQuickView`
-/// como callback opcional. Cualquier tarjeta la abre con:
-///
-/// ```dart
-/// ProductCard(
-///   product: product,
-///   onQuickView: () => showProductQuickView(context, product),
-/// )
-/// ```
+/// Centered quick view: exact variant options, photography, price and stock;
+/// independent favorite, X/Escape, in-place add confirmation and PDP entry.
 library;
 
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart' show OrdinalSortKey;
+import 'package:flutter/services.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
@@ -37,7 +21,7 @@ import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
 import '../catalog/product_tile.dart' show PackshotBlend;
-import '../checkout/mini_cart.dart';
+import '../catalog/product_controls.dart';
 import '../navigation/duo_workspace.dart';
 import 'product_selection.dart';
 import 'purchase_dock.dart';
@@ -58,8 +42,17 @@ Future<void> showProductQuickView(
   Product product, {
   int initialVariantIndex = 0,
   bool requireChoice = false,
+  String? initialVariantId,
+  ValueChanged<String?>? onVariantChanged,
+  ProductRestockAction? onRestock,
 }) {
   final store = StoreScope.of(context);
+  final originFocus = FocusManager.instance.primaryFocus;
+  initialVariantIndex = variantIndexForId(
+    product,
+    initialVariantId,
+    fallback: initialVariantIndex,
+  );
   store.record(EventType.galleryInteraction, productId: product.id);
   // A two-sided window shows the card on its right side, beside the catalog,
   // with no veil: touching another piece replaces it.
@@ -74,6 +67,8 @@ Future<void> showProductQuickView(
           product: product,
           initialVariantIndex: initialVariantIndex,
           requireChoice: requireChoice,
+          onVariantChanged: onVariantChanged,
+          onRestock: onRestock,
           parentContext: paneContext,
           embedded: true,
         ),
@@ -99,10 +94,14 @@ Future<void> showProductQuickView(
         product: product,
         initialVariantIndex: initialVariantIndex,
         requireChoice: requireChoice,
+        onVariantChanged: onVariantChanged,
+        onRestock: onRestock,
         parentContext: context,
       ),
     ),
-  );
+  ).whenComplete(() {
+    if (originFocus?.context != null) originFocus!.requestFocus();
+  });
 }
 
 class _QuickViewSheet extends StatefulWidget {
@@ -112,11 +111,15 @@ class _QuickViewSheet extends StatefulWidget {
     this.initialVariantIndex = 0,
     this.requireChoice = false,
     this.embedded = false,
+    this.onVariantChanged,
+    this.onRestock,
   });
 
   final Product product;
   final BuildContext parentContext;
   final int initialVariantIndex;
+  final ValueChanged<String?>? onVariantChanged;
+  final ProductRestockAction? onRestock;
 
   /// The card as a page of a two-sided window's right side rather than a
   /// dialog: it stays after an add, and «×» returns that side to the bag.
@@ -137,7 +140,15 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
   int? _variantIndex;
   int _page = 0;
   bool _adding = false;
+  bool _added = false;
+  String? _selectedId;
+  bool _missingCombination = false;
   String? _error;
+
+  Product? get _currentProduct => StoreScope.of(context)
+      .products
+      .where((p) => p.id == widget.product.id)
+      .firstOrNull;
 
   @override
   void initState() {
@@ -150,7 +161,10 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
       _variantIndex = (widget.initialVariantIndex >= 0 &&
               widget.initialVariantIndex < selectable.length)
           ? widget.initialVariantIndex
-          : 0;
+          : widget.initialVariantIndex < 0
+              ? -1
+              : 0;
+      _selectedId = selectedVariant(widget.product, _variantIndex!)?.id;
     }
   }
 
@@ -172,12 +186,18 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
   Future<void> _addToBag() async {
     final index = _variantIndex;
     if (index == null || _adding) return;
-    final parent = widget.parentContext;
     setState(() {
       _adding = true;
       _error = null;
+      _added = false;
     });
-    final result = await tryAddSelectionToBag(context, widget.product, index);
+    final product = _currentProduct;
+    final currentIndex = product == null
+        ? -1
+        : variantIndexForId(product, _selectedId, fallback: -1);
+    final result = product == null
+        ? const BagAddResult(BagAddStatus.unavailable)
+        : await tryAddSelectionToBag(context, product, currentIndex);
     if (!mounted) return;
     if (result.status != BagAddStatus.added) {
       // The sheet stays open and the choice is kept so the shopper can retry.
@@ -193,60 +213,39 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
       return;
     }
     NotificationScope.maybeOf(context)?.recordPushOutcome('add_to_cart');
-    if (widget.embedded) {
-      // Beside the bag the card stays; the add is confirmed on that side.
-      setState(() => _adding = false);
-      await showMiniCart(context);
-      return;
-    }
-    Navigator.of(context).pop();
-    // Same confirmation as the ficha — one modal at a time.
-    if (parent.mounted) {
-      await showMiniCart(parent);
-    }
+    setState(() {
+      _adding = false;
+      _added = true;
+    });
   }
 
   void _viewFullProduct() {
-    final product = widget.product;
+    final product = _currentProduct;
+    if (product == null) return;
     final parent = widget.parentContext;
     final variantIndex = _variantIndex ?? 0;
     if (widget.embedded) {
       // The product replaces this card on the same side.
-      openProduct(context, product, initialVariantIndex: variantIndex);
+      openProduct(
+        context,
+        product,
+        initialVariantIndex: variantIndex,
+        initialVariantId: _selectedId,
+      );
       return;
     }
     Navigator.of(context).pop();
     if (parent.mounted) {
-      openProduct(parent, product, initialVariantIndex: variantIndex);
-    }
-  }
-
-  Future<void> _requestRestock(Product product) async {
-    final notifications = NotificationScope.maybeOf(context);
-    if (notifications == null || !notifications.available) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Los avisos todavía no están disponibles en esta versión.',
-          ),
-        ),
+      openProduct(
+        parent,
+        product,
+        initialVariantIndex: variantIndex,
+        initialVariantId: _selectedId,
       );
-      return;
     }
-    final ok = await notifications.createRestockAlert(product.id);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          ok
-              ? 'Te avisaremos cuando esta pieza vuelva.'
-              : notifications.lastError ?? 'No pudimos crear el aviso.',
-        ),
-      ),
-    );
   }
 
-  /// The two page buttons, under the stock line. «AGREGAR A BOLSA» keeps its
+  /// The two page buttons, under the stock line. «Agregar al carrito» keeps its
   /// key and every state of the old bar (choose, restock, pending).
   Widget _buildActions(BoutiquePalette palette, {required bool inStock}) {
     final chosen = _variantIndex;
@@ -256,11 +255,11 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
       label = _kChooseLabel;
       onPressed = null;
     } else if (!inStock) {
-      label = 'Avísame cuando vuelva';
-      onPressed = () => _requestRestock(widget.product);
+      label = 'Agotado';
+      onPressed = null;
     } else {
-      label = _adding ? 'AGREGANDO…' : 'AGREGAR A BOLSA';
-      onPressed = _addToBag;
+      label = _adding ? 'Agregando…' : 'Agregar al carrito';
+      onPressed = _currentProduct == null ? null : _addToBag;
     }
     return Column(
       key: const Key('quick-view-actions'),
@@ -278,20 +277,49 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
           ),
           const SizedBox(height: BoutiqueSpace.sm),
         ],
-        PurchaseDockButton(
-          key: const Key('quick-view-primary'),
-          label: label,
-          pending: _adding,
-          large: true,
-          onPressed: onPressed,
-        ),
+        if (inStock || chosen == null || chosen == -1)
+          PurchaseDockButton(
+            key: const Key('quick-view-primary'),
+            label: label,
+            pending: _adding,
+            large: true,
+            onPressed: onPressed,
+          ),
+        if (!inStock &&
+            chosen != null &&
+            chosen >= 0 &&
+            widget.onRestock != null &&
+            _currentProduct != null)
+          TextButton(
+            onPressed: () {
+              final product = _currentProduct;
+              final variant = product == null
+                  ? null
+                  : selectedVariant(
+                      product,
+                      variantIndexForId(product, _selectedId, fallback: -1),
+                    );
+              if (product != null && variant != null && !variant.available) {
+                widget.onRestock!(product, variant);
+              }
+            },
+            child: Text(
+              'Avísame cuando vuelva',
+              style: boutiqueText(color: palette.ink),
+            ),
+          ),
+        if (_added)
+          Semantics(liveRegion: true, child: const Text('Agregado al carrito')),
+        if (_currentProduct == null)
+          const Text('Este producto ya no está disponible.'),
         const SizedBox(height: BoutiqueSpace.sm),
-        PurchaseOutlineButton(
-          key: const Key('quick-view-view-product'),
-          label: 'VER PRODUCTO',
-          textColor: palette.action,
-          onPressed: _viewFullProduct,
-        ),
+        if (_currentProduct != null)
+          PurchaseOutlineButton(
+            key: const Key('quick-view-view-product'),
+            label: 'Ver producto',
+            textColor: palette.action,
+            onPressed: _viewFullProduct,
+          ),
       ],
     );
   }
@@ -343,64 +371,57 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            PageView.builder(
-              controller: _gallery,
-              itemCount: images.length,
-              onPageChanged: (i) => setState(() => _page = i),
-              itemBuilder: (_, i) => PackshotBlend(
-                ground: palette.surfaceDeep,
-                child: MonettaImage(
-                  url: images[i],
-                  fit: BoxFit.contain,
-                  cacheWidth: MediaUrl.cardWidth,
-                  fallbackLabel:
-                      '${shopperProductName(product.title)} · Monetta',
-                ),
-              ),
-            ),
-            if (!inStock)
-              IgnorePointer(
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: BoutiqueSpace.lg,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: palette.canvas,
-                      borderRadius: BoutiqueRadius.capsule,
-                      border: Border.all(color: palette.ink, width: 1),
-                    ),
-                    child: Text(
-                      'AGOTADO',
-                      style: boutiqueEyebrow(size: 11, color: palette.ink),
+            // Read after the close button (UI v4.1 order).
+            Semantics(
+              container: true,
+              sortKey: const OrdinalSortKey(1),
+              child: PageView.builder(
+                controller: _gallery,
+                itemCount: images.length,
+                onPageChanged: (i) => setState(() => _page = i),
+                itemBuilder: (_, i) => Semantics(
+                  // Read in place of the photograph; tapping it opens the PDP.
+                  label: 'Foto ${i + 1} de ${images.length}',
+                  hint: 'Abre el producto',
+                  child: InkWell(
+                    onTap: _viewFullProduct,
+                    child: PackshotBlend(
+                      ground: palette.surfaceDeep,
+                      child: MonettaImage(
+                        url: images[i],
+                        fit: BoxFit.contain,
+                        cacheWidth: MediaUrl.cardWidth,
+                        fallbackLabel:
+                            '${shopperProductName(product.title)} · Monetta',
+                      ),
                     ),
                   ),
                 ),
               ),
-            Positioned(
-              top: BoutiqueSpace.xs,
-              left: BoutiqueSpace.xs,
-              child: _photoControl(
-                key: const Key('quick-view-back'),
-                tooltip: 'Regresar',
-                icon: Icons.chevron_left,
-                size: 30,
-                palette: palette,
-              ),
             ),
+            if (!inStock)
+              const Positioned(
+                left: 8,
+                bottom: 4,
+                child: ProductSoldOutBadge(),
+              ),
             Positioned(
               top: BoutiqueSpace.xs,
               right: BoutiqueSpace.xs,
-              child: _photoControl(
-                key: const Key('quick-view-close'),
-                tooltip: 'Cerrar vista previa',
-                icon: Icons.close,
-                size: 24,
-                palette: palette,
-                onPressed: widget.embedded
-                    ? () => DuoWorkspace.showBag(context)
-                    : null,
+              child: Semantics(
+                // The close button is read first (UI v4.1 order).
+                container: true,
+                sortKey: const OrdinalSortKey(0),
+                child: _photoControl(
+                  key: const Key('quick-view-close'),
+                  tooltip: 'Cerrar vista previa',
+                  icon: Icons.close,
+                  size: 24,
+                  palette: palette,
+                  onPressed: widget.embedded
+                      ? () => DuoWorkspace.showBag(context)
+                      : null,
+                ),
               ),
             ),
           ],
@@ -425,9 +446,8 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                   button: true,
                   selected: i == _page,
                   label: 'Foto ${i + 1} de ${images.length}',
-                  child: GestureDetector(
+                  child: InkWell(
                     onTap: () => _goToPage(i),
-                    behavior: HitTestBehavior.opaque,
                     child: Container(
                       key: ValueKey('thumb-$i'),
                       width: side,
@@ -558,9 +578,13 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final product = widget.product;
     final store = StoreScope.of(context);
+    final currentProduct = _currentProduct;
+    final product = currentProduct ?? widget.product;
     final facets = store.facetsFor(product.id);
+    if (_selectedId != null && !_missingCombination) {
+      _variantIndex = variantIndexForId(product, _selectedId);
+    }
     final chosen = _variantIndex;
     // Until an option is chosen the card shows the piece's own price and no
     // sale or availability claim: those belong to one variant.
@@ -570,8 +594,12 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     final onSale = chosen != null && selectionOnSale(product, chosen);
     final discount =
         chosen == null ? 0 : selectionDiscountPercent(product, chosen);
-    final inStock = chosen == null || selectionInStock(product, chosen);
-    final images = product.images.isEmpty ? <String?>[null] : product.images;
+    final inStock = currentProduct != null &&
+        (chosen == null || selectionInStock(product, chosen));
+    final memberImages = chosen == null
+        ? const <String>[]
+        : imagesForVariant(product, selectedVariant(product, chosen));
+    final images = memberImages.isEmpty ? <String?>[null] : memberImages;
 
     final media = MediaQuery.of(context);
     final screen = media.size;
@@ -633,13 +661,20 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                           _buildThumbnails(palette, images),
                           const SizedBox(height: BoutiqueSpace.md),
                         ],
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: ProductFavoriteButton(
+                            selected: store.wishlist.contains(product.id),
+                            onPressed: () => store.toggleWishlist(product.id),
+                          ),
+                        ),
                         if (facets?.brand != null)
                           Text(
                             brandLabel(facets!.brand!.value),
                             key: const Key('quick-view-brand'),
-                            style: boutiqueDisplay(
-                              22,
-                              weight: FontWeight.w700,
+                            style: boutiqueText(
+                              size: 18,
+                              weight: FontWeight.w600,
                               color: palette.ink,
                             ),
                           ),
@@ -647,8 +682,6 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                         Text(
                           shopperProductName(product.title),
                           key: const Key('quick-view-name'),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                           style: boutiqueText(
                             size: 15,
                             color: palette.ink,
@@ -682,11 +715,20 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                             product: product,
                             selectedIndex: chosen,
                             colorHeading: 'Colores',
-                            showSelectedName: false,
-                            onSelect: (i) => setState(() {
-                              _variantIndex = i;
-                              _error = null;
-                            }),
+                            showSelectedName: true,
+                            onSelect: (i) {
+                              if (_adding) return;
+                              setState(() {
+                                _variantIndex = i;
+                                _missingCombination = i < 0;
+                                _selectedId = selectedVariant(product, i)?.id;
+                                widget.onVariantChanged?.call(_selectedId);
+                                _page = 0;
+                                if (_gallery.hasClients) _gallery.jumpToPage(0);
+                                _added = false;
+                                _error = null;
+                              });
+                            },
                           ),
                         ],
                         if (chosen != null) ...[
@@ -705,7 +747,15 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
         ),
       ),
     );
-    if (!widget.embedded) return card;
+    if (!widget.embedded) {
+      return CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.escape): () =>
+              Navigator.of(context).pop(),
+        },
+        child: Focus(autofocus: true, child: card),
+      );
+    }
     return Scaffold(
       key: const Key('duo-preview'),
       backgroundColor: palette.canvas,

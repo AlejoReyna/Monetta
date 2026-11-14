@@ -2,10 +2,15 @@
 library;
 
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../app/monetta_tokens.g.dart';
+import '../../app/theme.dart';
 import '../../domain/editorial_content.dart';
+import '../../domain/home_content.dart';
+import '../../domain/product.dart';
 import '../../main.dart';
 import '../about/about_monetta_screen.dart';
 import '../account/account_screen.dart';
@@ -20,8 +25,27 @@ import '../home/home_account_invitation.dart';
 import '../home/home_boutique_sections.dart';
 import 'wholesale_content.dart';
 
+/// Editorial fallback uses only unique products actually present in the catalog.
+List<Product> wholesaleRecommendations(Iterable<Product> products) {
+  final seen = <String>{};
+  return products
+      .where((product) => product.id.isNotEmpty && seen.add(product.id))
+      .take(40)
+      .toList(growable: false);
+}
+
 class WholesaleScreen extends StatelessWidget {
-  const WholesaleScreen({this.openUri, super.key});
+  const WholesaleScreen(
+      {this.openUri,
+      this.onEmailRegister,
+      this.groups = const {},
+      this.showUnapprovedEditorial = false,
+      super.key});
+  final Map<String, Uri> groups;
+  final Future<String?> Function(String email)? onEmailRegister;
+
+  /// Review-only copy; must remain false without commercial approval.
+  final bool showUnapprovedEditorial;
   final Future<bool> Function(Uri)? openUri;
 
   Future<void> _quote(BuildContext context) async {
@@ -98,93 +122,167 @@ class WholesaleScreen extends StatelessWidget {
                 SizedBox(height: MonettaTokens.space[3]),
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    final columns =
-                        MediaQuery.textScalerOf(context).scale(1) > 1.3 ? 1 : 3;
+                    final columns = 3;
                     final gap = MonettaTokens.space[1];
-                    const steps = [
+                    final steps = [
                       (
                         Icons.shopping_bag_outlined,
                         'Elige tus productos',
-                        'Bolsas, carteras y perfumes.',
+                        'Arma tu pedido seleccionando entre miles de modelos originales de tus marcas favoritas.',
                       ),
                       (
                         Icons.shopping_cart_outlined,
-                        'Agrega mínimo 3 piezas',
-                        WholesalePresentation.minimum,
+                        showUnapprovedEditorial
+                            ? 'Agrega mínimo 3 piezas'
+                            : 'Agrega tus piezas',
+                        showUnapprovedEditorial
+                            ? 'Combina tus favoritos en el carrito y el descuento se aplica automáticamente.'
+                            : WholesalePresentation.minimum,
                       ),
                       (
                         Icons.credit_card_outlined,
-                        'Liquida o aparta',
-                        WholesalePresentation.reservation,
+                        showUnapprovedEditorial
+                            ? 'Liquida o aparta'
+                            : 'Consulta el pago',
+                        showUnapprovedEditorial
+                            ? WholesalePresentation.reservation
+                            : 'Consulta las condiciones vigentes por WhatsApp.',
                       ),
                     ];
-                    return Wrap(
-                      spacing: gap,
-                      runSpacing: gap,
-                      children: [
-                        for (var i = 0; i < steps.length; i++)
-                          SizedBox(
-                            width:
-                                (constraints.maxWidth - gap * (columns - 1)) /
-                                    columns,
-                            child: Container(
-                              padding: EdgeInsets.all(MonettaTokens.space[2]),
-                              decoration: BoxDecoration(
-                                color: palette.surface,
-                                borderRadius: BorderRadius.circular(
-                                  MonettaTokens.radiusCard,
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (var i = 0; i < steps.length; i++)
+                            SizedBox(
+                              key: ValueKey('wholesale-step-$i'),
+                              width: ((constraints.maxWidth -
+                                          gap * (columns - 1)) /
+                                      columns)
+                                  .clamp(220.0, 360.0),
+                              child: Container(
+                                margin: EdgeInsets.only(
+                                    right: i == steps.length - 1 ? 0 : gap),
+                                padding: EdgeInsets.all(MonettaTokens.space[2]),
+                                decoration: BoxDecoration(
+                                  color: palette.surface,
+                                  borderRadius: BorderRadius.circular(
+                                    MonettaTokens.radiusCard,
+                                  ),
+                                  border: Border.all(color: palette.hairline),
                                 ),
-                                border: Border.all(color: palette.hairline),
-                              ),
-                              child: Column(
-                                children: [
-                                  CircleAvatar(
-                                    radius: MonettaTokens.space[2],
-                                    backgroundColor: palette.action,
-                                    child: Text(
-                                      '${i + 1}',
+                                child: Column(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: MonettaTokens.space[2],
+                                      backgroundColor: palette.action,
+                                      child: Text(
+                                        '${i + 1}',
+                                        style: clientGuideStyle(
+                                          context,
+                                          MonettaTokens.navLabel,
+                                          color: palette.onAction,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: MonettaTokens.space[2]),
+                                    Icon(
+                                      steps[i].$1,
+                                      size: MonettaTokens.space[5],
+                                      color: palette.goldText,
+                                    ),
+                                    SizedBox(height: MonettaTokens.space[2]),
+                                    Text(
+                                      steps[i].$2,
+                                      textAlign: TextAlign.center,
+                                      style: clientGuideStyle(
+                                        context,
+                                        MonettaTokens.accountRow,
+                                      ),
+                                    ),
+                                    SizedBox(height: MonettaTokens.space[1]),
+                                    Text(
+                                      steps[i].$3,
+                                      textAlign: TextAlign.center,
                                       style: clientGuideStyle(
                                         context,
                                         MonettaTokens.navLabel,
-                                        color: palette.onAction,
+                                        color: palette.inkMuted,
                                       ),
                                     ),
-                                  ),
-                                  SizedBox(height: MonettaTokens.space[2]),
-                                  Icon(
-                                    steps[i].$1,
-                                    size: MonettaTokens.space[5],
-                                    color: palette.goldText,
-                                  ),
-                                  SizedBox(height: MonettaTokens.space[2]),
-                                  Text(
-                                    steps[i].$2,
-                                    textAlign: TextAlign.center,
-                                    style: clientGuideStyle(
-                                      context,
-                                      MonettaTokens.accountRow,
-                                    ),
-                                  ),
-                                  SizedBox(height: MonettaTokens.space[1]),
-                                  Text(
-                                    steps[i].$3,
-                                    textAlign: TextAlign.center,
-                                    style: clientGuideStyle(
-                                      context,
-                                      MonettaTokens.navLabel,
-                                      color: palette.inkMuted,
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     );
                   },
                 ),
               ],
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Comienza a vender',
+                  style: clientGuideStyle(context, MonettaTokens.sectionTitle)),
+              const SizedBox(height: 16),
+              Text('Únete a nuestra comunidad de emprendedores',
+                  style: guideSerifStyle(context,
+                      size: 21, color: palette.goldText)),
+              if (showUnapprovedEditorial)
+                const Text(
+                    'Genera ingresos desde hoy muy fácil vendiendo miles de productos originales con nuestro sistema de venta por catálogo.'),
+              const SizedBox(height: 16),
+              Wrap(spacing: 12, runSpacing: 12, children: [
+                for (final entry in const [
+                  ('grupo-1', 'Grupo 1'),
+                  ('grupo-2', 'Grupo 2')
+                ])
+                  if (groups[entry.$1] case final Uri uri
+                      when uri.scheme == 'https' &&
+                          uri.host.isNotEmpty &&
+                          uri.userInfo.isEmpty)
+                    SizedBox(
+                        width: 180,
+                        child: Theme(
+                            data: buildLightTheme(),
+                            child: ClientGuideButton(
+                                label: entry.$2,
+                                onPressed: () async {
+                                  try {
+                                    final ok = await (openUri ??
+                                        ((u) => launchUrl(u,
+                                            mode: LaunchMode
+                                                .externalApplication)))(uri);
+                                    if (!ok && context.mounted)
+                                      ScaffoldMessenger.maybeOf(context)
+                                          ?.showSnackBar(const SnackBar(
+                                              content: Text(
+                                                  'No se pudo abrir el enlace.')));
+                                  } catch (_) {
+                                    if (context.mounted)
+                                      ScaffoldMessenger.maybeOf(context)
+                                          ?.showSnackBar(const SnackBar(
+                                              content: Text(
+                                                  'No se pudo abrir el enlace.')));
+                                  }
+                                }))),
+              ]),
+              const SizedBox(height: 24),
+              Text('Beneficios',
+                  style: clientGuideStyle(context, MonettaTokens.sectionTitle)),
+              const Text('Accede a la mejor comunidad de emprendedores'),
+              if (showUnapprovedEditorial) ...[
+                const Text(
+                    'Vende productos originales con garantía de autenticidad'),
+                const Text(
+                    'Recibe nuestros catálogos de venta para compartir con tus clientes y amigos.'),
+              ],
+            ]),
           ),
           for (final category in ['bolsa', 'perfume']) ...[
             ClientGuideEditorial(
@@ -196,13 +294,13 @@ class WholesaleScreen extends StatelessWidget {
                   ? kGuideWholesaleBags
                   : kGuideWholesalePerfumes,
               overlaySide: GuideTextSide.left,
-              action: GuidePillButton(
-                key: ValueKey('wholesale-catalog-$category'),
-                label: 'VER CATÁLOGO',
-                onPressed: store == null
-                    ? null
-                    : () => _catalog(context, category: category),
-              ),
+              action: store == null
+                  ? null
+                  : GuidePillButton(
+                      key: ValueKey('wholesale-catalog-$category'),
+                      label: 'VER CATÁLOGO',
+                      onPressed: () => _catalog(context, category: category),
+                    ),
             ),
           ],
           ClientGuideServices(services: kClientGuideWholesaleServices),
@@ -235,31 +333,39 @@ class WholesaleScreen extends StatelessWidget {
                     ),
                   )
                 : HomeNewArrivalsRail(
-                    products: store.products.take(6).toList(),
+                    products: wholesaleRecommendations(store.products),
                     title: 'Productos que te pueden interesar',
                     onOpenAll: () => _catalog(context),
                   ),
           ),
           HomeAccountInvitation(
+            onEmailRegister: onEmailRegister,
             isSignedIn: account?.isSignedIn ?? false,
             onRegister: account == null
                 ? null
                 : () => unawaited(openAccount(context, controller: account)),
           ),
-          ClientGuideFooter(
-            onContact: () => unawaited(openContact(context)),
-            onAbout: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => AboutMonettaScreen(
-                  content: (EditorialContentScope.maybeOf(context)?.content ??
-                          MonettaEditorialContent.fallback)
-                      .about,
-                  onOpenCatalog: () => _catalog(context),
-                  onOpenPartner: () => Navigator.of(context).pop(),
-                ),
-              ),
-            ),
-          ),
+          Builder(
+              builder: (footerContext) => ClientGuideFooter(
+                    onWholesale: () =>
+                        Scrollable.of(footerContext).position.jumpTo(0),
+                    socialLinks: HomeContent.fallback.socialLinks,
+                    openUri: openUri,
+                    onContact: () => unawaited(
+                        openContact(context, groups: groups, openUri: openUri)),
+                    onAbout: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => AboutMonettaScreen(
+                          content: (EditorialContentScope.maybeOf(context)
+                                      ?.content ??
+                                  MonettaEditorialContent.fallback)
+                              .about,
+                          onOpenCatalog: () => _catalog(context),
+                          onOpenPartner: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+                    ),
+                  )),
         ],
       ),
     );
@@ -347,6 +453,7 @@ class _WholesaleQuoteBanner extends StatelessWidget {
                                 style: clientGuideStyle(
                                   context,
                                   MonettaTokens.sectionTitle,
+                                  color: Colors.black,
                                 ).copyWith(fontStyle: FontStyle.italic),
                               ),
                               Text(
@@ -354,6 +461,7 @@ class _WholesaleQuoteBanner extends StatelessWidget {
                                 style: clientGuideStyle(
                                   context,
                                   MonettaTokens.body,
+                                  color: Colors.black,
                                 ),
                               ),
                             ],
@@ -366,7 +474,7 @@ class _WholesaleQuoteBanner extends StatelessWidget {
                           ),
                           child: Icon(
                             Icons.chevron_right,
-                            color: palette.ink,
+                            color: Colors.black,
                             size: MonettaTokens.space[4],
                           ),
                         ),

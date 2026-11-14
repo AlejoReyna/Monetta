@@ -283,12 +283,18 @@ void main() {
       expect(status.success, isFalse);
     });
 
-    test('shipped and unpaid is not En camino', () {
+    test('shipped and unpaid keeps payment primary and fulfillment secondary',
+        () {
       final status = orderDisplayStatus(
         _order(fulfillmentStatus: 'shipped', status: 'pending'),
       );
       expect(status.label, 'Pago en proceso');
-      expect(status.label, isNot('En camino'));
+      expect(status.secondaryLabel, 'En camino');
+    });
+
+    test('shipped and unpaid still matches En camino filter', () {
+      final order = _order(fulfillmentStatus: 'shipped', status: 'pending');
+      expect(filterOrders([order], OrderFilter.inTransit), isNotEmpty);
     });
 
     test('paid and shipped is still En camino', () {

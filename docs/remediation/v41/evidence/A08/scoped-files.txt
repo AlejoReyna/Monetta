@@ -1,0 +1,26 @@
+A08 scoped changes (2026-11-11 pause)
+Base: 63850964343ffdd82fd322db5dfda382cfe42ef0
+
+NEW:
+lib/features/orders/order_fulfillment_progress.dart
+lib/features/product/restock_request.dart
+lib/features/product/restock_request_sheet.dart
+lib/features/product/restock_push_adapter.dart  # stub: unavailable only; NOT G12 (see A00 rejected-restock-push-adapter.dart.txt)
+test/features/orders/order_fulfillment_progress_test.dart
+test/features/product/restock_request_sheet_test.dart
+
+MODIFIED:
+lib/features/orders/order_status.dart
+lib/features/orders/order_detail_screen.dart
+test/features/orders/order_status_test.dart (partial)
+
+EXPLICITLY NOT EDITED (leases):
+lib/features/product/product_screen.dart
+lib/features/product/quick_view.dart
+lib/features/product/product_selection.dart
+lib/features/navigation/monetta_bottom_navigation.dart
+lib/app/cart_controller.dart
+lib/app/shopify_checkout_coordinator.dart
+lib/app/checkout_buyer_identity.dart
+lib/app/notification_controller.dart
+lib/main.dart

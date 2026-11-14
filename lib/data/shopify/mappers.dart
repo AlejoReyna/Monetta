@@ -48,6 +48,15 @@ Product productFromJson(Map<String, dynamic> json) {
       available: v['availableForSale'] == true,
       compareAtPrice: money(v['compareAtPrice']),
       sku: v['sku'] as String?,
+      selectedOptions: {
+        for (final option in (v['selectedOptions'] as List? ?? const [])
+            .whereType<Map<String, dynamic>>())
+          if (option['name'] is String && option['value'] is String)
+            option['name'] as String: option['value'] as String,
+      },
+      imageUrls: [
+        if (v['image'] case {'url': final String url}) url,
+      ],
     );
   }).toList();
 

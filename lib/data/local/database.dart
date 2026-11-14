@@ -48,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.connect() => AppDatabase(_openConnection());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -113,6 +113,21 @@ class AppDatabase extends _$AppDatabase {
               'refunded_amount',
               'REAL',
             );
+          }
+          if (from < 10) {
+            await _addColumnIfMissing(
+              'cached_variants',
+              'selected_options',
+              "TEXT NOT NULL DEFAULT '{}'",
+            );
+            await _addColumnIfMissing(
+              'cached_variants',
+              'image_urls',
+              "TEXT NOT NULL DEFAULT '[]'",
+            );
+            // A delta cursor cannot backfill fields added to unchanged
+            // Shopify variants. Require a complete refresh next time online.
+            await customStatement('DELETE FROM sync_cursors');
           }
         },
         beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON;'),

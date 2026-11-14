@@ -38,6 +38,8 @@ fragment ProductFields on Product {
         price { amount currencyCode }
         compareAtPrice { amount }
         sku
+        selectedOptions { name value }
+        image { url(transform: {maxWidth: 1200}) }
       }
     }
   }
@@ -410,7 +412,7 @@ query HomeContent {
 String productConnectionQuery(String field) {
   final selection = switch (field) {
     'variants' =>
-      'id title availableForSale price { amount currencyCode } compareAtPrice { amount } sku',
+      'id title availableForSale price { amount currencyCode } compareAtPrice { amount } sku selectedOptions { name value } image { url(transform: {maxWidth: 1200}) }',
     'collections' => 'handle',
     _ => throw ArgumentError.value(field),
   };

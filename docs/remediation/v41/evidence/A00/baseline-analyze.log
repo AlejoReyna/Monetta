@@ -1,0 +1,8 @@
+Analyzing Monetta...                                            
+
+warning • The member 'debugMonettaFixtureImage' can only be used within 'package:monetta_app/app/media/monetta_image.dart' or a test • docs/audits/2026-11-11-v41/render_probes_test.dart:57:5 • invalid_use_of_visible_for_testing_member
+warning • The member 'debugMonettaFixtureImage' can only be used within 'package:monetta_app/app/media/monetta_image.dart' or a test • docs/audits/2026-11-11-v41/render_probes_test.dart:61:5 • invalid_use_of_visible_for_testing_member
+   info • Missing a required trailing comma. Try adding a trailing comma • docs/audits/2026-11-11-v41/render_probes_test.dart:80:69 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • docs/audits/2026-11-11-v41/render_probes_test.dart:164:77 • require_trailing_commas
+
+4 issues found. (ran in 3.5s)

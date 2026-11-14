@@ -68,6 +68,6 @@ void main() {
     expect(surface, findsOneWidget);
     final bar = tester.getSize(surface).height;
     expect(tester.getSize(bleed).height, bar);
-    expect(bar, 90, reason: '56 + 34 of safe area');
+    expect(bar, 96, reason: '56 + 6 capsule margin + 34 of safe area');
   });
 }

@@ -26,19 +26,17 @@ void main() {
     );
   }
 
-  testWidgets('presents account action without unapproved shipping promises', (
+  testWidgets('presents the Correction 5 invitation and real access callback', (
     tester,
   ) async {
     var registerCalls = 0;
     await tester.pumpWidget(app(onRegister: () => registerCalls++));
 
-    expect(find.text('REGÍSTRATE'), findsOneWidget);
-    expect(find.text('Consulta tus pedidos y datos de compra'), findsOneWidget);
-    expect(
-      find.textContaining('contenido pendiente de aprobación'),
-      findsOneWidget,
-    );
-    expect(find.text('Pagos seguros con Shopify.'), findsOneWidget);
+    expect(find.text('Regístrate en MONETTA REWARDS'), findsOneWidget);
+    expect(find.textContaining('ENVÍO GRATIS', findRichText: true),
+        findsOneWidget);
+    expect(find.textContaining('GANA CASHBACK', findRichText: true),
+        findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('home-register-button')));
     expect(registerCalls, 1);
@@ -51,9 +49,8 @@ void main() {
       app(onRegister: () {}, isSignedIn: true),
     );
 
-    expect(find.text('TU CUENTA'), findsOneWidget);
-    expect(find.text('VER MI CUENTA'), findsOneWidget);
-    expect(find.text('REGÍSTRATE'), findsNothing);
+    expect(find.text('Ver mi cuenta'), findsOneWidget);
+    expect(find.text('Regístrate en MONETTA REWARDS'), findsOneWidget);
   });
 
   testWidgets('keeps payment logos off and never guesses active methods', (
@@ -63,14 +60,6 @@ void main() {
     await tester.pumpWidget(app(onRegister: () {}, width: 320));
 
     expect(tester.takeException(), isNull);
-    expect(
-      tester
-          .getSemantics(find.byKey(const ValueKey('home-payment-methods')))
-          .label,
-      contains(
-        'Pagos seguros con Shopify.',
-      ),
-    );
     expect(find.byIcon(Icons.apple), findsNothing);
     expect(find.textContaining('Visa'), findsNothing);
     expect(find.textContaining('PayPal'), findsNothing);

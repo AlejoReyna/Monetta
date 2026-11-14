@@ -145,6 +145,15 @@ export function registerEngagementRoutes(app: Express, deps: EngagementRouteDeps
     const localRule = rules.find((rule) => rule.key === 'local_cart_reminder');
     res.setHeader('Cache-Control', 'public, max-age=300');
     res.status(200).json({
+      capabilities: {
+        schemaVersion: 1,
+        variantRestock: {
+          supported: false,
+          channels: [],
+          reason: 'variant_stock_trigger_unavailable',
+        },
+        accountUnread: { supported: false, reason: 'device_scoped_delivery_only' },
+      },
       localCartReminder: {
         enabled: localRule?.enabled ?? false,
         delayHours: numericField(localRule?.configuration.delayHours, 20),
@@ -156,6 +165,13 @@ export function registerEngagementRoutes(app: Express, deps: EngagementRouteDeps
 
   app.post('/v1/product-alerts', deviceRoute(deps, async (req, res, deviceId) => {
     const body = objectBody(req);
+    // A product-only subscription must never acknowledge an exact-variant or
+    // email request that this device-push pipeline cannot fulfill.
+    if (body.variantId !== undefined || body.email !== undefined ||
+        (body.channel !== undefined && body.channel !== 'push')) {
+      res.status(409).json({ error: 'variant_restock_unavailable' });
+      return;
+    }
     const productKey = productKeyValue(body.productKey);
     const kind = productAlertKind(body.kind);
     if (productKey === null || kind === null) {

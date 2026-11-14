@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 
-/// Registers the real Inter, Playfair Display, Cormorant Garamond and Mrs
+/// Registers the real DM Sans, Cormorant Garamond and Mrs
 /// Saint Delafield files from `assets/fonts/`
 /// with the engine, so a widget test measures text with the faces the app
 /// ships instead of the square-glyph test font (which is wider and ignores
@@ -23,16 +23,10 @@ Future<void>? _loaded;
 
 /// The families and files the app is expected to ship (RF-17, E-T2).
 const Map<String, List<String>> kBundledFontFiles = <String, List<String>>{
-  'Inter': <String>[
-    'assets/fonts/inter/Inter-Light.ttf',
-    'assets/fonts/inter/Inter-Regular.ttf',
-    'assets/fonts/inter/Inter-Medium.ttf',
-    'assets/fonts/inter/Inter-SemiBold.ttf',
-    'assets/fonts/inter/Inter-Bold.ttf',
-  ],
-  'Playfair Display': <String>[
-    'assets/fonts/playfair_display/PlayfairDisplay-Regular.ttf',
-    'assets/fonts/playfair_display/PlayfairDisplay-Bold.ttf',
+  'DM Sans': <String>[
+    'assets/fonts/dm_sans/DMSans-Regular.ttf',
+    'assets/fonts/dm_sans/DMSans-SemiBold.ttf',
+    'assets/fonts/dm_sans/DMSans-Bold.ttf',
   ],
   // The guide's serif and script (open stand-ins for Reglarik and Above the
   // Beyond Script), so the captures show the real faces.
@@ -42,6 +36,7 @@ const Map<String, List<String>> kBundledFontFiles = <String, List<String>>{
     'assets/fonts/cormorant_garamond/CormorantGaramond-Regular.ttf',
     'assets/fonts/cormorant_garamond/CormorantGaramond-Italic.ttf',
     'assets/fonts/cormorant_garamond/CormorantGaramond-Medium.ttf',
+    'assets/fonts/cormorant_garamond/CormorantGaramond-Bold.ttf',
   ],
   'Mrs Saint Delafield': <String>[
     'assets/fonts/mrs_saint_delafield/MrsSaintDelafield-Regular.ttf',

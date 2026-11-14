@@ -131,5 +131,13 @@ void main() {
     expect(await controller.requestSystemPermission(), isTrue);
     expect(gateway.permissionRequests, 1);
     expect(requests, hasLength(3));
+
+    // G12 is unavailable until variant-scoped stock and delivery exist.
+    // A legacy tap must not record broad product consent or report success.
+    expect(controller.variantRestockAvailable, isFalse);
+    expect(await controller.createRestockAlert('product-1'), isFalse);
+    expect(gateway.permissionRequests, 1);
+    expect(controller.preferences.productAlerts, isFalse);
+    expect(requests, hasLength(3));
   });
 }

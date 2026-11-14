@@ -74,11 +74,34 @@ describe("catalog mapping", () => {
       price: 1299,
       compareAtPrice: 1499,
       sku: "MN-123",
+      // Exact-variant metadata (no inventory): empty for a row without options.
+      selectedOptions: {},
+      imageUrls: [],
       available: true,
     });
     expect(variant).toHaveProperty("sku", "MN-123");
     expect(variant).not.toHaveProperty("inventoryQuantity");
     expect(variant).not.toHaveProperty("inventoryItemId");
     expect(variant).not.toHaveProperty("inventoryPolicy");
+  });
+});
+
+
+describe("authoritative variant metadata", () => {
+  it("preserves named options and the actual variant image through JSON", () => {
+    const mapped = toCatalogProduct({ ...product, variants: { nodes: [{
+      ...product.variants.nodes[0]!,
+      selectedOptions: [{ name: "Color", value: "Negro" }, { name: "Size", value: "M" }],
+      image: { url: "https://cdn.shopify.com/variant-negro.jpg" },
+    }] } });
+    expect(JSON.parse(JSON.stringify(mapped)).variants[0]).toMatchObject({
+      selectedOptions: { Color: "Negro", Size: "M" },
+      imageUrls: ["https://cdn.shopify.com/variant-negro.jpg"],
+    });
+  });
+  it("keeps old source rows empty without copying the product image or parsing a title", () => {
+    const mapped = toCatalogProduct(product);
+    expect(mapped.variants[0]?.selectedOptions).toEqual({});
+    expect(mapped.variants[0]?.imageUrls).toEqual([]);
   });
 });

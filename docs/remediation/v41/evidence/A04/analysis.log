@@ -1,0 +1,96 @@
+Analyzing 3 items...                                            
+
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/brands_screen.dart:23:4 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/brands_screen.dart:34:74 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/brands_screen.dart:36:10 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/brands_screen.dart:58:54 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/brands_screen.dart:69:78 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/brands_screen.dart:69:79 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/brands_screen.dart:71:6 • require_trailing_commas
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/features/catalog/catalog_query.dart:111:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/features/catalog/catalog_query.dart:118:57 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/features/catalog/catalog_query.dart:125:23 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/features/catalog/catalog_query.dart:130:13 • curly_braces_in_flow_control_structures
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/categories_screen.dart:157:78 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/categories_screen.dart:162:74 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/categories_screen.dart:162:75 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/categories_screen.dart:165:79 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/categories_screen.dart:167:14 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:11:32 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:31:75 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:33:79 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:37:46 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:41:73 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:43:72 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:67:8 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:96:79 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:107:13 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:107:14 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:107:15 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:113:46 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/category_tree.dart:121:63 • require_trailing_commas
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/features/catalog/collection_screen.dart:211:7 • curly_braces_in_flow_control_structures
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:219:7 • require_trailing_commas
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/features/catalog/collection_screen.dart:222:7 • curly_braces_in_flow_control_structures
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:228:7 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:236:5 • require_trailing_commas
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/features/catalog/collection_screen.dart:295:62 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/features/catalog/collection_screen.dart:297:56 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block. Try wrapping the statement in a block • lib/features/catalog/collection_screen.dart:299:66 • curly_braces_in_flow_control_structures
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:343:63 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:358:62 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:361:48 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:362:14 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:362:15 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:362:16 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:441:11 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:477:49 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:478:23 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:478:24 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:480:22 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:480:23 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:504:65 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:506:64 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:512:77 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:517:71 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:522:78 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:528:61 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:528:62 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:528:63 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:534:71 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:534:72 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:534:73 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:535:22 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:536:20 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:536:21 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:536:22 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:1018:79 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:1022:58 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:1027:58 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:1028:24 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:1028:25 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:1099:77 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:1099:78 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:1099:79 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/catalog/collection_screen.dart:1105:78 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:101:73 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:101:74 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:101:75 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:138:52 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:173:24 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:189:55 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:193:66 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:199:79 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:226:74 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:226:75 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:226:76 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:226:77 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:226:78 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:227:24 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:232:75 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:238:63 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:266:29 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:266:30 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_side_menu.dart:394:58 • require_trailing_commas
+
+92 issues found. (ran in 17.2s)

@@ -1,0 +1,386 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart
+lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+ - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+        title: title ?? brandLabel(brandSlug),
+                        ^^^^^^^^^^
+00:00 +0 -1: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+   - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+          title: title ?? brandLabel(brandSlug),
+                          ^^^^^^^^^^
+  .
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1024:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 816:35                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 810:35                      _CustomZone.run
+  dart:async/zone.dart 702:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 743:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+ - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+        title: title ?? brandLabel(brandSlug),
+                        ^^^^^^^^^^
+00:00 +0 -2: loading /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+   - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+          title: title ?? brandLabel(brandSlug),
+                          ^^^^^^^^^^
+  .
+00:00 +0 -2: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1024:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 816:35                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 810:35                      _CustomZone.run
+  dart:async/zone.dart 702:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 743:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+ - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+        title: title ?? brandLabel(brandSlug),
+                        ^^^^^^^^^^
+00:00 +0 -3: loading /Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/product/quick_view_purchase_test.dart: lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+   - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+          title: title ?? brandLabel(brandSlug),
+                          ^^^^^^^^^^
+  .
+00:00 +0 -3: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1024:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 816:35                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 810:35                      _CustomZone.run
+  dart:async/zone.dart 702:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 743:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+ - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+        title: title ?? brandLabel(brandSlug),
+                        ^^^^^^^^^^
+00:00 +0 -4: loading /Users/alexis/theCode/Monetta/test/features/product/product_selection_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/product/product_selection_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/product/product_selection_test.dart: lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+   - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+          title: title ?? brandLabel(brandSlug),
+                          ^^^^^^^^^^
+  .
+00:00 +0 -4: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1024:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 816:35                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 810:35                      _CustomZone.run
+  dart:async/zone.dart 702:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 743:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+ - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+        title: title ?? brandLabel(brandSlug),
+                        ^^^^^^^^^^
+00:00 +0 -5: loading /Users/alexis/theCode/Monetta/test/features/product/product_selection_try_add_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/product/product_selection_try_add_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/product/product_selection_try_add_test.dart: lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+   - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+          title: title ?? brandLabel(brandSlug),
+                          ^^^^^^^^^^
+  .
+00:00 +0 -5: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1024:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 816:35                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 810:35                      _CustomZone.run
+  dart:async/zone.dart 702:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 743:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+ - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+        title: title ?? brandLabel(brandSlug),
+                        ^^^^^^^^^^
+00:00 +0 -6: loading /Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/product/purchase_dock_test.dart: lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+   - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+          title: title ?? brandLabel(brandSlug),
+                          ^^^^^^^^^^
+  .
+00:00 +0 -6: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1024:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 816:35                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 810:35                      _CustomZone.run
+  dart:async/zone.dart 702:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 743:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+ - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+        title: title ?? brandLabel(brandSlug),
+                        ^^^^^^^^^^
+00:00 +0 -7: loading /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+   - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+          title: title ?? brandLabel(brandSlug),
+                          ^^^^^^^^^^
+  .
+00:00 +0 -7: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1024:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 816:35                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 810:35                      _CustomZone.run
+  dart:async/zone.dart 702:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 743:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+00:00 +0 -7: /Users/alexis/theCode/Monetta/test/data/repositories/realtime_catalog_repository_test.dart: a valid non-empty snapshot atomically replaces stale cache rows
+00:00 +1 -7: /Users/alexis/theCode/Monetta/test/data/repositories/realtime_catalog_repository_test.dart: a valid non-empty snapshot atomically replaces stale cache rows
+00:00 +2 -7: /Users/alexis/theCode/Monetta/test/data/repositories/catalog_repository_test.dart: CatalogRepository seedFromAssetIfEmpty writes the bundled snapshot only on a cold cache
+00:00 +3 -7: /Users/alexis/theCode/Monetta/test/data/repositories/realtime_catalog_repository_test.dart: an empty snapshot never erases a valid cached catalog
+00:00 +4 -7: /Users/alexis/theCode/Monetta/test/data/repositories/catalog_repository_test.dart: CatalogRepository asset repair backfills only a missing cached description
+00:00 +5 -7: /Users/alexis/theCode/Monetta/test/data/repositories/realtime_catalog_repository_test.dart: one invalid document rejects the full snapshot without data loss
+00:00 +6 -7: /Users/alexis/theCode/Monetta/test/data/repositories/catalog_repository_test.dart: CatalogRepository the bundled asset cannot mutate an authoritative remote cache
+00:00 +7 -7: /Users/alexis/theCode/Monetta/test/data/repositories/realtime_catalog_repository_test.dart: numeric variant identities are canonicalized at the boundary
+00:00 +8 -7: /Users/alexis/theCode/Monetta/test/data/repositories/catalog_repository_test.dart: CatalogRepository sync() runs a real delta sync via a fake transport and writes into the cache
+00:00 +9 -7: /Users/alexis/theCode/Monetta/test/data/repositories/realtime_catalog_repository_test.dart: stream errors reconnect and later deliver a valid snapshot
+00:00 +10 -7: /Users/alexis/theCode/Monetta/test/data/repositories/catalog_repository_test.dart: CatalogRepository loadCached() normalizes cached products via the real normalizer
+00:00 +11 -7: /Users/alexis/theCode/Monetta/test/data/repositories/catalog_repository_test.dart: CatalogRepository full sync A+B then B-only removes A (F08)
+00:00 +12 -7: /Users/alexis/theCode/Monetta/test/data/repositories/catalog_repository_test.dart: CatalogRepository valid empty full sync clears the catalog (F08)
+00:00 +13 -7: /Users/alexis/theCode/Monetta/test/data/repositories/catalog_repository_test.dart: CatalogRepository incomplete pagination does not advance cursor or delete (F09)
+00:00 +14 -7: /Users/alexis/theCode/Monetta/test/data/repositories/catalog_repository_test.dart: CatalogRepository shop domain mismatch clears foreign catalog and cursor (F10)
+00:00 +15 -7: /Users/alexis/theCode/Monetta/test/data/repositories/catalog_repository_test.dart: CatalogRepository unstamped asset cache keeps the bag and records this shop
+00:00 +16 -7: /Users/alexis/theCode/Monetta/test/data/repositories/catalog_repository_test.dart: CatalogRepository a foreign shop still clears the bag
+00:00 +17 -7: /Users/alexis/theCode/Monetta/test/data/repositories/catalog_repository_test.dart: CatalogRepository T1-INV-01 a named foreign shop clears every local shopper scope
+00:00 +18 -7: /Users/alexis/theCode/Monetta/test/data/local/pr7_migration_test.dart: R3 empty catalog does not permit legacy account/session reuse
+00:00 +19 -7: /Users/alexis/theCode/Monetta/test/data/local/pr7_migration_test.dart: R3 empty catalog does not permit legacy account/session reuse
+00:00 +20 -7: /Users/alexis/theCode/Monetta/test/data/local/pr7_migration_test.dart: R3 empty catalog does not permit legacy account/session reuse
+00:00 +21 -7: /Users/alexis/theCode/Monetta/test/data/local/database_test.dart: AppDatabase cascades variant deletion when the parent product is deleted
+00:00 +22 -7: /Users/alexis/theCode/Monetta/test/data/local/pr7_migration_test.dart: R3 actual v5 keys/null provenance migrate before failed new-shop sync and restart
+00:00 +23 -7: /Users/alexis/theCode/Monetta/test/data/local/pr7_migration_test.dart: R3 actual v5 keys/null provenance migrate before failed new-shop sync and restart
+00:00 +24 -7: /Users/alexis/theCode/Monetta/test/data/local/pr7_migration_test.dart: R3 actual v5 keys/null provenance migrate before failed new-shop sync and restart
+00:00 +25 -7: /Users/alexis/theCode/Monetta/test/data/local/pr7_migration_test.dart: R3 actual v5 keys/null provenance migrate before failed new-shop sync and restart
+lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+ - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+        title: title ?? brandLabel(brandSlug),
+                        ^^^^^^^^^^
+00:00 +26 -7: /Users/alexis/theCode/Monetta/test/data/local/pr7_migration_test.dart: R3 actual v5 keys/null provenance migrate before failed new-shop sync and restart
+00:00 +27 -8: loading /Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/product/v41_product_flow_test.dart: lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+   - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+          title: title ?? brandLabel(brandSlug),
+                          ^^^^^^^^^^
+  .
+00:00 +27 -8: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1024:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 816:35                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 810:35                      _CustomZone.run
+  dart:async/zone.dart 702:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 743:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+ - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+        title: title ?? brandLabel(brandSlug),
+                        ^^^^^^^^^^
+00:03 +27 -9: loading /Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/product/v41_product_render_test.dart: lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+   - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+          title: title ?? brandLabel(brandSlug),
+                          ^^^^^^^^^^
+  .
+00:03 +27 -9: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1024:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 816:35                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 810:35                      _CustomZone.run
+  dart:async/zone.dart 702:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 743:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+ - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+        title: title ?? brandLabel(brandSlug),
+                        ^^^^^^^^^^
+00:06 +27 -10: loading /Users/alexis/theCode/Monetta/test/features/product/v41_product_recommendations_test.dart [E]
+  Failed to load "/Users/alexis/theCode/Monetta/test/features/product/v41_product_recommendations_test.dart":
+  Compilation failed for testPath=/Users/alexis/theCode/Monetta/test/features/product/v41_product_recommendations_test.dart: lib/features/catalog/brand_screen.dart:74:25: Error: The method 'brandLabel' isn't defined for the type 'BrandScreen'.
+   - 'BrandScreen' is from 'package:monetta_app/features/catalog/brand_screen.dart' ('lib/features/catalog/brand_screen.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'brandLabel'.
+          title: title ?? brandLabel(brandSlug),
+                          ^^^^^^^^^^
+  .
+00:06 +27 -10: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1024:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 816:35                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 810:35                      _CustomZone.run
+  dart:async/zone.dart 702:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 743:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+00:07 +27 -10: /Users/alexis/theCode/Monetta/test/data/repositories/v41_realtime_variant_test.dart: Firestore producer metadata survives cache
+00:07 +28 -10: /Users/alexis/theCode/Monetta/test/data/repositories/v41_realtime_variant_test.dart: Firestore producer metadata survives cache
+00:07 +29 -10: /Users/alexis/theCode/Monetta/test/data/repositories/v41_realtime_variant_test.dart: Firestore producer metadata survives cache
+00:07 +30 -10: /Users/alexis/theCode/Monetta/test/data/repositories/v41_realtime_variant_test.dart: Firestore producer metadata survives cache
+00:07 +31 -10: /Users/alexis/theCode/Monetta/test/data/repositories/v41_realtime_variant_test.dart: Firestore legacy metadata survives cache
+00:08 +32 -10: /Users/alexis/theCode/Monetta/test/data/repositories/v41_realtime_variant_test.dart: invalid producer options preserve last confirmed catalog
+00:08 +33 -10: /Users/alexis/theCode/Monetta/test/data/local/v41_variant_cache_test.dart: variant options and image membership survive database cold reopen
+00:08 +34 -10: /Users/alexis/theCode/Monetta/test/data/local/v41_variant_cache_test.dart: actual schema9 upgrade preserves catalog, bag and identity, resets cursor
+00:08 +35 -10: /Users/alexis/theCode/Monetta/test/app/notification_controller_test.dart: native permission consent registers announcements once
+00:08 +36 -10: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_data_contract_test.dart: old V1 payload without optional capabilities stays compatible; exact ledger zero is valid
+00:08 +37 -10: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_data_contract_test.dart: missing availableCents fails without manufacturing zero or current time
+00:08 +38 -10: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_data_contract_test.dart: missing pendingCents fails without manufacturing zero or current time
+00:08 +39 -10: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_data_contract_test.dart: missing reservedCents fails without manufacturing zero or current time
+00:08 +40 -10: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_data_contract_test.dart: missing asOf fails without manufacturing zero or current time
+00:08 +41 -10: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_data_contract_test.dart: missing balance is failed data
+00:08 +42 -10: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_data_contract_test.dart: fractional ledger cents are rejected rather than silently rounded
+00:08 +43 -10: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_data_contract_test.dart: account change discards a late balance
+00:08 +44 -10: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_data_contract_test.dart: explicit session cleanup protects A-B-A while bearer happens to be identical
+00:08 +45 -10: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_data_contract_test.dart: guest performs no balance read
+00:08 +46 -10: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_data_contract_test.dart: paged movement cursor is retained and supplied, never manufacturing a row
+00:08 +47 -10: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_data_contract_test.dart: malformed activity is failed rather than silently dropping private rows
+00:08 +48 -10: Some tests failed.
+
+Failing tests:
+  /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart: loading /Users/alexis/theCode/Monetta/test/features/catalog/product_card_test.dart
+  /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart: loading /Users/alexis/theCode/Monetta/test/features/product/product_layout_responsive_test.dart
+  /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart: loading /Users/alexis/theCode/Monetta/test/features/product/product_selection_purchase_test.dart
+  /Users/alexis/theCode/Monetta/test/features/product/product_selection_test.dart: loading /Users/alexis/theCode/Monetta/test/features/product/product_selection_test.dart
+  ... and 6 more

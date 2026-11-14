@@ -144,7 +144,7 @@ void main() {
 
       expect(find.byKey(quickAddKey(product.id)), findsNothing);
       expect(find.byTooltip('Vista rápida'), findsNothing);
-      final heart = find.byTooltip('Guardar');
+      final heart = find.byTooltip('Guardar en favoritos');
       expect(tester.getSize(heart).width, greaterThanOrEqualTo(48 - 0.01));
       expect(tester.getSize(heart).height, greaterThanOrEqualTo(48 - 0.01));
       final tile = find.byType(MonettaProductTile);

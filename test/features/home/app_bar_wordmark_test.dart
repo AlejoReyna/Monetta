@@ -79,7 +79,9 @@ void main() {
     expect(tester.getCenter(mark).dx, closeTo(390 / 2, 1));
   });
 
-  testWidgets('guide screen: bigger wordmark, toolbar still 56', (
+  testWidgets(
+      'guide screen: bigger wordmark, 64 pt toolbar for the v4.1 round '
+      'buttons', (
     tester,
   ) async {
     _view(tester, const Size(390, 844));
@@ -87,8 +89,7 @@ void main() {
     await tester.pump();
 
     final bar = find.byType(AppBar);
-    expect(tester.getSize(bar).height, kToolbarHeight);
-    expect(kToolbarHeight, 56);
+    expect(tester.getSize(bar).height, 64);
     expect(tester.getSize(_wordmarkIn(bar)).height, 28.5);
     expect(tester.getSize(_wordmarkIn(bar)).height, lessThan(56));
   });
@@ -127,7 +128,7 @@ void main() {
       await tester.pump();
 
       expect(tester.takeException(), isNull);
-      expect(tester.getSize(find.byType(AppBar)).height, kToolbarHeight);
+      expect(tester.getSize(find.byType(AppBar)).height, 64);
       final mark = _wordmarkIn(find.byType(AppBar));
       expect(tester.getSize(mark).height, 28.5);
       expect(tester.getTopLeft(mark).dx, greaterThanOrEqualTo(56));

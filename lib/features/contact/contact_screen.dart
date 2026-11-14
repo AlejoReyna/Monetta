@@ -1,16 +1,16 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/shopper_copy.dart';
 import '../../domain/home_content.dart';
-import '../../main.dart';
 import '../../app/monetta_tokens.g.dart';
+import '../../app/theme.dart';
 import '../boutique/client_guide_components.dart';
 import '../boutique/client_guide_scaffold.dart';
 import '../boutique/guide_art.dart';
-import 'contact_links.dart';
 import '../boutique/boutique_tokens.dart';
 
 /// Contacto web verificado (partner hub lo usa como "contacto").
@@ -38,56 +38,44 @@ class ContactChannel {
   final Uri uri;
 }
 
-/// Canales reales de la app. [socialLinks] permite a un propietario
-/// sobreescribir las redes (p. ej. desde Shopify); por defecto, las
-/// configuradas en el contenido editorial.
+/// Only explicit configured community and social bindings are presented.
 List<ContactChannel> monettaContactChannels({
   List<HomeSocialLink>? socialLinks,
+  Map<String, Uri> groups = const {},
 }) {
-  final socials = socialLinks ?? HomeContent.fallback.socialLinks;
+  final socials = socialLinks ?? const <HomeSocialLink>[];
+  bool safe(Uri? uri) =>
+      uri != null &&
+      uri.scheme == 'https' &&
+      uri.host.isNotEmpty &&
+      uri.userInfo.isEmpty;
   return [
     ContactChannel(
       key: 'whatsapp',
       icon: Icons.chat_outlined,
       iconAsset: kGuideIconContactWhatsApp,
-      title: 'WhatsApp',
+      title: 'Enviar Whatsapp al 826 106 6868',
       // The guide shows the number with its country code.
       subtitle: '+52 $kWhatsAppNumberDisplay',
-      uri: conciergeWhatsAppUri(),
+      uri: Uri.https('wa.me', '/$kWhatsAppE164'),
     ),
-    for (var i = 0; i < monettaWhatsAppGroups.length; i++)
-      ContactChannel(
-        key: 'grupo-${i + 1}',
-        icon: Icons.groups_outlined,
-        iconAsset: kGuideIconContactGroup,
-        title: 'Grupo ${i + 1}',
-        subtitle: 'Únete a nuestro grupo de WhatsApp',
-        uri: Uri.parse(monettaWhatsAppGroups[i]),
-      ),
-    ContactChannel(
-      key: 'facebook-group',
-      icon: Icons.facebook,
-      iconAsset: kGuideIconContactGroup,
-      title: 'Grupo de Facebook',
-      subtitle: 'Únete a nuestra comunidad',
-      uri: Uri.parse(monettaFacebookGroup),
-    ),
-    ContactChannel(
-      key: 'mayoreo',
-      icon: Icons.storefront_outlined,
-      title: 'Mayoreo por WhatsApp',
-      subtitle: 'Consulta las condiciones vigentes',
-      uri: wholesaleWhatsAppUri(),
-    ),
-    ContactChannel(
-      key: 'sitio',
-      icon: Icons.language_rounded,
-      title: 'Contacto en monetta.mx',
-      subtitle: 'Formulario y datos del sitio',
-      uri: kMonettaContactPageUri,
-    ),
+    for (final entry in const [
+      ('grupo-1', 'Grupo 1'),
+      ('grupo-2', 'Grupo 2'),
+      ('facebook-group', 'Grupo de Facebook')
+    ])
+      if (safe(groups[entry.$1]))
+        ContactChannel(
+            key: entry.$1,
+            icon: Icons.groups_outlined,
+            iconAsset: kGuideIconContactGroup,
+            title: entry.$2,
+            subtitle: entry.$1 == 'facebook-group'
+                ? 'Únete a nuestra comunidad'
+                : 'Únete a nuestro grupo de WhatsApp',
+            uri: groups[entry.$1]!),
     for (final link in socials)
-      if (link.uri != null)
+      if (safe(link.uri))
         ContactChannel(
           key: 'social-${link.id}',
           icon: _socialIcon(link.id),
@@ -116,17 +104,21 @@ IconData _socialIcon(String id) => switch (id) {
 Future<void> openContact(
   BuildContext context, {
   List<HomeSocialLink>? socialLinks,
+  Map<String, Uri> groups = const {},
   Future<bool> Function(Uri uri)? openUri,
 }) {
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => ContactScreen(socialLinks: socialLinks, openUri: openUri),
+      builder: (_) => ContactScreen(
+          socialLinks: socialLinks, groups: groups, openUri: openUri),
     ),
   );
 }
 
 class ContactScreen extends StatelessWidget {
-  const ContactScreen({this.socialLinks, this.openUri, super.key});
+  const ContactScreen(
+      {this.socialLinks, this.groups = const {}, this.openUri, super.key});
+  final Map<String, Uri> groups;
 
   final List<HomeSocialLink>? socialLinks;
 
@@ -152,8 +144,8 @@ class ContactScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final channels = monettaContactChannels(
-      socialLinks:
-          socialLinks ?? HomeContentScope.maybeOf(context)?.content.socialLinks,
+      socialLinks: socialLinks,
+      groups: groups,
     );
     final primary = channels.where(
       (c) =>
@@ -213,12 +205,51 @@ class ContactScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: MonettaTokens.space[3]),
-                for (final channel in primary) ...[
+                for (final channel in primary.where((c) => c.key == 'whatsapp'))
+                  Row(children: [
+                    SvgPicture.asset('assets/images/v41/icons/whatsapp.svg',
+                        width: 24,
+                        height: 24,
+                        colorFilter: const ColorFilter.mode(
+                            MonettaTokens.success, BlendMode.srcIn),
+                        excludeFromSemantics: true),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Theme(
+                          data: buildLightTheme(),
+                          child: GuideGlassSurface(
+                            child: OutlinedButton(
+                              key: const ValueKey('contact-channel-whatsapp'),
+                              onPressed: () => _open(context, channel.uri),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(0, 48),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 4, vertical: 12),
+                                foregroundColor: Colors.black,
+                                shape: const StadiumBorder(),
+                                textStyle: clientGuideStyle(
+                                        context, MonettaTokens.control)
+                                    .copyWith(fontSize: 12),
+                              ),
+                              child: Text(channel.title,
+                                  textAlign: TextAlign.center),
+                            ),
+                          )),
+                    ),
+                  ]),
+                const SizedBox(height: 24),
+                Text('Únete',
+                    style:
+                        clientGuideStyle(context, MonettaTokens.sectionTitle)),
+                Text('A nuestros grupos de emprendedores',
+                    style: clientGuideStyle(context, MonettaTokens.body)),
+                const SizedBox(height: 16),
+                for (final channel
+                    in primary.where((c) => c.key != 'whatsapp')) ...[
                   _ChannelRow(
-                    channel: channel,
-                    onTap: () => _open(context, channel.uri),
-                  ),
-                  SizedBox(height: MonettaTokens.space[1]),
+                      channel: channel,
+                      onTap: () => _open(context, channel.uri)),
+                  const SizedBox(height: 8),
                 ],
                 SizedBox(height: MonettaTokens.space[3]),
                 Divider(color: palette.hairline),
@@ -236,11 +267,6 @@ class ContactScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: MonettaTokens.space[3]),
-                if (socials.isEmpty)
-                  Text(
-                    'Redes sociales: enlaces pendientes.',
-                    style: clientGuideStyle(context, MonettaTokens.cardLabel),
-                  ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -290,9 +316,10 @@ class _ChannelRow extends StatelessWidget {
                 _ChannelIcon(
                   asset: channel.iconAsset,
                   fallback: channel.icon,
-                  size: 52,
+                  size:
+                      MediaQuery.textScalerOf(context).scale(1) > 1.3 ? 32 : 52,
                 ),
-                SizedBox(width: MonettaTokens.space[3]),
+                SizedBox(width: MonettaTokens.space[1]),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

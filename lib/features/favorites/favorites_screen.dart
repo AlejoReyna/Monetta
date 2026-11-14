@@ -9,6 +9,8 @@ import '../navigation/adaptive_storefront_scaffold.dart';
 import '../navigation/duo_workspace.dart';
 import '../navigation/storefront_destination_navigation.dart';
 import '../navigation/monetta_bottom_navigation.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../app/catalog_store.dart';
@@ -16,8 +18,10 @@ import '../../domain/product.dart';
 import '../../main.dart' show StoreScope;
 import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
+import '../catalog/catalog_browse_screen.dart';
 import '../catalog/product_card.dart';
 import '../catalog/browse_detail_layout.dart';
+import '../recommendations/taste_recommendation_rows.dart';
 
 Future<void> openFavorites(BuildContext context) {
   // Saved pieces are browsed on the browsing side, beside the account.
@@ -93,7 +97,12 @@ class _FavoritesBody extends StatelessWidget {
               body: 'Explora el catálogo y guarda las piezas que te '
                   'enamoren. Se conservan por cuenta en este dispositivo.',
               actionLabel: 'Explorar el catálogo',
-              onAction: () => Navigator.of(context).pop(),
+              onAction: () {
+                openCatalogBrowse(
+                  context,
+                  items: store.catalogItems,
+                );
+              },
             ),
           ],
         ),
@@ -128,6 +137,7 @@ class _FavoritesBody extends StatelessWidget {
               ),
             ),
           ),
+        const SliverToBoxAdapter(child: TasteRecommendationRows()),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           sliver: SliverGrid(

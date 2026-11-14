@@ -1,0 +1,119 @@
+{
+  "inspection": "Names and presence only; examples are not configured runtime. No live requests.",
+  "root_env_exists": false,
+  "accounts_orders_env_exists": false,
+  "runtime_presence": {
+    "DATABASE_URL": false,
+    "SHOPIFY_SHOP_DOMAIN": false,
+    "SHOPIFY_ADMIN_ACCESS_TOKEN": false,
+    "SHOPIFY_STOREFRONT_ACCESS_TOKEN": false,
+    "CUSTOMER_ACCOUNT_CLIENT_ID": false,
+    "ACCOUNTS_ORDERS_BASE_URL": false,
+    "NOTIFICATIONS_ENABLED": false
+  },
+  "define_files": {
+    "config/dart_defines.production.json.example": {
+      "SHOPIFY_STORE_DOMAIN": true,
+      "SHOPIFY_STOREFRONT_ACCESS_TOKEN": true,
+      "SHOPIFY_API_VERSION": true,
+      "CUSTOMER_ACCOUNT_SHOP_ID": true,
+      "CUSTOMER_ACCOUNT_CLIENT_ID": true,
+      "ACCOUNTS_ORDERS_BASE_URL": true
+    },
+    "config/dart_defines.staging.json.example": {
+      "SHOPIFY_STORE_DOMAIN": true,
+      "SHOPIFY_STOREFRONT_ACCESS_TOKEN": true,
+      "SHOPIFY_API_VERSION": true,
+      "CUSTOMER_ACCOUNT_SHOP_ID": true,
+      "CUSTOMER_ACCOUNT_CLIENT_ID": true,
+      "ACCOUNTS_ORDERS_BASE_URL": false,
+      "FIREBASE_ANDROID_API_KEY": true,
+      "FIREBASE_ANDROID_APP_ID": true,
+      "FIREBASE_IOS_API_KEY": true,
+      "FIREBASE_IOS_APP_ID": true,
+      "FIREBASE_PROJECT_ID": true,
+      "FIREBASE_MESSAGING_SENDER_ID": true,
+      "FIREBASE_STORAGE_BUCKET": true
+    },
+    "config/dart_defines.ci.json": {
+      "SHOPIFY_STORE_DOMAIN": false,
+      "SHOPIFY_STOREFRONT_ACCESS_TOKEN": false,
+      "SHOPIFY_API_VERSION": true,
+      "CUSTOMER_ACCOUNT_SHOP_ID": false,
+      "CUSTOMER_ACCOUNT_CLIENT_ID": false,
+      "ACCOUNTS_ORDERS_BASE_URL": false
+    }
+  },
+  "references_opened": [
+    {
+      "id": "restock",
+      "viewport_css": [
+        390,
+        844
+      ],
+      "png_pixels": [
+        780,
+        1688
+      ],
+      "png": "05_maquetas/png/restock.png",
+      "svg": "05_maquetas/svg/restock.svg",
+      "state": "Modelo de UI, no captura de una implementación",
+      "outside_text": [],
+      "png_sha256": "d57d545332645eb1d705b090d8bfe348092bc912f6abb3f3fb056aa6b9da5961",
+      "svg_sha256": "ae77dc28396c7fbdcedf89ff91d0522d01328c0c69ebdda6b40cb7e0fea045b1",
+      "verified_png_sha256": "d57d545332645eb1d705b090d8bfe348092bc912f6abb3f3fb056aa6b9da5961"
+    },
+    {
+      "id": "account",
+      "viewport_css": [
+        390,
+        844
+      ],
+      "png_pixels": [
+        780,
+        1688
+      ],
+      "png": "05_maquetas/png/account.png",
+      "svg": "05_maquetas/svg/account.svg",
+      "state": "Maqueta; datos ilustrativos",
+      "png_sha256": "61092e3d0b151f48a2af81fa71e57030cef03f68a8e480929185345330b4a70d",
+      "svg_sha256": "eb4070fc7a9f5b3f79967fb89a7e906b5f7ad677a5f35534ed9b7b0445d43ded",
+      "verified_png_sha256": "61092e3d0b151f48a2af81fa71e57030cef03f68a8e480929185345330b4a70d"
+    },
+    {
+      "id": "rewards",
+      "viewport_css": [
+        390,
+        844
+      ],
+      "png_pixels": [
+        780,
+        1688
+      ],
+      "png": "05_maquetas/png/rewards.png",
+      "svg": "05_maquetas/svg/rewards.svg",
+      "state": "Modelo de UI, no captura de una implementación",
+      "outside_text": [],
+      "png_sha256": "780312cef34e607be3036f798269fa4f0a114a07e159d6bc5ba28a9414a043c7",
+      "svg_sha256": "a5f9725f03c573b54a6865f8d0f620b4e59b4cd54df33ec102445ce2d7f1bb5a",
+      "verified_png_sha256": "780312cef34e607be3036f798269fa4f0a114a07e159d6bc5ba28a9414a043c7"
+    },
+    {
+      "id": "order_detail",
+      "viewport_css": [
+        390,
+        844
+      ],
+      "png_pixels": [
+        780,
+        1688
+      ],
+      "png": "05_maquetas/png/order_detail.png",
+      "svg": "05_maquetas/svg/order_detail.svg",
+      "state": "Maqueta; datos ilustrativos",
+      "png_sha256": "e530aff90019a818d3d49c5acc27f83d19de81006feda1de922be42e36c08de7",
+      "svg_sha256": "d1b4251e55c1345fa0298b3da8de313a4917c416dfbbad6f4835aa653e32c662",
+      "verified_png_sha256": "e530aff90019a818d3d49c5acc27f83d19de81006feda1de922be42e36c08de7"
+    }
+  ]
+}

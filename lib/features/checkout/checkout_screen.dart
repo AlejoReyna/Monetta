@@ -1840,7 +1840,7 @@ class _DeliveryOption extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Envíos: contenido pendiente de aprobación.',
+                  '5 - 7 días hábiles',
                   style: boutiqueText(size: 11, color: palette.inkMuted),
                 ),
               ],
@@ -1922,7 +1922,7 @@ class _ReviewPanel extends StatelessWidget {
         ),
         _ReviewBlock(
           title: 'Método de envío',
-          value: 'Envíos: contenido pendiente de aprobación.\n'
+          value: '5 - 7 días hábiles\n'
               'Se calcula en Shopify',
         ),
         _PaymentBlock(

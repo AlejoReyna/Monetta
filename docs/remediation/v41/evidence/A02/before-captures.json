@@ -1,0 +1,20 @@
+[
+  {
+    "capture": "docs/remediation/v41/evidence/A02/before/historical-audit-p-07-preview.png",
+    "original": "docs/audits/2026-11-11-v41/evidence/p-07-preview.png",
+    "sha256": "441562955a0cf64145e54b5018af8068495ad32bda61706981f588dd133a4bad",
+    "scope": "Dated historical audit fixture, not a fresh A02 render. Fresh baseline capture attempt was blocked by concurrent compile errors."
+  },
+  {
+    "capture": "docs/remediation/v41/evidence/A02/before/historical-audit-p-08-producto.png",
+    "original": "docs/audits/2026-11-11-v41/evidence/p-08-producto.png",
+    "sha256": "0f29880dc1170408ced0be9d3780ffb4bb568f885dc4ba32bca7f7f735780d42",
+    "scope": "Dated historical audit fixture, not a fresh A02 render. Fresh baseline capture attempt was blocked by concurrent compile errors."
+  },
+  {
+    "capture": "docs/remediation/v41/evidence/A02/before/historical-audit-viewport-sold-out-390.png",
+    "original": "docs/audits/2026-11-11-v41/evidence/viewport-sold-out-390.png",
+    "sha256": "b7ae80c9b02ecb7911f99c01bedb8c4d201f9b73e266fc49486f6bb4a435f435",
+    "scope": "Dated historical audit fixture, not a fresh A02 render. Fresh baseline capture attempt was blocked by concurrent compile errors."
+  }
+]

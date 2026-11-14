@@ -1,0 +1,40 @@
+00:00 +0: loading /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/data/customer_auth/customer_data_contracts_test.dart
+00:00 +0: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_data_contract_test.dart: old V1 payload without optional capabilities stays compatible; exact ledger zero is valid
+00:00 +1: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: presentacion en pesos sin calculo autoritativo
+00:00 +2: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_data_contract_test.dart: missing availableCents fails without manufacturing zero or current time
+00:00 +3: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +4: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +5: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +6: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +7: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +8: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +9: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +10: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +11: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +12: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +13: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +14: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +15: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +16: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +17: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +18: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +19: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +20: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +21: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +22: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +23: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +24: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +25: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +26: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +27: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +28: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +29: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +30: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +31: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +32: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +33: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: resumen de saldo con estados pendiente/disponible
+00:00 +34: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: estimacion de producto identificada como estimacion
+00:00 +35: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: estado por pedido pendiente y mayoreo excluido
+00:00 +36: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: control de canje con limite y error honesto
+00:00 +37: /Users/alexis/.t3/worktrees/Monetta/t3-86796faa-e15eef75d1848dc7/test/features/rewards/rewards_components_test.dart: control deshabilitado tras bandera
+00:00 +38: All tests passed!

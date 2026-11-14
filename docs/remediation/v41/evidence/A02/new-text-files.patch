@@ -1,0 +1,1323 @@
+diff --git a/lib/features/catalog/product_controls.dart b/lib/features/catalog/product_controls.dart
+new file mode 100644
+index 0000000..158e0d5
+--- /dev/null
++++ b/lib/features/catalog/product_controls.dart
+@@ -0,0 +1,70 @@
++import 'package:flutter/material.dart';
++import 'package:flutter_svg/flutter_svg.dart';
++
++import '../boutique/boutique_tokens.dart';
++
++/// Transparent target: colour is confined to the supplied heart silhouette.
++class ProductFavoriteButton extends StatelessWidget {
++  const ProductFavoriteButton({
++    required this.selected,
++    required this.onPressed,
++    this.onPhoto = false,
++    super.key,
++  });
++  final bool onPhoto;
++  final bool selected;
++  final VoidCallback onPressed;
++
++  @override
++  Widget build(BuildContext context) => Semantics(
++        toggled: selected,
++        button: true,
++        label: selected ? 'Quitar de favoritos' : 'Guardar en favoritos',
++        excludeSemantics: true,
++        onTap: onPressed,
++        child: IconButton(
++          tooltip: selected ? 'Quitar de favoritos' : 'Guardar en favoritos',
++          onPressed: onPressed,
++          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
++          icon: SvgPicture.asset(
++            'assets/images/v41/icons/${selected ? 'favorito_guardado' : 'favorito'}.svg',
++            width: 30,
++            height: 30,
++            excludeFromSemantics: true,
++            colorFilter: ColorFilter.mode(
++              selected
++                  ? const Color(0xFFA58248)
++                  : onPhoto
++                      ? const Color(0xFF242622)
++                      : context.boutique.ink,
++              BlendMode.srcIn,
++            ),
++          ),
++        ),
++      );
++}
++
++class ProductSoldOutBadge extends StatelessWidget {
++  const ProductSoldOutBadge({super.key});
++  @override
++  Widget build(BuildContext context) => IgnorePointer(
++        child: DecoratedBox(
++          decoration: BoxDecoration(
++            color: const Color(0xFF111111),
++            borderRadius: BorderRadius.circular(2),
++          ),
++          child: Padding(
++            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
++            child: Text(
++              'AGOTADO',
++              style: boutiqueText(
++                size: 10,
++                weight: FontWeight.w600,
++                color: Colors.white,
++                height: 1.2,
++              ),
++            ),
++          ),
++        ),
++      );
++}
+diff --git a/lib/features/product/variant_selection.dart b/lib/features/product/variant_selection.dart
+new file mode 100644
+index 0000000..46e37df
+--- /dev/null
++++ b/lib/features/product/variant_selection.dart
+@@ -0,0 +1,34 @@
++import '../../domain/product.dart';
++
++List<ProductVariant> productChoices(Product product) =>
++    product.variants.where((v) => !v.isDefault).toList();
++
++int variantIndexForId(Product product, String? id, {int fallback = 0}) {
++  if (id == null) return fallback;
++  final choices = productChoices(product);
++  if (choices.isEmpty) {
++    return product.variants.any((v) => v.id == id) ? 0 : -1;
++  }
++  return choices.indexWhere((v) => v.id == id);
++}
++
++Map<String, List<String>> productOptionValues(Product product) {
++  final options = <String, List<String>>{};
++  for (final variant in productChoices(product)) {
++    for (final entry in variant.selectedOptions.entries) {
++      final values = options.putIfAbsent(entry.key, () => []);
++      if (!values.contains(entry.value)) values.add(entry.value);
++    }
++  }
++  return options;
++}
++
++/// Resolves the exact combination, including exhausted variants. Missing
++/// combinations stay missing; another size/colour is never substituted.
++int indexForOptions(Product product, Map<String, String> options) =>
++    productChoices(product).indexWhere((v) =>
++        v.selectedOptions.length == options.length &&
++        options.entries.every((e) => v.selectedOptions[e.key] == e.value),);
++
++typedef ProductRestockAction = void Function(
++    Product product, ProductVariant variant,);
+diff --git a/lib/features/product/product_zoom.dart b/lib/features/product/product_zoom.dart
+new file mode 100644
+index 0000000..74b1d80
+--- /dev/null
++++ b/lib/features/product/product_zoom.dart
+@@ -0,0 +1,186 @@
++import 'package:flutter/material.dart';
++import 'package:flutter/services.dart';
++
++import '../../app/media/monetta_image.dart';
++import '../../data/media/media_url.dart';
++import '../boutique/boutique_tokens.dart';
++
++Future<int?> showProductZoom(
++  BuildContext context, {
++  required List<String> images,
++  required int initialPage,
++  required String title,
++}) {
++  final focus = FocusManager.instance.primaryFocus;
++  return showDialog<int>(
++    context: context,
++    builder: (_) =>
++        _ProductZoom(images: images, initialPage: initialPage, title: title),
++  ).whenComplete(() {
++    if (focus?.context != null) focus!.requestFocus();
++  });
++}
++
++class _ProductZoom extends StatefulWidget {
++  const _ProductZoom({
++    required this.images,
++    required this.initialPage,
++    required this.title,
++  });
++  final List<String> images;
++  final int initialPage;
++  final String title;
++  @override
++  State<_ProductZoom> createState() => _ProductZoomState();
++}
++
++class _ProductZoomState extends State<_ProductZoom> {
++  final _transform = TransformationController();
++  late int _page = widget.initialPage;
++  double get _scale => _transform.value.getMaxScaleOnAxis();
++  void _setScale(double value) {
++    _transform.value = Matrix4.diagonal3Values(
++      value.clamp(1, 4).toDouble(),
++      value.clamp(1, 4).toDouble(),
++      1,
++    );
++  }
++
++  void _move(int delta) => setState(() {
++        _page = (_page + delta + widget.images.length) % widget.images.length;
++        _transform.value = Matrix4.identity();
++      });
++  void _close() => Navigator.of(context).pop(_page);
++  @override
++  void dispose() {
++    _transform.dispose();
++    super.dispose();
++  }
++
++  @override
++  Widget build(BuildContext context) => CallbackShortcuts(
++        bindings: {
++          const SingleActivator(LogicalKeyboardKey.escape): _close,
++          const SingleActivator(LogicalKeyboardKey.equal): () =>
++              _setScale(_scale + .5),
++          const SingleActivator(LogicalKeyboardKey.minus): () =>
++              _setScale(_scale - .5),
++          if (widget.images.length > 1) ...{
++            const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
++                _move(1),
++            const SingleActivator(LogicalKeyboardKey.arrowLeft): () =>
++                _move(-1),
++          },
++        },
++        child: Dialog(
++          key: const Key('product-zoom-dialog'),
++          backgroundColor: context.boutique.canvas,
++          insetPadding: const EdgeInsets.all(16),
++          child: SafeArea(
++            child: Padding(
++              padding: const EdgeInsets.all(12),
++              child: Column(
++                children: [
++                  Row(
++                    children: [
++                      Expanded(
++                        child: Text(
++                          'Imagen del producto',
++                          style: boutiqueText(size: 18),
++                        ),
++                      ),
++                      IconButton(
++                        autofocus: true,
++                        tooltip: 'Cerrar zoom',
++                        onPressed: _close,
++                        icon: const Icon(Icons.close),
++                      ),
++                    ],
++                  ),
++                  Expanded(
++                    child: InteractiveViewer(
++                      transformationController: _transform,
++                      minScale: 1,
++                      maxScale: 4,
++                      child: MonettaImage(
++                        key: ValueKey(widget.images[_page]),
++                        url: widget.images[_page],
++                        fit: BoxFit.contain,
++                        cacheWidth: MediaUrl.heroWidth,
++                        fallbackLabel: widget.title,
++                      ),
++                    ),
++                  ),
++                  Flexible(
++                    child: SingleChildScrollView(
++                      child: Column(
++                        mainAxisSize: MainAxisSize.min,
++                        children: [
++                          Text(widget.title, textAlign: TextAlign.center),
++                          ValueListenableBuilder<Matrix4>(
++                            valueListenable: _transform,
++                            builder: (_, __, ___) => Wrap(
++                              alignment: WrapAlignment.center,
++                              crossAxisAlignment: WrapCrossAlignment.center,
++                              children: [
++                                IconButton(
++                                  tooltip: 'Reducir',
++                                  onPressed: _scale > 1
++                                      ? () => _setScale(_scale - .5)
++                                      : null,
++                                  icon: const Icon(Icons.remove),
++                                ),
++                                Semantics(
++                                  liveRegion: true,
++                                  child: Text('${(_scale * 100).round()}%'),
++                                ),
++                                IconButton(
++                                  tooltip: 'Ampliar',
++                                  onPressed: _scale < 4
++                                      ? () => _setScale(_scale + .5)
++                                      : null,
++                                  icon: const Icon(Icons.add),
++                                ),
++                                TextButton(
++                                  onPressed: () => _setScale(1),
++                                  child: Text(
++                                    'Restablecer',
++                                    style: boutiqueText(
++                                      color: context.boutique.ink,
++                                    ),
++                                  ),
++                                ),
++                              ],
++                            ),
++                          ),
++                          if (widget.images.length > 1)
++                            Wrap(
++                              alignment: WrapAlignment.center,
++                              crossAxisAlignment: WrapCrossAlignment.center,
++                              children: [
++                                IconButton(
++                                  tooltip: 'Foto anterior',
++                                  onPressed: () => _move(-1),
++                                  icon: const Icon(Icons.chevron_left),
++                                ),
++                                Text(
++                                  'Foto ${_page + 1} de ${widget.images.length}',
++                                ),
++                                IconButton(
++                                  tooltip: 'Foto siguiente',
++                                  onPressed: () => _move(1),
++                                  icon: const Icon(Icons.chevron_right),
++                                ),
++                              ],
++                            ),
++                        ],
++                      ),
++                    ),
++                  ),
++                ],
++              ),
++            ),
++          ),
++        ),
++      );
++}
+diff --git a/lib/features/product/product_recommendations.dart b/lib/features/product/product_recommendations.dart
+new file mode 100644
+index 0000000..e6700ae
+--- /dev/null
++++ b/lib/features/product/product_recommendations.dart
+@@ -0,0 +1,23 @@
++import '../../data/normalize/facets.dart';
++import '../../domain/product.dart';
++
++List<Product> uniqueProductSet(Iterable<Product> products,
++    {required String excluding, int limit = 40,}) {
++  final seen = <String>{excluding};
++  return products.where((p) => seen.add(p.id)).take(limit).toList();
++}
++
++/// The relationship is an observed canonical category/silhouette match;
++/// brand and actual session history are distinct sets in the PDP.
++List<Product> relatedProductSet(Product product, Iterable<Product> candidates,
++    CanonicalFacets? Function(String) facetsFor,) {
++  final source = facetsFor(product.id);
++  final category = source?.category?.value;
++  if (category == null) return const [];
++  final silhouette = source?.silhouette?.value;
++  return uniqueProductSet(candidates.where((candidate) {
++    final facets = facetsFor(candidate.id);
++    return facets?.category?.value == category &&
++        (silhouette == null || facets?.silhouette?.value == silhouette);
++  }), excluding: product.id,);
++}
+diff --git a/test/data/local/v41_variant_cache_test.dart b/test/data/local/v41_variant_cache_test.dart
+new file mode 100644
+index 0000000..9f0d982
+--- /dev/null
++++ b/test/data/local/v41_variant_cache_test.dart
+@@ -0,0 +1,76 @@
++import 'dart:io';
++import 'package:drift/native.dart';
++import 'package:flutter_test/flutter_test.dart';
++import 'package:monetta_app/data/local/database.dart';
++import 'package:monetta_app/data/local/catalog_cache_store.dart';
++import '../../support/v41_product_fixture.dart';
++
++void main() {
++  test('variant options and image membership survive database cold reopen',
++      () async {
++    final dir = await Directory.systemTemp.createTemp('monetta-v41-');
++    addTearDown(() => dir.delete(recursive: true));
++    final file = File('${dir.path}/catalog.sqlite');
++    final first = AppDatabase(NativeDatabase(file));
++    await CatalogCacheStore(first).upsertProducts([v41Product()]);
++    await first.close();
++    final second = AppDatabase(NativeDatabase(file));
++    addTearDown(second.close);
++    final product = (await CatalogCacheStore(second).allProducts()).single;
++    expect(
++      product.variants[1].selectedOptions,
++      {'Color': 'Negro', 'Talla': '37'},
++    );
++    expect(product.variants[1].available, false);
++    expect(product.variants[1].price, 1400);
++    expect(product.variants[1].compareAtPrice, isNull);
++    expect(
++      product.variants[2].imageUrls,
++      ['https://cdn.shopify.com/fixture/white.jpg'],
++    );
++  });
++  test(
++      'actual schema9 upgrade preserves catalog, bag and identity, resets cursor',
++      () async {
++    final dir = await Directory.systemTemp.createTemp('monetta-v41-upgrade-');
++    addTearDown(() => dir.delete(recursive: true));
++    final file = File('${dir.path}/catalog.sqlite');
++    final legacy = AppDatabase(NativeDatabase(file));
++    await CatalogCacheStore(legacy).upsertProducts([v41Product()]);
++    await legacy.customStatement(
++      "INSERT INTO bag_lines (product_id,variant_id,account_id,quantity) VALUES ('gid://shopify/Product/9001','gid://shopify/ProductVariant/9101','',2)",
++    );
++    await legacy.customStatement(
++      "INSERT INTO accounts (local_account_id,created_at,last_seen_at) VALUES ('account-preserved',1,1)",
++    );
++    await legacy.customStatement(
++      "INSERT INTO sync_cursors (id,last_updated_at,last_full_sync_at,shop_domain) VALUES (0,1,1,'test.myshopify.com')",
++    );
++    await legacy.customStatement(
++      'ALTER TABLE cached_variants DROP COLUMN selected_options',
++    );
++    await legacy
++        .customStatement('ALTER TABLE cached_variants DROP COLUMN image_urls');
++    await legacy.customStatement('PRAGMA user_version = 9');
++    await legacy.close();
++    final upgraded = AppDatabase(NativeDatabase(file));
++    addTearDown(upgraded.close);
++    final products = await CatalogCacheStore(upgraded).allProducts();
++    expect(products.single.variants, hasLength(3));
++    expect(products.single.variants.first.selectedOptions, isEmpty);
++    expect(products.single.variants.first.imageUrls, isEmpty);
++    expect((await upgraded.select(upgraded.bagLines).get()).single.quantity, 2);
++    expect(
++      (await upgraded.select(upgraded.accounts).get()).single.localAccountId,
++      'account-preserved',
++    );
++    expect(await upgraded.select(upgraded.syncCursors).get(), isEmpty);
++    expect(
++      (await upgraded.customSelect('PRAGMA user_version').getSingle())
++          .data
++          .values
++          .single,
++      10,
++    );
++  });
++}
+diff --git a/test/data/shopify/v41_variant_mapping_test.dart b/test/data/shopify/v41_variant_mapping_test.dart
+new file mode 100644
+index 0000000..493fc61
+--- /dev/null
++++ b/test/data/shopify/v41_variant_mapping_test.dart
+@@ -0,0 +1,53 @@
++import 'package:flutter_test/flutter_test.dart';
++import 'package:monetta_app/data/shopify/mappers.dart';
++import 'package:monetta_app/data/shopify/queries.dart';
++import 'package:monetta_app/domain/product.dart';
++import 'package:monetta_app/features/product/variant_selection.dart';
++
++import '../../support/v41_product_fixture.dart';
++
++void main() {
++  test('Storefront queries preserve options and image on every variant page',
++      () {
++    for (final query in [
++      kProductFragment,
++      productConnectionQuery('variants'),
++    ]) {
++      expect(query, contains('selectedOptions { name value }'));
++      expect(query, contains('image { url(transform: {maxWidth: 1200}) }'));
++    }
++  });
++  test('real wire options resolve exact stock/price/photo combinations', () {
++    final product = v41Product();
++    expect(productOptionValues(product), {
++      'Color': ['Negro', 'Blanco'],
++      'Talla': ['36', '37'],
++    });
++    final exhausted = product
++        .variants[indexForOptions(product, {'Color': 'Negro', 'Talla': '37'})];
++    expect(exhausted.available, false);
++    expect(exhausted.price, 1400);
++    expect(exhausted.compareAtPrice, isNull);
++    expect(
++      imagesForVariant(product, exhausted),
++      ['https://cdn.shopify.com/fixture/black.jpg'],
++    );
++    expect(indexForOptions(product, {'Color': 'Blanco', 'Talla': '37'}), -1);
++    expect(variantIndexForId(product, 'gid://shopify/ProductVariant/9103'), 2);
++    expect(variantIndexForId(product, 'removed'), -1);
++  });
++  test('missing image membership stays missing, titles do not invent options',
++      () {
++    final json = v41ProductJson();
++    final connection = json['variants'] as Map<String, dynamic>;
++    final variants = (connection['edges'] as List).cast<Map<String, dynamic>>();
++    for (final row in variants) {
++      final node = row['node'] as Map<String, dynamic>;
++      node.remove('selectedOptions');
++      node.remove('image');
++    }
++    final product = productFromJson(json);
++    expect(productOptionValues(product), isEmpty);
++    expect(imagesForVariant(product, product.variants.first), isEmpty);
++  });
++}
+diff --git a/test/data/repositories/v41_realtime_variant_test.dart b/test/data/repositories/v41_realtime_variant_test.dart
+new file mode 100644
+index 0000000..52d1e31
+--- /dev/null
++++ b/test/data/repositories/v41_realtime_variant_test.dart
+@@ -0,0 +1,93 @@
++import 'package:flutter_test/flutter_test.dart';
++import 'package:monetta_app/data/firestore/catalog_realtime_source.dart';
++import 'package:monetta_app/data/local/catalog_cache_store.dart';
++import 'package:monetta_app/data/local/database.dart';
++import 'package:monetta_app/data/repositories/realtime_catalog_repository.dart';
++
++class _Source implements CatalogRealtimeSource {
++  @override
++  Stream<List<CatalogRealtimeDocument>> watchProducts() => const Stream.empty();
++}
++
++CatalogRealtimeDocument document({
++  bool metadata = true,
++  bool invalid = false,
++}) =>
++    CatalogRealtimeDocument(
++      documentId: '9001',
++      data: {
++        'schemaVersion': 1,
++        'source': 'shopify',
++        'id': 'gid://shopify/Product/9001',
++        'shopifyLegacyId': '9001',
++        'handle': 'fixture',
++        'title': 'Producto de prueba',
++        'vendor': 'Coach',
++        'productType': 'Calzado',
++        'tags': <String>[],
++        'descriptionHtml': '',
++        'images': <String>[],
++        'collectionHandles': <String>[],
++        'createdAt': '2026-10-01T00:00:00Z',
++        'updatedAt': '2026-11-01T00:00:00Z',
++        'isPublished': true,
++        'variants': [
++          {
++            'id': 'gid://shopify/ProductVariant/9101',
++            'title': 'Negro / 36',
++            'price': 1200,
++            'compareAtPrice': null,
++            'available': true,
++            if (metadata)
++              'selectedOptions':
++                  invalid ? {'Color': 5} : {'Color': 'Negro', 'Talla': '36'},
++            if (metadata)
++              'imageUrls': ['https://cdn.shopify.com/fixture/black.jpg'],
++          }
++        ],
++      },
++    );
++void main() {
++  for (final legacy in [false, true]) {
++    test('Firestore ${legacy ? 'legacy' : 'producer'} metadata survives cache',
++        () async {
++      final db = openTestDatabase();
++      addTearDown(db.close);
++      final cache = CatalogCacheStore(db);
++      final repository =
++          RealtimeCatalogRepository(source: _Source(), cache: cache);
++      final update =
++          await repository.applySnapshot([document(metadata: !legacy)]);
++      expect(update.outcome, RealtimeCatalogOutcome.applied);
++      final variant = (await cache.allProducts()).single.variants.single;
++      expect(
++        variant.selectedOptions,
++        legacy ? isEmpty : {'Color': 'Negro', 'Talla': '36'},
++      );
++      expect(
++        variant.imageUrls,
++        legacy ? isEmpty : ['https://cdn.shopify.com/fixture/black.jpg'],
++      );
++    });
++  }
++  test('invalid producer options preserve last confirmed catalog', () async {
++    final db = openTestDatabase();
++    addTearDown(db.close);
++    final cache = CatalogCacheStore(db);
++    final repository =
++        RealtimeCatalogRepository(source: _Source(), cache: cache);
++    await repository.applySnapshot([document()]);
++    expect(
++      (await repository.applySnapshot([document(invalid: true)])).outcome,
++      RealtimeCatalogOutcome.invalid,
++    );
++    expect(
++      (await cache.allProducts())
++          .single
++          .variants
++          .single
++          .selectedOptions['Color'],
++      'Negro',
++    );
++  });
++}
+diff --git a/test/features/product/v41_product_flow_test.dart b/test/features/product/v41_product_flow_test.dart
+new file mode 100644
+index 0000000..d850d23
+--- /dev/null
++++ b/test/features/product/v41_product_flow_test.dart
+@@ -0,0 +1,355 @@
++// Deterministic local commerce/photography fixtures; no live service success.
++import 'dart:async';
++import 'dart:io';
++import 'package:flutter/material.dart';
++import 'package:flutter/services.dart';
++import 'package:flutter_test/flutter_test.dart';
++import 'package:monetta_app/app/media/monetta_image.dart';
++import 'package:monetta_app/data/local/database.dart';
++import 'package:monetta_app/domain/product.dart';
++import 'package:monetta_app/features/catalog/product_card.dart';
++import 'package:monetta_app/features/catalog/product_controls.dart';
++import 'package:monetta_app/features/product/product_screen.dart';
++import 'package:monetta_app/features/product/product_selection.dart';
++import 'package:monetta_app/features/product/product_zoom.dart';
++import 'package:monetta_app/features/product/quick_view.dart';
++import 'package:monetta_app/reco/events.dart';
++import '../../support/product_screen_harness.dart';
++import '../../support/scripted_catalog_store.dart';
++import '../../support/v41_product_fixture.dart';
++
++Future<ScriptedCatalogStore> mount(
++  WidgetTester tester, {
++  Widget Function(Product)? home,
++}) async {
++  setPhoneView(tester);
++  final db = openTestDatabase();
++  final store = ScriptedCatalogStore(database: db);
++  addTearDown(() async {
++    store.dispose();
++    await db.close();
++  });
++  await store.loadFromAsset();
++  final product = v41Product();
++  store.products = [product];
++  await tester.pumpWidget(
++    fichaApp(
++      store,
++      home?.call(product) ??
++          Scaffold(
++            body: SingleChildScrollView(
++              child: SizedBox(width: 300, child: ProductCard(product: product)),
++            ),
++          ),
++    ),
++  );
++  await tester.pumpAndSettle();
++  return store;
++}
++
++Future<void> reveal(WidgetTester tester, Finder finder) async {
++  await tester.ensureVisible(finder);
++  await tester.pumpAndSettle();
++}
++
++void main() {
++  setUpAll(mockPathProvider);
++  setUp(() {
++    debugMonettaFixtureImage =
++        MemoryImage(File('test/support/fixture_product.jpg').readAsBytesSync());
++  });
++  tearDown(() {
++    debugMonettaFixtureImage = null;
++  });
++
++  testWidgets(
++      'independent heart/options carry actual variant card → quick → PDP → add and return',
++      (tester) async {
++    final store = await mount(tester);
++    await tester.tap(find.byType(ProductFavoriteButton));
++    await tester.pumpAndSettle();
++    expect(store.wishlist, contains(v41Product().id));
++    expect(find.byKey(const Key('quick-view-card')), findsNothing);
++    await tester.tap(find.byTooltip('Elegir opción'));
++    await tester.pumpAndSettle();
++    await tester.tap(find.text('Blanco / 36').last);
++    await tester.pumpAndSettle();
++    expect(find.byKey(const Key('quick-view-card')), findsNothing);
++    expect(
++      tester
++          .widget<MonettaProductTile>(find.byType(MonettaProductTile))
++          .data
++          .priceLabel,
++      '\$1,600 MXN',
++    );
++    await tester.tap(find.byType(MonettaImage).first);
++    await tester.pumpAndSettle();
++    expect(find.byKey(const Key('quick-view-back')), findsNothing);
++    expect(
++      tester.widget<Text>(find.byKey(const Key('quick-view-price'))).data,
++      '\$1,600 MXN',
++    );
++    expect(
++      tester.widget<MonettaImage>(find.byType(MonettaImage).first).url,
++      contains('white.jpg'),
++    );
++    await reveal(tester, find.byKey(const Key('quick-view-view-product')));
++    await tester.tap(find.byKey(const Key('quick-view-view-product')));
++    await tester.pumpAndSettle();
++    expect(find.byKey(const Key('quick-view-card')), findsNothing);
++    expect(
++      tester.widget<ProductScreen>(find.byType(ProductScreen)).initialVariantId,
++      'gid://shopify/ProductVariant/9103',
++    );
++    await reveal(tester, find.byKey(const Key('purchase-dock-primary')));
++    await tester.tap(find.byKey(const Key('purchase-dock-primary')));
++    await tester.pumpAndSettle();
++    expect(
++      store.bagLines.single.variant.id,
++      'gid://shopify/ProductVariant/9103',
++    );
++    expect(find.text('Agregado al carrito'), findsOneWidget);
++    expect(find.text('En tu bolsa'), findsNothing);
++    await tester.binding.handlePopRoute();
++    await tester.pumpAndSettle();
++    expect(find.byType(ProductScreen), findsNothing);
++    expect(find.byKey(const Key('quick-view-card')), findsNothing);
++    expect(
++      tester
++          .widget<MonettaProductTile>(find.byType(MonettaProductTile))
++          .data
++          .priceLabel,
++      '\$1,600 MXN',
++    );
++  });
++
++  testWidgets(
++      'unavailable combination cannot add or inherit another compare-at/image',
++      (tester) async {
++    final store = await mount(tester);
++    final context = tester.element(find.byType(ProductCard));
++    unawaited(showProductQuickView(context, store.products.single));
++    await tester.pumpAndSettle();
++    await reveal(tester, find.text('37'));
++    await tester.tap(find.text('37'));
++    await tester.pumpAndSettle();
++    expect(find.byType(ProductSoldOutBadge), findsOneWidget);
++    expect(find.byKey(const Key('quick-view-primary')), findsNothing);
++    expect(find.text('Avísame cuando vuelva'), findsNothing);
++    expect(find.byKey(const ValueKey('discount-badge')), findsNothing);
++    await tester
++        .tap(find.bySemanticsLabel('Color Blanco, no disponible').first);
++    await tester.pumpAndSettle();
++    expect(
++      find.byKey(const Key('product-combination-unavailable')),
++      findsOneWidget,
++    );
++    expect(selectedVariant(store.products.single, -1), isNull);
++    expect(store.addCalls, 0);
++    await tester.tap(find.text('36'));
++    await tester.pumpAndSettle();
++    await reveal(tester, find.byKey(const Key('quick-view-primary')));
++    store.failWith = StateError('fixture failure');
++    await tester.tap(find.byKey(const Key('quick-view-primary')));
++    await tester.pumpAndSettle();
++    expect(find.byKey(const Key('quick-view-error')), findsOneWidget);
++    expect(store.bagQuantity, 0);
++    store.failWith = null;
++    store.hold = Completer<void>();
++    await tester.tap(find.byKey(const Key('quick-view-primary')));
++    await tester.pump();
++    await tester.tap(find.byKey(const Key('quick-view-primary')));
++    await tester.pump();
++    expect(
++      store.addCalls,
++      2,
++      reason: 'one failed attempt and one in-flight attempt',
++    );
++    store.hold!.complete();
++    await tester.pumpAndSettle();
++    expect(
++      store.bagLines.single.variant.id,
++      'gid://shopify/ProductVariant/9103',
++    );
++    expect(find.byKey(const Key('quick-view-card')), findsOneWidget);
++  });
++
++  testWidgets(
++      'legacy index supported, stable id wins, exhausted/missing ids stay unavailable',
++      (tester) async {
++    final store = await mount(
++      tester,
++      home: (p) => ProductScreen(
++        productId: p.id,
++        initialVariantIndex: 0,
++        initialVariantId: p.variants[1].id,
++      ),
++    );
++    expect(
++      tester.widget<Text>(find.byKey(const Key('product-price'))).data,
++      '\$1,400 MXN',
++    );
++    expect(find.byType(ProductSoldOutBadge), findsOneWidget);
++    expect(find.byKey(const Key('purchase-dock-primary')), findsNothing);
++    expect(find.text('Avísame cuando vuelva'), findsNothing);
++    expect(selectionCompareAt(store.products.single, 1), isNull);
++    expect(variantIndexForId(store.products.single, null, fallback: 2), 2);
++    expect(
++      variantIndexForId(store.products.single, 'withdrawn', fallback: 0),
++      -1,
++    );
++  });
++
++  testWidgets(
++      'escape closes quick view and restores originating keyboard focus',
++      (tester) async {
++    final focus = FocusNode();
++    addTearDown(focus.dispose);
++    await mount(
++      tester,
++      home: (product) => Builder(
++        builder: (context) => Scaffold(
++          body: TextButton(
++            focusNode: focus,
++            onPressed: () => showProductQuickView(context, product),
++            child: const Text('Abrir'),
++          ),
++        ),
++      ),
++    );
++    focus.requestFocus();
++    await tester.pump();
++    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
++    await tester.pumpAndSettle();
++    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
++    await tester.pumpAndSettle();
++    expect(find.byKey(const Key('quick-view-card')), findsNothing);
++    expect(focus.hasFocus, true);
++  });
++
++  testWidgets(
++      'zoom exposes enlarge/reduce/reset and multiple photos with focus return',
++      (tester) async {
++    final focus = FocusNode();
++    addTearDown(focus.dispose);
++    await mount(
++      tester,
++      home: (p) => Builder(
++        builder: (context) => Scaffold(
++          body: TextButton(
++            focusNode: focus,
++            onPressed: () => showProductZoom(
++              context,
++              images: [
++                'https://cdn.shopify.com/fixture/1.jpg',
++                'https://cdn.shopify.com/fixture/2.jpg',
++              ],
++              initialPage: 0,
++              title: p.title,
++            ),
++            child: const Text('Zoom'),
++          ),
++        ),
++      ),
++    );
++    focus.requestFocus();
++    await tester.pump();
++    await tester.tap(find.text('Zoom'));
++    await tester.pumpAndSettle();
++    await tester.tap(find.byTooltip('Ampliar'));
++    await tester.pump();
++    expect(find.text('150%'), findsOneWidget);
++    await tester.tap(find.byTooltip('Reducir'));
++    await tester.pump();
++    expect(find.text('100%'), findsOneWidget);
++    await tester.tap(find.byTooltip('Ampliar'));
++    await tester.tap(find.text('Restablecer'));
++    await tester.pump();
++    expect(find.text('100%'), findsOneWidget);
++    await tester.tap(find.byTooltip('Foto siguiente'));
++    await tester.pump();
++    expect(find.text('Foto 2 de 2'), findsOneWidget);
++    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
++    await tester.pumpAndSettle();
++    expect(find.byKey(const Key('product-zoom-dialog')), findsNothing);
++    expect(focus.hasFocus, true);
++  });
++  testWidgets(
++      'featured direct-PDP entry preserves selected variant without quick view',
++      (tester) async {
++    final store = await mount(
++      tester,
++      home: (p) => Scaffold(
++        body: SingleChildScrollView(
++          child: ProductCard(
++            product: p,
++            initialVariantId: p.variants.last.id,
++            openDirectly: true,
++          ),
++        ),
++      ),
++    );
++    await tester.tap(find.byType(MonettaImage).first);
++    await tester.pumpAndSettle();
++    expect(find.byKey(const Key('quick-view-card')), findsNothing);
++    expect(
++      tester.widget<ProductScreen>(find.byType(ProductScreen)).initialVariantId,
++      store.products.single.variants.last.id,
++    );
++    expect(
++      tester.widget<Text>(find.byKey(const Key('product-price'))).data,
++      '\$1,600 MXN',
++    );
++  });
++
++  testWidgets(
++      'quick photo transition and catalog reorder use selected ID for purchase',
++      (tester) async {
++    final store = await mount(tester);
++    final old = store.products.single;
++    final context = tester.element(find.byType(ProductCard));
++    unawaited(
++      showProductQuickView(
++        context,
++        old,
++        initialVariantId: old.variants.last.id,
++      ),
++    );
++    await tester.pumpAndSettle();
++    store.products = [
++      Product(
++        id: old.id,
++        handle: old.handle,
++        title: old.title,
++        vendor: old.vendor,
++        productType: old.productType,
++        tags: old.tags,
++        variants: old.variants.reversed.toList(),
++        images: old.images,
++        createdAt: old.createdAt,
++        updatedAt: old.updatedAt,
++        descriptionHtml: old.descriptionHtml,
++      ),
++    ];
++    store.record(EventType.galleryInteraction, productId: old.id);
++    await tester.pumpAndSettle();
++    await reveal(tester, find.byKey(const Key('quick-view-primary')));
++    await tester.tap(find.byKey(const Key('quick-view-primary')));
++    await tester.pumpAndSettle();
++    expect(store.bagLines.single.variant.id, old.variants.last.id);
++    final photo = find
++        .descendant(
++          of: find.byKey(const Key('quick-view-card')),
++          matching: find.byType(MonettaImage),
++        )
++        .first;
++    await reveal(tester, photo);
++    await tester.tap(photo);
++    await tester.pumpAndSettle();
++    expect(find.byKey(const Key('quick-view-card')), findsNothing);
++    expect(
++      tester.widget<ProductScreen>(find.byType(ProductScreen)).initialVariantId,
++      old.variants.last.id,
++    );
++  });
++}
+diff --git a/test/features/product/v41_product_render_test.dart b/test/features/product/v41_product_render_test.dart
+new file mode 100644
+index 0000000..f0c7b82
+--- /dev/null
++++ b/test/features/product/v41_product_render_test.dart
+@@ -0,0 +1,267 @@
++// REVIEW FIXTURES ONLY: owner-provided photographs, illustrative stock/prices.
++// No network, provider response, golden approval or production catalog mutation.
++import 'dart:async';
++import 'dart:io';
++import 'dart:ui' as ui;
++import 'package:flutter/material.dart';
++import 'package:flutter/rendering.dart';
++import 'package:flutter_test/flutter_test.dart';
++import 'package:monetta_app/app/media/monetta_image.dart';
++import 'package:monetta_app/app/catalog_store.dart';
++import 'package:monetta_app/data/local/database.dart';
++import 'package:monetta_app/data/normalize/normalizer.dart';
++import 'package:monetta_app/domain/product.dart';
++import 'package:monetta_app/features/catalog/product_card.dart';
++import 'package:monetta_app/features/product/product_screen.dart';
++import 'package:monetta_app/features/product/product_zoom.dart';
++import 'package:monetta_app/features/product/quick_view.dart';
++import 'package:monetta_app/main.dart';
++import 'package:monetta_app/reco/events.dart';
++import '../../support/client_guide_capture.dart';
++import '../../support/product_screen_harness.dart';
++
++const _source = 'test/support/v41';
++Product _product() => Product(
++      id: 'gid://shopify/Product/9901',
++      handle: 'visual-fixture',
++      title: 'Reloj Coach Iris Charms',
++      vendor: 'Coach',
++      productType: 'Reloj',
++      tags: const ['Coach', 'Reloj'],
++      createdAt: DateTime.utc(2026),
++      updatedAt: DateTime.utc(2026),
++      descriptionHtml:
++          '<p>Descripción de prueba del producto; contenido ilustrativo para revisión local.</p>',
++      variants: const [
++        ProductVariant(
++          id: 'gid://shopify/ProductVariant/99011',
++          title: 'Plateado/Dorado',
++          price: 7219,
++          available: true,
++          selectedOptions: {'Color': 'Plateado/Dorado'},
++          imageUrls: ['https://cdn.shopify.com/fixture/iris-plateado.png'],
++        ),
++        ProductVariant(
++          id: 'gid://shopify/ProductVariant/99012',
++          title: 'Dorado',
++          price: 7219,
++          available: false,
++          selectedOptions: {'Color': 'Dorado'},
++          imageUrls: ['https://cdn.shopify.com/fixture/iris-dorado.png'],
++        ),
++      ],
++      images: const [],
++    );
++Future<void> capture(WidgetTester tester, String name) async {
++  final directory = Platform.environment['MONETTA_A02_CAPTURE_DIR'];
++  if (directory == null) return;
++  await tester.runAsync(() async {
++    for (final element in find.byType(Image).evaluate()) {
++      await precacheImage(
++        (element.widget as Image).image,
++        element,
++        onError: (_, __) {},
++      );
++    }
++  });
++  await tester.pump();
++  final view = tester.binding.renderViews.first;
++  await tester.runAsync(() async {
++    final image = await (view.debugLayer! as OffsetLayer)
++        .toImage(view.paintBounds, pixelRatio: 1);
++    final data = await image.toByteData(format: ui.ImageByteFormat.png);
++    await Directory(directory).create(recursive: true);
++    await File('$directory/$name.png').writeAsBytes(data!.buffer.asUint8List());
++    image.dispose();
++  });
++}
++
++void main() {
++  setUpAll(mockPathProvider);
++  tearDown(() => debugMonettaFixtureImage = null);
++  for (final mode in [
++    (390.0, 1.0, Brightness.light),
++    (390.0, 1.0, Brightness.dark),
++    (320.0, 2.0, Brightness.light),
++  ]) {
++    final suffix = '${mode.$1.toInt()}-${mode.$2.toInt()}x-${mode.$3.name}';
++    Future<CatalogStore> mount(
++      WidgetTester tester,
++      Widget Function(Product) child, {
++      bool gold = false,
++    }) async {
++      final db = openTestDatabase();
++      final store = CatalogStore(database: db);
++      addTearDown(() async {
++        store.dispose();
++        await db.close();
++      });
++      await store.loadFromAsset();
++      final p = _product();
++      store.products = [...store.products, p];
++      store.facetsById = {
++        ...store.facetsById,
++        p.id: Normalizer(store.rules)
++            .normalize(p, now: DateTime.utc(2026, 11, 11)),
++      };
++      debugMonettaFixtureImage = MemoryImage(
++        File(
++          '$_source/${gold ? 'iris-dorado.png' : 'iris-plateado-dorado.png'}',
++        ).readAsBytesSync(),
++      );
++      await pumpClientGuide(
++        tester,
++        StoreScope(notifier: store, child: child(p)),
++        size: Size(mode.$1, 844),
++        textScale: mode.$2,
++        brightness: mode.$3,
++      );
++      return store;
++    }
++
++    testWidgets('common card $suffix', (tester) async {
++      await mount(
++        tester,
++        (p) => Scaffold(
++          body: ListView(
++            padding: const EdgeInsets.all(16),
++            children: [
++              ProductCard(product: p, initialVariantId: p.variants[1].id),
++            ],
++          ),
++        ),
++        gold: true,
++      );
++      if (mode.$2 == 2) {
++        final caption = find.descendant(
++          of: find.byType(MonettaProductTile),
++          matching: find.text(_product().title),
++        );
++        expect(paragraphOf(tester, caption).didExceedMaxLines, false);
++      }
++      await capture(tester, 'card-$suffix');
++      expect(tester.takeException(), isNull);
++    });
++    testWidgets('quick view $suffix', (tester) async {
++      final store =
++          await mount(tester, (_) => const Scaffold(body: SizedBox()));
++      final context = tester.element(find.byType(Scaffold));
++      unawaited(showProductQuickView(context, store.products.last));
++      await tester.pumpAndSettle();
++      await capture(tester, 'quick-$suffix');
++      expect(tester.takeException(), isNull);
++      await tester
++          .ensureVisible(find.byKey(const Key('quick-view-view-product')));
++      await tester.pumpAndSettle();
++      await capture(tester, 'quick-actions-$suffix');
++      expect(tester.takeException(), isNull);
++    });
++    testWidgets('PDP details $suffix', (tester) async {
++      await mount(
++        tester,
++        (p) => ProductScreen(
++          productId: p.id,
++          shippingPolicy: 'Política de envíos de prueba. No publicada.',
++          returnsPolicy: 'Política de cambios de prueba. No publicada.',
++          endSectionsBuilder: (_) => const Padding(
++            padding: EdgeInsets.all(24),
++            child: Text('Conexión editorial de prueba A06'),
++          ),
++        ),
++      );
++      await capture(tester, 'pdp-$suffix');
++      expect(tester.takeException(), isNull);
++      for (var step = 0;
++          step < 15 &&
++              find
++                  .text('Otras formas de comprar')
++                  .hitTestable()
++                  .evaluate()
++                  .isEmpty;
++          step++) {
++        await tester.drag(find.byType(ListView).first, const Offset(0, -200));
++        await tester.pumpAndSettle();
++      }
++      expect(
++        find.text('Otras formas de comprar').hitTestable(),
++        findsOneWidget,
++      );
++      await tester.tap(find.text('Otras formas de comprar').hitTestable());
++      await tester.pumpAndSettle();
++      expect(find.text('Solicitar apartado por WhatsApp'), findsOneWidget);
++      await capture(tester, 'details-$suffix');
++      expect(tester.takeException(), isNull);
++      final position = tester.state<ScrollableState>(mainScrollable()).position;
++      final apartado = find.byKey(const Key('purchase-apartar'));
++      position.jumpTo(
++        (position.pixels + tester.getTopLeft(apartado).dy - 200)
++            .clamp(0.0, position.maxScrollExtent),
++      );
++      await tester.pumpAndSettle();
++      expect(apartado.hitTestable(), findsOneWidget);
++      await capture(tester, 'details-actions-$suffix');
++      expect(tester.takeException(), isNull);
++    });
++    testWidgets('recommendation rail and same-set continuation $suffix',
++        (tester) async {
++      final store = await mount(tester, (p) => ProductScreen(productId: p.id));
++      store.record(EventType.productView, productId: store.products.first.id);
++      await tester.pumpAndSettle();
++      final heading = find.text('Más de la marca');
++      expect(heading, findsOneWidget);
++      final position = tester.state<ScrollableState>(mainScrollable()).position;
++      position.jumpTo(
++        (position.pixels + tester.getTopLeft(heading).dy - 120)
++            .clamp(0.0, position.maxScrollExtent),
++      );
++      await tester.pumpAndSettle();
++      await capture(tester, 'recommendations-$suffix');
++      expect(tester.takeException(), isNull);
++      final link = find.byKey(const ValueKey('product-set-Más de la marca'));
++      position.jumpTo(
++        (position.pixels + tester.getTopLeft(link).dy - 400)
++            .clamp(0.0, position.maxScrollExtent),
++      );
++      await tester.pumpAndSettle();
++      await tester.tap(link.hitTestable());
++      await tester.pumpAndSettle();
++      final grid =
++          find.byKey(const ValueKey('product-set-grid-Más de la marca'));
++      expect(grid, findsOneWidget);
++      final expected = store
++          .moreFromBrand('coach', excluding: store.products.last.id, limit: 40)
++          .map((p) => p.id)
++          .toSet();
++      expect(
++        tester.widget<GridView>(grid).childrenDelegate.estimatedChildCount,
++        expected.length,
++      );
++      final visible = tester
++          .widgetList<ProductCard>(
++            find.descendant(of: grid, matching: find.byType(ProductCard)),
++          )
++          .map((card) => card.product.id)
++          .toList();
++      expect(visible.toSet().length, visible.length);
++      expect(expected.containsAll(visible), true);
++      await capture(tester, 'recommendation-set-$suffix');
++      expect(tester.takeException(), isNull);
++    });
++    testWidgets('zoom $suffix', (tester) async {
++      final store =
++          await mount(tester, (_) => const Scaffold(body: SizedBox()));
++      final context = tester.element(find.byType(Scaffold));
++      unawaited(
++        showProductZoom(
++          context,
++          images: store.products.last.variants.first.imageUrls,
++          initialPage: 0,
++          title: 'Plateado/Dorado',
++        ),
++      );
++      await tester.pumpAndSettle();
++      await capture(tester, 'zoom-$suffix');
++      expect(tester.takeException(), isNull);
++    });
++  }
++}
+diff --git a/test/features/product/v41_product_recommendations_test.dart b/test/features/product/v41_product_recommendations_test.dart
+new file mode 100644
+index 0000000..23fb9df
+--- /dev/null
++++ b/test/features/product/v41_product_recommendations_test.dart
+@@ -0,0 +1,50 @@
++import 'package:flutter_test/flutter_test.dart';
++import 'package:monetta_app/data/normalize/facets.dart';
++import 'package:monetta_app/features/product/product_recommendations.dart';
++import '../../support/product_screen_harness.dart';
++
++void main() {
++  test('rails retain 40 unique real products, source order and fewer-item sets',
++      () {
++    final products = List.generate(45, (i) => syntheticProduct(id: '$i'));
++    final set = uniqueProductSet(
++      [products[0], products[0], ...products],
++      excluding: '2',
++    );
++    expect(set, hasLength(40));
++    expect(set.map((p) => p.id).toSet(), hasLength(40));
++    expect(set.map((p) => p.id), isNot(contains('2')));
++    expect(
++      uniqueProductSet(products.take(3), excluding: '1').map((p) => p.id),
++      ['0', '2'],
++    );
++    expect(uniqueProductSet([], excluding: '1'), isEmpty);
++  });
++  test('related is actual category/silhouette membership, not the brand set',
++      () {
++    final products = List.generate(4, (i) => syntheticProduct(id: '$i'));
++    CanonicalFacets? facets(String id) => id == '3'
++        ? null
++        : CanonicalFacets(
++            productId: id,
++            brand: FacetValue(
++              id == '1' ? 'coach' : 'guess',
++              FacetSource.metafieldOverride,
++            ),
++            category: const FacetValue('bolsa', FacetSource.metafieldOverride),
++            silhouette: FacetValue(
++              id == '2' ? 'tote' : 'crossbody',
++              FacetSource.metafieldOverride,
++            ),
++            priceBand: null,
++            onSale: false,
++            inStock: true,
++            newArrival: false,
++          );
++    expect(
++      relatedProductSet(products[0], products, facets).map((p) => p.id),
++      ['1'],
++    );
++    expect(relatedProductSet(products[3], products, facets), isEmpty);
++  });
++}
+diff --git a/test/support/v41_product_fixture.dart b/test/support/v41_product_fixture.dart
+new file mode 100644
+index 0000000..04a44e6
+--- /dev/null
++++ b/test/support/v41_product_fixture.dart
+@@ -0,0 +1,50 @@
++// Deterministic Shopify Storefront wire fixture. No network or real inventory.
++import 'package:monetta_app/data/shopify/mappers.dart';
++import 'package:monetta_app/domain/product.dart';
++
++Map<String, dynamic> v41ProductJson() => {
++      'id': 'gid://shopify/Product/9001',
++      'handle': 'fixture-shoe',
++      'title': 'Calzado Coach de prueba',
++      'vendor': 'Coach',
++      'productType': 'Calzado',
++      'tags': ['Coach', 'Calzado'],
++      'descriptionHtml':
++          '<p>Descripción confirmada de la fuente de prueba.</p>',
++      'createdAt': '2026-10-01T00:00:00Z',
++      'updatedAt': '2026-11-01T00:00:00Z',
++      'images': {
++        'edges': [
++          {
++            'node': {'url': 'https://cdn.shopify.com/fixture/overview.jpg'},
++          },
++        ],
++      },
++      'variants': {
++        'edges': [
++          for (final row in [
++            ('9101', 'Negro', '36', '1200.00', '1500.00', true, 'black'),
++            ('9102', 'Negro', '37', '1400.00', null, false, 'black'),
++            ('9103', 'Blanco', '36', '1600.00', null, true, 'white'),
++          ])
++            {
++              'node': {
++                'id': 'gid://shopify/ProductVariant/${row.$1}',
++                'title': '${row.$2} / ${row.$3}',
++                'availableForSale': row.$6,
++                'price': {'amount': row.$4, 'currencyCode': 'MXN'},
++                'compareAtPrice': row.$5 == null ? null : {'amount': row.$5},
++                'selectedOptions': [
++                  {'name': 'Color', 'value': row.$2},
++                  {'name': 'Talla', 'value': row.$3},
++                ],
++                'image': {
++                  'url': 'https://cdn.shopify.com/fixture/${row.$7}.jpg',
++                },
++              },
++            },
++        ],
++      },
++    };
++
++Product v41Product() => productFromJson(v41ProductJson());

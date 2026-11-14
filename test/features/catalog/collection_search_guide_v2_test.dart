@@ -33,17 +33,9 @@ Future<void> _pumpCollection(
   await tester.pumpAndSettle();
 }
 
-Color? _pillColor(WidgetTester tester, String value) {
-  final material = find.descendant(
-    of: find.byKey(Key('collection-pill-$value')),
-    matching: find.byType(Material),
-  );
-  return tester.widget<Material>(material.first).color;
-}
-
 void main() {
   group('COL-GUIDE collection toolbar (slide 06)', () {
-    testWidgets('pills, count, «Ordenar por» and no brand link',
+    testWidgets('v4.1 independent controls preserve immutable collection scope',
         (tester) async {
       final store = await _loadedStore();
       addTearDown(store.dispose);
@@ -55,89 +47,29 @@ void main() {
           filter: CollectionFilter(category: 'bolsa'),
         ),
       );
-
-      for (final label in [
-        'Bolsas',
-        'Carteras',
-        'Accesorios',
-        'Relojes',
-        'Más',
-      ]) {
-        expect(
-          find.descendant(
-            of: find.byWidgetPredicate(
-              (w) =>
-                  w.key is ValueKey<String> &&
-                  (w.key! as ValueKey<String>)
-                      .value
-                      .startsWith('collection-pill-'),
-            ),
-            matching: find.text(label),
-          ),
-          findsOneWidget,
-          reason: label,
-        );
-      }
-      // The destination's own category is the active (brown) pill.
-      expect(_pillColor(tester, 'bolsa'), isNot(_pillColor(tester, 'cartera')));
-
-      // «N productos» is the real number of pieces in the destination.
-      final expected = store.products
-          .where((p) => store.facetsFor(p.id)?.category?.value == 'bolsa')
-          .length;
-      expect(
-        tester.widget<Text>(find.byKey(const Key('collection-count'))).data,
-        '$expected productos',
-      );
-      expect(find.text('Ordenar por'), findsOneWidget);
-      expect(find.byKey(const Key('collection-open-brand')), findsNothing);
-      expect(find.textContaining('Ver Coach'), findsNothing);
-      // The round filter button is part of the same row.
+      expect(find.byKey(const Key('collection-local-search')), findsOneWidget);
       expect(find.byKey(const Key('collection-filter-button')), findsOneWidget);
-    });
-
-    testWidgets('a pill changes the category; the sort link opens the sheet',
-        (tester) async {
-      final store = await _loadedStore();
-      addTearDown(store.dispose);
-      await _pumpCollection(
-        tester,
-        store,
-        const CollectionScreen(
-          title: 'Bolsas',
-          filter: CollectionFilter(category: 'bolsa'),
-        ),
-      );
-      await tester.tap(find.byKey(const Key('collection-pill-cartera')));
+      expect(find.byKey(const Key('collection-sort-button')), findsOneWidget);
+      expect(find.byKey(const Key('collection-pill-cartera')), findsNothing);
+      await tester.tap(find.byKey(const Key('collection-sort-button')));
       await tester.pumpAndSettle();
-      final wallets = store.products
-          .where((p) => store.facetsFor(p.id)?.category?.value == 'cartera')
-          .length;
-      expect(
-        tester.widget<Text>(find.byKey(const Key('collection-count'))).data,
-        '$wallets ${wallets == 1 ? 'producto' : 'productos'}',
-      );
+      expect(find.byKey(const Key('collection-sort-oldest')), findsOneWidget);
+      expect(find.byKey(const Key('collection-filter-apply')), findsNothing);
+      await tester.tap(find.byKey(const Key('collection-sort-oldest')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('collection-sort-apply')));
+      await tester.pumpAndSettle();
       expect(
         tester.widgetList<ProductCard>(find.byType(ProductCard)).every(
-              (c) =>
-                  store.facetsFor(c.product.id)?.category?.value == 'cartera',
+              (c) => store.facetsFor(c.product.id)?.category?.value == 'bolsa',
             ),
         isTrue,
       );
-      // It is a filter like any other: it counts and can be cleared.
-      expect(find.byKey(const Key('collection-filter-count')), findsOneWidget);
-      await tester.tap(find.byKey(const Key('collection-clear-inline')));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('collection-filter-count')), findsNothing);
-
-      await tester.tap(find.byKey(const Key('collection-sort-button')));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('collection-filter-sort')), findsOneWidget);
     });
 
     testWidgets(
-        '«VER PRODUCTO» opens the ficha; the card has no "+" and keeps its heart',
-        (tester) async {
+        'a card opens the quick view and its «Ver producto» opens the ficha; '
+        'the card has no "+" nor pill and keeps its heart', (tester) async {
       final store = await _loadedStore();
       addTearDown(store.dispose);
       await _pumpCollection(
@@ -151,17 +83,14 @@ void main() {
       final card = tester.widgetList<ProductCard>(find.byType(ProductCard));
       expect(card, isNotEmpty);
       final first = card.first.product;
-      final button = find.byKey(Key('view-product-${first.id}'));
-      expect(button, findsOneWidget);
-      expect(
-        find.descendant(of: button, matching: find.text('VER PRODUCTO')),
-        findsOneWidget,
-      );
-      // The card has no purchase shortcut any more; the favourite stays.
+      expect(find.byKey(Key('view-product-${first.id}')), findsNothing);
+      // The card has no purchase shortcut; the favourite stays.
       expect(find.byKey(Key('quick-add-${first.id}')), findsNothing);
-      expect(find.byTooltip('Guardar'), findsWidgets);
+      expect(find.byTooltip('Guardar en favoritos'), findsWidgets);
 
-      await tester.tap(button);
+      await tester.tap(find.byType(MonettaProductTile).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ver producto'));
       await tester.pumpAndSettle();
       expect(
         tester.widget<ProductScreen>(find.byType(ProductScreen)).productId,

@@ -27,9 +27,18 @@ class RewardsSummary {
   final bool reviewEnabled;
   final bool referralEnabled;
 
+  // V1 has no authoritative membership, thresholds or benefits source.
+  // These gates must stay closed until a versioned membership DTO is approved.
+  bool get membershipAvailable => false;
+  bool get tierProgressAvailable => false;
+  bool get tierBenefitsAvailable => false;
+
   factory RewardsSummary.fromJson(Map<String, dynamic> json) {
-    final balance =
-        (json['balance'] ?? <String, dynamic>{}) as Map<String, dynamic>;
+    final rawBalance = json['balance'];
+    if (rawBalance is! Map<String, dynamic>) {
+      throw const RewardsApiError('invalid_response');
+    }
+    final balance = rawBalance;
     final incentives =
         (json['incentives'] ?? <String, dynamic>{}) as Map<String, dynamic>;
     final program =
@@ -37,16 +46,16 @@ class RewardsSummary {
     final expiry = balance['nextExpiry'] as Map<String, dynamic>?;
     return RewardsSummary(
       redemptionEnabled: program['redemptionEnabled'] == true,
-      availableCents: (balance['availableCents'] as num? ?? 0).toInt(),
-      pendingCents: (balance['pendingCents'] as num? ?? 0).toInt(),
-      reservedCents: (balance['reservedCents'] as num? ?? 0).toInt(),
+      availableCents: _requiredInt(balance['availableCents']),
+      pendingCents: _requiredInt(balance['pendingCents']),
+      reservedCents: _requiredInt(balance['reservedCents']),
       nextExpiry: expiry == null
           ? null
           : RewardsExpiry(
-              cents: (expiry['cents'] as num? ?? 0).toInt(),
-              at: DateTime.tryParse('${expiry['at']}') ?? DateTime.now(),
+              cents: _requiredInt(expiry['cents']),
+              at: _requiredDate(expiry['at']),
             ),
-      asOf: DateTime.tryParse('${balance['asOf']}') ?? DateTime.now(),
+      asOf: _requiredDate(balance['asOf']),
       firstPurchaseEnabled:
           (incentives['firstPurchase'] as Map<String, dynamic>?)?['enabled'] ==
               true,
@@ -96,13 +105,13 @@ class RewardsMovement {
 
   factory RewardsMovement.fromJson(Map<String, dynamic> json) =>
       RewardsMovement(
-        id: (json['id'] as num? ?? 0).toInt(),
-        type: '${json['type'] ?? ''}',
-        state: '${json['state'] ?? ''}',
-        amountCents: (json['amountCents'] as num? ?? 0).toInt(),
+        id: _requiredInt(json['id']),
+        type: _requiredString(json['type']),
+        state: _requiredString(json['state']),
+        amountCents: _requiredInt(json['amountCents']),
         orderShopifyId: json['orderShopifyId'] as String?,
         reason: json['reason'] as String?,
-        createdAt: DateTime.tryParse('${json['createdAt']}') ?? DateTime.now(),
+        createdAt: _requiredDate(json['createdAt']),
       );
 }
 
@@ -188,4 +197,24 @@ class RewardsApiError implements Exception {
         'discount_already_used' => 'Ese descuento ya fue utilizado.',
         _ => 'No fue posible completar la operación.',
       };
+}
+
+int _requiredInt(Object? raw) {
+  if (raw is! num || !raw.isFinite || raw != raw.truncateToDouble()) {
+    throw const RewardsApiError('invalid_response');
+  }
+  return raw.toInt();
+}
+
+DateTime _requiredDate(Object? raw) {
+  final date = raw is String ? DateTime.tryParse(raw) : null;
+  if (date == null) throw const RewardsApiError('invalid_response');
+  return date.toUtc();
+}
+
+String _requiredString(Object? raw) {
+  if (raw is! String || raw.trim().isEmpty) {
+    throw const RewardsApiError('invalid_response');
+  }
+  return raw;
 }

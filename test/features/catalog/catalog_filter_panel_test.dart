@@ -7,14 +7,12 @@ import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/catalog_controls.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
+import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/main.dart';
 
-// The filter panel is the only entry to filtering (FICHA-T1, BRIEF 2.2): the
-// quick-filter pills of the catalog and the silhouette / sort pills of the
-// collections are gone, and every capability they offered is reachable, and
-// works, from the panel. FLT-02 and FLT-03 characterize the panel as it is
-// today; FLT-01* are the target state and fail until the pills are removed.
+// G05/G07/G08 v4.1 supersedes combined-sheet and proposed pixel-gap assertions.
+// Keep the real category/brand/price/color/availability and cancel/clear checks.
 
 CatalogItem _item(
   int i, {
@@ -240,7 +238,7 @@ void main() {
 
     for (final scale in [1.0, 2.0]) {
       testWidgets(
-          'FLT-01b header-to-photos gap is 8-16 px at text scale $scale',
+          'v4.1 search and independent sort controls precede photos at text $scale',
           (tester) async {
         _view(tester);
         await _pumpCatalog(tester, scale: scale);
@@ -248,8 +246,11 @@ void main() {
         expect(tester.takeException(), isNull);
         final header = tester.getRect(find.byType(AppBar));
         final firstTile = tester.getRect(find.byType(MonettaProductTile).first);
-        final gap = firstTile.top - header.bottom;
-        expect(gap, inInclusiveRange(8, 16), reason: 'no empty band');
+        final search =
+            tester.getRect(find.byKey(const Key('catalog-local-search')));
+        expect(search.top, greaterThanOrEqualTo(header.bottom));
+        expect(firstTile.top, greaterThan(search.bottom));
+        expect(find.byKey(const Key('catalog-sort-button')), findsOneWidget);
       });
     }
   });
@@ -262,7 +263,6 @@ void main() {
       await _openCatalogPanel(tester);
 
       for (final label in [
-        'Ordenar por',
         'Categoría',
         'Tipo de bolsa',
         'Marca',
@@ -280,9 +280,9 @@ void main() {
       await _pumpCatalog(tester);
       expect(_catalogOrder(tester), _feedOrder());
 
-      await _openCatalogPanel(tester);
-      await _tap(tester, _inSheet('Precio: de menor a mayor'));
-      await _applyCatalogPanel(tester);
+      await _tap(tester, find.byKey(const Key('catalog-sort-button')));
+      await _tap(tester, _inSheet('Precio: menor a mayor'));
+      await _tap(tester, find.byKey(const Key('catalog-sort-apply')));
 
       expect(_catalogOrder(tester), [
         _name(4), // 800
@@ -340,7 +340,7 @@ void main() {
       await _pumpCatalog(tester);
       await _openCatalogPanel(tester);
       await _openSection(tester, 'availability');
-      await _tap(tester, _inSheet('En existencia'));
+      await _tap(tester, _inSheet('Disponibles'));
 
       expect(_applyLabel(tester), 'Ver 5 artículos');
       await _applyCatalogPanel(tester);
@@ -380,10 +380,12 @@ void main() {
         (tester) async {
       _view(tester);
       await _pumpCatalog(tester);
+      await _tap(tester, find.byKey(const Key('catalog-sort-button')));
+      await _tap(tester, _inSheet('Precio: menor a mayor'));
+      await _tap(tester, find.byKey(const Key('catalog-sort-apply')));
       await _openCatalogPanel(tester);
       await _openSection(tester, 'brand');
       await _tap(tester, _inSheet('Guess'));
-      await _tap(tester, _inSheet('Precio: de menor a mayor'));
       await _applyCatalogPanel(tester);
       expect(_catalogOrder(tester), [_name(3), _name(6), _name(1)]);
 
@@ -403,7 +405,10 @@ void main() {
       expect(_applyLabel(tester), 'Ver 6 artículos');
 
       await _applyCatalogPanel(tester);
-      expect(_catalogOrder(tester), _feedOrder());
+      expect(
+        _catalogOrder(tester),
+        [_name(4), _name(3), _name(6), _name(1), _name(5), _name(2)],
+      );
       _expectCatalogBadge(null);
     });
   });
@@ -412,9 +417,9 @@ void main() {
     testWidgets('FLT-03 (vigente) only an order: no badge', (tester) async {
       _view(tester);
       await _pumpCatalog(tester);
-      await _openCatalogPanel(tester);
-      await _tap(tester, _inSheet('Precio: de mayor a menor'));
-      await _applyCatalogPanel(tester);
+      await _tap(tester, find.byKey(const Key('catalog-sort-button')));
+      await _tap(tester, _inSheet('Precio: mayor a menor'));
+      await _tap(tester, find.byKey(const Key('catalog-sort-apply')));
 
       expect(_catalogOrder(tester).first, _name(2));
       _expectCatalogBadge(null);
@@ -488,11 +493,11 @@ void main() {
       expect(find.byKey(const Key('collection-clear-inline')), findsNothing);
       expect(find.byKey(const Key('collection-count')), findsOneWidget);
       expect(find.byKey(const Key('collection-sort-button')), findsOneWidget);
-      final banner = tester.getRect(find.byType(CatalogEditorialBanner));
+      final banner = tester.getRect(find.byType(GuideBanner));
       final toolbar =
-          tester.getRect(find.byKey(const Key('collection-pill-bolsa')));
+          tester.getRect(find.byKey(const Key('collection-local-search')));
       final firstCard = tester.getRect(find.byType(ProductCard).first);
-      expect(toolbar.top - banner.bottom, inInclusiveRange(8, 24));
+      expect(toolbar.top, greaterThanOrEqualTo(banner.bottom));
       expect(firstCard.top, greaterThan(toolbar.bottom));
     });
   });
@@ -508,7 +513,6 @@ void main() {
       final unfiltered = _cardIds(tester);
 
       await _openCollectionPanel(tester);
-      await _tap(tester, find.byKey(const Key('collection-filter-type')));
       final rows = find.byWidgetPredicate(
         (widget) =>
             widget.key is ValueKey<String> &&
@@ -539,10 +543,6 @@ void main() {
 
       // A pending change in the panel is dropped by Cancelar.
       await _openCollectionPanel(tester);
-      await _tap(
-        tester,
-        find.byKey(const Key('collection-filter-availability')),
-      );
       await _tap(tester, find.byKey(const Key('collection-filter-stock')));
       await _tap(tester, find.byKey(const Key('collection-filter-cancel')));
 
@@ -558,12 +558,9 @@ void main() {
       addTearDown(store.dispose);
       await _pumpCollection(tester, store);
 
-      await _openCollectionPanel(tester);
-      await _tap(
-        tester,
-        find.byKey(const Key('collection-filter-sort-priceAsc')),
-      );
-      await _applyCollectionPanel(tester);
+      await _tap(tester, find.byKey(const Key('collection-sort-button')));
+      await _tap(tester, find.byKey(const Key('collection-sort-priceAsc')));
+      await _tap(tester, find.byKey(const Key('collection-sort-apply')));
 
       _expectCollectionBadge(null);
       final prices = tester
@@ -616,12 +613,10 @@ void main() {
       final unfiltered = _cardIds(tester);
 
       await _openCollectionPanel(tester);
-      await _tap(tester, find.byKey(const Key('collection-filter-brand')));
       await _tap(
         tester,
         find.byKey(Key('collection-filter-brand-${emptyPair!.$1}')),
       );
-      await _tap(tester, find.byKey(const Key('collection-filter-type')));
       await _tap(
         tester,
         find.byKey(Key('collection-filter-silhouette-${emptyPair.$2}')),
@@ -632,7 +627,7 @@ void main() {
       expect(find.byType(ProductCard), findsNothing);
       _expectCollectionBadge(2);
 
-      await _tap(tester, find.text('Limpiar filtros'));
+      await _tap(tester, find.byKey(const Key('collection-clear-inline')));
 
       expect(find.text('Sin resultados'), findsNothing);
       expect(_cardIds(tester), unfiltered);

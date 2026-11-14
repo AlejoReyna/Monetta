@@ -9,7 +9,6 @@ import 'package:monetta_app/data/shopify/cart/checkout_launcher.dart';
 import 'package:monetta_app/domain/product.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/features/catalog/browse_detail_layout.dart';
-import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/features/checkout/checkout_screen.dart';
 import 'package:monetta_app/features/navigation/adaptive_storefront_scaffold.dart';
@@ -312,15 +311,10 @@ void main() {
     await settle(tester);
 
     expect(shop.store.bagQuantity, 1);
+    // UI v4.1: the preview stays and confirms in place; nothing else opens.
     expect(find.byKey(const Key('duo-preview')), findsOneWidget);
-    // The mini-cart sheet is not needed: the bag lives on this side.
-    expect(find.text('VER BOLSA'), findsOneWidget);
-    expect(find.byKey(const Key('duo-added-to-bag')), findsOneWidget);
-    await tester.tap(find.text('VER BOLSA'));
-    await settle(tester);
-    expect(find.byKey(const Key('duo-preview')), findsNothing);
-    expect(find.byType(BagScreen), findsOneWidget);
-    expect(find.text('Recomendaciones'), findsNothing);
+    expect(find.text('Agregado al carrito'), findsOneWidget);
+    expect(find.byType(BagScreen), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -425,59 +419,6 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('filters open on the right and apply live on the left',
-      (tester) async {
-    final store = await loadedStore();
-    await mount(
-      tester,
-      store,
-      const BrowseDetailLayout(
-        child: CollectionScreen(
-          title: 'Bolsas',
-          filter: CollectionFilter(query: 'bolsa'),
-        ),
-      ),
-    );
-    String count() =>
-        tester.widget<Text>(find.byKey(const Key('collection-count'))).data!;
-    final before = count();
-
-    await reveal(tester, find.byKey(const Key('collection-filter-button')));
-    await tester.tap(find.byKey(const Key('collection-filter-button')));
-    await settle(tester);
-    final apply = find.byKey(const Key('collection-filter-apply'));
-    expect(tester.getRect(apply), inside(kRightSide));
-    // No sheet covers the pieces on the left.
-    expect(
-      tester.getRect(find.byKey(const Key('collection-count'))),
-      inside(kLeftSide),
-    );
-
-    await reveal(tester, find.byKey(const Key('collection-filter-brand')));
-    await tester.tap(find.byKey(const Key('collection-filter-brand')));
-    await settle(tester);
-    final brand = find.byWidgetPredicate(
-      (widget) =>
-          widget.key is ValueKey<String> &&
-          (widget.key! as ValueKey<String>)
-              .value
-              .startsWith('collection-filter-brand-'),
-    );
-    await reveal(tester, brand.first);
-    await tester.tap(brand.first);
-    await settle(tester);
-    final after = count();
-    expect(after, isNot(before), reason: 'applied without pressing «Ver»');
-
-    // «Ver» only closes; the filters stand.
-    await tester.tap(apply);
-    await settle(tester);
-    expect(apply, findsNothing);
-    expect(count(), after);
-    expect(find.byKey(const Key('duo-empty-bag')), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
-
   testWidgets('checkout spans both sides: form left, order summary right',
       (tester) async {
     final shop = await catalog();
@@ -526,9 +467,17 @@ void main() {
       shop.store,
       _Browse(products: [shop.single, shop.several]),
     );
-    await reveal(tester, find.byKey(Key('view-product-${shop.several.id}')));
-    await tester.tap(find.byKey(Key('view-product-${shop.several.id}')));
+    // The card previews; its «Ver producto» opens the product page.
+    await reveal(tester, cardFor(shop.several));
+    await tester.tap(cardFor(shop.several));
     await settle(tester);
+    // A detail pane opens the page straight away; otherwise the preview's
+    // «Ver producto» does.
+    if (find.text('Ver producto').evaluate().isNotEmpty) {
+      await reveal(tester, find.text('Ver producto'));
+      await tester.tap(find.text('Ver producto'));
+      await settle(tester);
+    }
     final product = find.byType(ProductScreen);
     final state = tester.state(product);
     expect(tester.getRect(product), inside(kRightSide));
@@ -559,9 +508,17 @@ void main() {
       ),
       start: outer,
     );
-    await reveal(tester, find.byKey(Key('view-product-${shop.several.id}')));
-    await tester.tap(find.byKey(Key('view-product-${shop.several.id}')));
+    // The card previews; its «Ver producto» opens the product page.
+    await reveal(tester, cardFor(shop.several));
+    await tester.tap(cardFor(shop.several));
     await settle(tester);
+    // A detail pane opens the page straight away; otherwise the preview's
+    // «Ver producto» does.
+    if (find.text('Ver producto').evaluate().isNotEmpty) {
+      await reveal(tester, find.text('Ver producto'));
+      await tester.tap(find.text('Ver producto'));
+      await settle(tester);
+    }
     final product = find.byType(ProductScreen);
     final state = tester.state(product);
     expect(tester.widget<ProductScreen>(product).onClose, isNotNull);
@@ -592,9 +549,17 @@ void main() {
       _Browse(products: [shop.single, shop.several]),
       start: outer,
     );
-    await reveal(tester, find.byKey(Key('view-product-${shop.several.id}')));
-    await tester.tap(find.byKey(Key('view-product-${shop.several.id}')));
+    // The card previews; its «Ver producto» opens the product page.
+    await reveal(tester, cardFor(shop.several));
+    await tester.tap(cardFor(shop.several));
     await settle(tester);
+    // A detail pane opens the page straight away; otherwise the preview's
+    // «Ver producto» does.
+    if (find.text('Ver producto').evaluate().isNotEmpty) {
+      await reveal(tester, find.text('Ver producto'));
+      await tester.tap(find.text('Ver producto'));
+      await settle(tester);
+    }
     final product = find.byType(ProductScreen);
     final state = tester.state(product);
 

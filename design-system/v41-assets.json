@@ -1,0 +1,1089 @@
+{
+  "version": "4.1",
+  "source": "MONETTA_Entrega_Final_v4.1 (02_sistema/manifiesto_banners.json, 02_sistema/inventario_iconos.json)",
+  "rules": [
+    "Elegir activos por ID, no por nombre de archivo (§003).",
+    "Fotos de categoría solo en Inicio; otras superficies usan iconos dorados (§004).",
+    "El copy de cada banner es su texto alternativo único; CTA y carrusel son controles reales aparte (§109).",
+    "B04: Inicio usa la variante editorial sin control y superpone el control nativo «Comenzar a vender» (exception_ui_cta).",
+    "F11 (archivo LENTES(1)) es Carteras de Hombre por Corrección 5 p89.",
+    "live_route null: el destino se resuelve por entorno; sin binding válido se oculta el control (GATE:binding)."
+  ],
+  "exception_ui_cta": {
+    "banner": "B04",
+    "source_copy": "CONOCE MÁS",
+    "ui_control": "Comenzar a vender",
+    "source": "Corrección4 p9/p11",
+    "rule": "Texto editorial intacto; control de UI separado obedece corrección expresa. Fuente exacta conserva CONOCE MÁS; variante editorial omite solo el control antiguo."
+  },
+  "banners": [
+    {
+      "id": "B01",
+      "key": "inicio_productos",
+      "copy_exact": "Compra fácil\ndesde México",
+      "semantic_destination": "Todos los productos",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B01_inicio_productos.jpg",
+      "web": {
+        "768": "monetta-v41-B01_inicio_productos-768.jpg",
+        "1280": "monetta-v41-B01_inicio_productos-1280.jpg",
+        "1920": "monetta-v41-B01_inicio_productos-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B02",
+      "key": "inicio_marcas",
+      "copy_exact": "Tus marcas fav\nen un sólo lugar",
+      "semantic_destination": "Todas las marcas",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B02_inicio_marcas.jpg",
+      "web": {
+        "768": "monetta-v41-B02_inicio_marcas-768.jpg",
+        "1280": "monetta-v41-B02_inicio_marcas-1280.jpg",
+        "1920": "monetta-v41-B02_inicio_marcas-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B03",
+      "key": "inicio_categorias",
+      "copy_exact": "Miles\nde modelos\noriginales por descubrir",
+      "semantic_destination": "Todas las categorías",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B03_inicio_categorias.jpg",
+      "web": {
+        "768": "monetta-v41-B03_inicio_categorias-768.jpg",
+        "1280": "monetta-v41-B03_inicio_categorias-1280.jpg",
+        "1920": "monetta-v41-B03_inicio_categorias-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B04",
+      "key": "inicio_mayoreo",
+      "copy_exact": "PRECIOS DE\nmayoreo\nA partir de 3 piezas\nCONOCE MÁS",
+      "semantic_destination": "Página de Mayoreo",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B04_inicio_mayoreo.jpg",
+      "web": {
+        "768": "monetta-v41-B04_inicio_mayoreo-768.jpg",
+        "1280": "monetta-v41-B04_inicio_mayoreo-1280.jpg",
+        "1920": "monetta-v41-B04_inicio_mayoreo-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B05",
+      "key": "carteras_hombre",
+      "copy_exact": "CARTERAS\nDE HOMBRE",
+      "semantic_destination": "Carteras de Hombre",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B05_carteras_hombre.jpg",
+      "web": {
+        "768": "monetta-v41-B05_carteras_hombre-768.jpg",
+        "1280": "monetta-v41-B05_carteras_hombre-1280.jpg",
+        "1920": "monetta-v41-B05_carteras_hombre-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B06",
+      "key": "charms",
+      "copy_exact": "CHARMS",
+      "semantic_destination": "Charms",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B06_charms.jpg",
+      "web": {
+        "768": "monetta-v41-B06_charms-768.jpg",
+        "1280": "monetta-v41-B06_charms-1280.jpg",
+        "1920": "monetta-v41-B06_charms-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B07",
+      "key": "lentes",
+      "copy_exact": "LENTES",
+      "semantic_destination": "Lentes",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B07_lentes.jpg",
+      "web": {
+        "768": "monetta-v41-B07_lentes-768.jpg",
+        "1280": "monetta-v41-B07_lentes-1280.jpg",
+        "1920": "monetta-v41-B07_lentes-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B08",
+      "key": "bolsos",
+      "copy_exact": "BOLSOS",
+      "semantic_destination": "Bolsos",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B08_bolsos.jpg",
+      "web": {
+        "768": "monetta-v41-B08_bolsos-768.jpg",
+        "1280": "monetta-v41-B08_bolsos-1280.jpg",
+        "1920": "monetta-v41-B08_bolsos-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B09",
+      "key": "calzado_hombre",
+      "copy_exact": "CALZADO\nDE HOMBRE",
+      "semantic_destination": "Calzado de Hombre",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B09_calzado_hombre.jpg",
+      "web": {
+        "768": "monetta-v41-B09_calzado_hombre-768.jpg",
+        "1280": "monetta-v41-B09_calzado_hombre-1280.jpg",
+        "1920": "monetta-v41-B09_calzado_hombre-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B10",
+      "key": "munequeras",
+      "copy_exact": "MUÑEQUERAS",
+      "semantic_destination": "Muñequeras",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B10_munequeras.jpg",
+      "web": {
+        "768": "monetta-v41-B10_munequeras-768.jpg",
+        "1280": "monetta-v41-B10_munequeras-1280.jpg",
+        "1920": "monetta-v41-B10_munequeras-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B11",
+      "key": "relojes",
+      "copy_exact": "RELOJES",
+      "semantic_destination": "Relojes de Mujer",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B11_relojes.jpg",
+      "web": {
+        "768": "monetta-v41-B11_relojes-768.jpg",
+        "1280": "monetta-v41-B11_relojes-1280.jpg",
+        "1920": "monetta-v41-B11_relojes-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B12",
+      "key": "relojes_hombre",
+      "copy_exact": "RELOJES\nDE HOMBRE",
+      "semantic_destination": "Relojes de Hombre",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B12_relojes_hombre.jpg",
+      "web": {
+        "768": "monetta-v41-B12_relojes_hombre-768.jpg",
+        "1280": "monetta-v41-B12_relojes_hombre-1280.jpg",
+        "1920": "monetta-v41-B12_relojes_hombre-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B13",
+      "key": "calzado_mujer",
+      "copy_exact": "CALZADO\nDE DAMA",
+      "semantic_destination": "Calzado de Mujer",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B13_calzado_mujer.jpg",
+      "web": {
+        "768": "monetta-v41-B13_calzado_mujer-768.jpg",
+        "1280": "monetta-v41-B13_calzado_mujer-1280.jpg",
+        "1920": "monetta-v41-B13_calzado_mujer-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B14",
+      "key": "bolsos_hombre",
+      "copy_exact": "BOLSOS\nDE HOMBRE",
+      "semantic_destination": "Bolsos de Hombre",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B14_bolsos_hombre.jpg",
+      "web": {
+        "768": "monetta-v41-B14_bolsos_hombre-768.jpg",
+        "1280": "monetta-v41-B14_bolsos_hombre-1280.jpg",
+        "1920": "monetta-v41-B14_bolsos_hombre-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B15",
+      "key": "tarjeteros",
+      "copy_exact": "TARJETEROS",
+      "semantic_destination": "Tarjeteros",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B15_tarjeteros.jpg",
+      "web": {
+        "768": "monetta-v41-B15_tarjeteros-768.jpg",
+        "1280": "monetta-v41-B15_tarjeteros-1280.jpg",
+        "1920": "monetta-v41-B15_tarjeteros-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B16",
+      "key": "perfumes_todos",
+      "copy_exact": "PERFUMES",
+      "semantic_destination": "Perfumes",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B16_perfumes_todos.jpg",
+      "web": {
+        "768": "monetta-v41-B16_perfumes_todos-768.jpg",
+        "1280": "monetta-v41-B16_perfumes_todos-1280.jpg",
+        "1920": "monetta-v41-B16_perfumes_todos-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B17",
+      "key": "accesorios",
+      "copy_exact": "ACCESORIOS",
+      "semantic_destination": "Accesorios",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B17_accesorios.jpg",
+      "web": {
+        "768": "monetta-v41-B17_accesorios-768.jpg",
+        "1280": "monetta-v41-B17_accesorios-1280.jpg",
+        "1920": "monetta-v41-B17_accesorios-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B18",
+      "key": "crossbody",
+      "copy_exact": "CROSSBODY",
+      "semantic_destination": "Crossbody",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B18_crossbody.jpg",
+      "web": {
+        "768": "monetta-v41-B18_crossbody-768.jpg",
+        "1280": "monetta-v41-B18_crossbody-1280.jpg",
+        "1920": "monetta-v41-B18_crossbody-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B19",
+      "key": "tote",
+      "copy_exact": "TOTES",
+      "semantic_destination": "Tote",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B19_tote.jpg",
+      "web": {
+        "768": "monetta-v41-B19_tote-768.jpg",
+        "1280": "monetta-v41-B19_tote-1280.jpg",
+        "1920": "monetta-v41-B19_tote-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B20",
+      "key": "bolsos_hombro",
+      "copy_exact": "BOLSOS\nDE HOMBRO",
+      "semantic_destination": "De hombro",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B20_bolsos_hombro.jpg",
+      "web": {
+        "768": "monetta-v41-B20_bolsos_hombro-768.jpg",
+        "1280": "monetta-v41-B20_bolsos_hombro-1280.jpg",
+        "1920": "monetta-v41-B20_bolsos_hombro-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B21",
+      "key": "carteras",
+      "copy_exact": "CARTERAS",
+      "semantic_destination": "Carteras de Mujer",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B21_carteras.jpg",
+      "web": {
+        "768": "monetta-v41-B21_carteras-768.jpg",
+        "1280": "monetta-v41-B21_carteras-1280.jpg",
+        "1920": "monetta-v41-B21_carteras-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B22",
+      "key": "bolsos_mano",
+      "copy_exact": "BOLSOS\nDE MANO",
+      "semantic_destination": "De mano",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B22_bolsos_mano.jpg",
+      "web": {
+        "768": "monetta-v41-B22_bolsos_mano-768.jpg",
+        "1280": "monetta-v41-B22_bolsos_mano-1280.jpg",
+        "1920": "monetta-v41-B22_bolsos_mano-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B23",
+      "key": "perfumes_alternativo",
+      "copy_exact": "PERFUMES",
+      "semantic_destination": "Perfumes; alcance femenino por confirmar",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B23_perfumes_alternativo.jpg",
+      "web": {
+        "768": "monetta-v41-B23_perfumes_alternativo-768.jpg",
+        "1280": "monetta-v41-B23_perfumes_alternativo-1280.jpg",
+        "1920": "monetta-v41-B23_perfumes_alternativo-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B24",
+      "key": "guess",
+      "copy_exact": "GUESS",
+      "semantic_destination": "Guess",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B24_guess.jpg",
+      "web": {
+        "768": "monetta-v41-B24_guess-768.jpg",
+        "1280": "monetta-v41-B24_guess-1280.jpg",
+        "1920": "monetta-v41-B24_guess-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B25",
+      "key": "tory_burch",
+      "copy_exact": "TORY\nBURCH",
+      "semantic_destination": "Tory Burch",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B25_tory_burch.jpg",
+      "web": {
+        "768": "monetta-v41-B25_tory_burch-768.jpg",
+        "1280": "monetta-v41-B25_tory_burch-1280.jpg",
+        "1920": "monetta-v41-B25_tory_burch-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B26",
+      "key": "marc_jacobs",
+      "copy_exact": "MARC\nJACOBS",
+      "semantic_destination": "Marc Jacobs",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B26_marc_jacobs.jpg",
+      "web": {
+        "768": "monetta-v41-B26_marc_jacobs-768.jpg",
+        "1280": "monetta-v41-B26_marc_jacobs-1280.jpg",
+        "1920": "monetta-v41-B26_marc_jacobs-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B27",
+      "key": "kate_spade",
+      "copy_exact": "KATE\nSPADE",
+      "semantic_destination": "Kate Spade",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B27_kate_spade.jpg",
+      "web": {
+        "768": "monetta-v41-B27_kate_spade-768.jpg",
+        "1280": "monetta-v41-B27_kate_spade-1280.jpg",
+        "1920": "monetta-v41-B27_kate_spade-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B28",
+      "key": "coach",
+      "copy_exact": "COACH",
+      "semantic_destination": "Coach",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B28_coach.jpg",
+      "web": {
+        "768": "monetta-v41-B28_coach-768.jpg",
+        "1280": "monetta-v41-B28_coach-1280.jpg",
+        "1920": "monetta-v41-B28_coach-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B29",
+      "key": "michael_kors",
+      "copy_exact": "MICHAEL\nKORS",
+      "semantic_destination": "Michael Kors",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B29_michael_kors.jpg",
+      "web": {
+        "768": "monetta-v41-B29_michael_kors-768.jpg",
+        "1280": "monetta-v41-B29_michael_kors-1280.jpg",
+        "1920": "monetta-v41-B29_michael_kors-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B30",
+      "key": "steve_madden",
+      "copy_exact": "STEVE\nMADDEN",
+      "semantic_destination": "Steve Madden",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B30_steve_madden.jpg",
+      "web": {
+        "768": "monetta-v41-B30_steve_madden-768.jpg",
+        "1280": "monetta-v41-B30_steve_madden-1280.jpg",
+        "1920": "monetta-v41-B30_steve_madden-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B31",
+      "key": "contacto",
+      "copy_exact": "Tu boutique y\nproveedor de\nconfianza.\nBienvenida a nuestro paraíso de\nmodelos originales de marcas que\namas, importados y con envíos\ngarantizados a todo México.",
+      "semantic_destination": "Contacto",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B31_contacto.jpg",
+      "web": {
+        "768": "monetta-v41-B31_contacto-768.jpg",
+        "1280": "monetta-v41-B31_contacto-1280.jpg",
+        "1920": "monetta-v41-B31_contacto-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B32",
+      "key": "mayoreo",
+      "copy_exact": "MAYOREO\nObtén precios especiales\nen productos originales\nimportados de tus\nmarcas favoritas",
+      "semantic_destination": "Mayoreo",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B32_mayoreo.jpg",
+      "web": {
+        "768": "monetta-v41-B32_mayoreo-768.jpg",
+        "1280": "monetta-v41-B32_mayoreo-1280.jpg",
+        "1920": "monetta-v41-B32_mayoreo-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    },
+    {
+      "id": "B04-editorial",
+      "key": "inicio_mayoreo_editorial_sin_control",
+      "copy_exact": "PRECIOS DE\nmayoreo\nA partir de 3 piezas",
+      "semantic_destination": "Página de Mayoreo",
+      "live_route": null,
+      "app": "assets/images/v41/banners/B04_inicio_mayoreo_editorial_sin_control.jpg",
+      "web": {
+        "768": "monetta-v41-B04_inicio_mayoreo_editorial_sin_control-768.jpg",
+        "1280": "monetta-v41-B04_inicio_mayoreo_editorial_sin_control-1280.jpg",
+        "1920": "monetta-v41-B04_inicio_mayoreo_editorial_sin_control-1920.jpg"
+      },
+      "pixels": [
+        1920,
+        800
+      ]
+    }
+  ],
+  "home_photos": [
+    {
+      "id": "F01",
+      "key": "calzado_mujer",
+      "source": "ICONO  CALZADO DE DAMA.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F01_calzado_mujer.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F01_calzado_mujer-300.jpg",
+        "600": "monetta-v41-foto-F01_calzado_mujer-600.jpg"
+      }
+    },
+    {
+      "id": "F02",
+      "key": "bolsos_hombro",
+      "source": "ICONO BOLSO DE HOMBRO.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F02_bolsos_hombro.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F02_bolsos_hombro-300.jpg",
+        "600": "monetta-v41-foto-F02_bolsos_hombro-600.jpg"
+      }
+    },
+    {
+      "id": "F03",
+      "key": "bolsos_mano",
+      "source": "ICONO BOLSO DE MANO.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F03_bolsos_mano.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F03_bolsos_mano-300.jpg",
+        "600": "monetta-v41-foto-F03_bolsos_mano-600.jpg"
+      }
+    },
+    {
+      "id": "F04",
+      "key": "calzado_hombre",
+      "source": "ICONO CALZADO DE HOMBRE.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F04_calzado_hombre.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F04_calzado_hombre-300.jpg",
+        "600": "monetta-v41-foto-F04_calzado_hombre-600.jpg"
+      }
+    },
+    {
+      "id": "F05",
+      "key": "accesorios",
+      "source": "ICONO DE ACCESORIOS.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F05_accesorios.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F05_accesorios-300.jpg",
+        "600": "monetta-v41-foto-F05_accesorios-600.jpg"
+      }
+    },
+    {
+      "id": "F06",
+      "key": "bolsos_hombre",
+      "source": "ICONO DE BOLSOS DE HOMBRE.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F06_bolsos_hombre.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F06_bolsos_hombre-300.jpg",
+        "600": "monetta-v41-foto-F06_bolsos_hombre-600.jpg"
+      }
+    },
+    {
+      "id": "F07",
+      "key": "bolsos",
+      "source": "ICONO DE BOLSOS.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F07_bolsos.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F07_bolsos-300.jpg",
+        "600": "monetta-v41-foto-F07_bolsos-600.jpg"
+      }
+    },
+    {
+      "id": "F08",
+      "key": "carteras",
+      "source": "ICONO DE CARTERAS .AVIF",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F08_carteras.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F08_carteras-300.jpg",
+        "600": "monetta-v41-foto-F08_carteras-600.jpg"
+      }
+    },
+    {
+      "id": "F09",
+      "key": "carteras_mujer",
+      "source": "ICONO DE CARTERAS DE MUJER.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F09_carteras_mujer.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F09_carteras_mujer-300.jpg",
+        "600": "monetta-v41-foto-F09_carteras_mujer-600.jpg"
+      }
+    },
+    {
+      "id": "F10",
+      "key": "crossbody",
+      "source": "ICONO DE CROSSBODY.png",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F10_crossbody.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F10_crossbody-300.jpg",
+        "600": "monetta-v41-foto-F10_crossbody-600.jpg"
+      }
+    },
+    {
+      "id": "F11",
+      "key": "carteras_hombre",
+      "source": "ICONO DE LENTES(1).JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F11_carteras_hombre.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F11_carteras_hombre-300.jpg",
+        "600": "monetta-v41-foto-F11_carteras_hombre-600.jpg"
+      }
+    },
+    {
+      "id": "F12",
+      "key": "lentes",
+      "source": "ICONO DE LENTES.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F12_lentes.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F12_lentes-300.jpg",
+        "600": "monetta-v41-foto-F12_lentes-600.jpg"
+      }
+    },
+    {
+      "id": "F13",
+      "key": "relojes_hombre",
+      "source": "ICONO DE RELOJES DE HOMBRE.PNG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F13_relojes_hombre.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F13_relojes_hombre-300.jpg",
+        "600": "monetta-v41-foto-F13_relojes_hombre-600.jpg"
+      }
+    },
+    {
+      "id": "F14",
+      "key": "tarjeteros",
+      "source": "ICONO DE TARJETEROS.PNG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F14_tarjeteros.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F14_tarjeteros-300.jpg",
+        "600": "monetta-v41-foto-F14_tarjeteros-600.jpg"
+      }
+    },
+    {
+      "id": "F15",
+      "key": "munequeras",
+      "source": "ICONO MUÑEQUERA.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F15_munequeras.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F15_munequeras-300.jpg",
+        "600": "monetta-v41-foto-F15_munequeras-600.jpg"
+      }
+    },
+    {
+      "id": "F16",
+      "key": "relojes_mujer",
+      "source": "ICONO RELOJ DE MUJER.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F16_relojes_mujer.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F16_relojes_mujer-300.jpg",
+        "600": "monetta-v41-foto-F16_relojes_mujer-600.jpg"
+      }
+    },
+    {
+      "id": "F17",
+      "key": "tote",
+      "source": "ICONO TOTE.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F17_tote.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F17_tote-300.jpg",
+        "600": "monetta-v41-foto-F17_tote-600.jpg"
+      }
+    },
+    {
+      "id": "F18",
+      "key": "bolsos_alt",
+      "source": "INCONO DE BOLSOS.JPG",
+      "scope": "Inicio únicamente",
+      "app": "assets/images/v41/home_photos/F18_bolsos_alt.jpg",
+      "web": {
+        "300": "monetta-v41-foto-F18_bolsos_alt-300.jpg",
+        "600": "monetta-v41-foto-F18_bolsos_alt-600.jpg"
+      }
+    }
+  ],
+  "icons": [
+    {
+      "id": "bolsos",
+      "app": "assets/images/v41/icons/bolsos.svg",
+      "web": "monetta-v41-icon-bolsos.svg"
+    },
+    {
+      "id": "bolsos-mujer",
+      "app": "assets/images/v41/icons/bolsos-mujer.svg",
+      "web": "monetta-v41-icon-bolsos-mujer.svg"
+    },
+    {
+      "id": "crossbody",
+      "app": "assets/images/v41/icons/crossbody.svg",
+      "web": "monetta-v41-icon-crossbody.svg"
+    },
+    {
+      "id": "tote",
+      "app": "assets/images/v41/icons/tote.svg",
+      "web": "monetta-v41-icon-tote.svg"
+    },
+    {
+      "id": "de-mano",
+      "app": "assets/images/v41/icons/de-mano.svg",
+      "web": "monetta-v41-icon-de-mano.svg"
+    },
+    {
+      "id": "de-hombro",
+      "app": "assets/images/v41/icons/de-hombro.svg",
+      "web": "monetta-v41-icon-de-hombro.svg"
+    },
+    {
+      "id": "bolsos-hombre",
+      "app": "assets/images/v41/icons/bolsos-hombre.svg",
+      "web": "monetta-v41-icon-bolsos-hombre.svg"
+    },
+    {
+      "id": "carteras",
+      "app": "assets/images/v41/icons/carteras.svg",
+      "web": "monetta-v41-icon-carteras.svg"
+    },
+    {
+      "id": "carteras-mujer",
+      "app": "assets/images/v41/icons/carteras-mujer.svg",
+      "web": "monetta-v41-icon-carteras-mujer.svg"
+    },
+    {
+      "id": "munequeras",
+      "app": "assets/images/v41/icons/munequeras.svg",
+      "web": "monetta-v41-icon-munequeras.svg"
+    },
+    {
+      "id": "carteras-clasicas",
+      "app": "assets/images/v41/icons/carteras-clasicas.svg",
+      "web": "monetta-v41-icon-carteras-clasicas.svg"
+    },
+    {
+      "id": "tarjeteros",
+      "app": "assets/images/v41/icons/tarjeteros.svg",
+      "web": "monetta-v41-icon-tarjeteros.svg"
+    },
+    {
+      "id": "carteras-hombre",
+      "app": "assets/images/v41/icons/carteras-hombre.svg",
+      "web": "monetta-v41-icon-carteras-hombre.svg"
+    },
+    {
+      "id": "perfumes",
+      "app": "assets/images/v41/icons/perfumes.svg",
+      "web": "monetta-v41-icon-perfumes.svg"
+    },
+    {
+      "id": "perfumes-mujer",
+      "app": "assets/images/v41/icons/perfumes-mujer.svg",
+      "web": "monetta-v41-icon-perfumes-mujer.svg"
+    },
+    {
+      "id": "perfumes-hombre",
+      "app": "assets/images/v41/icons/perfumes-hombre.svg",
+      "web": "monetta-v41-icon-perfumes-hombre.svg"
+    },
+    {
+      "id": "calzado",
+      "app": "assets/images/v41/icons/calzado.svg",
+      "web": "monetta-v41-icon-calzado.svg"
+    },
+    {
+      "id": "calzado-mujer",
+      "app": "assets/images/v41/icons/calzado-mujer.svg",
+      "web": "monetta-v41-icon-calzado-mujer.svg"
+    },
+    {
+      "id": "deportivo",
+      "app": "assets/images/v41/icons/deportivo.svg",
+      "web": "monetta-v41-icon-deportivo.svg"
+    },
+    {
+      "id": "casual",
+      "app": "assets/images/v41/icons/casual.svg",
+      "web": "monetta-v41-icon-casual.svg"
+    },
+    {
+      "id": "calzado-hombre",
+      "app": "assets/images/v41/icons/calzado-hombre.svg",
+      "web": "monetta-v41-icon-calzado-hombre.svg"
+    },
+    {
+      "id": "accesorios",
+      "app": "assets/images/v41/icons/accesorios.svg",
+      "web": "monetta-v41-icon-accesorios.svg"
+    },
+    {
+      "id": "lentes",
+      "app": "assets/images/v41/icons/lentes.svg",
+      "web": "monetta-v41-icon-lentes.svg"
+    },
+    {
+      "id": "relojes",
+      "app": "assets/images/v41/icons/relojes.svg",
+      "web": "monetta-v41-icon-relojes.svg"
+    },
+    {
+      "id": "charms",
+      "app": "assets/images/v41/icons/charms.svg",
+      "web": "monetta-v41-icon-charms.svg"
+    },
+    {
+      "id": "otros-accesorios",
+      "app": "assets/images/v41/icons/otros-accesorios.svg",
+      "web": "monetta-v41-icon-otros-accesorios.svg"
+    },
+    {
+      "id": "marcas",
+      "app": "assets/images/v41/icons/marcas.svg",
+      "web": "monetta-v41-icon-marcas.svg"
+    },
+    {
+      "id": "mayoreo",
+      "app": "assets/images/v41/icons/mayoreo.svg",
+      "web": "monetta-v41-icon-mayoreo.svg"
+    },
+    {
+      "id": "instagram",
+      "app": "assets/images/v41/icons/instagram.svg",
+      "web": "monetta-v41-icon-instagram.svg"
+    },
+    {
+      "id": "facebook",
+      "app": "assets/images/v41/icons/facebook.svg",
+      "web": "monetta-v41-icon-facebook.svg"
+    },
+    {
+      "id": "tiktok",
+      "app": "assets/images/v41/icons/tiktok.svg",
+      "web": "monetta-v41-icon-tiktok.svg"
+    },
+    {
+      "id": "whatsapp",
+      "app": "assets/images/v41/icons/whatsapp.svg",
+      "web": "monetta-v41-icon-whatsapp.svg"
+    },
+    {
+      "id": "envios",
+      "app": "assets/images/v41/icons/envios.svg",
+      "web": "monetta-v41-icon-envios.svg"
+    },
+    {
+      "id": "pagos",
+      "app": "assets/images/v41/icons/pagos.svg",
+      "web": "monetta-v41-icon-pagos.svg"
+    },
+    {
+      "id": "originales",
+      "app": "assets/images/v41/icons/originales.svg",
+      "web": "monetta-v41-icon-originales.svg"
+    },
+    {
+      "id": "atencion",
+      "app": "assets/images/v41/icons/atencion.svg",
+      "web": "monetta-v41-icon-atencion.svg"
+    },
+    {
+      "id": "pedidos",
+      "app": "assets/images/v41/icons/pedidos.svg",
+      "web": "monetta-v41-icon-pedidos.svg"
+    },
+    {
+      "id": "avisos",
+      "app": "assets/images/v41/icons/avisos.svg",
+      "web": "monetta-v41-icon-avisos.svg"
+    },
+    {
+      "id": "direccion",
+      "app": "assets/images/v41/icons/direccion.svg",
+      "web": "monetta-v41-icon-direccion.svg"
+    },
+    {
+      "id": "ajustes",
+      "app": "assets/images/v41/icons/ajustes.svg",
+      "web": "monetta-v41-icon-ajustes.svg"
+    },
+    {
+      "id": "ayuda",
+      "app": "assets/images/v41/icons/ayuda.svg",
+      "web": "monetta-v41-icon-ayuda.svg"
+    },
+    {
+      "id": "salir",
+      "app": "assets/images/v41/icons/salir.svg",
+      "web": "monetta-v41-icon-salir.svg"
+    },
+    {
+      "id": "ordenar",
+      "app": "assets/images/v41/icons/ordenar.svg",
+      "web": "monetta-v41-icon-ordenar.svg"
+    },
+    {
+      "id": "filtros",
+      "app": "assets/images/v41/icons/filtros.svg",
+      "web": "monetta-v41-icon-filtros.svg"
+    },
+    {
+      "id": "favorito",
+      "app": "assets/images/v41/icons/favorito.svg",
+      "web": "monetta-v41-icon-favorito.svg"
+    },
+    {
+      "id": "home",
+      "app": "assets/images/v41/icons/home.svg",
+      "web": "monetta-v41-icon-home.svg"
+    },
+    {
+      "id": "grid",
+      "app": "assets/images/v41/icons/grid.svg",
+      "web": "monetta-v41-icon-grid.svg"
+    },
+    {
+      "id": "cart",
+      "app": "assets/images/v41/icons/cart.svg",
+      "web": "monetta-v41-icon-cart.svg"
+    },
+    {
+      "id": "user",
+      "app": "assets/images/v41/icons/user.svg",
+      "web": "monetta-v41-icon-user.svg"
+    },
+    {
+      "id": "search",
+      "app": "assets/images/v41/icons/search.svg",
+      "web": "monetta-v41-icon-search.svg"
+    },
+    {
+      "id": "menu",
+      "app": "assets/images/v41/icons/menu.svg",
+      "web": "monetta-v41-icon-menu.svg"
+    },
+    {
+      "id": "close",
+      "app": "assets/images/v41/icons/close.svg",
+      "web": "monetta-v41-icon-close.svg"
+    },
+    {
+      "id": "right",
+      "app": "assets/images/v41/icons/right.svg",
+      "web": "monetta-v41-icon-right.svg"
+    },
+    {
+      "id": "down",
+      "app": "assets/images/v41/icons/down.svg",
+      "web": "monetta-v41-icon-down.svg"
+    },
+    {
+      "id": "back",
+      "app": "assets/images/v41/icons/back.svg",
+      "web": "monetta-v41-icon-back.svg"
+    },
+    {
+      "id": "check",
+      "app": "assets/images/v41/icons/check.svg",
+      "web": "monetta-v41-icon-check.svg"
+    },
+    {
+      "id": "favorito_guardado",
+      "app": "assets/images/v41/icons/favorito_guardado.svg",
+      "web": "monetta-v41-icon-favorito_guardado.svg"
+    },
+    {
+      "id": "pago_rechazado",
+      "app": "assets/images/v41/icons/pago_rechazado.svg",
+      "web": "monetta-v41-icon-pago_rechazado.svg"
+    },
+    {
+      "id": "pago_verificando",
+      "app": "assets/images/v41/icons/pago_verificando.svg",
+      "web": "monetta-v41-icon-pago_verificando.svg"
+    },
+    {
+      "id": "envio-camion",
+      "app": "assets/images/v41/icons/envio-camion.svg",
+      "web": "monetta-v41-icon-envio-camion.svg"
+    },
+    {
+      "id": "envio-avion",
+      "app": "assets/images/v41/icons/envio-avion.svg",
+      "web": "monetta-v41-icon-envio-avion.svg"
+    }
+  ]
+}

@@ -12,7 +12,7 @@ import '../boutique/boutique_tokens.dart';
 import 'rewards_models.dart';
 
 // ---------------------------------------------------------------------------
-// Resumen de saldo: "Tienes $184 Monetta disponibles".
+// Resumen de saldo: «Saldo disponible $184» en verde.
 // ---------------------------------------------------------------------------
 
 /// Bloque disponible/pendiente + próximo vencimiento + movimientos.
@@ -23,9 +23,11 @@ class RewardsBalanceCard extends StatelessWidget {
     this.movements = const [],
     this.expanded = false,
     this.onToggleExpanded,
+    this.showPending = true,
     super.key,
   });
 
+  final bool showPending;
   final RewardsSummary summary;
   final List<RewardsMovement> movements;
   final bool expanded;
@@ -64,12 +66,12 @@ class RewardsBalanceCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Tienes ${summary.availableLabel} disponibles',
+                      'Saldo disponible\n${summary.availableLabel}',
                       key: const ValueKey('rewards-balance-available'),
                       style: boutiqueText(
                         size: 16,
                         weight: FontWeight.w600,
-                        color: colors.contentPrimary,
+                        color: const Color(0xFF3B7030),
                       ),
                     ),
                   ],
@@ -77,11 +79,13 @@ class RewardsBalanceCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            '\$${(summary.pendingCents / 100).toStringAsFixed(0)} pendientes de entrega',
-            style: sans(size: 12.5, color: colors.contentMuted),
-          ),
+          if (showPending) ...[
+            const SizedBox(height: 6),
+            Text(
+              '\$${(summary.pendingCents / 100).toStringAsFixed(0)} pendientes de entrega',
+              style: sans(size: 12.5, color: colors.contentMuted),
+            ),
+          ],
           if (summary.nextExpiry != null) ...[
             const SizedBox(height: 6),
             Text(

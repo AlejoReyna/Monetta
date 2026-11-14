@@ -16,6 +16,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/account_controller.dart';
+import '../../app/monetta_tokens.g.dart';
 import '../../data/accounts_orders/accounts_orders_config.dart';
 import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
@@ -125,10 +126,20 @@ class _AutoRewardsSectionState extends State<AutoRewardsSection> {
 
   @override
   Widget build(BuildContext context) {
-    return RewardsSection(
-      controller: widget.controller,
-      reader: _effective,
-      showMovements: widget.showMovements,
+    return ListenableBuilder(
+      listenable: widget.controller,
+      builder: (context, _) {
+        final owner = widget.controller.account?.localAccountId;
+        if (!widget.controller.isSignedIn || owner == null) {
+          return const Text('Inicia sesión para consultar tu saldo.');
+        }
+        return RewardsSection(
+          key: ValueKey(owner),
+          controller: widget.controller,
+          reader: _effective,
+          showMovements: widget.showMovements,
+        );
+      },
     );
   }
 }
@@ -543,6 +554,7 @@ class _RewardsLoaded extends StatelessWidget {
         children: [
           RewardsBalanceCard(
             summary: summary,
+            showPending: false,
             movements: const [],
             expanded: false,
           ),
@@ -713,7 +725,7 @@ class _MovementRow extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            '${amount < 0 ? '-' : '+'}\$${(amount.abs() / 100).toStringAsFixed(0)}',
+            '${amount < 0 ? '-' : '+'}\$${(amount.abs() / 100).toStringAsFixed(2)}',
             style: boutiqueText(
               size: 13,
               weight: FontWeight.w600,
@@ -744,11 +756,11 @@ class _StateDot extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final color = switch (state) {
-      'available' => const Color(0xFF3B7B4A),
+      'available' => MonettaTokens.success,
       'pending' => palette.goldText,
       'used' => palette.inkMuted,
-      'expired' => const Color(0xFFA3342B),
-      'reversed' => const Color(0xFFA3342B),
+      'expired' => MonettaTokens.sale,
+      'reversed' => MonettaTokens.sale,
       _ => palette.inkMuted,
     };
     return Semantics(

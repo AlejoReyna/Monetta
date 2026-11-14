@@ -1,0 +1,71 @@
+{
+  "base_commit": "df3c9c258d74a6c32f197adba0d34d9d3eb17ee6",
+  "environment": {
+    "flutter": "3.47.9",
+    "dart": "3.13.7",
+    "node": "26.13.0",
+    "note": "functions declares node22; target-node22 execution remains for CI. npm ci emitted engine warning. No locks changed."
+  },
+  "checks": [
+    {
+      "cwd": "functions",
+      "command": "npm run typecheck && npm test",
+      "result": "passed",
+      "test_files": 4,
+      "tests_passed": 16
+    },
+    {
+      "cwd": "services/accounts_orders",
+      "command": "npm run typecheck && npm test",
+      "result": "passed",
+      "test_files_passed": 25,
+      "test_files_skipped": 4,
+      "tests_passed": 214,
+      "tests_skipped": 12,
+      "skip_reason": "Optional PostgreSQL admin connection (WP01_PG_ADMIN_URL or local postgres fallback) was unavailable; 4 files/12 tests skipped. No live migration or database mutation ran."
+    },
+    {
+      "command": "flutter test --no-pub --reporter expanded test/data/customer_auth test/data/accounts_orders test/data/repositories/order_history_repository_test.dart test/data/notifications test/data/shopify/editorial_content_repository_test.dart test/data/shopify/shop_policy_repository_test.dart test/features/rewards test/app/notification_controller_test.dart",
+      "result": "161 passed",
+      "log": "flutter-regression-tests.log"
+    },
+    {
+      "command": "flutter test --no-pub --reporter expanded test/data/customer_auth/customer_data_contracts_test.dart test/features/rewards/rewards_data_contract_test.dart test/app/notification_controller_test.dart",
+      "result": "31 passed after final error/snapshot changes",
+      "log": "flutter-final-contract-tests.log"
+    },
+    {
+      "command": "flutter analyze --no-pub <12 changed Dart files, exact list in handoff>",
+      "result": "passed: No issues found"
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ],
+  "verification_boundary": "Provider transports, permissions and data are deterministic fixtures. No configured/live Shopify, Firebase, production service, rate, payment, email or push delivery was verified. No screen layouts changed; existing Rewards render regressions ran, new UI captures belong to consuming packages.",
+  "implementation_commit": "9f425bf6f693375b63f6c8914afe4a97eaee6d50",
+  "files_changed": [
+    "functions/src/catalog.ts",
+    "functions/src/shopifyAdmin.ts",
+    "functions/src/types.ts",
+    "functions/test/catalog.test.ts",
+    "functions/test/shopifyAdmin.test.ts",
+    "lib/app/notification_controller.dart",
+    "lib/data/customer_auth/customer_addresses.dart",
+    "lib/data/customer_auth/customer_graphql_client.dart",
+    "lib/data/customer_auth/customer_order_details.dart",
+    "lib/data/shopify/shop_policy_repository.dart",
+    "lib/features/rewards/rewards_api.dart",
+    "lib/features/rewards/rewards_models.dart",
+    "services/accounts_orders/src/engagement/api/routes.ts",
+    "services/accounts_orders/src/rewards/service.ts",
+    "services/accounts_orders/test/engagementApi.test.ts",
+    "services/accounts_orders/test/rewardsApi.test.ts",
+    "test/app/notification_controller_test.dart",
+    "test/data/customer_auth/customer_data_contracts_test.dart",
+    "test/data/shopify/shop_policy_repository_test.dart",
+    "test/features/rewards/rewards_components_test.dart",
+    "test/features/rewards/rewards_data_contract_test.dart"
+  ]
+}

@@ -1,12 +1,22 @@
 /// Shared presentation for the continuation pages of the client guide.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../../app/monetta_tokens.g.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
+import '../../domain/home_content.dart';
 import 'boutique_tokens.dart';
 import 'client_guide_components.dart';
 import 'guide_art.dart';
+import '../help/policy_reader.dart';
+import '../../data/shopify/shop_policy_repository.dart';
+import '../../data/customer_auth/customer_graphql_client.dart';
 
 class ClientGuideEditorial extends StatelessWidget {
   const ClientGuideEditorial({
@@ -32,6 +42,9 @@ class ClientGuideEditorial extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (imageAsset == kGuideHomeWholesale) {
+      return GuideBanner(id: 'B04-editorial', action: action);
+    }
     final palette = context.boutique;
     final side = overlaySide;
     if (side != null && imageAsset != null) {
@@ -120,7 +133,6 @@ class ClientGuideEditorial extends StatelessWidget {
   }
 
   Widget _buildOverlay(BuildContext context, GuideTextSide side) {
-    final palette = context.boutique;
     final onRight = side == GuideTextSide.right;
     final large = MediaQuery.textScalerOf(context).scale(1) > 1.3;
     return LayoutBuilder(
@@ -131,7 +143,7 @@ class ClientGuideEditorial extends StatelessWidget {
         final titleStyle = guideSerifStyle(
           context,
           size: titleSize,
-          color: palette.ink,
+          color: Colors.black,
           height: 1.05,
           letterSpacing: titleSize * 0.02,
         );
@@ -151,7 +163,7 @@ class ClientGuideEditorial extends StatelessWidget {
                 alignment:
                     onRight ? Alignment.centerRight : Alignment.centerLeft,
                 child: SizedBox(
-                  width: width * (large ? 0.7 : 0.5),
+                  width: width * (large ? 1.0 : 0.5),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: MonettaTokens.space[1],
@@ -173,7 +185,7 @@ class ClientGuideEditorial extends StatelessWidget {
                                   style: guideAccentStyle(
                                     context,
                                     size: titleSize * 2.0,
-                                    color: palette.ink,
+                                    color: Colors.black,
                                     underline: true,
                                   ),
                                 ),
@@ -189,7 +201,7 @@ class ClientGuideEditorial extends StatelessWidget {
                           style: guideSerifItalicStyle(
                             context,
                             size: (width * 0.039).clamp(13.0, 19.0),
-                            color: palette.ink,
+                            color: Colors.black,
                             weight: FontWeight.w500,
                           ),
                         ),
@@ -197,7 +209,8 @@ class ClientGuideEditorial extends StatelessWidget {
                           SizedBox(height: MonettaTokens.space[2]),
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 200),
-                            child: action!,
+                            child:
+                                Theme(data: buildLightTheme(), child: action!),
                           ),
                         ],
                       ],
@@ -227,8 +240,29 @@ class ClientGuideService {
   final String subtitle;
 }
 
-/// Services row of the guide's home («PÁGINA PRINCIPAL (SEGUIMIENTO)»).
+/// Services row of UI v4.1 (home and product page), with the copy the client
+/// delivered (master document, «Servicios recibidos»). Paga a Meses Sin
+/// Intereses stays a service line, never a new guarantee.
 const List<ClientGuideService> kClientGuideHomeServices = [
+  ClientGuideService(
+    iconAsset: 'assets/images/v41/icons/envio-avion.svg',
+    title: 'ENVÍO GRATIS',
+    subtitle: '5 - 7 días hábiles',
+  ),
+  ClientGuideService(
+    iconAsset: 'assets/images/v41/icons/originales.svg',
+    title: 'Producto Original',
+    subtitle: 'Importado desde E.U.A',
+  ),
+  ClientGuideService(
+    iconAsset: 'assets/images/v41/icons/pagos.svg',
+    title: 'Paga a Meses',
+    subtitle: 'Sin Intereses',
+  ),
+];
+
+/// Services row of the guide's wholesale page.
+const List<ClientGuideService> kClientGuideWholesaleServices = [
   ClientGuideService(
     iconAsset: kGuideIconServiceShipping,
     title: 'Envíos seguros',
@@ -251,17 +285,6 @@ const List<ClientGuideService> kClientGuideHomeServices = [
   ),
 ];
 
-/// Services row of the guide's wholesale page: the first entry is the free
-/// shipping threshold; the other three match the home.
-final List<ClientGuideService> kClientGuideWholesaleServices = [
-  const ClientGuideService(
-    iconAsset: kGuideIconServiceShipping,
-    title: 'Envío gratis',
-    subtitle: 'En compras mayores a \$1,999 MXN',
-  ),
-  ...kClientGuideHomeServices.skip(1),
-];
-
 class ClientGuideServices extends StatelessWidget {
   const ClientGuideServices({
     this.services = kClientGuideHomeServices,
@@ -278,7 +301,7 @@ class ClientGuideServices extends StatelessWidget {
         // Four across, as in the guide; two at large text sizes so the
         // captions keep their words whole.
         final large = MediaQuery.textScalerOf(context).scale(1) > 1.3;
-        final columns = large ? 2 : 4;
+        final columns = large ? 2 : services.length.clamp(1, 4);
         final gap = MonettaTokens.space[2];
         final cell = (constraints.maxWidth - gap * 2) / columns;
         final iconSize = (cell * 0.62).clamp(40.0, 72.0);
@@ -302,15 +325,23 @@ class ClientGuideServices extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          Image.asset(
-                            service.iconAsset,
-                            height: iconSize,
-                            width: iconSize,
-                            fit: BoxFit.contain,
-                            excludeFromSemantics: true,
-                            errorBuilder: (_, __, ___) =>
-                                SizedBox.square(dimension: iconSize),
-                          ),
+                          if (service.iconAsset.endsWith('.svg'))
+                            SvgPicture.asset(
+                              service.iconAsset,
+                              height: iconSize * 0.7,
+                              width: iconSize * 0.7,
+                              excludeFromSemantics: true,
+                            )
+                          else
+                            Image.asset(
+                              service.iconAsset,
+                              height: iconSize,
+                              width: iconSize,
+                              fit: BoxFit.contain,
+                              excludeFromSemantics: true,
+                              errorBuilder: (_, __, ___) =>
+                                  SizedBox.square(dimension: iconSize),
+                            ),
                           SizedBox(height: MonettaTokens.space[1]),
                           Text(
                             service.title,
@@ -343,62 +374,217 @@ class ClientGuideServices extends StatelessWidget {
   }
 }
 
+/// UI v4.1 footer (Corrección 5): a very soft grey band with the wordmark and
+/// the social icons on one line, an «Ayuda» column (Contacto, Envíos, Cambios y
+/// devoluciones) and an «Información» column (Mayoreo, Aviso de privacidad,
+/// Términos y condiciones), then the rights line. No search and no payments
+/// line. A policy link appears only when the store has published that policy.
 class ClientGuideFooter extends StatelessWidget {
   const ClientGuideFooter({
     required this.onContact,
     required this.onAbout,
+    this.onWholesale,
+    this.socialLinks = const <HomeSocialLink>[],
+    this.openUri,
     super.key,
   });
   final VoidCallback onContact;
+
+  /// Retained for existing callers; not part of the correction 5 footer.
   final VoidCallback onAbout;
+  final VoidCallback? onWholesale;
+
+  /// Instagram, TikTok and Facebook in that order when configured; WhatsApp
+  /// always closes the row.
+  final List<HomeSocialLink> socialLinks;
+
+  /// Test seam; defaults to opening the link outside the app.
+  final Future<bool> Function(Uri uri)? openUri;
+
+  static const Color background = Color(0xfff5f5f4);
 
   @override
   Widget build(BuildContext context) {
+    final controller = PolicyScope.maybeOf(context);
     final palette = context.boutique;
+    bool published(ShopPolicyKind kind) =>
+        controller?.policies?[kind]?.status == CapabilityReadStatus.supported;
+
+    Widget link(String label, VoidCallback onTap, {Key? key}) => Semantics(
+          button: true,
+          child: InkWell(
+            key: key,
+            onTap: onTap,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 44),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  label,
+                  style: clientGuideStyle(
+                    context,
+                    MonettaTokens.control,
+                    color: palette.ink,
+                  ).copyWith(fontSize: 15, fontWeight: FontWeight.w400),
+                ),
+              ),
+            ),
+          ),
+        );
+
+    Widget column(String title, List<Widget> links) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(
+                title.toUpperCase(),
+                style: clientGuideStyle(
+                  context,
+                  MonettaTokens.navLabel,
+                  color: palette.inkMuted,
+                ).copyWith(fontSize: 12, letterSpacing: 0.4),
+              ),
+            ),
+            const SizedBox(height: 8),
+            ...links,
+          ],
+        );
+
+    final help = column('Ayuda', [
+      link('Contacto', onContact, key: const ValueKey('footer-contact')),
+      if (published(ShopPolicyKind.shipping))
+        link('Envíos', () => openPolicy(context, ShopPolicyKind.shipping),
+            key: const ValueKey('footer-shipping')),
+      if (published(ShopPolicyKind.refund))
+        link('Cambios y devoluciones',
+            () => openPolicy(context, ShopPolicyKind.refund),
+            key: const ValueKey('footer-refund')),
+    ]);
+    final info = column('Información', [
+      if (onWholesale != null)
+        link('Mayoreo', onWholesale!, key: const ValueKey('footer-wholesale')),
+      if (published(ShopPolicyKind.privacy))
+        link('Aviso de privacidad',
+            () => openPolicy(context, ShopPolicyKind.privacy),
+            key: const ValueKey('footer-privacy')),
+      if (published(ShopPolicyKind.terms))
+        link('Términos y condiciones',
+            () => openPolicy(context, ShopPolicyKind.terms),
+            key: const ValueKey('footer-terms')),
+      if (controller?.failed == true)
+        link('Reintentar políticas', controller!.refresh,
+            key: const ValueKey('footer-policies-retry')),
+    ]);
+
     return Container(
       key: const ValueKey('client-guide-footer'),
-      color: palette.bar,
-      padding: EdgeInsets.all(MonettaTokens.space[4]),
+      color: background,
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const MonettaWordmark(height: MonettaTokens.logoHeight),
-          SizedBox(height: MonettaTokens.space[3]),
           Wrap(
-            alignment: WrapAlignment.center,
-            spacing: MonettaTokens.space[3],
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runSpacing: 12,
+            spacing: 16,
             children: [
-              TextButton(
-                onPressed: onContact,
-                child: const Text('Ayuda y contacto'),
+              Semantics(
+                label: 'MONETTA',
+                excludeSemantics: true,
+                child: const MonettaWordmark(height: MonettaTokens.logoHeight),
               ),
-              TextButton(
-                onPressed: onAbout,
-                child: const Text('Nuestra historia'),
-              ),
+              _FooterSocialRow(links: socialLinks, openUri: openUri),
             ],
           ),
-          SizedBox(height: MonettaTokens.space[1]),
-          Text(
-            'Información de envíos y políticas: pendiente de aprobación.',
-            textAlign: TextAlign.center,
-            style: clientGuideStyle(
-              context,
-              MonettaTokens.navLabel,
-              color: palette.inkMuted,
-            ),
+          const SizedBox(height: 24),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              // Two columns down to 320 px; at large text sizes they stack.
+              final scale = MediaQuery.textScalerOf(context).scale(1);
+              if (constraints.maxWidth < 300 || scale > 1.6) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [help, const SizedBox(height: 16), info],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: help),
+                  const SizedBox(width: 16),
+                  Expanded(child: info),
+                ],
+              );
+            },
           ),
-          SizedBox(height: MonettaTokens.space[3]),
+          const SizedBox(height: 24),
           Text(
-            'Monetta · Todos los derechos reservados',
-            textAlign: TextAlign.center,
+            '© ${DateTime.now().year} MONETTA',
             style: clientGuideStyle(
               context,
               MonettaTokens.navLabel,
               color: palette.inkMuted,
-            ),
+            ).copyWith(fontSize: 12),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _FooterSocialRow extends StatelessWidget {
+  const _FooterSocialRow({required this.links, this.openUri});
+
+  final List<HomeSocialLink> links;
+  final Future<bool> Function(Uri uri)? openUri;
+
+  static const _order = ['instagram', 'tiktok', 'facebook'];
+  static const _assets = <String, String>{
+    'instagram': 'assets/images/v41/icons/instagram.svg',
+    'tiktok': 'assets/images/v41/icons/tiktok.svg',
+    'facebook': 'assets/images/v41/icons/facebook.svg',
+    'whatsapp': 'assets/images/v41/icons/whatsapp.svg',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    bool safe(Uri? uri) =>
+        uri != null && uri.scheme == 'https' && uri.host.isNotEmpty;
+    final entries = <(String, String, Uri)>[
+      for (final id in _order)
+        for (final link in links)
+          if (link.id == id && safe(link.uri)) (id, link.label, link.uri!),
+      (
+        'whatsapp',
+        'WhatsApp $kWhatsAppNumberDisplay',
+        Uri.https('wa.me', '/$kWhatsAppE164')
+      ),
+    ];
+    final open = openUri ??
+        (Uri uri) => launchUrl(uri, mode: LaunchMode.externalApplication);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final (id, label, uri) in entries)
+          Semantics(
+            button: true,
+            label: label,
+            excludeSemantics: true,
+            child: InkResponse(
+              key: ValueKey('footer-social-$id'),
+              radius: 24,
+              onTap: () => unawaited(open(uri)),
+              child: SizedBox.square(
+                dimension: 44,
+                child: Center(
+                  child: SvgPicture.asset(_assets[id]!, width: 26, height: 26),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

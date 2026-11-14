@@ -74,9 +74,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    // The 56 px overflow row inside the floating capsule's 6 px top and
+    // 12 px bottom margins (UI v4.1).
     expect(
       tester.getSize(find.byKey(const Key('bottom-nav-surface'))).height,
-      56,
+      56 + 6 + 12,
     );
     for (final label in ['Inicio', 'Categorías', 'Carrito (2)', 'Cuenta']) {
       await tester.tap(find.byKey(const Key('navigation-overflow')));

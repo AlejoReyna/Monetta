@@ -1,0 +1,1150 @@
+[
+  {
+    "id": "B01",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B01_inicio_productos.jpg",
+    "sha256": "1eb959abc73632f919fcdc011590406c1dfad26f0e8600ed0e888af7b131b08f",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B02",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B02_inicio_marcas.jpg",
+    "sha256": "c51a77c308dd851869be7a633ee9da7487c3ab90763e06523b4a46d858aa15f4",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B03",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B03_inicio_categorias.jpg",
+    "sha256": "7b5fecdb4792e9a7fefa71bccb1fa80685380105a333471c8aeb19cc282fe743",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B04",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B04_inicio_mayoreo.jpg",
+    "sha256": "7b7526769588d7a55da5b61d0c4ffcdfb4cf9bd536c491339eab966969e58613",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B05",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B05_carteras_hombre.jpg",
+    "sha256": "ff403cad5d4cbe01e5ba3922d5618b4e444844557d53559b4021d0621ebef6c7",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B06",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B06_charms.jpg",
+    "sha256": "dab25720f8c083547a16cb80e77151335e332d14ffcb28f47894ca5ec80d89bb",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B07",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B07_lentes.jpg",
+    "sha256": "ca80f06dcad495852d08a1edba4afc1dc25d21c06216f8dbe65a866c271806e7",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B08",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B08_bolsos.jpg",
+    "sha256": "3d6f8e069856c55f12010eb4cb16077ad456f14b3b213c811940391f7c7320eb",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B09",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B09_calzado_hombre.jpg",
+    "sha256": "08a99f2038e1259b6611e7cdadf12fae0ffefffb19b7d51e84bbe7ddf066afea",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B10",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B10_munequeras.jpg",
+    "sha256": "4f395349ab1e3e683434223a4ef6925aae02af4053482dc7b30eb2ea448d0e35",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B11",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B11_relojes.jpg",
+    "sha256": "ca4c47359001662927db893b1e8f31e47a8cd5dbb79f9b7df1f935f5a9707281",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B12",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B12_relojes_hombre.jpg",
+    "sha256": "73c539c4cb80f8912c0829fc344075fcef4171e49fce5d5873703fb127af9e53",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B13",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B13_calzado_mujer.jpg",
+    "sha256": "622f47dd67a655204af70d91041e748d54c4239178c563bc82f52f0ab3017b74",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B14",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B14_bolsos_hombre.jpg",
+    "sha256": "8535134272fc829293c284acba4dc0d3bec6bf6f97a70a4e0b8df8fcd4e5f1e0",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B15",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B15_tarjeteros.jpg",
+    "sha256": "4211aecc358a2ebe94904da2a590d745e0fc086f58d95a324876dc75d14ab190",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B16",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B16_perfumes_todos.jpg",
+    "sha256": "7c7a434c46e6f8d6276129bbd8363db548fbd4e58a06f8f7725ab0c86b00879a",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B17",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B17_accesorios.jpg",
+    "sha256": "04352c0fdcb446fae612c2b05d29149203232d32ba8b4db6b8f957eaedef9444",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B18",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B18_crossbody.jpg",
+    "sha256": "a172d33409ca96a25fd187cfbcfdf2e191c5dddedfafeb2fea744de902c15ce0",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B19",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B19_tote.jpg",
+    "sha256": "2564fd42435185afb9d52e76a8bdcb35f97226a9806ca888e0741b20e813fd86",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B20",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B20_bolsos_hombro.jpg",
+    "sha256": "8c0b525b5ddda93fa12cc71b3b829deecc230321846bf9964b69d525bacaea2b",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B21",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B21_carteras.jpg",
+    "sha256": "98c99cb3661d6c82e8fc00c0bf4f4445fe86666a199ed450dea376207cf7e6e4",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B22",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B22_bolsos_mano.jpg",
+    "sha256": "9e7b2b928793181ea12e03047596610e2efb6f4122cb5b30b62c1d51f23734b4",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B23",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B23_perfumes_alternativo.jpg",
+    "sha256": "5d038aa53080c775578e89eaa28064bc228327436694fcdacc331d123d1f5cab",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B24",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B24_guess.jpg",
+    "sha256": "ebe43aad789f13baba7eb00c990600370dd5584a3ece61588e0d418be906607a",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B25",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B25_tory_burch.jpg",
+    "sha256": "7c05a1188c05d64fdef471e48618b345062af8d5b6276ec2620f512ae9c798bc",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B26",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B26_marc_jacobs.jpg",
+    "sha256": "6252e5fb0959170ce87076eb490a69c1a8a7db798f583b6b0c5814583a57b6d9",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B27",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B27_kate_spade.jpg",
+    "sha256": "313f926bd1ea700c04a23b3284dd95d6be1ba734885707a9b8e3222b519b95d3",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B28",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B28_coach.jpg",
+    "sha256": "13b9837bc2c773705805a576fde467aef9252fc9e73806184e4c4af313b9bf66",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B29",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B29_michael_kors.jpg",
+    "sha256": "46ded0729c78aab254422e870b28ff84b538d60b713fc491619391b38123f8d1",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B30",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B30_steve_madden.jpg",
+    "sha256": "6d19d16921c3dd56d0c581b17525a98aee4da0ee7a74b64929e2c119c57266fe",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B31",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B31_contacto.jpg",
+    "sha256": "09c7d2f7dd4cc1a959b5958298a1bc0026f79a717d9afa9c9e2f070f675b97e7",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B32",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B32_mayoreo.jpg",
+    "sha256": "e0428e271d4d15f30c79165b6b240bdf02f86595032bfa0d179596aa5012024a",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "B04-editorial",
+    "kind": "banners",
+    "path": "assets/images/v41/banners/B04_inicio_mayoreo_editorial_sin_control.jpg",
+    "sha256": "2b21ec23d1011cfede708e70817db5fe6d2308bf507877f65773823357e72771",
+    "app_pixels": [
+      1280,
+      533
+    ],
+    "source_pixels": [
+      1920,
+      800
+    ]
+  },
+  {
+    "id": "F01",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F01_calzado_mujer.jpg",
+    "sha256": "50496eb0026ea41931fc58b858150501b29480c2d7d47eb4aa91c1171fffac5c",
+    "app_pixels": [
+      600,
+      600
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F02",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F02_bolsos_hombro.jpg",
+    "sha256": "71a2d2e6d000fed8c92c03099d73846f548c75661d3e05de1f2041ff24dfd121",
+    "app_pixels": [
+      600,
+      400
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F03",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F03_bolsos_mano.jpg",
+    "sha256": "247070bd83300de26b46b8f6b579ea223dc743bbaf060d4afe0b7859bf761fe0",
+    "app_pixels": [
+      600,
+      800
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F04",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F04_calzado_hombre.jpg",
+    "sha256": "2c4524825e9f304e8f5c83a0e2b97e1a7cd60f7ad7376464bf8baea3e7e96e5d",
+    "app_pixels": [
+      600,
+      807
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F05",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F05_accesorios.jpg",
+    "sha256": "ac880377a87ab0481b4d472ef64db177951325bd98334f0176c1dd4837f2ff44",
+    "app_pixels": [
+      600,
+      547
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F06",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F06_bolsos_hombre.jpg",
+    "sha256": "0f7b387e9d7281c4e107dce828f31ae972adcb6d085c36659cb27ae8f034ee4a",
+    "app_pixels": [
+      600,
+      547
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F07",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F07_bolsos.jpg",
+    "sha256": "218fd113552214e15e65504646f2f38e21ca7b044cf6ef80fb3a30490d395c87",
+    "app_pixels": [
+      600,
+      547
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F08",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F08_carteras.jpg",
+    "sha256": "a39422157e63bfc7f5c7059f84c8baac115637c3ed884484c86dc77d87566da9",
+    "app_pixels": [
+      600,
+      547
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F09",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F09_carteras_mujer.jpg",
+    "sha256": "acdbf9c0b60660176d2ca8f5b2ec935ec4fcdfae38067c4516adff543149aacf",
+    "app_pixels": [
+      600,
+      600
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F10",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F10_crossbody.jpg",
+    "sha256": "d19abd6cfc7661daebcdef874f2bc6504fa8a8fbafd938a79d825d3db2685aa7",
+    "app_pixels": [
+      600,
+      749
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F11",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F11_carteras_hombre.jpg",
+    "sha256": "6f7d60e2b73dc3e44d3d9d308e8dd451d59c29f1c6da459ee8137e5b5337a240",
+    "app_pixels": [
+      600,
+      547
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F12",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F12_lentes.jpg",
+    "sha256": "17bf1a5ff7b66ad5500d7aae261b0e42c5e3d805fa21a43316fb866e149f9de9",
+    "app_pixels": [
+      600,
+      733
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F13",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F13_relojes_hombre.jpg",
+    "sha256": "f26de2daf977481afd22850a863a80f56d4aba7f6eb2f9be9ddb133a8e28f32c",
+    "app_pixels": [
+      600,
+      721
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F14",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F14_tarjeteros.jpg",
+    "sha256": "90c3a88c408d4df86f44c61fe75e00d56d05f1e86260ec10c8714aaf62c081af",
+    "app_pixels": [
+      600,
+      447
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F15",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F15_munequeras.jpg",
+    "sha256": "7577ea9d46eeeef10559e4ae7c0396254bd0fa2639e831ab3b8e0cfefdeddd1c",
+    "app_pixels": [
+      600,
+      600
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F16",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F16_relojes_mujer.jpg",
+    "sha256": "1f6a02007e180b1a9dea783c868c41ae9bf88e5351c7b209b25c81c663d31b5d",
+    "app_pixels": [
+      600,
+      920
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F17",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F17_tote.jpg",
+    "sha256": "6e9972640e49bacc37a603600fd3b16b37985c1b356f278916c45e6932d65f21",
+    "app_pixels": [
+      600,
+      750
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "F18",
+    "kind": "home_photos",
+    "path": "assets/images/v41/home_photos/F18_bolsos_alt.jpg",
+    "sha256": "1cca4dd41fd7411253286c4a74b58b2596f72b03f9cfeddd9ed584df0ac43989",
+    "app_pixels": [
+      600,
+      600
+    ],
+    "source_pixels": null
+  },
+  {
+    "id": "bolsos",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/bolsos.svg",
+    "sha256": "5966e63d3d6380f56f066b6f37f625c8f06a1d227a4b229aa1f78c65d4b9eda5",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "bolsos-mujer",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/bolsos-mujer.svg",
+    "sha256": "488840cd310bfc1e3002f84109ce0a3c44ae4bfa77f56c4350dcd3b950162595",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "crossbody",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/crossbody.svg",
+    "sha256": "e4c6515659923a3ad6dda9205d4881f1b28f91b10b954afaf6d97ec2e7f0959e",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "tote",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/tote.svg",
+    "sha256": "79479c42f8639ff6db86fb8b1ac6e99b08a3ea549456c4564595a8832a6510e2",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "de-mano",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/de-mano.svg",
+    "sha256": "3c2b39fa08773f15ddf6559ad1f8c0e7e34328d67d6c4e1b4a59e97d59ff08b9",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "de-hombro",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/de-hombro.svg",
+    "sha256": "e6c5d8860c983da7f079ed0bff534faf1352eaf99ecac0d783c567f0bce60e11",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "bolsos-hombre",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/bolsos-hombre.svg",
+    "sha256": "23e9063fe368516ecf4e641ce16cac6ff4fa9080b75d0b0015041db36d969236",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "carteras",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/carteras.svg",
+    "sha256": "9d1452087821acbc634826af1a986207b74e6cfc516946bfa7e996bf9d7243a2",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "carteras-mujer",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/carteras-mujer.svg",
+    "sha256": "0e2086797c101f847243e04666b0072c57213445ae4f91d30be6068d252b3723",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "munequeras",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/munequeras.svg",
+    "sha256": "f9a726ea62a45404ff09499a06c6146a084ffc9e6cfc604d74d2891b090855fe",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "carteras-clasicas",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/carteras-clasicas.svg",
+    "sha256": "4f490b74beff3b343c3320efc695d49170d6664f1677084b0139ef38c0fb5ac1",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "tarjeteros",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/tarjeteros.svg",
+    "sha256": "6c07ed34bca35bdb78fa4de3d5310a4350aa7c8c31596fdabea678a3cf1b7a62",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "carteras-hombre",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/carteras-hombre.svg",
+    "sha256": "8a2ba11cbcb2a357e3dcee3738d28e7296241dce7594f16ad2ef8c93302838eb",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "perfumes",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/perfumes.svg",
+    "sha256": "aefdf44cb58a44040db3dcca6562304298d05cc42a4a56f56b5ffd328a187110",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "perfumes-mujer",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/perfumes-mujer.svg",
+    "sha256": "343e464933e736c80dab2d1b19050a7cc76cd7e624d9693db7ca7338f726f409",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "perfumes-hombre",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/perfumes-hombre.svg",
+    "sha256": "4a118aaa97eb2845c35b35057e5bf6288e82cb739d58c8e6afada5f47e3c7106",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "calzado",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/calzado.svg",
+    "sha256": "517a30d64f636da240c5622baba999f7885c0068ba35107365852b931c4e7c72",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "calzado-mujer",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/calzado-mujer.svg",
+    "sha256": "628e049d1cd6b2de8f0278694d1878fd99a91a2bda9fd389ba7f8f2a442c0d92",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "deportivo",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/deportivo.svg",
+    "sha256": "06d1fbdd08d834f322d161abb3c30917f3411f41717be3b90cd10cd425ff38a5",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "casual",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/casual.svg",
+    "sha256": "693d1ce316f640c998b187a6cb0bf2ea2b433b47d097b465d6ef0d25ac6e3efc",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "calzado-hombre",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/calzado-hombre.svg",
+    "sha256": "ca0e16e571a0ccabf222eb2b28d2fadfb5dc8ed02cae675388ef22ea1be2797f",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "accesorios",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/accesorios.svg",
+    "sha256": "7c478455b98b75e52a2e3800890fc97c32e77fec8ca18525d02099408a283f8c",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "lentes",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/lentes.svg",
+    "sha256": "ab0a05cd5bc21a468661c364a0730f03f2f5953e70ec5d6bf18ac9e4f5413184",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "relojes",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/relojes.svg",
+    "sha256": "2824d124131e0229793078da42f4e7df3f61487846e83953fcb31fbb2923e461",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "charms",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/charms.svg",
+    "sha256": "ba26576bd288d42edb2c9ebd6362405baea7ef4df6095751e41ddcaeed482918",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "otros-accesorios",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/otros-accesorios.svg",
+    "sha256": "7050f3147bea7e785cd5326d073bbedf466f79797e1d7006b88fd9faa0f95cc7",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "marcas",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/marcas.svg",
+    "sha256": "2703dbceba7479ad467372374aac6b9d01fd42a8c60164e98d74b31771fbc2d9",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "mayoreo",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/mayoreo.svg",
+    "sha256": "8bae9a1f100d40534f14b521c30d5650065030da2cc8463dfa374803f567f3fd",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "instagram",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/instagram.svg",
+    "sha256": "6007608cf4fa7ca91066b74c5520f07a4c8792f972e42c2b334c4132b4ad6b59",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "facebook",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/facebook.svg",
+    "sha256": "548a8b8aaa31d3af03c2f8fb21a4800532c4313f351296c6f1405652fa9046f1",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "tiktok",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/tiktok.svg",
+    "sha256": "03b5af41cc91eda929bb8304d2caff1783aaafc6fea1e4d63e6ee34758b5bbbd",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "whatsapp",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/whatsapp.svg",
+    "sha256": "732846471a333d71a78606d215fbbb54cbc743c2724a8e839009e8843aa908df",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "envios",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/envios.svg",
+    "sha256": "4e59d33cda3dad37cf0231f09d96a8d34916e41517315dbe75a59839d03b81d0",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "pagos",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/pagos.svg",
+    "sha256": "e017b1ad66a2f24c79d0c9132429822ec0732efb46a8651e39a11a4257da3119",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "originales",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/originales.svg",
+    "sha256": "ccc9ac13b1103348a62f0aba3560be5aee8b46aeb3f2f1f186e50fac360e29c3",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "atencion",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/atencion.svg",
+    "sha256": "3e05cf79e1a0066132f55df473f965b513071ba48db025d13000237b52d7b1a4",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "pedidos",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/pedidos.svg",
+    "sha256": "9211928c6523a3021131e5cac4ae9d4db92ac61044124061eb3c6c65a9b785f5",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "avisos",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/avisos.svg",
+    "sha256": "4aa92e59ba8bf086a690aa663a34a0d4cdd9ef8310c308f184e5577df7a947a1",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "direccion",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/direccion.svg",
+    "sha256": "633ed6695b56179fe4582c2e0144d74dc4c7264c98c0dec603ec7b3d31a2f289",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "ajustes",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/ajustes.svg",
+    "sha256": "552f4fa74d1bbb257c9ad19ae42b0e8c636209a481919dbe343e69fc1a051304",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "ayuda",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/ayuda.svg",
+    "sha256": "ecda995414061ea2dea8992d9fd355a06b4e8904241bd820bffac2b65decba2e",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "salir",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/salir.svg",
+    "sha256": "c5d7d1330a74dd568768c7b57248706b890d4847576355b066cdf4273c48f9d8",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "ordenar",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/ordenar.svg",
+    "sha256": "eb93f805fdec861e36e9c98a2cc9265830105dd597818da81b9cd5b3d5efeadc",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "filtros",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/filtros.svg",
+    "sha256": "4e232752d8c35a4f5b1f4afa7d8a8483eb1883237483236190d0a8a6dffb869a",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "favorito",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/favorito.svg",
+    "sha256": "f043d9fd035e70b2a43be1ccf3978871683138f6d9bf7dc37d7258fc5606f3a0",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "home",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/home.svg",
+    "sha256": "44b309d43653a16127bf88a7f440fc3d3510827602f4833eb8987907df32c35b",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "grid",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/grid.svg",
+    "sha256": "cef81870e930c08db42d2dd29d89d48a249055e5e14df2570ab1e01a29c0a5b0",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "cart",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/cart.svg",
+    "sha256": "3b5ff2317831329e7ca44b13dba60c19ddfb21b75eff5417a4f56eccca72c150",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "user",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/user.svg",
+    "sha256": "7bed003109799b8092cba40bb4a973c06ad94e85e62cb5d87ba355326087d621",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "search",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/search.svg",
+    "sha256": "dbd45359de631269a0e4f60d4da5711a6a376f2a6debca377bfb55765cbe7b8e",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "menu",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/menu.svg",
+    "sha256": "bd82208a69afdf2bc43838cb13be8f212edae03141299e6091098f64f15ff6a3",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "close",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/close.svg",
+    "sha256": "29c753b85f0f51a50bf2e06ac3cc20286b5aa0f84abc0af7d0a0add0d5a1f82d",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "right",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/right.svg",
+    "sha256": "23a57558f9d7218bf9d5bb6d5782f23b37db3a83c42f7121a9c34473c80b674a",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "down",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/down.svg",
+    "sha256": "bf0522d118843e5fad20a3863d1cd54ef7726852fe5932a26f8a25f3c7f326af",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "back",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/back.svg",
+    "sha256": "d4f65dbe5c824c7e0a867fed3e6df80534ded13afde7a394c3990113dd9debf1",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "check",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/check.svg",
+    "sha256": "4e9e20017546a623dd5a33a5045384d67ea2c77c03e89b23e0496ef093bd4527",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "favorito_guardado",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/favorito_guardado.svg",
+    "sha256": "fdde3ff29096b9117b70da02f73268c59fd8bec08cd01e11e6e24ed79b600f7d",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "pago_rechazado",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/pago_rechazado.svg",
+    "sha256": "ba3c5693c779951011dc8eddb8cda3a5b68322bdc99803b0fcbb0a903f56227b",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "pago_verificando",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/pago_verificando.svg",
+    "sha256": "33c48826a52de92972789e61324bc840a50442aa31cbf890ecfb4994bfc36c81",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "envio-camion",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/envio-camion.svg",
+    "sha256": "4baf1d290d76a1782af64c1a7c3ef7d2a844bafd4df65e04d5a42adccd5c5de3",
+    "app_pixels": null,
+    "source_pixels": null
+  },
+  {
+    "id": "envio-avion",
+    "kind": "icons",
+    "path": "assets/images/v41/icons/envio-avion.svg",
+    "sha256": "ef1902e87184bd9f5b6735385b6a556f7404162221671770e6e71d40b02d499f",
+    "app_pixels": null,
+    "source_pixels": null
+  }
+]

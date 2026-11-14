@@ -32,10 +32,11 @@ void main() {
     );
     final navigator = tester.state<NavigatorState>(find.byType(Navigator));
     await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
-    await tester.pumpAndSettle();
-    expect(find.byType(CategoriesScreen), findsOneWidget);
+    // Categorías keeps animated placeholders while an unloaded catalog loads.
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(CategoriesScreen, skipOffstage: false), findsOneWidget);
     navigator.pop();
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.byKey(const ValueKey('guide-search-button')));
     await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsOneWidget);

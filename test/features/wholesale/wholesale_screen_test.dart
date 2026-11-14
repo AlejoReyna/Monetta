@@ -5,6 +5,7 @@ import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/wholesale/wholesale_content.dart';
 import 'package:monetta_app/features/wholesale/wholesale_screen.dart';
+import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/main.dart';
 import '../../support/client_guide_capture.dart';
 
@@ -12,9 +13,7 @@ void main() {
   test('quote asks for terms without pre-accepting amounts or minimums', () {
     final uri = wholesaleQuoteUri();
     expect(uri.host, 'wa.me');
-    expect(uri.queryParameters['text'], isNot(contains(r'$800')));
-    expect(uri.queryParameters['text'], isNot(contains('3 modelos')));
-    expect(uri.queryParameters['text'], contains('condiciones vigentes'));
+    expect(uri.query, isEmpty);
   });
 
   for (final (size, scale, brightness) in [
@@ -48,7 +47,8 @@ void main() {
         textScale: scale,
         brightness: brightness,
       );
-      expect(find.text('MAYOREO'), findsOneWidget);
+      expect(find.byWidgetPredicate((w) => w is GuideBanner && w.id == 'B32'),
+          findsOneWidget);
       expect(tester.takeException(), isNull);
       if (scale == 1) {
         await captureClientGuide(
@@ -56,15 +56,23 @@ void main() {
           'wholesale-${size.width.toInt()}-${brightness.name}',
         );
       }
-      final scroll = find.byType(Scrollable).first;
+      // The page's own vertical list (the steps row scrolls sideways).
+      final scroll = find
+          .descendant(
+            of: find.byKey(const ValueKey('wholesale-scroll')),
+            matching: find.byWidgetPredicate(
+              (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+            ),
+          )
+          .first;
       await tester.scrollUntilVisible(
         find.text(WholesalePresentation.minimum),
         300,
         scrollable: scroll,
       );
       expect(find.text(WholesalePresentation.minimum), findsOneWidget);
-      // The guide's reservation line is shown as it is.
-      expect(find.textContaining(r'$800'), findsOneWidget);
+      // Received terms are not published without commercial approval.
+      expect(find.textContaining(r'$800'), findsNothing);
       expect(find.textContaining('pendiente de confirmación'), findsNothing);
       expect(find.textContaining('pendientes de confirmación'), findsNothing);
       final catalog = find.byKey(const ValueKey('wholesale-catalog-perfume'));
@@ -73,14 +81,16 @@ void main() {
       await tester.pumpAndSettle();
       // Inspect the existing collection route even with an empty local catalog.
       await tester.tap(catalog);
-      await tester.pumpAndSettle();
-      final collection =
-          tester.widget<CollectionScreen>(find.byType(CollectionScreen));
+      // An unloaded catalog keeps its animated placeholders: no settle.
+      await tester.pump(const Duration(seconds: 1));
+      final collection = tester.widget<CollectionScreen>(
+        find.byType(CollectionScreen, skipOffstage: false),
+      );
       expect(collection.filter.category, 'perfume');
       Navigator.of(
-        tester.element(find.byType(CollectionScreen)),
+        tester.element(find.byType(CollectionScreen, skipOffstage: false)),
       ).pop();
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
       final quote = find.byKey(const ValueKey('wholesale-quote-bottom'));
       await tester.scrollUntilVisible(quote, 300, scrollable: scroll);
       await tester.ensureVisible(quote);

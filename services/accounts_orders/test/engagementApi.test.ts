@@ -71,6 +71,29 @@ describe('engagement API', () => {
     });
   });
 
+  it('advertises unavailable exact-variant restock and account unread without inventing channels', async () => {
+    const res = await fetch(`${baseUrl}/v1/notification-config`);
+    expect(res.status).toBe(200);
+    expect((await res.json()).capabilities).toMatchObject({
+      schemaVersion: 1,
+      variantRestock: { supported: false, channels: [], reason: 'variant_stock_trigger_unavailable' },
+      accountUnread: { supported: false },
+    });
+  });
+
+  it('rejects unsupported variant/email requests before recording subscription or consent', async () => {
+    const credential = await deviceCredential();
+    for (const extra of [{ variantId: 'gid://shopify/ProductVariant/1' }, { email: 'fixture@example.test' }, { channel: 'email' }]) {
+      const res = await fetch(`${baseUrl}/v1/product-alerts`, {
+        method: 'POST', headers: { Authorization: `Device ${credential}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productKey: 'shopify:1', kind: 'restock', ...extra }),
+      });
+      expect(res.status).toBe(409);
+      expect(await res.json()).toEqual({ error: 'variant_restock_unavailable' });
+    }
+    expect(repository.alerts.size).toBe(0);
+  });
+
   it('requires App Check, issues a device credential, and prevents takeover', async () => {
     const denied = await registerDevice(null);
     expect(denied.status).toBe(401);

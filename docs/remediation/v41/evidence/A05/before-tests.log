@@ -1,0 +1,70 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/rewards/rewards_guide_screen_test.dart
+00:00 +0: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Account opens hosted auth directly and never renders the hardcoded login
+00:00 +1: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Account opens hosted auth directly and never renders the hardcoded login
+00:00 +2: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Account opens hosted auth directly and never renders the hardcoded login
+00:01 +3: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_bottom_navigation_test.dart: NAV-02 there is no selection capsule
+00:01 +4: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_guide_screen_test.dart: a missing reader does not invent a balance
+00:01 +5: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: cancelling hosted auth keeps the shopper on the current page
+00:01 +6: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_bottom_navigation_test.dart: NAV-03 selection is color only, identical on icon and label NAV-03 colors per state (light theme)
+00:01 +7: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_bottom_navigation_test.dart: NAV-03 selection is color only, identical on icon and label NAV-03 colors per state (light theme)
+00:01 +8: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: orders UI distinguishes failed from empty
+00:01 +9: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: orders UI distinguishes failed from empty
+00:01 +10: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: orders UI distinguishes failed from empty
+00:01 +11: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: orders UI distinguishes failed from empty
+00:01 +12: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: orders UI distinguishes failed from empty
+00:01 +13: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_guide_screen_test.dart: capture rewards 834.0 light
+00:01 +14: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_guide_screen_test.dart: capture rewards 834.0 light
+00:01 +15: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_guide_screen_test.dart: capture rewards 834.0 light
+00:01 +16: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the avatar renders the Shopify photo when there is one
+00:01 +17: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the avatar renders the Shopify photo when there is one
+00:01 +18: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_guide_screen_test.dart: capture rewards-share 390.0 light
+00:01 +19: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_bottom_navigation_test.dart: NAV-04 animation is color only and lasts 180 ms NAV-04 disableAnimations snaps to the final colors in one frame
+00:01 +20: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name without a photo the avatar keeps the initial
+00:01 +21: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name without a photo the avatar keeps the initial
+00:01 +22: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name without a photo the avatar keeps the initial
+00:01 +23: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_guide_screen_test.dart: capture rewards-share 834.0 light
+00:01 +24: /Users/alexis/theCode/Monetta/test/features/rewards/rewards_guide_screen_test.dart: capture rewards-share 834.0 light
+00:01 +25: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the identity row is a labelled editing button
+00:01 +26: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the identity row is a labelled editing button
+00:01 +27: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the identity row is a labelled editing button
+00:01 +28: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the identity row is a labelled editing button
+00:01 +29: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the identity row is a labelled editing button
+00:01 +30: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the identity row is a labelled editing button
+00:01 +31: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the identity row is a labelled editing button
+00:01 +32: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the identity row is a labelled editing button
+00:01 +33: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the identity row is a labelled editing button
+00:01 +34: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the identity row is a labelled editing button
+00:01 +35: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_bottom_navigation_test.dart: NAV-07 cart badge NAV-07 shows the count, caps at 9+, hides at zero
+00:01 +36: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name saving a changed name sends only the name
+00:01 +37: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name saving a changed name sends only the name
+00:01 +38: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name saving a changed name sends only the name
+00:01 +39: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name saving a changed name sends only the name
+00:01 +40: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name saving a changed name sends only the name
+00:02 +41: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name saving a changed name sends only the name
+00:02 +42: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name saving a changed name sends only the name
+00:02 +43: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_bottom_navigation_test.dart: NAV-09 text scale NAV-09 width 320 at x1.0: labels fit, stay uniform and the bar contains them
+00:02 +44: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a picked photo is sent alone, without touching the name
+00:02 +45: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a picked photo is sent alone, without touching the name
+00:02 +46: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a picked photo is sent alone, without touching the name
+00:02 +47: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a picked photo is sent alone, without touching the name
+00:02 +48: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a picked photo is sent alone, without touching the name
+00:02 +49: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a picked photo is sent alone, without touching the name
+00:02 +50: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a picked photo is sent alone, without touching the name
+00:02 +51: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_bottom_navigation_test.dart: NAV-09 text scale NAV-09 width 390 at x1.5: labels fit, stay uniform and the bar contains them
+00:02 +52: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a cancelled picker changes nothing
+00:02 +53: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a cancelled picker changes nothing
+00:02 +54: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a cancelled picker changes nothing
+00:02 +55: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a cancelled picker changes nothing
+00:02 +56: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a cancelled picker changes nothing
+00:02 +57: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a cancelled picker changes nothing
+00:02 +58: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_bottom_navigation_test.dart: NAV-09 text scale NAV-09 width 800 at x2.0: labels fit, stay uniform and the bar contains them
+00:02 +59: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name «Quitar foto» removes the stored photo on save
+00:02 +60: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name «Quitar foto» removes the stored photo on save
+00:02 +61: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name «Quitar foto» removes the stored photo on save
+00:02 +62: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name «Quitar foto» removes the stored photo on save
+00:02 +63: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name «Quitar foto» removes the stored photo on save
+00:02 +64: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name an empty name is refused before calling Shopify
+00:02 +65: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name shows Spanish error copy and keeps the sheet open
+00:02 +66: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name the editor does not overflow at 2.0 text scale
+00:02 +67: /Users/alexis/theCode/Monetta/test/features/account/account_screen_test.dart: Profile photo and name a legacy Monetta account has no edit affordance
+00:02 +68: All tests passed!

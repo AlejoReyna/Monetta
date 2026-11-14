@@ -42,6 +42,12 @@ export class RewardsService {
     ]);
     const merged: ProgramPolicy = { ...policy, version: dbPolicy.version };
     return {
+      capabilities: {
+        schemaVersion: 1,
+        membership: { supported: false, reason: 'authoritative_rules_unavailable' },
+        tierProgress: { supported: false, reason: 'authoritative_rules_unavailable' },
+        tierBenefits: { supported: false, reason: 'authoritative_rules_unavailable' },
+      },
       program: {
         enabled: this.deps.env.rewardsEnabled,
         redemptionEnabled: merged.redemptionEnabled,

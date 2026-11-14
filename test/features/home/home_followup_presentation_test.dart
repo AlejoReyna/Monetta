@@ -71,7 +71,8 @@ void main() {
         alignment: .15,
       );
       await tester.pumpAndSettle();
-      expect(find.text('A partir de 3 piezas'), findsOneWidget);
+      // UI v4.1: the single B04 banner with «Comenzar a vender».
+      expect(find.text('Comenzar a vender'), findsOneWidget);
       expect(find.textContaining('pendientes de confirmación'), findsNothing);
       if (scale == 1) {
         await captureClientGuide(
@@ -95,10 +96,14 @@ void main() {
         400,
         scrollable: scroll,
       );
-      await tester
-          .ensureVisible(find.text('Monetta · Todos los derechos reservados'));
+      await tester.ensureVisible(
+        find.textContaining(RegExp(r'^© \d{4} MONETTA$')),
+      );
       await tester.pumpAndSettle();
-      expect(find.text('Ayuda y contacto'), findsOneWidget);
+      // The v4.1 footer: Ayuda and Información, no «Ayuda y contacto».
+      expect(find.text('AYUDA'), findsOneWidget);
+      expect(find.text('INFORMACIÓN'), findsOneWidget);
+      expect(find.text('Ayuda y contacto'), findsNothing);
       if (scale == 1) {
         await captureClientGuide(
           tester,

@@ -162,6 +162,11 @@ class RealtimeCatalogRepository {
             'variant.compareAtPrice',
           ),
           sku: _nullableString(variant['sku'], 'variant.sku'),
+          selectedOptions: _variantOptions(variant['selectedOptions']),
+          imageUrls: _stringList(
+            variant['imageUrls'] ?? const <String>[],
+            'variant.imageUrls',
+          ),
         ),
       );
     }
@@ -271,4 +276,13 @@ class RealtimeCatalogRepository {
 
   static Future<void> _defaultRetryDelay(Duration duration) =>
       Future<void>.delayed(duration);
+}
+
+Map<String, String> _variantOptions(Object? raw) {
+  if (raw == null) return const {};
+  if (raw is! Map<String, Object?> ||
+      raw.values.any((value) => value is! String)) {
+    throw const FormatException('Invalid variant.selectedOptions');
+  }
+  return raw.cast<String, String>();
 }

@@ -1,187 +1,96 @@
+// G05-A uses the same scoped query/filter/sort surface as collections.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:monetta_app/app/catalog_store.dart';
-import 'package:monetta_app/app/theme.dart';
-import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/catalog/brand_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
-import 'package:monetta_app/main.dart';
-
-Future<CatalogStore> _loadedStore() async {
-  final store = CatalogStore(database: openTestDatabase());
-  await store.loadFromAsset();
-  return store;
-}
-
-/// The brand with the most pieces in the bundled catalog — the screen must
-/// work for whichever brand that is, not for one hard-coded name.
-String _busiestBrand(CatalogStore store) => store.availableBrands.first;
-
-/// The story and "Ver todo" sit below the whole grid, and the busiest brand
-/// can hold about a hundred pieces: more than the default 50 drags reach.
-const _scrollsToPageEnd = 200;
-
-Future<void> _pump(
-  WidgetTester tester,
-  CatalogStore store,
-  String slug, {
-  String? story,
-}) async {
-  await tester.pumpWidget(
-    MaterialApp(
-      theme: buildTheme(),
-      home: StoreScope(
-        notifier: store,
-        child: BrandScreen(brandSlug: slug, story: story),
-      ),
-    ),
-  );
-  await tester.pump();
-}
+import 'v41_discovery_fixture.dart';
+import 'v41_discovery_test.dart' show mountDiscovery, tapVisible;
 
 void main() {
-  testWidgets('shows only this brand, for whichever brand is asked for',
+  for (final brand in ['coach', 'guess']) {
+    testWidgets(
+        '$brand uses actual membership through query, filters, clear and order',
+        (tester) async {
+      final store = await discoveryStore();
+      await mountDiscovery(tester, BrandScreen(brandSlug: brand), store);
+      void check() {
+        final cards = tester.widgetList<ProductCard>(find.byType(ProductCard));
+        expect(cards, isNotEmpty);
+        expect(
+          cards.every(
+            (c) => store.facetsFor(c.product.id)?.brand?.value == brand,
+          ),
+          isTrue,
+        );
+      }
+
+      check();
+      await tapVisible(
+        tester,
+        find.byKey(const Key('collection-filter-button')),
+      );
+      // Fixed destination brand cannot be replaced from the filter panel.
+      expect(
+        find.byKey(
+          Key(
+            'collection-filter-brand-${brand == 'coach' ? 'guess' : 'coach'}',
+          ),
+        ),
+        findsNothing,
+      );
+      await tapVisible(
+        tester,
+        find.byKey(const Key('collection-filter-offers')),
+      );
+      await tapVisible(
+        tester,
+        find.byKey(const Key('collection-filter-apply')),
+      );
+      check();
+      await tapVisible(
+        tester,
+        find.byKey(const Key('collection-clear-inline')),
+      );
+      check();
+      await tapVisible(tester, find.byKey(const Key('collection-sort-button')));
+      await tapVisible(tester, find.byKey(const Key('collection-sort-oldest')));
+      await tapVisible(tester, find.byKey(const Key('collection-sort-apply')));
+      check();
+      expect(
+        tester
+            .widget<CollectionScreen>(find.byType(CollectionScreen))
+            .filter
+            .brand,
+        brand,
+      );
+    });
+  }
+  testWidgets(
+      'unknown brand shows empty rather than a different brand fallback',
       (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1.0;
-
-    final store = await _loadedStore();
-    addTearDown(store.dispose);
-    final slug = _busiestBrand(store);
-
-    await _pump(tester, store, slug);
-
-    final visible = tester
-        .widgetList<ProductCard>(find.byType(ProductCard))
-        .map((card) => card.product.id);
-    expect(visible, isNotEmpty);
-    for (final id in visible) {
-      expect(store.facetsFor(id)?.brand?.value, slug);
-    }
-  });
-
-  testWidgets('category tabs keep the brand scope', (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1.0;
-
-    final store = await _loadedStore();
-    addTearDown(store.dispose);
-    final slug = _busiestBrand(store);
-    final categories = <String>{
-      for (final product in store.products)
-        if (store.facetsFor(product.id)?.brand?.value == slug)
-          if (store.facetsFor(product.id)?.category?.value case final value?)
-            value,
-    };
-
-    await _pump(tester, store, slug);
-
-    if (categories.length < 2) {
-      // Tabs are only offered when there is more than one real category.
-      expect(find.byKey(const Key('brand-tab-all')), findsNothing);
-      return;
-    }
-
-    final category = categories.first;
-    final tab = find.byKey(Key('brand-tab-$category')).hitTestable();
-    final categoryStrip = find.byWidgetPredicate(
-      (widget) =>
-          widget is Scrollable &&
-          axisDirectionToAxis(widget.axisDirection) == Axis.horizontal,
+    final store = await discoveryStore();
+    await mountDiscovery(
+      tester,
+      const BrandScreen(brandSlug: 'missing'),
+      store,
     );
-    await tester.scrollUntilVisible(tab, 200, scrollable: categoryStrip);
-    await tester.pump();
-    await tester.tap(tab);
-    await tester.pumpAndSettle();
-
-    final visible = tester
-        .widgetList<ProductCard>(find.byType(ProductCard))
-        .map((card) => card.product.id);
-    expect(visible, isNotEmpty);
-    for (final id in visible) {
-      expect(store.facetsFor(id)?.brand?.value, slug);
-      expect(store.facetsFor(id)?.category?.value, category);
-    }
+    expect(find.text('Sin resultados'), findsOneWidget);
+    expect(find.byType(ProductCard), findsNothing);
   });
-
-  testWidgets('a tab is never offered for a category with no pieces',
-      (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1.0;
-
-    final store = await _loadedStore();
-    addTearDown(store.dispose);
-    final slug = _busiestBrand(store);
-    final categories = <String>{
-      for (final product in store.products)
-        if (store.facetsFor(product.id)?.brand?.value == slug)
-          if (store.facetsFor(product.id)?.category?.value case final value?)
-            value,
-    };
-
-    await _pump(tester, store, slug);
-
-    for (final missing in const ['perfume', 'reloj', 'cosmetiquera']) {
-      if (categories.contains(missing)) continue;
-      expect(find.byKey(Key('brand-tab-$missing')), findsNothing);
-    }
-  });
-
-  testWidgets('the editorial block only exists when there is text',
-      (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 2400);
-    tester.view.devicePixelRatio = 1.0;
-
-    final store = await _loadedStore();
-    addTearDown(store.dispose);
-    final slug = _busiestBrand(store);
-
-    await _pump(tester, store, slug);
-    expect(find.byKey(const ValueKey('brand-story')), findsNothing);
-    expect(find.text('Sobre la marca'), findsNothing);
-    // Nothing claims a ranking the app cannot compute.
-    expect(find.text('Más vendidas'), findsNothing);
-
-    await _pump(tester, store, slug, story: 'Texto de la dueña.');
+  testWidgets('owner story exists only when supplied', (tester) async {
+    final store = await discoveryStore();
+    await mountDiscovery(
+      tester,
+      const BrandScreen(brandSlug: 'guess', story: 'Texto de la dueña.'),
+      store,
+    );
     await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('brand-story')).hitTestable(),
+      find.byKey(const ValueKey('brand-story')),
       300,
       scrollable: find.byType(Scrollable).first,
-      maxScrolls: _scrollsToPageEnd,
     );
-    await tester.pumpAndSettle();
+    expect(find.text('Texto de la dueña.'), findsOneWidget);
     expect(find.text('Sobre la marca'), findsOneWidget);
-  });
-
-  testWidgets('continuing keeps the brand in the destination', (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 2400);
-    tester.view.devicePixelRatio = 1.0;
-
-    final store = await _loadedStore();
-    addTearDown(store.dispose);
-    final slug = _busiestBrand(store);
-
-    await _pump(tester, store, slug);
-    await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('brand-see-all')).hitTestable(),
-      300,
-      scrollable: find.byType(Scrollable).first,
-      maxScrolls: _scrollsToPageEnd,
-    );
-    // The final ensureVisible jumps without a frame; lay out before tapping.
-    await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('brand-see-all')));
-    await tester.pumpAndSettle();
-
-    final collection = tester.widget<CollectionScreen>(
-      find.byType(CollectionScreen),
-    );
-    expect(collection.filter.brand, slug);
   });
 }

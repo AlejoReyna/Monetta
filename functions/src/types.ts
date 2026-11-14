@@ -44,6 +44,8 @@ export interface AdminProduct {
       readonly price: string;
       readonly compareAtPrice: string | null;
       readonly sku: string | null;
+      readonly selectedOptions?: ReadonlyArray<{ readonly name: string; readonly value: string }>;
+      readonly image?: { readonly url: string } | null;
       readonly availableForSale: boolean;
       readonly inventoryQuantity: number | null;
       readonly inventoryPolicy: "CONTINUE" | "DENY" | string;
@@ -73,6 +75,8 @@ export interface CatalogProductDocument {
     readonly price: number;
     readonly compareAtPrice: number | null;
     readonly sku: string | null;
+    readonly selectedOptions: Readonly<Record<string, string>>;
+    readonly imageUrls: readonly string[];
     readonly available: boolean;
   }>;
   readonly createdAt: string;

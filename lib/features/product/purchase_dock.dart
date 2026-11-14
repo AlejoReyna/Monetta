@@ -8,6 +8,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../boutique/boutique_tokens.dart';
+import '../boutique/client_guide_components.dart';
 
 /// Minimum height of a dock action.
 const double kPurchaseDockButtonHeight = 48;
@@ -83,74 +84,65 @@ class PurchaseDockButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final enabled = onPressed != null && !pending;
-    final background = enabled
-        ? palette.action
-        : Color.alphaBlend(
-            palette.canvas.withValues(alpha: 0.45),
-            palette.action,
-          );
+    final foreground = large ? const Color(0xFF242622) : palette.onAction;
+    final button = Material(
+      color: large ? Colors.transparent : palette.action,
+      shape: StadiumBorder(
+        side:
+            large ? BorderSide(color: palette.borderControl) : BorderSide.none,
+      ),
+      child: InkWell(
+        onTap: enabled ? onPressed : null,
+        customBorder: const StadiumBorder(),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight:
+                large ? kPurchaseButtonHeight : kPurchaseDockButtonHeight,
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: BoutiqueSpace.xl,
+              vertical: large ? BoutiqueSpace.sm : BoutiqueSpace.md,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (pending) ...[
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: foreground,
+                    ),
+                  ),
+                  const SizedBox(width: BoutiqueSpace.sm),
+                ],
+                Flexible(
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: boutiqueText(
+                      size: large ? 15 : 14,
+                      weight: large ? FontWeight.w400 : FontWeight.w600,
+                      color: foreground,
+                      height: 1.2,
+                    ).copyWith(letterSpacing: large ? .9 : null),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
     return Semantics(
       button: true,
       enabled: enabled,
       label: label,
       excludeSemantics: true,
       onTap: enabled ? onPressed : null,
-      child: Material(
-        color: background,
-        shape: const StadiumBorder(),
-        child: InkWell(
-          onTap: enabled ? onPressed : null,
-          customBorder: const StadiumBorder(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight:
-                  large ? kPurchaseButtonHeight : kPurchaseDockButtonHeight,
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: BoutiqueSpace.xl,
-                vertical: large ? BoutiqueSpace.sm : BoutiqueSpace.md,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (pending) ...[
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: palette.onAction,
-                      ),
-                    ),
-                    const SizedBox(width: BoutiqueSpace.sm),
-                  ],
-                  Flexible(
-                    // No line cap: at large text scales the button grows
-                    // instead of truncating the label.
-                    child: Text(
-                      label,
-                      textAlign: TextAlign.center,
-                      style: large
-                          ? boutiqueText(
-                              size: 15,
-                              color: palette.onAction,
-                              height: 1.2,
-                            ).copyWith(letterSpacing: 0.9)
-                          : boutiqueText(
-                              size: 14,
-                              weight: FontWeight.w600,
-                              color: palette.onAction,
-                              height: 1.2,
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      child: large ? GuideGlassSurface(child: button) : button,
     );
   }
 }
@@ -173,39 +165,35 @@ class PurchaseOutlineButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final enabled = onPressed != null;
     return Semantics(
       button: true,
-      enabled: enabled,
+      enabled: onPressed != null,
       label: label,
       excludeSemantics: true,
       onTap: onPressed,
-      child: Material(
-        color: Colors.transparent,
-        shape: StadiumBorder(side: BorderSide(color: palette.borderControl)),
-        child: InkWell(
-          onTap: onPressed,
-          customBorder: const StadiumBorder(),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: kPurchaseButtonHeight),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: BoutiqueSpace.xl,
-                vertical: BoutiqueSpace.sm,
-              ),
-              child: Center(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: boutiqueText(
-                    size: 15,
-                    color:
-                        enabled ? textColor : textColor.withValues(alpha: 0.45),
-                    height: 1.2,
-                  ).copyWith(letterSpacing: 0.9),
-                ),
-              ),
+      child: GuideGlassSurface(
+        halo: onPressed != null,
+        child: OutlinedButton(
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, kPurchaseButtonHeight),
+            padding: const EdgeInsets.symmetric(
+              horizontal: BoutiqueSpace.xl,
+              vertical: BoutiqueSpace.sm,
             ),
+            side: BorderSide(color: palette.borderControl),
+            shape: const StadiumBorder(),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: boutiqueText(
+              size: 15,
+              color: onPressed != null
+                  ? const Color(0xFF242622)
+                  : const Color(0x73242622),
+              height: 1.2,
+            ).copyWith(letterSpacing: .9),
           ),
         ),
       ),

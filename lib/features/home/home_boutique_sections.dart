@@ -10,7 +10,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../app/monetta_tokens.g.dart';
 import '../../app/theme.dart';
 import '../../domain/campaign.dart';
 import '../../domain/product.dart';
@@ -111,9 +110,9 @@ class HomeSearchField extends StatelessWidget {
 class HomeEditorialBanner extends StatefulWidget {
   const HomeEditorialBanner({
     required this.playing,
-    required this.onOpenNew,
-    this.onOpenCatalog,
-    this.onOpenPerfumes,
+    required this.onOpenProducts,
+    required this.onOpenBrands,
+    required this.onOpenCategories,
     super.key,
   });
 
@@ -121,14 +120,14 @@ class HomeEditorialBanner extends StatefulWidget {
   /// home drives it from the scroll offset and the app lifecycle.
   final bool playing;
 
-  /// Slide 2, «Nueva colección».
-  final VoidCallback onOpenNew;
+  /// B01 — all products.
+  final VoidCallback onOpenProducts;
 
-  /// Slide 1, «Compra fácil desde México»: the full catalog.
-  final VoidCallback? onOpenCatalog;
+  /// B02 — all brands.
+  final VoidCallback onOpenBrands;
 
-  /// Slide 3, «Perfumes».
-  final VoidCallback? onOpenPerfumes;
+  /// B03 — categories.
+  final VoidCallback onOpenCategories;
 
   /// Number of slides, one dot each.
   static const int slideCount = 3;
@@ -137,7 +136,7 @@ class HomeEditorialBanner extends StatefulWidget {
   /// photographs' own proportions so a tall phone does not crop them hard.
   static double heightFor(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    return math.min(homeBannerHeight(context), width / 1.8);
+    return math.min(homeBannerHeight(context), width / 2.4 + 24);
   }
 
   @override
@@ -218,12 +217,7 @@ class _HomeEditorialBannerState extends State<HomeEditorialBanner> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.boutique;
-    final width = MediaQuery.sizeOf(context).width;
-    final gutter = MonettaTokens.gutterFor(width);
-    final serif = MonettaTokens.campaign.sizeFor(width) * 1.05;
-    // Full bleed, square to the edges — figure 03 runs the photograph from
-    // rail to rail under the header, not as an inset card.
+    // v4.1 B01–B03 delivered banners; manual swipe with optional autoplay.
     return SizedBox(
       key: const ValueKey('home-compact-hero'),
       height: HomeEditorialBanner.heightFor(context),
@@ -242,136 +236,20 @@ class _HomeEditorialBannerState extends State<HomeEditorialBanner> {
                 _restartAutoplay();
               },
               children: [
-                _BannerSlide(
-                  key: const ValueKey('home-banner-slide-easy'),
-                  photo: const GuidePhoto(
-                    kGuideHomeBannerEasy,
-                    GuideTextSide.right,
-                  ),
-                  focus: const Alignment(-.6, 0),
-                  gutter: gutter,
-                  onTap: widget.onOpenCatalog,
-                  children: [
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'Compra ',
-                            style: guideSerifItalicStyle(
-                              context,
-                              size: serif,
-                              color: palette.ink,
-                            ),
-                          ),
-                          TextSpan(
-                            text: 'fácil',
-                            style: guideAccentStyle(
-                              context,
-                              size: serif * 1.7,
-                              color: palette.ink,
-                            ),
-                          ),
-                        ],
-                      ),
-                      textAlign: TextAlign.end,
-                    ),
-                    Text(
-                      'desde México',
-                      textAlign: TextAlign.end,
-                      style: guideSerifItalicStyle(
-                        context,
-                        size: serif,
-                        color: palette.ink,
-                      ),
-                    ),
-                  ],
+                GuideBanner(
+                  key: const ValueKey('home-banner-slide-products'),
+                  id: 'B01',
+                  onTap: widget.onOpenProducts,
                 ),
-                _BannerSlide(
-                  photo: const GuidePhoto(
-                    kGuideHomeBannerNew,
-                    GuideTextSide.left,
-                  ),
-                  focus: const Alignment(.4, 0),
-                  gutter: gutter,
-                  actionKey: const ValueKey('home-banner-action'),
-                  onTap: widget.onOpenNew,
-                  children: [
-                    Text(
-                      'NUEVA',
-                      style: guideSerifStyle(
-                        context,
-                        size: serif * 0.6,
-                        color: palette.ink,
-                        weight: FontWeight.w500,
-                        letterSpacing: serif * 0.1,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'COLECCIÓN',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: guideSerifStyle(
-                        context,
-                        size: serif * 1.15,
-                        color: palette.ink,
-                        height: 1.05,
-                        letterSpacing: serif * 0.04,
-                      ),
-                    ),
-                    const SizedBox(height: BoutiqueSpace.sm),
-                    ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: width * .58),
-                      child: Text(
-                        'Un paraíso de marcas\npor descubrir.',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: guideSerifItalicStyle(
-                          context,
-                          size: serif * 0.62,
-                          color: palette.ink,
-                          weight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
+                GuideBanner(
+                  key: const ValueKey('home-banner-slide-brands'),
+                  id: 'B02',
+                  onTap: widget.onOpenBrands,
                 ),
-                _BannerSlide(
-                  key: const ValueKey('home-banner-slide-perfumes'),
-                  photo: const GuidePhoto(
-                    kGuideHomeBannerPerfumes,
-                    GuideTextSide.right,
-                  ),
-                  focus: const Alignment(-.3, 0),
-                  gutter: gutter,
-                  onTap: widget.onOpenPerfumes,
-                  children: [
-                    Text(
-                      'PERFUMES',
-                      textAlign: TextAlign.end,
-                      style: guideSerifStyle(
-                        context,
-                        size: serif * 1.15,
-                        color: palette.ink,
-                        height: 1.05,
-                        letterSpacing: serif * 0.04,
-                      ),
-                    ),
-                    const SizedBox(height: BoutiqueSpace.sm),
-                    ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: width * .5),
-                      child: Text(
-                        'Descubre nuestra selección de fragancias originales',
-                        textAlign: TextAlign.end,
-                        style: guideSerifItalicStyle(
-                          context,
-                          size: serif * 0.62,
-                          color: palette.ink,
-                          weight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
+                GuideBanner(
+                  key: const ValueKey('home-banner-slide-categories'),
+                  id: 'B03',
+                  onTap: widget.onOpenCategories,
                 ),
               ],
             ),
@@ -386,67 +264,6 @@ class _HomeEditorialBannerState extends State<HomeEditorialBanner> {
                 child: _HeroDots(
                   count: HomeEditorialBanner.slideCount,
                   active: _page,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// One carousel slide: a guide still, a cream wash on the text side and the
-/// copy aligned to that side. The copy scales down instead of overflowing.
-class _BannerSlide extends StatelessWidget {
-  const _BannerSlide({
-    required this.photo,
-    required this.focus,
-    required this.gutter,
-    required this.children,
-    this.onTap,
-    this.actionKey,
-    super.key,
-  });
-
-  final GuidePhoto photo;
-  final Alignment focus;
-  final double gutter;
-  final List<Widget> children;
-  final VoidCallback? onTap;
-  final Key? actionKey;
-
-  @override
-  Widget build(BuildContext context) {
-    final onRight = photo.textSide == GuideTextSide.right;
-    return GestureDetector(
-      key: actionKey,
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          GuideArt(asset: photo.asset, alignment: focus),
-          GuideScrim(textSide: photo.textSide),
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              gutter,
-              BoutiqueSpace.lg,
-              gutter,
-              BoutiqueSpace.xl,
-            ),
-            child: Align(
-              alignment: onRight ? Alignment.centerRight : Alignment.centerLeft,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment:
-                    onRight ? Alignment.centerRight : Alignment.centerLeft,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: onRight
-                      ? CrossAxisAlignment.end
-                      : CrossAxisAlignment.start,
-                  children: children,
                 ),
               ),
             ),

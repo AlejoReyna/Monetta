@@ -2,12 +2,13 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:typed_data' show Uint8List;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
 import '../../app/motion.dart';
+import '../../app/account_controller.dart';
+import '../notifications/notification_inbox.dart';
 import '../../app/monetta_tokens.g.dart';
 import '../../app/storefront_layout.dart';
 import '../../app/theme.dart';
@@ -18,6 +19,9 @@ enum MonettaBottomDestination { home, catalog, bag, account }
 
 // Layout of the docked bar. The theme is the only source of its colors.
 const double _kBarMinHeight = 56;
+
+/// Radius of the v4.1 selection capsule behind the current destination.
+const double _kSelectionRadius = 24;
 const double _kBarSidePadding = 10;
 const double _kBarMaxContentWidth = 480;
 // 2 (was 4) so that «Categorías» (about 69 pt in Inter 600 at 13) still fits
@@ -27,7 +31,6 @@ const double _kItemVerticalPadding = 6;
 const double _kIconBox = 24;
 const double _kIconStroke = 1.7;
 // Ring around the profile photo that stands in for the «Cuenta» glyph.
-const double _kPhotoRingWidth = 1.5;
 const double _kIconLabelGap = 3;
 const double _kLabelSize = 13;
 const double _kLabelHeight = 1.25;
@@ -36,6 +39,12 @@ const double _kPressedOpacity = 0.55;
 // iOS-only floating glass capsule. The fill is the theme's navigation surface,
 // so dark mode and high contrast need no special colors.
 const double _kGlassHorizontalMargin = 16;
+
+/// Below this width the capsule hugs the screen edges so four destinations
+/// (with «Categorías», the widest label) still share one row.
+const double _kGlassNarrowWidth = 360;
+const double _kGlassNarrowMargin = 6;
+const double _kBarNarrowSidePadding = 2;
 const double _kGlassTopMargin = 6;
 const double _kGlassMinBottomMargin = 12;
 const double _kGlassRadius = 28;
@@ -71,11 +80,19 @@ class MonettaBottomNavigation extends StatelessWidget {
     required this.current,
     required this.bagCount,
     required this.onSelected,
+    this.notificationInbox,
+    this.accountController,
+    this.wholesaleEligible = false,
     this.secondary,
     this.vertical = false,
     super.key,
   });
 
+  final NotificationInbox? notificationInbox;
+  final AccountController? accountController;
+
+  /// Set only from the checkout's authoritative eligibility response.
+  final bool wholesaleEligible;
   final bool vertical;
 
   MonettaBottomNavigation asRail() => MonettaBottomNavigation(
@@ -84,6 +101,9 @@ class MonettaBottomNavigation extends StatelessWidget {
         bagCount: bagCount,
         onSelected: onSelected,
         vertical: true,
+        notificationInbox: notificationInbox,
+        accountController: accountController,
+        wholesaleEligible: wholesaleEligible,
       );
 
   final MonettaBottomDestination? current;
@@ -96,6 +116,20 @@ class MonettaBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final account = accountController ?? AccountScope.maybeOf(context);
+    return ListenableBuilder(
+      listenable: Listenable.merge([account, notificationInbox]),
+      builder: (context, _) {
+        final owner = account?.account?.localAccountId;
+        final unread = account?.isSignedIn == true && owner != null
+            ? notificationInbox?.unreadCountFor(owner) ?? 0
+            : 0;
+        return _build(context, unread);
+      },
+    );
+  }
+
+  Widget _build(BuildContext context, int unread) {
     if (!StorefrontPaneScope.ownsNavigationOf(context)) {
       return const SizedBox.shrink();
     }
@@ -114,7 +148,10 @@ class MonettaBottomNavigation extends StatelessWidget {
                   tooltip: destination == MonettaBottomDestination.bag &&
                           bagCount > 0
                       ? '${_labelOf(destination)}, $bagCount ${bagCount == 1 ? 'artículo' : 'artículos'}'
-                      : _labelOf(destination),
+                      : destination == MonettaBottomDestination.account &&
+                              unread > 0
+                          ? 'Cuenta, $unread avisos sin leer'
+                          : _labelOf(destination),
                   style: IconButton.styleFrom(
                     minimumSize: const Size(48, 48),
                     side: destination == current || destination == secondary
@@ -143,10 +180,23 @@ class MonettaBottomNavigation extends StatelessWidget {
                           ],
                         )
                       : Badge(
-                          isLabelVisible:
-                              destination == MonettaBottomDestination.bag &&
-                                  bagCount > 0,
-                          label: Text('$bagCount'),
+                          isLabelVisible: destination ==
+                                      MonettaBottomDestination.bag &&
+                                  bagCount > 0 ||
+                              destination == MonettaBottomDestination.account &&
+                                  unread > 0,
+                          backgroundColor:
+                              destination == MonettaBottomDestination.account
+                                  ? const Color(0xFFA58248)
+                                  : null,
+                          textColor:
+                              destination == MonettaBottomDestination.account
+                                  ? Colors.black
+                                  : null,
+                          label: Text(
+                              destination == MonettaBottomDestination.account
+                                  ? (unread > 99 ? '99+' : '$unread')
+                                  : '$bagCount'),
                           child: _NavGlyph(destination: destination),
                         ),
                 ),
@@ -155,32 +205,21 @@ class MonettaBottomNavigation extends StatelessWidget {
         ],
       );
     }
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
-      return _buildGlassCapsule(context, colors);
-    }
-    return DecoratedBox(
-      key: const Key('bottom-nav-surface'),
-      decoration: BoxDecoration(
-        color: colors.navigationSurface,
-        border: Border(top: BorderSide(color: colors.divider, width: 0.5)),
-      ),
-      // Ink and focus paint on the bar's surface.
-      child: Material(
-        type: MaterialType.transparency,
-        child: SafeArea(
-          top: false,
-          maintainBottomViewPadding: true,
-          child: _buildHorizontalContent(context),
-        ),
-      ),
-    );
+    // UI v4.1: the floating glass capsule with halo C on every platform.
+    return _buildGlassCapsule(context, colors, unread);
   }
 
-  /// Floating translucent capsule used on iOS. The blur is dropped under high
-  /// contrast and the fill becomes opaque.
-  Widget _buildGlassCapsule(BuildContext context, MonettaColors colors) {
+  /// Floating translucent capsule (UI v4.1 on iOS, Android and web) ringed
+  /// by halo C: gold at 18 %, 10 px blur, 2 px spread, transparent centre.
+  /// The blur is dropped under high contrast and the fill becomes opaque.
+  Widget _buildGlassCapsule(
+      BuildContext context, MonettaColors colors, int unread) {
     final highContrast = MediaQuery.highContrastOf(context);
     final radius = BorderRadius.circular(_kGlassRadius);
+    final narrow = (MediaQuery.maybeSizeOf(context)?.width ?? double.infinity) <
+        _kGlassNarrowWidth;
+    final margin = narrow ? _kGlassNarrowMargin : _kGlassHorizontalMargin;
+    final sidePadding = narrow ? _kBarNarrowSidePadding : _kBarSidePadding;
     // Space the capsule adds around the destinations, so the overflow
     // decision keeps at least the task height the flat bar leaves.
     final bottomInset = MediaQuery.maybeViewPaddingOf(context)?.bottom ?? 0;
@@ -201,7 +240,9 @@ class MonettaBottomNavigation extends StatelessWidget {
         type: MaterialType.transparency,
         child: _buildHorizontalContent(
           context,
+          sidePadding: sidePadding,
           reservedHeight: reservedHeight,
+          unread: unread,
         ),
       ),
     );
@@ -215,21 +256,18 @@ class MonettaBottomNavigation extends StatelessWidget {
       );
     }
     return SafeArea(
+      // The whole band the bar takes at the foot of the screen.
+      key: const Key('bottom-nav-surface'),
       top: false,
       maintainBottomViewPadding: true,
       minimum: const EdgeInsets.only(bottom: _kGlassMinBottomMargin),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          _kGlassHorizontalMargin,
-          _kGlassTopMargin,
-          _kGlassHorizontalMargin,
-          0,
-        ),
+        padding: EdgeInsets.fromLTRB(margin, _kGlassTopMargin, margin, 0),
         child: Center(
           heightFactor: 1,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: _kBarMaxContentWidth + 2 * _kBarSidePadding,
+            constraints: BoxConstraints(
+              maxWidth: _kBarMaxContentWidth + 2 * sidePadding,
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -240,6 +278,11 @@ class MonettaBottomNavigation extends StatelessWidget {
                         .withValues(alpha: _kGlassShadowAlpha),
                     blurRadius: _kGlassShadowBlur,
                     offset: _kGlassShadowOffset,
+                  ),
+                  const BoxShadow(
+                    color: MonettaTokens.haloColor,
+                    blurRadius: MonettaTokens.haloBlur,
+                    spreadRadius: MonettaTokens.haloSpread,
                   ),
                 ],
               ),
@@ -255,18 +298,19 @@ class MonettaBottomNavigation extends StatelessWidget {
     );
   }
 
-  /// Destinations of the horizontal bar, shared by the flat bar and the iOS
-  /// capsule. [reservedHeight] is extra vertical space the surrounding chrome
-  /// takes besides the bar itself.
+  /// Destinations inside the capsule. [reservedHeight] is extra vertical
+  /// space the surrounding chrome takes besides the bar itself.
   Widget _buildHorizontalContent(
     BuildContext context, {
     double reservedHeight = 0,
+    double sidePadding = _kBarSidePadding,
+    int unread = 0,
   }) {
     final media = MediaQuery.maybeOf(context);
     final animationsDisabled =
         media?.disableAnimations == true || media?.accessibleNavigation == true;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: _kBarSidePadding),
+      padding: EdgeInsets.symmetric(horizontal: sidePadding),
       child: Center(
         heightFactor: 1,
         child: ConstrainedBox(
@@ -332,7 +376,7 @@ class MonettaBottomNavigation extends StatelessWidget {
                           value: destination,
                           checked: current == destination,
                           child: Text(
-                            '${_labelOf(destination)}${destination == MonettaBottomDestination.bag && bagCount > 0 ? ' ($bagCount)' : ''}',
+                            '${_labelOf(destination)}${destination == MonettaBottomDestination.bag && bagCount > 0 ? ' ($bagCount)' : destination == MonettaBottomDestination.account && unread > 0 ? ', $unread avisos sin leer' : ''}',
                           ),
                         ),
                     ],
@@ -348,6 +392,8 @@ class MonettaBottomNavigation extends StatelessWidget {
                       destination: destination,
                       selected: destination == current,
                       bagCount: bagCount,
+                      unreadCount: unread,
+                      wholesaleEligible: wholesaleEligible,
                       labelScaler: scaler,
                       wrapLabel: wrapLabel,
                       animationsDisabled: animationsDisabled,
@@ -369,6 +415,8 @@ class _NavItem extends StatefulWidget {
     required this.destination,
     required this.selected,
     required this.bagCount,
+    required this.unreadCount,
+    required this.wholesaleEligible,
     required this.labelScaler,
     this.wrapLabel = false,
     required this.animationsDisabled,
@@ -378,6 +426,8 @@ class _NavItem extends StatefulWidget {
   final MonettaBottomDestination destination;
   final bool selected;
   final int bagCount;
+  final int unreadCount;
+  final bool wholesaleEligible;
   final TextScaler labelScaler;
   final bool wrapLabel;
   final bool animationsDisabled;
@@ -396,10 +446,15 @@ class _NavItemState extends State<_NavItem> {
     final selected = widget.selected;
     final colors = context.monettaColors;
     final label = _labelOf(destination);
-    final badge =
-        destination == MonettaBottomDestination.bag ? widget.bagCount : 0;
+    final badge = destination == MonettaBottomDestination.bag
+        ? widget.bagCount
+        : destination == MonettaBottomDestination.account
+            ? widget.unreadCount
+            : 0;
     final semanticLabel = badge > 0
-        ? '$label, $badge ${badge == 1 ? 'artículo' : 'artículos'}'
+        ? destination == MonettaBottomDestination.account
+            ? '$label, $badge avisos sin leer'
+            : '$label, $badge ${badge == 1 ? 'artículo' : 'artículos'}'
         : label;
 
     return Semantics(
@@ -414,67 +469,88 @@ class _NavItemState extends State<_NavItem> {
         onHighlightChanged: (pressed) => setState(() => _pressed = pressed),
         // The visible label and the badge are already in [semanticLabel].
         child: ExcludeSemantics(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: _kBarMinHeight),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: _kItemHorizontalPadding,
-                vertical: _kItemVerticalPadding,
-              ),
-              child: Opacity(
-                opacity: _pressed ? _kPressedOpacity : 1,
-                child: TweenAnimationBuilder<double>(
-                  duration: widget.animationsDisabled ? Duration.zero : kSnap,
-                  curve: kMotionCurve,
-                  tween: Tween(end: selected ? 1 : 0),
-                  builder: (context, progress, _) {
-                    final color = Color.lerp(
-                      colors.navigationForegroundMuted,
-                      colors.navigationForeground,
-                      progress,
-                    )!;
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconTheme.merge(
-                          data: IconThemeData(color: color),
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              _NavGlyph(
-                                key: Key('bottom-nav-${destination.name}-icon'),
-                                destination: destination,
-                              ),
-                              if (badge > 0)
-                                Positioned(
-                                  left: 16,
-                                  top: -6,
-                                  child: _BagBadge(count: badge),
-                                ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: _kIconLabelGap),
-                        Text(
-                          label,
-                          key: Key('bottom-nav-${destination.name}-label'),
-                          maxLines: widget.wrapLabel ? null : 1,
-                          softWrap: widget.wrapLabel,
-                          textAlign: TextAlign.center,
-                          textScaler: widget.labelScaler,
-                          style: _labelStyle(
-                            weight:
-                                selected ? FontWeight.w600 : FontWeight.w400,
-                            color: color,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+          // v4.1 (nav_0–nav_3): the current destination sits on a soft capsule;
+          // icon and label stay ink. The capsule cross-fades, nothing moves.
+          child: TweenAnimationBuilder<double>(
+            duration: widget.animationsDisabled ? Duration.zero : kSnap,
+            curve: kMotionCurve,
+            tween: Tween(end: selected ? 1 : 0),
+            builder: (context, progress, _) {
+              final color = Color.lerp(
+                colors.navigationForegroundMuted,
+                colors.navigationForeground,
+                progress,
+              )!;
+              return DecoratedBox(
+                key: Key('bottom-nav-${destination.name}-selection'),
+                decoration: BoxDecoration(
+                  color: colors.navigationSelection.withValues(
+                    alpha: colors.navigationSelection.a * progress,
+                  ),
+                  borderRadius: BorderRadius.circular(_kSelectionRadius),
                 ),
-              ),
-            ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: _kBarMinHeight),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: _kItemHorizontalPadding,
+                      vertical: _kItemVerticalPadding,
+                    ),
+                    child: Opacity(
+                      opacity: _pressed ? _kPressedOpacity : 1,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconTheme.merge(
+                            data: IconThemeData(
+                                color: destination ==
+                                            MonettaBottomDestination.bag &&
+                                        widget.wholesaleEligible
+                                    ? const Color(0xFFA58248)
+                                    : color),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                _NavGlyph(
+                                  key: Key(
+                                    'bottom-nav-${destination.name}-icon',
+                                  ),
+                                  destination: destination,
+                                ),
+                                if (badge > 0)
+                                  Positioned(
+                                    left: 16,
+                                    top: -6,
+                                    child: _BagBadge(
+                                        count: badge,
+                                        account: destination ==
+                                            MonettaBottomDestination.account),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: _kIconLabelGap),
+                          Text(
+                            label,
+                            key: Key('bottom-nav-${destination.name}-label'),
+                            maxLines: widget.wrapLabel ? null : 1,
+                            softWrap: widget.wrapLabel,
+                            textAlign: TextAlign.center,
+                            textScaler: widget.labelScaler,
+                            style: _labelStyle(
+                              weight:
+                                  selected ? FontWeight.w600 : FontWeight.w400,
+                              color: color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -495,59 +571,11 @@ class _NavGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = IconTheme.of(context).color ?? const Color(0xFF000000);
-    final glyph = CustomPaint(
+    return CustomPaint(
       size: const Size.square(_kIconBox),
       painter: _NavGlyphPainter(destination: destination, color: color),
     );
-    if (destination != MonettaBottomDestination.account) return glyph;
-    // The bar reads the photo itself so every screen shows it. Without an
-    // account scope (tests, previews) or a photo it is the plain glyph.
-    final controller = AccountScope.maybeOf(context);
-    final photo = controller != null && controller.isSignedIn
-        ? controller.profilePhotoBytes
-        : null;
-    if (photo == null) return glyph;
-    return _ProfilePhotoGlyph(photo: photo, color: color, fallback: glyph);
   }
-}
-
-/// The signed-in shopper's photo as a circle in the glyph's box. The ring uses
-/// the item's current colour so the selected and unselected cue survives. The
-/// photo is decorative: the item's semantics stay «Cuenta».
-class _ProfilePhotoGlyph extends StatelessWidget {
-  const _ProfilePhotoGlyph({
-    required this.photo,
-    required this.color,
-    required this.fallback,
-  });
-
-  final Uint8List photo;
-  final Color color;
-  final Widget fallback;
-
-  @override
-  Widget build(BuildContext context) => ExcludeSemantics(
-        child: Container(
-          key: const Key('bottom-nav-account-photo'),
-          width: _kIconBox,
-          height: _kIconBox,
-          foregroundDecoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: color, width: _kPhotoRingWidth),
-          ),
-          child: ClipOval(
-            child: Image.memory(
-              photo,
-              width: _kIconBox,
-              height: _kIconBox,
-              fit: BoxFit.cover,
-              gaplessPlayback: true,
-              excludeFromSemantics: true,
-              errorBuilder: (_, __, ___) => fallback,
-            ),
-          ),
-        ),
-      );
 }
 
 class _NavGlyphPainter extends CustomPainter {
@@ -651,20 +679,21 @@ class _NavGlyphPainter extends CustomPainter {
 }
 
 class _BagBadge extends StatelessWidget {
-  const _BagBadge({required this.count});
+  const _BagBadge({required this.count, this.account = false});
 
   final int count;
+  final bool account;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.monettaColors;
     return Container(
-      key: const Key('bottom-nav-bag-badge'),
+      key: Key(account ? 'bottom-nav-account-badge' : 'bottom-nav-bag-badge'),
       constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
       padding: const EdgeInsets.symmetric(horizontal: 4),
       alignment: Alignment.center,
       decoration: ShapeDecoration(
-        color: colors.navigationForeground,
+        color: account ? const Color(0xFFA58248) : colors.navigationForeground,
         shape: StadiumBorder(
           side: BorderSide(
             color: colors.navigationSurface,
@@ -674,13 +703,15 @@ class _BagBadge extends StatelessWidget {
         ),
       ),
       child: Text(
-        count > 9 ? '9+' : '$count',
+        account
+            ? (count > 99 ? '99+' : '$count')
+            : (count > 9 ? '9+' : '$count'),
         textScaler: TextScaler.noScaling,
         style: sans(
           size: 10,
           weight: FontWeight.w600,
           height: 1,
-          color: colors.navigationSurface,
+          color: account ? Colors.black : colors.navigationSurface,
         ),
       ),
     );

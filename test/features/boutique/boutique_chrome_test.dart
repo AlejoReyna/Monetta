@@ -88,11 +88,18 @@ Color? _scaffoldColor(WidgetTester tester) {
   return tester.widget<Scaffold>(scaffold).backgroundColor;
 }
 
+/// Fill of the UI v4.1 glass capsule, without its translucency.
 Color? _bottomBarColor(WidgetTester tester) {
-  final surface = find.byKey(const Key('bottom-nav-surface'));
-  expect(surface, findsOneWidget);
-  final decoration = tester.widget<DecoratedBox>(surface).decoration;
-  return (decoration as BoxDecoration).color;
+  final glass = find.byKey(const Key('bottom-nav-glass'));
+  expect(glass, findsOneWidget);
+  final fill = tester
+      .widgetList<DecoratedBox>(
+        find.descendant(of: glass, matching: find.byType(DecoratedBox)),
+      )
+      .map((box) => box.decoration)
+      .whereType<ShapeDecoration>()
+      .first;
+  return fill.color?.withValues(alpha: 1);
 }
 
 CatalogItem _monettaItem(int i, String category) => CatalogItem(

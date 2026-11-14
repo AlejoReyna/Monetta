@@ -1,7 +1,7 @@
 {%- comment -%}
   Collection / brand / category page as the client guide draws it (slides 06–20; collection_screen.dart and
   guideCollectionPhoto in PR #33): the global header, the guide's photo banner for a brand, silhouette or category, the
-  category pills with the filters button, «N productos» and «Ordenar por», then the grid with VER PRODUCTO. A listing the
+  category pills with the filters button, «N productos» and «Ordenar por», then the grid of cards (no pill, UI v4.1). A listing the
   guide has no photograph for keeps its screen title. From 1200 px the filter sidebar stays.
   Products, prices, availability, filters, sort options and pagination are Shopify's (storefront filtering + paginate).
   Merchants only choose how many products per page and which menu feeds the shortcut chips.
@@ -141,7 +141,7 @@
     {% render 'monetta-guia-pills', active: guide_pill, filters_button: has_controls, active_count: active_count %}
 
     {%- capture results_html -%}
-      {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', view_button: true, listing_card: true, sizes: card_sizes, xl_widths: '240,360,480,600,720,900' %}
+      {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', listing_card: true, sizes: card_sizes, xl_widths: '240,360,480,600,720,900' %}
     {%- endcapture -%}
     {% render 'monetta-listing-layout',
       filters: collection.filters,

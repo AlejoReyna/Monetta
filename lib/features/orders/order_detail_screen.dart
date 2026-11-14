@@ -22,6 +22,8 @@ import '../../data/local/database.dart' show OrderSummary;
 import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
 import '../rewards/rewards_section.dart';
+import '../checkout/purchase_notices.dart';
+import 'order_fulfillment_progress.dart';
 import 'order_status.dart';
 
 const missingPaymentWhatsAppLabel =
@@ -114,6 +116,7 @@ class OrderDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final status = orderDisplayStatus(order);
+    final payment = orderPaymentStatus(order);
     final label = orderLabelOf(order);
     return Scaffold(
       backgroundColor: palette.canvas,
@@ -146,10 +149,39 @@ class OrderDetailScreen extends StatelessWidget {
                   subtitle: 'Realizado el ${orderDateLabel(order.placedAt)}.',
                 ),
                 const SizedBox(height: BoutiqueSpace.lg),
+                if (orderFulfillmentPhase(order) !=
+                    OrderFulfillmentPhase.unavailable) ...[
+                  ECard(
+                    children: [
+                      const ESectionTitle(title: 'Envío'),
+                      const SizedBox(height: BoutiqueSpace.sm),
+                      OrderFulfillmentProgressBar(order: order),
+                    ],
+                  ),
+                  const SizedBox(height: BoutiqueSpace.lg),
+                ],
                 ECard(
                   children: [
-                    const ESectionTitle(title: 'Estado'),
+                    const ESectionTitle(title: 'Estado de pago'),
                     const SizedBox(height: BoutiqueSpace.sm),
+                    if (payment.key != status.key) ...[
+                      EStatusCapsule.forOrderKey(
+                        payment.key,
+                        label: payment.label,
+                        guideIcon: Icons.payments_outlined,
+                      ),
+                      const SizedBox(height: BoutiqueSpace.sm),
+                      Text(
+                        payment.detail,
+                        style: boutiqueText(
+                          size: 13,
+                          color: palette.inkMuted,
+                        ),
+                      ),
+                      const SizedBox(height: BoutiqueSpace.md),
+                      const ESectionTitle(title: 'Resumen'),
+                      const SizedBox(height: BoutiqueSpace.sm),
+                    ],
                     EStatusCapsule.forOrderKey(
                       status.key,
                       label: status.label,
@@ -303,14 +335,13 @@ class OrderDetailScreen extends StatelessWidget {
                     ..._timeline(context),
                     const SizedBox(height: BoutiqueSpace.sm),
                     Text(
-                      'Sin número de guía no mostramos fechas estimadas. '
-                      'Envíos: contenido pendiente de aprobación. '
-                      'Devoluciones y garantía: contenido pendiente de aprobación.',
+                      'Sin número de guía no mostramos fechas estimadas.',
                       style: boutiqueText(
                         size: 12,
                         color: palette.inkMuted,
                       ),
                     ),
+                    const PurchasePolicyNotice(),
                   ],
                 ),
                 if (order.source == 'whatsapp_apartado') ...[
@@ -376,19 +407,16 @@ class OrderDetailScreen extends StatelessWidget {
         'Registrado el ${orderDateLabel(order.placedAt)}.',
       ),
     ];
-    // El pago se lee aparte del envío. Un reembolso o un impago no
-    // agrega "enviado" ni "entregado" aunque haya fulfillment.
-    final paid = order.source != 'whatsapp_apartado' &&
-        orderPaymentStatus(order).key == 'confirmed';
+    final payment = orderPaymentStatus(order);
+    final terminalPayment = orderFulfillmentBlocked(order);
     if (order.source != 'whatsapp_apartado') {
-      if (paid) {
+      if (payment.key == 'confirmed') {
         events.add(('Pago confirmado', 'Shopify registró el pago.'));
       } else {
-        final payment = orderPaymentStatus(order);
         events.add((payment.label, payment.detail));
       }
     }
-    if (!paid && order.source != 'whatsapp_apartado') {
+    if (terminalPayment) {
       return events;
     }
     final fulfillment = order.fulfillmentStatus?.toLowerCase().trim();

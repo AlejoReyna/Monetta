@@ -10,7 +10,6 @@ import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/catalog_controls.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
-import 'package:monetta_app/features/catalog/product_tile.dart';
 import 'package:monetta_app/features/home/home_account_invitation.dart';
 import 'package:monetta_app/main.dart';
 
@@ -60,18 +59,6 @@ TextStyle _styleOf(WidgetTester tester, Finder finder) {
   return style!;
 }
 
-/// The style the first card of the screen gives to its product name.
-TextStyle _cardNameStyle(WidgetTester tester, CatalogItem item) {
-  final name = ProductTileData.fromCatalogItem(item).title;
-  return _styleOf(
-    tester,
-    find.descendant(
-      of: find.byType(MonettaProductTile).first,
-      matching: find.text(name),
-    ),
-  );
-}
-
 void _expectSerif(TextStyle style, {required String reason}) {
   expect(style.fontFamily, kBoutiqueSerifFamily, reason: '$reason: family');
   expect(
@@ -99,20 +86,16 @@ Future<void> _openCatalogPanel(WidgetTester tester) async {
 
 void main() {
   group('TYPE-01 catalog titles follow the client guide', () {
-    testWidgets('TYPE-01 "Productos" is serif w400, 26', (tester) async {
+    testWidgets('v4.1 catalog context title is secondary DM Sans 15',
+        (tester) async {
       _view(tester);
       final items = [_item(1), _item(2), _item(3)];
       await tester.pumpWidget(_app(CatalogBrowseScreen(items: items)));
       await tester.pump();
 
       final title = _styleOf(tester, find.text('Productos'));
-      _expectSerif(title, reason: 'Productos');
-      expect(title.fontSize, MonettaTokens.screenTitle.compact);
-      // The card's own caption is set in the serif since the card redesign.
-      expect(
-        _cardNameStyle(tester, items.first).fontFamily,
-        kBoutiqueSerifFamily,
-      );
+      _expectSans(title, reason: 'v4.1 contextual title');
+      expect(title.fontSize, 15);
     });
 
     testWidgets('TYPE-01b "Sin resultados" of the empty catalog is serif w400',
@@ -145,24 +128,18 @@ void main() {
       );
     });
 
-    testWidgets('TYPE-01b the catalog panel title is sans w600',
-        (tester) async {
+    testWidgets('v4.1 catalog panel title uses editorial type', (tester) async {
       _view(tester);
       final items = [_item(1), _item(2), _item(3)];
       await tester.pumpWidget(_app(CatalogBrowseScreen(items: items)));
       await tester.pump();
       await _openCatalogPanel(tester);
 
-      final title = _styleOf(tester, find.text('Filtrar y ordenar'));
-      _expectSans(title, reason: 'catalog panel title');
-      // Panel chrome stays sans while the card caption is serif.
-      expect(
-        _cardNameStyle(tester, items.first).fontFamily,
-        isNot(title.fontFamily),
-      );
+      final title = _styleOf(tester, find.text('Filtros'));
+      _expectSerif(title, reason: 'v4.1 Filtros');
     });
 
-    testWidgets('TYPE-01b the collection panel title is sans w600',
+    testWidgets('v4.1 collection panel title uses editorial type',
         (tester) async {
       _view(tester);
       final store = await _loadedStore();
@@ -182,9 +159,9 @@ void main() {
       await tester.tap(find.byKey(const Key('collection-filter-button')));
       await tester.pumpAndSettle();
 
-      _expectSans(
-        _styleOf(tester, find.text('Filtrar y ordenar')),
-        reason: 'collection panel title',
+      _expectSerif(
+        _styleOf(tester, find.text('Filtros')),
+        reason: 'v4.1 Filtros',
       );
     });
   });
@@ -348,7 +325,7 @@ void main() {
       expect(editorial(24).fontFamily, isNot(kBoutiqueSansFamily));
     });
 
-    testWidgets('TYPE-02 the Home account invitation title is still serif',
+    testWidgets('C5 registration keeps the exact accepted copy and UI type',
         (tester) async {
       _view(tester);
       await tester.pumpWidget(
@@ -362,9 +339,10 @@ void main() {
       );
       await tester.pump();
 
-      final style = _styleOf(tester, find.text('REGÍSTRATE'));
-      expect(style.fontFamily, kBoutiqueSerifFamily);
-      expect(style.fontFamilyFallback, kBoutiqueSerifFallback);
+      final style =
+          _styleOf(tester, find.text('Regístrate en MONETTA REWARDS'));
+      expect(style.fontFamily, kBoutiqueSansFamily);
+      expect(style.fontFamilyFallback, kBoutiqueSansFallback);
     });
   });
 }

@@ -1,0 +1,77 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart
+00:00 +0: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:01 +1: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:01 +2: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:02 +3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:02 +4: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:02 +5: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:02 +5: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar scroll reaches Mayoreo after brands and labeled social controls at 200%
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:694:25)
+#1      WidgetController.element (package:flutter_test/src/controller.dart:888:30)
+#2      WidgetController.ensureVisible (package:flutter_test/src/controller.dart:2389:32)
+#3      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart:99:18)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  sidebar scroll reaches Mayoreo after brands and labeled social controls at 200%
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:02 +5 -1: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:02 +5 -1: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar scroll reaches Mayoreo after brands and labeled social controls at 200% [E]
+  Test failed. See exception logs above.
+  The test description was: sidebar scroll reaches Mayoreo after brands and labeled social controls at 200%
+  
+00:03 +6 -1: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:03 +7 -1: /Users/alexis/theCode/Monetta/test/features/catalog/categories_screen_test.dart: owner taxonomy expands in-flow and retains state on return at text 1.0
+00:03 +8 -1: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +9 -1: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +9 -1: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: guess uses actual membership through query, filters, clear and order
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:694:25)
+#1      WidgetController.element (package:flutter_test/src/controller.dart:888:30)
+#2      WidgetController.ensureVisible (package:flutter_test/src/controller.dart:2389:32)
+#3      tapVisible (file:///Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart:21:16)
+#4      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart:42:13)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  guess uses actual membership through query, filters, clear and order
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:04 +9 -2: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +9 -2: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: guess uses actual membership through query, filters, clear and order [E]
+  Test failed. See exception logs above.
+  The test description was: guess uses actual membership through query, filters, clear and order
+  
+00:04 +10 -2: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +11 -2: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +12 -2: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +13 -2: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: owner story exists only when supplied
+00:04 +14 -2: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: local search plus oldest retains scope and later query wins synchronously
+00:04 +15 -2: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: unknown collection membership is not a broader product fallback
+00:05 +16 -2: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: all brands routes to the actual canonical set and returns to directory
+00:05 +17 -2: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: global search filter entry preserves query and count scope
+00:05 +18 -2: Some tests failed.
+
+Failing tests:
+  /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: guess uses actual membership through query, filters, clear and order
+  /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar scroll reaches Mayoreo after brands and labeled social controls at 200%

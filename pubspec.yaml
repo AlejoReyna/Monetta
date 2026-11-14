@@ -71,6 +71,7 @@ dependencies:
 
   crypto: ^3.0.7
   shared_preferences: ^2.5.6
+  flutter_svg: ^2.3.4
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -103,33 +104,29 @@ flutter:
     - assets/images/
     - assets/images/brands/
     - assets/images/guide/
+    - assets/images/v41/banners/
+    - assets/images/v41/lettering/
+    - assets/images/v41/home_photos/
+    - assets/images/v41/icons/
+    - design-system/v41-assets.json
     - assets/images/guide/icons/
     - assets/catalog/
-    - assets/fonts/inter/OFL.txt
-    - assets/fonts/playfair_display/OFL.txt
+    - assets/fonts/dm_sans/OFL.txt
     - assets/fonts/cormorant_garamond/OFL.txt
     - assets/fonts/mrs_saint_delafield/OFL.txt
   fonts:
-    - family: Inter
+    # MONETTA UI v4.1 (§006): DM Sans 400/600/700 for UI and Cormorant Garamond
+    # 400/700 for editorial titles, from the delivery's 06_referencias/fuentes (OFL).
+    - family: DM Sans
       fonts:
-        - asset: assets/fonts/inter/Inter-Light.ttf
-          weight: 300
-        - asset: assets/fonts/inter/Inter-Regular.ttf
+        - asset: assets/fonts/dm_sans/DMSans-Regular.ttf
           weight: 400
-        - asset: assets/fonts/inter/Inter-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/inter/Inter-SemiBold.ttf
+        - asset: assets/fonts/dm_sans/DMSans-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/inter/Inter-Bold.ttf
+        - asset: assets/fonts/dm_sans/DMSans-Bold.ttf
           weight: 700
-    - family: Playfair Display
-      fonts:
-        - asset: assets/fonts/playfair_display/PlayfairDisplay-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/playfair_display/PlayfairDisplay-Bold.ttf
-          weight: 700
-    # Open stand-ins for the guide's licensed faces: Reglarik (serif) and
-    # Above the Beyond Script. Both are SIL OFL 1.1.
+    # Light, italic and medium remain for the older guide lettering until the
+    # v4.1 banner text layers replace it.
     - family: Cormorant Garamond
       fonts:
         - asset: assets/fonts/cormorant_garamond/CormorantGaramond-Light.ttf
@@ -144,6 +141,8 @@ flutter:
           style: italic
         - asset: assets/fonts/cormorant_garamond/CormorantGaramond-Medium.ttf
           weight: 500
+        - asset: assets/fonts/cormorant_garamond/CormorantGaramond-Bold.ttf
+          weight: 700
     - family: Mrs Saint Delafield
       fonts:
         - asset: assets/fonts/mrs_saint_delafield/MrsSaintDelafield-Regular.ttf

@@ -22,6 +22,13 @@ export function toCatalogProduct(product: AdminProduct): CatalogProductDocument 
     price: finiteMoney(variant.price) ?? 0,
     compareAtPrice: finiteMoney(variant.compareAtPrice),
     sku: variant.sku,
+    selectedOptions: Object.fromEntries(
+      (variant.selectedOptions ?? [])
+        .filter((option) => typeof option.name === "string" && option.name.trim() !== "" &&
+          typeof option.value === "string" && option.value.trim() !== "")
+        .map((option) => [option.name, option.value]),
+    ),
+    imageUrls: variant.image?.url ? [variant.image.url] : [],
     available: variant.availableForSale,
   }));
   const availablePrices = variants

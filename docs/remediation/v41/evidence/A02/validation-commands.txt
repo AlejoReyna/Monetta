@@ -1,0 +1,18 @@
+Run from /Users/alexis/theCode/Monetta. Local fixtures only, no deployment or live commerce.
+
+Successful scoped generation (codegen-retry.log):
+dart run build_runner build --build-filter=lib/data/local/database.g.dart --delete-conflicting-outputs
+
+Data upgrade/mapper/cold-reopen evidence (data-tests.log, 5 passed):
+flutter test --no-pub --reporter expanded test/data/local/v41_variant_cache_test.dart test/data/shopify/v41_variant_mapping_test.dart
+
+Post-A03 data/capability seam run (final-flow-and-seams.log, 44 passed at that source revision; two product-flow cases were subsequently added):
+flutter test --no-pub --reporter expanded test/features/product/purchase_dock_test.dart test/features/product/v41_product_flow_test.dart test/data/local/v41_variant_cache_test.dart test/data/shopify/v41_variant_mapping_test.dart test/data/repositories/v41_realtime_variant_test.dart test/features/product/v41_product_recommendations_test.dart test/app/notification_controller_test.dart test/features/rewards/rewards_data_contract_test.dart
+
+Final current product verification and 27 PNGs (verified-product-tests.log, 125 passed):
+MONETTA_A02_CAPTURE_DIR=docs/remediation/v41/evidence/A02/after flutter test --no-pub --reporter expanded test/features/catalog/product_card_test.dart test/features/product/product_selection_purchase_test.dart test/features/product/quick_view_purchase_test.dart test/features/product/product_selection_test.dart test/features/product/product_selection_try_add_test.dart test/features/product/purchase_dock_test.dart test/features/product/product_layout_responsive_test.dart test/features/product/v41_product_flow_test.dart test/features/product/v41_product_render_test.dart test/features/product/v41_product_recommendations_test.dart
+
+Final scoped analysis (verified-analyze.log, 32 paths, no issues):
+flutter analyze --no-pub lib/domain/product.dart lib/data/shopify/mappers.dart lib/data/shopify/queries.dart lib/data/repositories/catalog_repository.dart lib/data/repositories/realtime_catalog_repository.dart lib/data/local/tables.dart lib/data/local/database.dart lib/data/local/database.g.dart lib/data/local/catalog_cache_store.dart lib/features/catalog/product_card.dart lib/features/catalog/product_tile.dart lib/features/catalog/product_controls.dart lib/features/product/product_selection.dart lib/features/product/variant_selection.dart lib/features/product/product_screen.dart lib/features/product/product_zoom.dart lib/features/product/product_recommendations.dart lib/features/product/quick_view.dart lib/features/product/purchase_dock.dart test/features/product/v41_product_flow_test.dart test/features/product/v41_product_render_test.dart test/features/product/v41_product_recommendations_test.dart test/data/local/v41_variant_cache_test.dart test/data/shopify/v41_variant_mapping_test.dart test/data/repositories/v41_realtime_variant_test.dart test/features/product/purchase_dock_test.dart test/features/catalog/product_card_test.dart test/features/product/product_selection_test.dart test/features/product/quick_view_purchase_test.dart test/features/product/product_layout_responsive_test.dart test/data/local/database_test.dart test/support/v41_product_fixture.dart
+
+No platform build or installed-device/provider verification claimed. Do not use --update-goldens. Source/test SHA-256 values are in source-manifest.json. Baseline archived .dart.txt files retain original bytes. The first combined final-focused-tests.log was blocked by a concurrent BrandScreen import error; it is retained as a failed log, not represented as an overall passing command. A00's bounded import repair preceded the successful final product run.

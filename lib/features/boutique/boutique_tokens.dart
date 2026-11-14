@@ -25,8 +25,8 @@ import '../../app/theme.dart';
 // Type
 // ---------------------------------------------------------------------------
 
-/// Editorial serif. Playfair Display when registered; platform serif until then.
-const String kBoutiqueSerifFamily = 'Playfair Display';
+/// Editorial serif (v4.1): Cormorant Garamond 400/700.
+const String kBoutiqueSerifFamily = MonettaTokens.serifFamily;
 const List<String> kBoutiqueSerifFallback = <String>[
   'New York',
   'Iowan Old Style',
@@ -36,8 +36,8 @@ const List<String> kBoutiqueSerifFallback = <String>[
   'serif',
 ];
 
-/// Controls, prices, navigation. Inter when registered; platform sans until then.
-const String kBoutiqueSansFamily = 'Inter';
+/// Controls, prices, navigation (v4.1): DM Sans 400/600/700.
+const String kBoutiqueSansFamily = MonettaTokens.sansFamily;
 const List<String> kBoutiqueSansFallback = <String>[
   'SF Pro Text',
   'Helvetica Neue',
@@ -100,8 +100,9 @@ TextStyle _serifRole(
           ? role.compact
           : role.sizeFor(MediaQuery.sizeOf(context).width));
   return TextStyle(
-    fontFamily: kBoutiqueSerifFamily,
-    fontFamilyFallback: kBoutiqueSerifFallback,
+    fontFamily: role.serif ? kBoutiqueSerifFamily : kBoutiqueSansFamily,
+    fontFamilyFallback:
+        role.serif ? kBoutiqueSerifFallback : kBoutiqueSansFallback,
     fontSize: resolved,
     fontWeight: FontWeight.values[(role.weight ~/ 100) - 1],
     letterSpacing: resolved * role.tracking,
@@ -141,13 +142,19 @@ TextStyle boutiqueSectionHeading({
 }) =>
     _serifRole(MonettaTokens.sectionTitle, size, color, context);
 
-/// Row label of the account, menu and settings lists: serif (18 / 19 / 20).
+/// Row label of the account, menu and settings lists: DM Sans (18 / 19 / 20).
 TextStyle boutiqueRowLabel({
   Color? color,
   double? size,
   BuildContext? context,
 }) =>
-    _serifRole(MonettaTokens.accountRow, size, color, context);
+    boutiqueText(
+      size: size ??
+          MonettaTokens.accountRow.sizeFor(
+              context == null ? 390 : MediaQuery.sizeOf(context).width),
+      color: color,
+      height: MonettaTokens.accountRow.lineHeight,
+    );
 
 /// Running copy, labels, prices. Floor of 12 for secondary, 14 for body.
 TextStyle boutiqueText({
@@ -228,7 +235,7 @@ abstract final class BoutiqueRadius {
 // rest of this file (and its callers) already read.
 const Color _ivory = MonettaTokens.onPhoto;
 const Color _pageGround = MonettaTokens.canvas;
-const Color _tile = MonettaTokens.surfaceTile;
+const Color _tile = MonettaTokens.surface;
 const Color _warm = MonettaTokens.surfaceWarm;
 const Color _boutiqueInk = MonettaTokens.ink;
 const Color _mutedBoutiqueInk = MonettaTokens.inkMuted;
@@ -331,7 +338,7 @@ class BoutiquePalette {
         selectedFill: shared.surfaceMuted,
         selectedBorder: shared.contentPrimary,
         sale: shared.sale,
-        onDark: const Color(0xFFF8F5EE),
+        onDark: MonettaTokens.onPhoto,
         action: shared.actionPrimary,
         onAction: shared.onActionPrimary,
         actionDark: shared.actionDark,

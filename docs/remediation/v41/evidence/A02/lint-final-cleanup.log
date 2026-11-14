@@ -1,0 +1,50 @@
+Computing fixes in product_screen.dart...
+Applying fixes...
+
+product_screen.dart
+  require_trailing_commas - 1 fix
+
+1 fix made in 1 file.
+Computing fixes in v41_variant_mapping_test.dart...
+Nothing to fix!
+Computing fixes in product_layout_responsive_test.dart...
+Applying fixes...
+
+product_layout_responsive_test.dart
+  require_trailing_commas - 3 fixes
+
+3 fixes made in 1 file.
+Computing fixes in product_selection_test.dart...
+Applying fixes...
+
+product_selection_test.dart
+  require_trailing_commas - 3 fixes
+
+3 fixes made in 1 file.
+Computing fixes in quick_view_purchase_test.dart...
+Applying fixes...
+
+quick_view_purchase_test.dart
+  require_trailing_commas - 1 fix
+
+1 fix made in 1 file.
+Computing fixes in v41_product_render_test.dart...
+Applying fixes...
+
+v41_product_render_test.dart
+  require_trailing_commas - 4 fixes
+
+4 fixes made in 1 file.
+Computing fixes in v41_product_fixture.dart...
+Applying fixes...
+
+v41_product_fixture.dart
+  require_trailing_commas - 5 fixes
+
+5 fixes made in 1 file.
+Formatted lib/features/product/product_screen.dart
+Formatted test/features/product/product_layout_responsive_test.dart
+Formatted test/features/product/product_selection_test.dart
+Formatted test/features/product/quick_view_purchase_test.dart
+Formatted test/features/product/v41_product_render_test.dart
+Formatted 7 files (5 changed) in 0.04 seconds.

@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/shopper_copy.dart';
@@ -43,6 +43,7 @@ final Map<String, Product Function(CatalogStore)> _scenarios = {
 Future<void> _expectGuideContract(
   WidgetTester tester, {
   required double width,
+  bool inStock = true,
 }) async {
   final nav = find.byKey(const Key('bottom-nav-surface'));
   expect(nav, findsOneWidget);
@@ -52,8 +53,17 @@ Future<void> _expectGuideContract(
   expect(rect.right, lessThanOrEqualTo(width + 0.01));
   expect(rect.bottom, closeTo(kPhoneHeight, 0.01), reason: 'anchored below');
   expect(find.byKey(const Key('home-menu-button')), findsOneWidget);
-  await scrollTo(tester, find.byKey(kDockPrimaryKey));
-  expect(find.byKey(kDockPrimaryKey), findsOneWidget);
+  if (inStock) {
+    await scrollTo(tester, find.byKey(kDockPrimaryKey));
+    expect(find.byKey(kDockPrimaryKey), findsOneWidget);
+  } else {
+    expect(find.byKey(kDockPrimaryKey), findsNothing);
+    expect(
+      find.byKey(kRestockKey),
+      findsNothing,
+      reason: 'G12 requires exact-variant capability',
+    );
+  }
 
   await scrollToEnd(tester);
   expect(tester.takeException(), isNull);
@@ -115,7 +125,11 @@ void main() {
           final product = pick(store);
           await pumpFicha(tester, store, product.id, scale: scale);
 
-          await _expectGuideContract(tester, width: width);
+          await _expectGuideContract(
+            tester,
+            width: width,
+            inStock: product.isInStock,
+          );
         });
       }
 
@@ -142,7 +156,10 @@ void main() {
       final size = tester.getSize(finder);
       expect(size.width, greaterThanOrEqualTo(48), reason: '$what: width');
       expect(size.height, greaterThanOrEqualTo(48), reason: '$what: height');
-      final node = tester.getSemantics(finder);
+      final native =
+          find.descendant(of: finder, matching: find.byType(IconButton));
+      final node =
+          tester.getSemantics(native.evaluate().length == 1 ? native : finder);
       expect(accessibleName(node), isNotEmpty, reason: '$what: name');
       expect(
         node.getSemanticsData().flagsCollection.isButton,
@@ -181,11 +198,14 @@ void main() {
           );
           expect(
             accessibleName(tester.getSemantics(find.byKey(kDockPrimaryKey))),
-            contains('AGREGAR A BOLSA'),
+            contains('Agregar al carrito'),
           );
 
           await scrollTo(tester, find.byKey(kBuyNowKey));
-          expectButton(tester, find.byKey(kBuyNowKey), what: 'COMPRAR AHORA');
+          expectButton(tester, find.byKey(kBuyNowKey), what: 'Comprar ahora');
+          await scrollTo(tester, find.text('Otras formas de comprar'));
+          await tester.tap(find.text('Otras formas de comprar'));
+          await tester.pump();
           await scrollTo(tester, find.byKey(kApartarKey));
           expectButton(tester, find.byKey(kApartarKey), what: 'Apartar');
         });
@@ -207,7 +227,10 @@ void main() {
         await scrollTo(tester, find.byKey(kDockPrimaryKey));
         await scrollTo(tester, name);
         final title = tester.getSemantics(
-          find.byKey(const Key('home-menu-button')),
+          find.descendant(
+            of: find.byKey(const Key('home-menu-button')),
+            matching: find.byType(IconButton),
+          ),
         );
         final content = tester.getSemantics(name);
         final action = tester.getSemantics(find.byKey(kDockPrimaryKey));

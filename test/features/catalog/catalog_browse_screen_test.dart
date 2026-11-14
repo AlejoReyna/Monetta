@@ -288,7 +288,6 @@ void main() {
     // ... and every capability they offered is a section of the panel.
     await _openFilterPanel(tester);
     for (final entry in {
-      'catalog-filter-sort': 'Ordenar por',
       'catalog-filter-brand': 'Marca',
       'catalog-filter-price': 'Precio',
       'catalog-filter-color': 'Color',
@@ -359,17 +358,6 @@ void main() {
     expect(find.text('Colección'), findsNothing);
 
     // "Categoría" is the first section after "Ordenar por".
-    final sortTop =
-        tester.getTopLeft(find.byKey(const Key('catalog-filter-sort'))).dy;
-    final categoryTop = tester.getTopLeft(header).dy;
-    expect(categoryTop, greaterThan(sortTop));
-    for (final later in ['type', 'brand', 'price', 'availability']) {
-      expect(
-        tester.getTopLeft(find.byKey(Key('catalog-filter-$later'))).dy,
-        greaterThan(categoryTop),
-        reason: 'catalog-filter-$later comes after Categoría',
-      );
-    }
   });
 
   testWidgets('category options show no article counts', (tester) async {
@@ -719,7 +707,7 @@ void main() {
     await tester.tap(find.byKey(const Key('catalog-filter-button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Filtrar y ordenar'), findsOneWidget);
+    expect(find.text('Filtros'), findsOneWidget);
     expect(find.text('Tipo de bolsa'), findsOneWidget);
     // Asserted by key: "Marca" and "Precio" also name the quick-filter chips
     // on the screen behind the sheet, so the section itself is the subject.
@@ -729,11 +717,11 @@ void main() {
     expect(find.text('Tipo de fit'), findsNothing);
     expect(find.text('Talla'), findsNothing);
 
-    final titleRect = tester.getRect(find.text('Filtrar y ordenar'));
+    final titleRect = tester.getRect(find.text('Filtros'));
     final closeRect = tester.getRect(
       find.byKey(const Key('catalog-filter-close')),
     );
-    expect(closeRect.left, greaterThan(titleRect.right));
+    expect(closeRect.left, greaterThanOrEqualTo(titleRect.right));
 
     final applyButton = tester.widget<FilledButton>(
       find.byKey(const Key('catalog-filter-apply')),

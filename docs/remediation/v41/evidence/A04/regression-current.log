@@ -1,0 +1,681 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart
+00:00 +0: /Users/alexis/theCode/Monetta/test/features/catalog/categories_screen_test.dart: owner taxonomy expands in-flow and retains state on return at text 1.0
+00:01 +1: /Users/alexis/theCode/Monetta/test/features/catalog/categories_screen_test.dart: owner taxonomy expands in-flow and retains state on return at text 1.0
+00:01 +2: /Users/alexis/theCode/Monetta/test/features/catalog/categories_screen_test.dart: owner taxonomy expands in-flow and retains state on return at text 1.0
+00:01 +3: /Users/alexis/theCode/Monetta/test/features/catalog/categories_screen_test.dart: owner taxonomy expands in-flow and retains state on return at text 1.0
+00:02 +4: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:02 +5: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:02 +6: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:02 +7: /Users/alexis/theCode/Monetta/test/features/catalog/categories_screen_test.dart: owner taxonomy expands in-flow and retains state on return at text 2.0
+00:03 +8: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +9: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +10: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +11: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +12: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +13: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +14: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:05 +15: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:05 +16: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: local search plus oldest retains scope and later query wins synchronously
+00:06 +17: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:06 +18: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:07 +19: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:07 +20: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:07 +21: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:07 +22: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:08 +23: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:08 +24: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:08 +25: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:08 +26: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:08 +27: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:09 +28: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:09 +29: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:09 +30: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:09 +31: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-02 every pill capability works from the panel only FLT-02 (vigente) Cerrar keeps the filters already applied
+00:10 +32: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: collection filters are Spanish, stay pending until applied, and filter the grid
+00:11 +32: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-02 every pill capability works from the panel only FLT-02 (vigente) Limpiar leaves an empty draft
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _DescendantWidgetFinder:<Found 0 widgets with text "Precio: de menor a mayor" descending
+from widgets with type "BottomSheet": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      _tap (file:///Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart:98:3)
+#5      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart:385:13)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart line 98
+The test description was:
+  FLT-02 (vigente) Limpiar leaves an empty draft
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:11 +32 -1: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: collection filters are Spanish, stay pending until applied, and filter the grid
+00:11 +32 -1: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-02 every pill capability works from the panel only FLT-02 (vigente) Limpiar leaves an empty draft [E]
+  Test failed. See exception logs above.
+  The test description was: FLT-02 (vigente) Limpiar leaves an empty draft
+  
+00:11 +33 -1: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: collection filters are Spanish, stay pending until applied, and filter the grid
+00:11 +34 -1: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: collection filters are Spanish, stay pending until applied, and filter the grid
+00:11 +35 -1: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: collection filters are Spanish, stay pending until applied, and filter the grid
+00:11 +35 -1: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide TYPE-01 "Productos" is serif w400, 26
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: 'Cormorant Garamond'
+  Actual: 'DM Sans'
+   Which: is different.
+          Expected: Cormorant  ...
+            Actual: DM Sans
+                    ^
+           Differ at offset 0
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart:112:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart line 112
+The test description was:
+  TYPE-01 "Productos" is serif w400, 26
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:11 +35 -2: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: collection filters are Spanish, stay pending until applied, and filter the grid
+00:11 +35 -2: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide TYPE-01 "Productos" is serif w400, 26 [E]
+  Test failed. See exception logs above.
+  The test description was: TYPE-01 "Productos" is serif w400, 26
+  
+00:11 +36 -2: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-03 the badge counts filters, never the ordering FLT-03 (vigente) brand + color count as 2
+00:12 +37 -2: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: FLT-01 there is no quick filter rail; Marca, Precio, Color and Ordenar live in the filter panel
+00:12 +38 -2: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: FLT-01 there is no quick filter rail; Marca, Precio, Color and Ordenar live in the filter panel
+00:12 +39 -2: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: FLT-01 there is no quick filter rail; Marca, Precio, Color and Ordenar live in the filter panel
+00:12 +40 -2: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: every collection view exposes its filter action
+00:12 +41 -2: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: every collection view exposes its filter action
+00:12 +41 -2: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-03 the badge counts filters, never the ordering FLT-03 (vigente) no matches: "Sin resultados" and Limpiar filtros restores everything
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _KeyWidgetFinder:<Found 0 widgets with key [<'collection-clear-inline'>]: []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      _tap (file:///Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart:98:3)
+#5      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart:451:13)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart line 98
+The test description was:
+  FLT-03 (vigente) no matches: "Sin resultados" and Limpiar filtros restores everything
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:12 +41 -3: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: every collection view exposes its filter action
+00:12 +41 -3: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-03 the badge counts filters, never the ordering FLT-03 (vigente) no matches: "Sin resultados" and Limpiar filtros restores everything [E]
+  Test failed. See exception logs above.
+  The test description was: FLT-03 (vigente) no matches: "Sin resultados" and Limpiar filtros restores everything
+  
+00:12 +42 -3: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: every collection view exposes its filter action
+00:12 +43 -3: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: category options show no article counts
+00:12 +44 -3: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-01c collections have no duplicated pills FLT-01c no sort chip, silhouette pills or chip rail
+00:13 +45 -3: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:13 +46 -3: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:13 +47 -3: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:13 +48 -3: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:13 +49 -3: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:13 +50 -3: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:13 +51 -3: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-01c collections have no duplicated pills FLT-01c (guide v2) under the banner there is one toolbar: filter button, category pills, count and «Ordenar por»; no brand link and no clear action while nothing is filtered
+00:13 +52 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:14 +53 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:14 +54 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:14 +55 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:14 +56 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:14 +57 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:15 +58 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:15 +59 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:15 +60 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:15 +61 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:15 +62 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:15 +63 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:15 +64 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:15 +65 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:15 +66 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:15 +67 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:16 +68 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:16 +69 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:16 +70 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:16 +71 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:16 +72 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:16 +73 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:16 +74 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:16 +75 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:17 +76 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:17 +77 -3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:694:25)
+#1      WidgetController.element (package:flutter_test/src/controller.dart:888:30)
+#2      WidgetController.dragUntilVisible.<anonymous closure> (package:flutter_test/src/controller.dart:2489:38)
+<asynchronous suspension>
+#3      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#4      WidgetController.scrollUntilVisible.<anonymous closure> (package:flutter_test/src/controller.dart:2439:7)
+<asynchronous suspension>
+#5      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#6      main.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart:66:5)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  TYPE-01d the brand story heading is serif w400
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:17 +77 -4: /Users/alexis/theCode/Monetta/test/features/catalog/collection_guide_photo_test.dart: destination resolves delivered B08 without title reconstruction
+00:17 +77 -4: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400 [E]
+  Test failed. See exception logs above.
+  The test description was: TYPE-01d the brand story heading is serif w400
+  
+Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses
+TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request
+will actually be made. Any test expecting a real network connection and status code will fail.
+To test code that needs an HttpClient, provide your own HttpClient implementation to the code under
+test, so that your test can consistently provide a testable response to the code under test.
+00:17 +78 -4: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: COL-GUIDE collection toolbar (slide 06) v4.1 independent controls preserve immutable collection scope
+00:18 +79 -4: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: COL-GUIDE collection toolbar (slide 06) v4.1 independent controls preserve immutable collection scope
+00:18 +80 -4: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: COL-GUIDE collection toolbar (slide 06) v4.1 independent controls preserve immutable collection scope
+00:18 +81 -4: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: COL-GUIDE collection toolbar (slide 06) v4.1 independent controls preserve immutable collection scope
+00:18 +82 -4: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: typing offers catalog suggestions and submitting shows results
+00:18 +83 -4: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: typing offers catalog suggestions and submitting shows results
+00:19 +84 -4: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: typing offers catalog suggestions and submitting shows results
+00:19 +85 -4: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: typing offers catalog suggestions and submitting shows results
+00:19 +86 -4: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: typing offers catalog suggestions and submitting shows results
+00:19 +86 -4: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: COL-GUIDE collection toolbar (slide 06) «VER PRODUCTO» opens the ficha; the card has no "+" and keeps its heart
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: at least one matching candidate
+  Actual: _WidgetPredicateWidgetFinder:<Found 0 widgets with widget matching predicate: []>
+   Which: means none were found but some were expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart:87:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart line 87
+The test description was:
+  «VER PRODUCTO» opens the ficha; the card has no "+" and keeps its heart
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:19 +86 -5: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: typing offers catalog suggestions and submitting shows results
+00:19 +86 -5: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: COL-GUIDE collection toolbar (slide 06) «VER PRODUCTO» opens the ficha; the card has no "+" and keeps its heart [E]
+  Test failed. See exception logs above.
+  The test description was: «VER PRODUCTO» opens the ficha; the card has no "+" and keeps its heart
+  
+00:20 +87 -5: /Users/alexis/theCode/Monetta/test/features/catalog/collection_guide_photo_test.dart: no matching approved banner leaves the collection context readable
+00:20 +88 -5: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_result_count_test.dart: a shopper without a session does not see the piece count
+00:20 +89 -5: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: SRCH-GUIDE search state (slide 05) typing shows recents with a clock, suggestions with icons, three small products and a bordered «Ver todo»
+00:20 +90 -5: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: SRCH-GUIDE search state (slide 05) typing shows recents with a clock, suggestions with icons, three small products and a bordered «Ver todo»
+00:20 +91 -5: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: SRCH-GUIDE search state (slide 05) typing shows recents with a clock, suggestions with icons, three small products and a bordered «Ver todo»
+00:20 +92 -5: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: SRCH-GUIDE search state (slide 05) typing shows recents with a clock, suggestions with icons, three small products and a bordered «Ver todo»
+00:20 +93 -5: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: SRCH-GUIDE search state (slide 05) typing shows recents with a clock, suggestions with icons, three small products and a bordered «Ver todo»
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/app/media/monetta_image.dart:293:16
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#0e0ba relayoutBoundary=up1 OVERFLOWING:
+  creator: Column ← Center ← ColoredBox ← _ImageFallback ← MonettaImage-[<'fallback'>] ← ColorFiltered
+    ← ColorFiltered ← PackshotBlend ← Stack ← ClipRRect ← _TileImage ← SizedBox ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(0.0<=w<=95.3, 0.0<=h<=43.6)
+  size: Size(95.3, 43.6)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/features/catalog/product_tile.dart:767:24
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#590ed OVERFLOWING:
+  needs compositing
+  creator: Column ← LayoutBuilder ← Padding ← Stack ← DecoratedBox ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← MouseRegion ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(w=95.3, h=290.6)
+  size: Size(95.3, 290.6)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/features/catalog/product_tile.dart:767:24
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#a73f4 OVERFLOWING:
+  needs compositing
+  creator: Column ← LayoutBuilder ← Padding ← Stack ← DecoratedBox ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← MouseRegion ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(w=95.3, h=290.6)
+  size: Size(95.3, 290.6)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (3) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:20 +93 -6: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a category opens a real collection, not a dead end
+00:20 +93 -6: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: SRCH-GUIDE search state (slide 05) typing shows recents with a clock, suggestions with icons, three small products and a bordered «Ver todo» [E]
+  Test failed. See exception logs above.
+  The test description was: typing shows recents with a clock, suggestions with icons, three small products and a bordered «Ver todo»
+  
+00:20 +94 -6: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a category opens a real collection, not a dead end
+00:21 +95 -6: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a submitted query is remembered, reusable and removable
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/app/media/monetta_image.dart:293:16
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#0c5c3 relayoutBoundary=up1 OVERFLOWING:
+  creator: Column ← Center ← ColoredBox ← _ImageFallback ← MonettaImage-[<'fallback'>] ← ColorFiltered
+    ← ColorFiltered ← PackshotBlend ← Stack ← ClipRRect ← _TileImage ← SizedBox ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(0.0<=w<=95.3, 0.0<=h<=43.6)
+  size: Size(95.3, 43.6)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/features/catalog/product_tile.dart:767:24
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#7d3ef OVERFLOWING:
+  needs compositing
+  creator: Column ← LayoutBuilder ← Padding ← Stack ← DecoratedBox ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← MouseRegion ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(w=95.3, h=290.6)
+  size: Size(95.3, 290.6)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/features/catalog/product_tile.dart:767:24
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#67669 OVERFLOWING:
+  needs compositing
+  creator: Column ← LayoutBuilder ← Padding ← Stack ← DecoratedBox ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← MouseRegion ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(w=95.3, h=290.6)
+  size: Size(95.3, 290.6)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (3) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:21 +95 -7: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a submitted query is remembered, reusable and removable [E]
+  Test failed. See exception logs above.
+  The test description was: a submitted query is remembered, reusable and removable
+  
+00:21 +95 -7: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the whole history can be cleared
+00:22 +96 -7: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: no results names the term and offers real categories
+00:22 +97 -7: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the query survives coming back from another route
+00:23 +98 -7: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: for an owner, the result count matches the grid it labels
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/app/media/monetta_image.dart:293:16
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#98c58 relayoutBoundary=up1 OVERFLOWING:
+  creator: Column ← Center ← ColoredBox ← _ImageFallback ← MonettaImage-[<'fallback'>] ← ColorFiltered
+    ← ColorFiltered ← PackshotBlend ← Stack ← ClipRRect ← _TileImage ← SizedBox ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(0.0<=w<=95.3, 0.0<=h<=43.6)
+  size: Size(95.3, 43.6)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/features/catalog/product_tile.dart:767:24
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#5a4c6 OVERFLOWING:
+  needs compositing
+  creator: Column ← LayoutBuilder ← Padding ← Stack ← DecoratedBox ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← MouseRegion ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(w=95.3, h=290.6)
+  size: Size(95.3, 290.6)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/features/catalog/product_tile.dart:767:24
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#f27f7 OVERFLOWING:
+  needs compositing
+  creator: Column ← LayoutBuilder ← Padding ← Stack ← DecoratedBox ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← MouseRegion ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(w=95.3, h=290.6)
+  size: Size(95.3, 290.6)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (3) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:23 +98 -8: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: for an owner, the result count matches the grid it labels [E]
+  Test failed. See exception logs above.
+  The test description was: for an owner, the result count matches the grid it labels
+  
+00:23 +98 -8: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a shopper sees results without a piece count
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/app/media/monetta_image.dart:293:16
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#ae987 relayoutBoundary=up1 OVERFLOWING:
+  creator: Column ← Center ← ColoredBox ← _ImageFallback ← MonettaImage-[<'fallback'>] ← ColorFiltered
+    ← ColorFiltered ← PackshotBlend ← Stack ← ClipRRect ← _TileImage ← SizedBox ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(0.0<=w<=95.3, 0.0<=h<=43.6)
+  size: Size(95.3, 43.6)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: min
+  crossAxisAlignment: center
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/features/catalog/product_tile.dart:767:24
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#3aa1d OVERFLOWING:
+  needs compositing
+  creator: Column ← LayoutBuilder ← Padding ← Stack ← DecoratedBox ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← MouseRegion ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(w=95.3, h=290.6)
+  size: Size(95.3, 290.6)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10.0 pixels on the bottom.
+
+The relevant error-causing widget was:
+  Column Column:file:///Users/alexis/theCode/Monetta/lib/features/catalog/product_tile.dart:767:24
+
+The overflowing RenderFlex has an orientation of Axis.vertical.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#45b28 OVERFLOWING:
+  needs compositing
+  creator: Column ← LayoutBuilder ← Padding ← Stack ← DecoratedBox ← Listener ← RawGestureDetector ←
+    GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← MouseRegion ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(w=95.3, h=290.6)
+  size: Size(95.3, 290.6)
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤◢◤
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (3) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:23 +98 -9: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a shopper sees results without a piece count [E]
+  Test failed. See exception logs above.
+  The test description was: a shopper sees results without a piece count
+  
+00:23 +98 -9: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: multi-word queries match every word in the catalog
+00:24 +99 -9: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: live results follow a multi-word query into Ver todo
+00:24 +100 -9: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: an unknown query shows the empty state while typing
+00:24 +101 -9: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: search capture 390.0 light
+00:31 +102 -9: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: search capture 390.0 dark
+00:37 +103 -9: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: search capture 834.0 light
+00:46 +104 -9: Some tests failed.
+
+Failing tests:
+  /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+  /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-02 every pill capability works from the panel only FLT-02 (vigente) Limpiar leaves an empty draft
+  /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-03 the badge counts filters, never the ordering FLT-03 (vigente) no matches: "Sin resultados" and Limpiar filtros restores everything
+  /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide TYPE-01 "Productos" is serif w400, 26
+  ... and 5 more

@@ -1,0 +1,139 @@
+diff --git a/lib/features/rewards/rewards_progress.dart b/lib/features/rewards/rewards_progress.dart
+new file mode 100644
+index 0000000..752d6b6
+--- /dev/null
++++ b/lib/features/rewards/rewards_progress.dart
+@@ -0,0 +1,133 @@
++/// Pure presentation for an authoritative tier result. No purchase or tier
++/// rules are inferred here. Production integration awaits A03's accepted DTO.
++library;
++
++import 'dart:math' as math;
++import 'package:flutter/material.dart';
++import '../../app/theme.dart';
++
++class RewardsProgress extends StatelessWidget {
++  const RewardsProgress({
++    required this.level,
++    required this.fraction,
++    required this.purchaseCountLabel,
++    this.nextLevel,
++    this.isFinalLevel = false,
++    super.key,
++  }) : assert(fraction >= 0 && fraction <= 1);
++
++  final String level;
++  final double fraction;
++
++  /// Service-provided count wording remains accessible in the final state.
++  final String purchaseCountLabel;
++  final String? nextLevel;
++  final bool isFinalLevel;
++
++  @override
++  Widget build(BuildContext context) {
++    final percentage = '${(fraction * 100).round()}%';
++    return Semantics(
++      label:
++          '$level, $percentage, $purchaseCountLabel${nextLevel == null || isFinalLevel ? '' : ', Siguiente nivel: $nextLevel'}',
++      excludeSemantics: true,
++      child: Column(children: [
++        LayoutBuilder(builder: (context, constraints) {
++          // Let enlarged text increase the painted area rather than shrinking
++          // text into a fixed circle. The surrounding page owns scrolling.
++          final side = math.min(constraints.maxWidth, 300.0);
++          final height =
++              math.max(side, MediaQuery.textScalerOf(context).scale(150));
++          return SizedBox(
++              width: side,
++              height: height,
++              child: CustomPaint(
++                painter: RewardsArcPainter(fraction: fraction),
++                child: Padding(
++                    padding: const EdgeInsets.all(28),
++                    child: Column(
++                        mainAxisAlignment: MainAxisAlignment.center,
++                        children: [
++                          Text(level,
++                              textAlign: TextAlign.center,
++                              style: display(32)
++                                  .copyWith(fontWeight: FontWeight.bold)),
++                          Text(percentage, style: sans(size: 16)),
++                        ])),
++              ));
++        }),
++        if (!isFinalLevel) ...[
++          Text(purchaseCountLabel,
++              textAlign: TextAlign.center, style: sans(size: 18)),
++          if (nextLevel != null)
++            Text('Siguiente nivel: $nextLevel',
++                textAlign: TextAlign.center, style: display(22)),
++        ],
++      ]),
++    );
++  }
++}
++
++class RewardsArcPainter extends CustomPainter {
++  const RewardsArcPainter({required this.fraction});
++  final double fraction;
++  static const start = 3 * math.pi / 4;
++  static const sweep = 3 * math.pi / 2;
++
++  @override
++  void paint(Canvas canvas, Size size) {
++    final diameter = math.min(size.width, size.height) - 28;
++    final rect = Rect.fromCenter(
++        center: size.center(Offset.zero), width: diameter, height: diameter);
++    final paint = Paint()
++      ..style = PaintingStyle.stroke
++      ..strokeWidth = 18
++      ..strokeCap = StrokeCap.round;
++    canvas.drawArc(
++        rect, start, sweep, false, paint..color = const Color(0xFFE9ECE6));
++    if (fraction > 0)
++      canvas.drawArc(rect, start, sweep * fraction, false,
++          paint..color = const Color(0xFFA58248).withValues(alpha: .85));
++  }
++
++  @override
++  bool shouldRepaint(RewardsArcPainter oldDelegate) =>
++      oldDelegate.fraction != fraction;
++}
++
++/// Caller supplies only provider-supported benefit wording, in approved order.
++Future<void> showRewardsBenefits(
++  BuildContext context, {
++  required String level,
++  required String introduction,
++  required List<String> benefits,
++}) =>
++    showDialog<void>(
++        context: context,
++        builder: (context) => AlertDialog(
++              title: Column(
++                  crossAxisAlignment: CrossAxisAlignment.start,
++                  children: [
++                    Text('Miembro', style: sans(size: 14)),
++                    Text(level,
++                        style:
++                            display(32).copyWith(fontWeight: FontWeight.bold)),
++                  ]),
++              scrollable: true,
++              content: Column(
++                  mainAxisSize: MainAxisSize.min,
++                  crossAxisAlignment: CrossAxisAlignment.start,
++                  children: [
++                    Text(introduction),
++                    const Divider(thickness: 2),
++                    for (final benefit in benefits)
++                      Padding(
++                          padding: const EdgeInsets.symmetric(vertical: 4),
++                          child: Text(benefit)),
++                  ]),
++              actions: [
++                TextButton(
++                    onPressed: () => Navigator.pop(context),
++                    child: const Text('Cerrar'))
++              ],
++            ));

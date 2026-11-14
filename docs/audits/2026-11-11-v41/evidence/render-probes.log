@@ -1,0 +1,12 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/docs/audits/2026-11-11-v41/render_probes_test.dart
+00:00 +0: Home viewport 320.0 at text scale 2.0
+00:01 +1: Home viewport 390.0 at text scale 1.0
+00:02 +2: Home viewport 768.0 at text scale 1.0
+00:03 +3: Home viewport 1440.0 at text scale 1.0
+00:04 +4: contact viewport 320 at text scale 2
+00:04 +5: wholesale viewport 320 at text scale 2
+00:05 +6: Favorites with saved products
+00:05 +7: Order detail with confirmed shipment
+00:05 +8: Sold out product card
+00:06 +9: iOS Home viewport
+00:06 +10: All tests passed!

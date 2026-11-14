@@ -45,7 +45,6 @@ Product _showcase(CatalogStore store) {
   bool fits(Product p, {required bool sale}) =>
       p.isInStock &&
       p.images.length > 1 &&
-      hasReliableColorOptions(p) &&
       selectableVariants(p).length > 1 &&
       store.facetsFor(p.id)?.brand != null &&
       (!sale || p.isOnSale);
@@ -170,7 +169,7 @@ void main() {
   testWidgets('b-04 ficha desplazada hasta relacionados (claro)',
       (tester) async {
     await openProductPage(tester);
-    final related = find.text('Productos relacionados');
+    final related = find.text('Relacionados');
     final scroll = find
         .byWidgetPredicate(
           (widget) =>

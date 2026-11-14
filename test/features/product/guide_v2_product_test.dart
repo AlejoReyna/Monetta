@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/features/product/product_screen.dart';
 import 'package:monetta_app/features/product/product_selection.dart';
@@ -10,7 +11,7 @@ void main() {
   setUpAll(mockPathProvider);
 
   group('PREVIEW-GUIDE quick view (slide 12)', () {
-    testWidgets('no «COMPRAR AHORA»; thumbnails, add and ver producto stay',
+    testWidgets('no «Comprar ahora»; thumbnails, add and ver producto stay',
         (tester) async {
       setPhoneView(tester, height: 1700);
       final store = await loadedStore();
@@ -23,14 +24,11 @@ void main() {
       );
       await pumpQuickView(tester, store, product);
 
-      expect(find.text('COMPRAR AHORA'), findsNothing);
+      expect(find.text('Comprar ahora'), findsNothing);
       expect(find.byKey(const Key('quick-view-buy-now')), findsNothing);
-      expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
+      expect(find.text('Agregar al carrito'), findsOneWidget);
       expect(find.byKey(const Key('quick-view-view-product')), findsOneWidget);
-      expect(find.text('VER PRODUCTO'), findsOneWidget);
-      // Thumbnails under the gallery.
-      expect(find.byKey(const ValueKey('thumb-0')), findsOneWidget);
-      expect(find.byKey(const ValueKey('thumb-1')), findsOneWidget);
+      expect(find.text('Ver producto'), findsOneWidget);
       // Brand in the serif; the stock line only says whether it is available,
       // never an invented quantity.
       expect(find.byKey(const Key('quick-view-brand')), findsOneWidget);
@@ -75,15 +73,24 @@ void main() {
         id: 'gid://shopify/Product/9101',
         title: 'Bolsa de colores',
         variants: [
-          syntheticVariant(id: 'v-negro', title: 'Negro'),
-          syntheticVariant(id: 'v-beige', title: 'Beige'),
+          syntheticVariant(
+            id: 'v-negro',
+            title: 'Negro',
+            selectedOptions: const {'Color': 'Negro'},
+          ),
+          syntheticVariant(
+            id: 'v-beige',
+            title: 'Beige',
+            selectedOptions: const {'Color': 'Beige'},
+          ),
         ],
       );
       addProducts(store, [colored]);
       expect(hasReliableColorOptions(colored), isTrue);
       await pumpQuickView(tester, store, colored);
-      expect(find.text('Colores'), findsOneWidget);
-      expect(find.text('COMPRAR AHORA'), findsNothing);
+      // The heading carries the choice: «Color: Negro» (UI v4.1).
+      expect(find.textContaining('Color'), findsWidgets);
+      expect(find.text('Comprar ahora'), findsNothing);
     });
   });
 
@@ -101,13 +108,14 @@ void main() {
 
       final row = find.byKey(const Key('product-trust-row'));
       expect(row, findsOneWidget);
+      // UI v4.1 services, with the delivered copy.
       for (final text in [
-        'Entrega estimada',
-        '3 a 5 días',
-        'Productos originales',
-        'Garantía de autenticidad',
-        'Pago seguro',
-        'Compra con confianza',
+        'ENVÍO GRATIS',
+        '5 - 7 días hábiles',
+        'Producto Original',
+        'Importado desde E.U.A',
+        'Paga a Meses',
+        'Sin Intereses',
       ]) {
         expect(
           find.descendant(of: row, matching: find.text(text)),
@@ -116,7 +124,7 @@ void main() {
         );
       }
       expect(
-        find.descendant(of: row, matching: find.byType(Icon)),
+        find.descendant(of: row, matching: find.byType(SvgPicture)),
         findsNWidgets(3),
       );
 
@@ -125,11 +133,11 @@ void main() {
       final buy = find.byKey(kBuyNowKey);
       final addLabel = find.descendant(
         of: add,
-        matching: find.text('AGREGAR A BOLSA'),
+        matching: find.text('Agregar al carrito'),
       );
       final buyLabel = find.descendant(
         of: buy,
-        matching: find.text('COMPRAR AHORA'),
+        matching: find.text('Comprar ahora'),
       );
       expect(addLabel, findsOneWidget);
       expect(buyLabel, findsOneWidget);
@@ -141,8 +149,8 @@ void main() {
       expect(find.textContaining('reseñas'), findsNothing);
       expect(find.byIcon(Icons.star), findsNothing);
       expect(find.byIcon(Icons.star_rounded), findsNothing);
-      // Apartado and WhatsApp stay below.
-      expect(find.byKey(kPurchaseSectionKey), findsOneWidget);
+      // The WhatsApp apartado lives in «Otras formas de comprar».
+      expect(find.text('Otras formas de comprar'), findsOneWidget);
     });
   });
 }

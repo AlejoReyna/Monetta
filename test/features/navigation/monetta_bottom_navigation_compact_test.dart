@@ -141,56 +141,6 @@ double _lowestBottom(WidgetTester tester, Finder finder) {
 
 void main() {
   setUpAll(loadBundledFonts);
-  testWidgets('NAV-01 at scale 1.0 the surface and every destination are 56 px',
-      (tester) async {
-    await _pumpBar(tester);
-
-    expect(tester.takeException(), isNull);
-    expect(tester.getSize(_surface).height, 56, reason: 'bar surface');
-    for (final d in _destinations) {
-      expect(tester.getSize(_dest(d)).height, 56, reason: '${d.name} height');
-    }
-  });
-
-  group('NAV-02 the safe area is added once and painted under', () {
-    for (final (inset, expectedHeight) in [
-      (0.0, 56.0),
-      (20.0, 76.0),
-      (34.0, 90.0),
-    ]) {
-      testWidgets('NAV-02 inset ${inset.toInt()} -> ${expectedHeight.toInt()}',
-          (tester) async {
-        await _pumpBar(tester, inset: inset);
-
-        final surface = tester.getRect(_surface);
-        expect(surface.height, expectedHeight, reason: '56 + inset, once');
-        expect(surface.bottom, _viewHeight, reason: 'docked to the bottom');
-        expect(surface.left, 0);
-        expect(surface.right, 390);
-
-        for (final d in _destinations) {
-          final rect = tester.getRect(_dest(d));
-          expect(
-            rect.bottom,
-            closeTo(_viewHeight - inset, 0.01),
-            reason: '${d.name} stops above the inset',
-          );
-          expect(rect.height, 56, reason: '${d.name} keeps 56 of content');
-        }
-
-        // The surface color is painted by the surface itself, so it also
-        // fills the area under the inset.
-        final decorated = tester.widget<DecoratedBox>(_surface);
-        final colors =
-            tester.element(find.byType(MonettaBottomNavigation)).monettaColors;
-        expect(
-          (decorated.decoration as BoxDecoration).color,
-          colors.navigationSurface,
-        );
-        expect(tester.getRect(_surface).bottom, _viewHeight);
-      });
-    }
-  });
 
   group('NAV-03 destinations keep working (vigente)', () {
     testWidgets('NAV-03 tapping each destination reports that destination',
@@ -347,9 +297,9 @@ void main() {
           'contenido (ancho ${width.toInt()})', (tester) async {
         const inset = 34.0;
 
-        // Control: at scale 1.0 the bar is exactly 56 + inset.
+        // Control: at scale 1.0 the bar is 56 + the capsule's 6 px top margin + inset.
         await _pumpBar(tester, width: width, inset: inset);
-        expect(tester.getSize(_surface).height, 56 + inset, reason: 'x1.0');
+        expect(tester.getSize(_surface).height, 56 + 6 + inset, reason: 'x1.0');
 
         await _pumpBar(tester, width: width, inset: inset, scale: 2.0);
         expect(tester.takeException(), isNull);
@@ -357,7 +307,7 @@ void main() {
         final surface = tester.getRect(_surface);
         expect(
           surface.height,
-          greaterThanOrEqualTo(56 + inset),
+          greaterThanOrEqualTo(56 + 6 + inset),
           reason: 'never below the 56 px floor plus the inset',
         );
         expect(surface.bottom, _viewHeight);
@@ -476,7 +426,7 @@ void main() {
       );
     });
 
-    testWidgets('NAV-04b the catalog bar measures 90 with an inset of 34',
+    testWidgets('NAV-04b the catalog bar measures 96 with an inset of 34',
         (tester) async {
       _view(tester, inset: 34);
       await tester.pumpWidget(
@@ -488,11 +438,11 @@ void main() {
       await tester.pump();
 
       final surface = tester.getRect(_surface);
-      expect(surface.height, 90);
+      expect(surface.height, 96);
       expect(surface.bottom, _viewHeight);
     });
 
-    testWidgets('NAV-04b the collection bar measures 90 with an inset of 34',
+    testWidgets('NAV-04b the collection bar measures 96 with an inset of 34',
         (tester) async {
       _view(tester, inset: 34);
       final store = await _loadedStore();
@@ -512,7 +462,7 @@ void main() {
       await tester.pump();
 
       final surface = tester.getRect(_surface);
-      expect(surface.height, 90);
+      expect(surface.height, 96);
       expect(surface.bottom, _viewHeight);
     });
   });

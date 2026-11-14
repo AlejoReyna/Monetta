@@ -1,0 +1,30 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart
+00:00 +0: /Users/alexis/theCode/Monetta/test/app/v41_base_tokens_test.dart: v4.1 confirmed colours
+00:00 +1: /Users/alexis/theCode/Monetta/test/app/v41_base_tokens_test.dart: v4.1 halo C: gold at 18%, blur 10, spread 2
+00:00 +2: /Users/alexis/theCode/Monetta/test/app/v41_base_tokens_test.dart: v4.1 faces: DM Sans for UI, Cormorant Garamond editorial
+00:00 +3: /Users/alexis/theCode/Monetta/test/app/v41_base_tokens_test.dart: every v4.1 asset in the manifest ships with the app and the theme
+00:00 +4: /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: every owner photograph constant points at a shipped file
+00:00 +5: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: all supplied assets resolve by ID with matching hashes and dimensions
+00:00 +6: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: all supplied assets resolve by ID with matching hashes and dimensions
+00:00 +7: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: all supplied assets resolve by ID with matching hashes and dimensions
+00:00 +8: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: all supplied assets resolve by ID with matching hashes and dimensions
+00:00 +9: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: all supplied assets resolve by ID with matching hashes and dimensions
+00:00 +10: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: all supplied assets resolve by ID with matching hashes and dimensions
+00:00 +11: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: all supplied assets resolve by ID with matching hashes and dimensions
+00:00 +12: /Users/alexis/theCode/Monetta/test/features/boutique/guide_photos_test.dart: GuideHero text side left (the default) puts the title in the left half
+00:00 +13: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: button wraps enlarged copy and supports keyboard activation
+00:00 +14: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: button wraps enlarged copy and supports keyboard activation
+00:01 +15: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: shared assets and opaque reduced-motion controls render
+00:01 +16: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 320.0/1.0
+00:02 +17: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 320.0/2.0
+00:02 +18: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 768.0/1.0
+00:02 +19: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 768.0/2.0
+00:02 +20: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 1440.0/1.0
+00:02 +21: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 1440.0/2.0
+00:03 +22: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 320.0/1.0
+00:03 +23: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 320.0/2.0
+00:03 +24: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 768.0/1.0
+00:03 +25: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 768.0/2.0
+00:03 +26: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 1440.0/1.0
+00:04 +27: /Users/alexis/theCode/Monetta/test/features/boutique/v41_foundation_test.dart: hero readable 1440.0/2.0
+00:04 +28: All tests passed!

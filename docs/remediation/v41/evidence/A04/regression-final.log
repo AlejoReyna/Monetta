@@ -1,0 +1,143 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart
+00:00 +0: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:01 +1: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:01 +2: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:02 +3: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:02 +4: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:03 +5: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:03 +6: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:04 +7: /Users/alexis/theCode/Monetta/test/features/catalog/brand_screen_test.dart: coach uses actual membership through query, filters, clear and order
+00:04 +8: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +9: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:05 +10: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:07 +11: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:07 +12: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:07 +13: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:07 +14: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:08 +15: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:09 +16: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: local search plus oldest retains scope and later query wins synchronously
+00:10 +17: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: unknown collection membership is not a broader product fallback
+00:10 +18: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: all brands routes to the actual canonical set and returns to directory
+00:11 +19: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: color plus offer selects an actual variant through quick view, PDP and return
+00:12 +20: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: error retains query and pieces; unavailable retry does not report success
+00:12 +21: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: progressive pages expose unique IDs and counts use the complete scope
+00:16 +22: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: 320/200% draft footer stays above the keyboard and cancellation retains query
+00:16 +23: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:17 +24: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:17 +25: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:18 +26: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:18 +27: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:18 +28: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:18 +29: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:18 +30: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:19 +31: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:19 +32: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:19 +33: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:19 +34: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: FLT-02c collection hides count metadata and the panel filters the grid by silhouette
+00:20 +35: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-02 every pill capability works from the panel only FLT-02 (vigente) Cerrar keeps the filters already applied
+00:20 +36: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: collection filters are Spanish, stay pending until applied, and filter the grid
+00:20 +37: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: collection filters are Spanish, stay pending until applied, and filter the grid
+00:21 +38: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: collection filters are Spanish, stay pending until applied, and filter the grid
+00:21 +39: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: collection filters are Spanish, stay pending until applied, and filter the grid
+00:21 +40: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-03 the badge counts filters, never the ordering FLT-03 (vigente) no matches: "Sin resultados" and Limpiar filtros restores everything
+00:22 +41: /Users/alexis/theCode/Monetta/test/features/catalog/collection_screen_test.dart: every collection view exposes its filter action
+00:22 +42: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-01c collections have no duplicated pills FLT-01c no sort chip, silhouette pills or chip rail
+00:23 +43: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-01c collections have no duplicated pills FLT-01c (guide v2) under the banner there is one toolbar: filter button, category pills, count and «Ordenar por»; no brand link and no clear action while nothing is filtered
+00:24 +44: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-02c collection filtering lives in the panel FLT-02c (vigente) a silhouette from the panel counts as 1 and Cancelar keeps what was applied
+00:26 +45: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-02c collection filtering lives in the panel FLT-02c (vigente) the order is not counted by the badge
+00:27 +46: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_filter_panel_test.dart: FLT-02c collection filtering lives in the panel FLT-02c (vigente) no matches: "Sin resultados" and Limpiar filtros restore the collection
+00:28 +47: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog context title is secondary DM Sans 15
+00:30 +48: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog context title is secondary DM Sans 15
+00:30 +49: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: shows the header and no category rail or pills
+00:30 +50: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: shows the header and no category rail or pills
+00:30 +51: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: shows the header and no category rail or pills
+00:30 +52: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog panel title uses editorial type
+00:30 +53: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: FLT-01 there is no quick filter rail; Marca, Precio, Color and Ordenar live in the filter panel
+00:30 +54: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:31 +55: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:31 +56: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:31 +57: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:32 +58: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:32 +59: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:32 +60: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:32 +61: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:32 +62: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: filters by the categories applied in the panel
+00:32 +63: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: filters by the categories applied in the panel
+00:33 +64: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01c collection titles follow the client guide TYPE-01c photo banner title is serif w400, 26
+00:33 +65: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: several categories show the union of their products
+00:33 +66: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01c collection titles follow the client guide TYPE-01c the bar keeps the wordmark and the banner title stays serif
+00:34 +67: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01c collection titles follow the client guide TYPE-01c the bar keeps the wordmark and the banner title stays serif
+00:34 +68: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:34 +69: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:35 +70: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:35 +71: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:35 +72: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:35 +73: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:35 +74: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:35 +75: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:35 +76: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:35 +77: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:35 +78: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:36 +79: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:36 +80: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:36 +81: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:37 +82: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:37 +83: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:37 +84: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:37 +85: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:37 +86: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:38 +87: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the brand story heading is serif w400
+00:38 +88: /Users/alexis/theCode/Monetta/test/features/catalog/collection_guide_photo_test.dart: destination resolves delivered B26 without title reconstruction
+00:38 +89: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the search section titles are serif w400
+00:39 +90: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the search section titles are serif w400
+00:39 +91: /Users/alexis/theCode/Monetta/test/features/catalog/collection_guide_photo_test.dart: no matching approved banner leaves the collection context readable
+00:39 +92: /Users/alexis/theCode/Monetta/test/features/catalog/brand_search_titles_typography_test.dart: TYPE-01d the search results title is serif w400
+00:42 +93: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: search invitations have five distinct prompts
+00:42 +94: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: typing offers catalog suggestions and submitting shows results
+00:45 +95: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: typing offers catalog suggestions and submitting shows results
+00:45 +96: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_result_count_test.dart: a shopper without a session does not see the piece count
+00:45 +97: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: COL-GUIDE collection toolbar (slide 06) «VER PRODUCTO» opens the ficha; the card has no "+" and keeps its heart
+00:45 +98: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: COL-GUIDE collection toolbar (slide 06) «VER PRODUCTO» opens the ficha; the card has no "+" and keeps its heart
+00:45 +99: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: COL-GUIDE collection toolbar (slide 06) «VER PRODUCTO» opens the ficha; the card has no "+" and keeps its heart
+00:46 +100: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: COL-GUIDE collection toolbar (slide 06) «VER PRODUCTO» opens the ficha; the card has no "+" and keeps its heart
+00:46 +101: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: COL-GUIDE collection toolbar (slide 06) «VER PRODUCTO» opens the ficha; the card has no "+" and keeps its heart
+00:46 +102: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_layout_responsive_test.dart: RESP-01 catalog, width 320 at x1.0
+00:47 +103: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_layout_responsive_test.dart: RESP-01 catalog, width 320 at x1.0
+00:47 +104: /Users/alexis/theCode/Monetta/test/features/catalog/collection_search_guide_v2_test.dart: SRCH-GUIDE search state (slide 05) typing shows recents with a clock, suggestions with icons, three small products and a bordered «Ver todo»
+00:47 +105: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a submitted query is remembered, reusable and removable
+00:47 +106: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a submitted query is remembered, reusable and removable
+00:48 +107: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a submitted query is remembered, reusable and removable
+00:48 +108: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a submitted query is remembered, reusable and removable
+00:48 +109: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a submitted query is remembered, reusable and removable
+00:48 +110: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_layout_responsive_test.dart: RESP-01 collection, width 320 at x2.0
+00:48 +111: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the whole history can be cleared
+00:48 +112: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the whole history can be cleared
+00:48 +113: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the whole history can be cleared
+00:48 +114: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_layout_responsive_test.dart: RESP-01 collection, width 390 at x1.0
+00:49 +115: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: no results names the term and offers real categories
+00:49 +116: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: no results names the term and offers real categories
+00:49 +117: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: no results names the term and offers real categories
+00:49 +118: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_layout_responsive_test.dart: RESP-01 collection, width 390 at x2.0
+00:49 +119: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the query survives coming back from another route
+00:49 +120: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the query survives coming back from another route
+00:49 +121: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the query survives coming back from another route
+00:50 +122: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the query survives coming back from another route
+00:50 +123: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the query survives coming back from another route
+00:50 +124: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the query survives coming back from another route
+00:50 +125: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_layout_responsive_test.dart: RESP-01 collection, width 430 at x2.0
+00:50 +126: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: for an owner, the result count matches the grid it labels
+00:50 +127: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: for an owner, the result count matches the grid it labels
+00:50 +128: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: for an owner, the result count matches the grid it labels
+00:51 +129: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: for an owner, the result count matches the grid it labels
+00:51 +130: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: for an owner, the result count matches the grid it labels
+00:51 +131: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_layout_responsive_test.dart: RESP-01 catalog, width 768 at x2.0
+00:51 +132: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a shopper sees results without a piece count
+00:52 +133: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a shopper sees results without a piece count
+00:52 +134: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a shopper sees results without a piece count
+00:52 +135: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: multi-word queries match every word in the catalog
+00:52 +136: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: live results follow a multi-word query into Ver todo
+00:53 +137: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: an unknown query shows the empty state while typing
+00:55 +138: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: search capture 390.0 light
+01:00 +139: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: search capture 390.0 dark
+01:05 +140: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: search capture 834.0 light
+01:11 +141: All tests passed!

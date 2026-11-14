@@ -708,9 +708,34 @@ class $CachedVariantsTable extends CachedVariants
   late final GeneratedColumn<String> sku = GeneratedColumn<String>(
       'sku', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _selectedOptionsMeta =
+      const VerificationMeta('selectedOptions');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, productId, title, price, compareAtPrice, available, sku];
+  late final GeneratedColumn<String> selectedOptions = GeneratedColumn<String>(
+      'selected_options', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('{}'));
+  static const VerificationMeta _imageUrlsMeta =
+      const VerificationMeta('imageUrls');
+  @override
+  late final GeneratedColumn<String> imageUrls = GeneratedColumn<String>(
+      'image_urls', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('[]'));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        productId,
+        title,
+        price,
+        compareAtPrice,
+        available,
+        sku,
+        selectedOptions,
+        imageUrls
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -760,6 +785,16 @@ class $CachedVariantsTable extends CachedVariants
       context.handle(
           _skuMeta, sku.isAcceptableOrUnknown(data['sku']!, _skuMeta));
     }
+    if (data.containsKey('selected_options')) {
+      context.handle(
+          _selectedOptionsMeta,
+          selectedOptions.isAcceptableOrUnknown(
+              data['selected_options']!, _selectedOptionsMeta));
+    }
+    if (data.containsKey('image_urls')) {
+      context.handle(_imageUrlsMeta,
+          imageUrls.isAcceptableOrUnknown(data['image_urls']!, _imageUrlsMeta));
+    }
     return context;
   }
 
@@ -783,6 +818,10 @@ class $CachedVariantsTable extends CachedVariants
           .read(DriftSqlType.bool, data['${effectivePrefix}available'])!,
       sku: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}sku']),
+      selectedOptions: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}selected_options'])!,
+      imageUrls: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_urls'])!,
     );
   }
 
@@ -800,6 +839,8 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
   final double? compareAtPrice;
   final bool available;
   final String? sku;
+  final String selectedOptions;
+  final String imageUrls;
   const CachedVariant(
       {required this.id,
       required this.productId,
@@ -807,7 +848,9 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
       required this.price,
       this.compareAtPrice,
       required this.available,
-      this.sku});
+      this.sku,
+      required this.selectedOptions,
+      required this.imageUrls});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -822,6 +865,8 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
     if (!nullToAbsent || sku != null) {
       map['sku'] = Variable<String>(sku);
     }
+    map['selected_options'] = Variable<String>(selectedOptions);
+    map['image_urls'] = Variable<String>(imageUrls);
     return map;
   }
 
@@ -836,6 +881,8 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
           : Value(compareAtPrice),
       available: Value(available),
       sku: sku == null && nullToAbsent ? const Value.absent() : Value(sku),
+      selectedOptions: Value(selectedOptions),
+      imageUrls: Value(imageUrls),
     );
   }
 
@@ -850,6 +897,8 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
       compareAtPrice: serializer.fromJson<double?>(json['compareAtPrice']),
       available: serializer.fromJson<bool>(json['available']),
       sku: serializer.fromJson<String?>(json['sku']),
+      selectedOptions: serializer.fromJson<String>(json['selectedOptions']),
+      imageUrls: serializer.fromJson<String>(json['imageUrls']),
     );
   }
   @override
@@ -863,6 +912,8 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
       'compareAtPrice': serializer.toJson<double?>(compareAtPrice),
       'available': serializer.toJson<bool>(available),
       'sku': serializer.toJson<String?>(sku),
+      'selectedOptions': serializer.toJson<String>(selectedOptions),
+      'imageUrls': serializer.toJson<String>(imageUrls),
     };
   }
 
@@ -873,7 +924,9 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
           double? price,
           Value<double?> compareAtPrice = const Value.absent(),
           bool? available,
-          Value<String?> sku = const Value.absent()}) =>
+          Value<String?> sku = const Value.absent(),
+          String? selectedOptions,
+          String? imageUrls}) =>
       CachedVariant(
         id: id ?? this.id,
         productId: productId ?? this.productId,
@@ -883,6 +936,8 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
             compareAtPrice.present ? compareAtPrice.value : this.compareAtPrice,
         available: available ?? this.available,
         sku: sku.present ? sku.value : this.sku,
+        selectedOptions: selectedOptions ?? this.selectedOptions,
+        imageUrls: imageUrls ?? this.imageUrls,
       );
   CachedVariant copyWithCompanion(CachedVariantsCompanion data) {
     return CachedVariant(
@@ -895,6 +950,10 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
           : this.compareAtPrice,
       available: data.available.present ? data.available.value : this.available,
       sku: data.sku.present ? data.sku.value : this.sku,
+      selectedOptions: data.selectedOptions.present
+          ? data.selectedOptions.value
+          : this.selectedOptions,
+      imageUrls: data.imageUrls.present ? data.imageUrls.value : this.imageUrls,
     );
   }
 
@@ -907,14 +966,16 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
           ..write('price: $price, ')
           ..write('compareAtPrice: $compareAtPrice, ')
           ..write('available: $available, ')
-          ..write('sku: $sku')
+          ..write('sku: $sku, ')
+          ..write('selectedOptions: $selectedOptions, ')
+          ..write('imageUrls: $imageUrls')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, productId, title, price, compareAtPrice, available, sku);
+  int get hashCode => Object.hash(id, productId, title, price, compareAtPrice,
+      available, sku, selectedOptions, imageUrls);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -925,7 +986,9 @@ class CachedVariant extends DataClass implements Insertable<CachedVariant> {
           other.price == this.price &&
           other.compareAtPrice == this.compareAtPrice &&
           other.available == this.available &&
-          other.sku == this.sku);
+          other.sku == this.sku &&
+          other.selectedOptions == this.selectedOptions &&
+          other.imageUrls == this.imageUrls);
 }
 
 class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
@@ -936,6 +999,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
   final Value<double?> compareAtPrice;
   final Value<bool> available;
   final Value<String?> sku;
+  final Value<String> selectedOptions;
+  final Value<String> imageUrls;
   final Value<int> rowid;
   const CachedVariantsCompanion({
     this.id = const Value.absent(),
@@ -945,6 +1010,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
     this.compareAtPrice = const Value.absent(),
     this.available = const Value.absent(),
     this.sku = const Value.absent(),
+    this.selectedOptions = const Value.absent(),
+    this.imageUrls = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CachedVariantsCompanion.insert({
@@ -955,6 +1022,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
     this.compareAtPrice = const Value.absent(),
     required bool available,
     this.sku = const Value.absent(),
+    this.selectedOptions = const Value.absent(),
+    this.imageUrls = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         productId = Value(productId),
@@ -969,6 +1038,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
     Expression<double>? compareAtPrice,
     Expression<bool>? available,
     Expression<String>? sku,
+    Expression<String>? selectedOptions,
+    Expression<String>? imageUrls,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -979,6 +1050,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
       if (compareAtPrice != null) 'compare_at_price': compareAtPrice,
       if (available != null) 'available': available,
       if (sku != null) 'sku': sku,
+      if (selectedOptions != null) 'selected_options': selectedOptions,
+      if (imageUrls != null) 'image_urls': imageUrls,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -991,6 +1064,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
       Value<double?>? compareAtPrice,
       Value<bool>? available,
       Value<String?>? sku,
+      Value<String>? selectedOptions,
+      Value<String>? imageUrls,
       Value<int>? rowid}) {
     return CachedVariantsCompanion(
       id: id ?? this.id,
@@ -1000,6 +1075,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
       compareAtPrice: compareAtPrice ?? this.compareAtPrice,
       available: available ?? this.available,
       sku: sku ?? this.sku,
+      selectedOptions: selectedOptions ?? this.selectedOptions,
+      imageUrls: imageUrls ?? this.imageUrls,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1028,6 +1105,12 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
     if (sku.present) {
       map['sku'] = Variable<String>(sku.value);
     }
+    if (selectedOptions.present) {
+      map['selected_options'] = Variable<String>(selectedOptions.value);
+    }
+    if (imageUrls.present) {
+      map['image_urls'] = Variable<String>(imageUrls.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1044,6 +1127,8 @@ class CachedVariantsCompanion extends UpdateCompanion<CachedVariant> {
           ..write('compareAtPrice: $compareAtPrice, ')
           ..write('available: $available, ')
           ..write('sku: $sku, ')
+          ..write('selectedOptions: $selectedOptions, ')
+          ..write('imageUrls: $imageUrls, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4603,9 +4688,10 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
   final String? attributionCode;
   final String status;
 
-  /// Shopify Customer Account `Order.transactions.type` values, joined
-  /// with commas (`bank_deposit`, `manual`, `card`, …). Null when the
-  /// order history query did not return a transaction type — never guessed.
+  /// Payment method tokens joined with commas (`bank_deposit`, `manual`,
+  /// `card`, …). Customer Account `Order.transactions.type`, or the same
+  /// normalized gateway names from the order mirror. Null when neither
+  /// source returned a method — never guessed.
   final String? paymentMethod;
 
   /// Shopify `cancelledAt`. Null when the order was not canceled.
@@ -5807,6 +5893,8 @@ typedef $$CachedVariantsTableCreateCompanionBuilder = CachedVariantsCompanion
   Value<double?> compareAtPrice,
   required bool available,
   Value<String?> sku,
+  Value<String> selectedOptions,
+  Value<String> imageUrls,
   Value<int> rowid,
 });
 typedef $$CachedVariantsTableUpdateCompanionBuilder = CachedVariantsCompanion
@@ -5818,6 +5906,8 @@ typedef $$CachedVariantsTableUpdateCompanionBuilder = CachedVariantsCompanion
   Value<double?> compareAtPrice,
   Value<bool> available,
   Value<String?> sku,
+  Value<String> selectedOptions,
+  Value<String> imageUrls,
   Value<int> rowid,
 });
 
@@ -5870,6 +5960,13 @@ class $$CachedVariantsTableFilterComposer
   ColumnFilters<String> get sku => $composableBuilder(
       column: $table.sku, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get selectedOptions => $composableBuilder(
+      column: $table.selectedOptions,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imageUrls => $composableBuilder(
+      column: $table.imageUrls, builder: (column) => ColumnFilters(column));
+
   $$CachedProductsTableFilterComposer get productId {
     final $$CachedProductsTableFilterComposer composer = $composerBuilder(
         composer: this,
@@ -5919,6 +6016,13 @@ class $$CachedVariantsTableOrderingComposer
   ColumnOrderings<String> get sku => $composableBuilder(
       column: $table.sku, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get selectedOptions => $composableBuilder(
+      column: $table.selectedOptions,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get imageUrls => $composableBuilder(
+      column: $table.imageUrls, builder: (column) => ColumnOrderings(column));
+
   $$CachedProductsTableOrderingComposer get productId {
     final $$CachedProductsTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -5966,6 +6070,12 @@ class $$CachedVariantsTableAnnotationComposer
 
   GeneratedColumn<String> get sku =>
       $composableBuilder(column: $table.sku, builder: (column) => column);
+
+  GeneratedColumn<String> get selectedOptions => $composableBuilder(
+      column: $table.selectedOptions, builder: (column) => column);
+
+  GeneratedColumn<String> get imageUrls =>
+      $composableBuilder(column: $table.imageUrls, builder: (column) => column);
 
   $$CachedProductsTableAnnotationComposer get productId {
     final $$CachedProductsTableAnnotationComposer composer = $composerBuilder(
@@ -6019,6 +6129,8 @@ class $$CachedVariantsTableTableManager extends RootTableManager<
             Value<double?> compareAtPrice = const Value.absent(),
             Value<bool> available = const Value.absent(),
             Value<String?> sku = const Value.absent(),
+            Value<String> selectedOptions = const Value.absent(),
+            Value<String> imageUrls = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               CachedVariantsCompanion(
@@ -6029,6 +6141,8 @@ class $$CachedVariantsTableTableManager extends RootTableManager<
             compareAtPrice: compareAtPrice,
             available: available,
             sku: sku,
+            selectedOptions: selectedOptions,
+            imageUrls: imageUrls,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -6039,6 +6153,8 @@ class $$CachedVariantsTableTableManager extends RootTableManager<
             Value<double?> compareAtPrice = const Value.absent(),
             required bool available,
             Value<String?> sku = const Value.absent(),
+            Value<String> selectedOptions = const Value.absent(),
+            Value<String> imageUrls = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               CachedVariantsCompanion.insert(
@@ -6049,6 +6165,8 @@ class $$CachedVariantsTableTableManager extends RootTableManager<
             compareAtPrice: compareAtPrice,
             available: available,
             sku: sku,
+            selectedOptions: selectedOptions,
+            imageUrls: imageUrls,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

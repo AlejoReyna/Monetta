@@ -58,17 +58,19 @@ Future<void> openSearch(
   String? prompt,
 }) async {
   final store = StoreScope.of(context);
-  // Search always opens on the browsing side.
-  await DuoWorkspace.navigatorFor(context).push<void>(
-    monettaFadeRoute(
-      StoreScope(
-        notifier: store,
-        child: BrowseDetailLayout(
-          child: SearchScreen(initialQuery: initialQuery, prompt: prompt),
-        ),
-      ),
+  final account = AccountScope.maybeOf(context);
+  final content = HomeContentScope.maybeOf(context);
+  Widget screen = StoreScope(
+    notifier: store,
+    child: BrowseDetailLayout(
+      child: SearchScreen(initialQuery: initialQuery, prompt: prompt),
     ),
   );
+  if (account != null) screen = AccountScope(notifier: account, child: screen);
+  if (content != null) {
+    screen = HomeContentScope(notifier: content, child: screen);
+  }
+  await DuoWorkspace.navigatorFor(context).push<void>(monettaFadeRoute(screen));
 }
 
 class SearchScreen extends StatefulWidget {
@@ -291,12 +293,13 @@ class _SearchScreenState extends State<SearchScreen> {
 
   /// The full result list as a real destination, so a shopper can keep the
   /// query and pick up the collection's own filters and ordering.
-  void _openAllResults(String query) {
+  void _openAllResults(String query, {CatalogInitialPanel? initialPanel}) {
     openCollection(
       context,
       CollectionScreen(
         title: query,
         filter: CollectionFilter(query: query),
+        initialPanel: initialPanel,
       ),
     );
   }
@@ -332,6 +335,33 @@ class _SearchScreenState extends State<SearchScreen> {
               onClear: _clear,
             ),
             Divider(height: 0.5, color: palette.hairline),
+            if (!emptyQuery)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Wrap(
+                  spacing: 16,
+                  children: [
+                    TextButton(
+                      style: catalogTextButtonStyle(context),
+                      key: const Key('search-filters'),
+                      onPressed: () => _openAllResults(
+                        query.trim(),
+                        initialPanel: CatalogInitialPanel.filters,
+                      ),
+                      child: const Text('Filtros'),
+                    ),
+                    TextButton(
+                      style: catalogTextButtonStyle(context),
+                      key: const Key('search-sort'),
+                      onPressed: () => _openAllResults(
+                        query.trim(),
+                        initialPanel: CatalogInitialPanel.sort,
+                      ),
+                      child: const Text('Ordenar por'),
+                    ),
+                  ],
+                ),
+              ),
             Expanded(
               child: emptyQuery
                   ? _DiscoveryState(
@@ -802,26 +832,20 @@ class _ProductRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width - BoutiqueSpace.gutter * 2;
-    const gap = BoutiqueSpace.sm;
-    final columns = width >= 600 ? 4 : 3;
-    final tileWidth = (width - gap * (columns - 1)) / columns;
-    final extent = productTileExtent(
-      tileWidth: tileWidth,
-      textScaler: MediaQuery.textScalerOf(context),
+    final delegate = productGridDelegate(
+      context,
+      availableWidth: width,
       density: ProductTileDensity.compact,
-      priceLines: tilePriceLinesFor(products.take(columns)),
+      priceLines: tilePriceLinesFor(products),
     );
+    final columns =
+        (delegate as SliverGridDelegateWithFixedCrossAxisCount).crossAxisCount;
     return GridView.builder(
       key: const ValueKey('search-product-rail'),
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columns,
-        crossAxisSpacing: gap,
-        mainAxisSpacing: BoutiqueSpace.sm,
-        mainAxisExtent: extent,
-      ),
+      gridDelegate: delegate,
       itemCount: products.length < columns ? products.length : columns,
       itemBuilder: (context, index) {
         final product = products[index];

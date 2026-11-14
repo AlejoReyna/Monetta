@@ -1,0 +1,37 @@
+00:00 +0: loading /Users/alexis/.t3/worktrees/Monetta/t3-6e7afa25-ac37e86413729ac0/test/features/contact/a06_surfaces_test.dart
+00:00 +0: fixture contact 320.0 1.0 Brightness.light
+00:00 +1: fixture wholesale 320.0 1.0 Brightness.light
+00:00 +2: fixture registration 320.0 1.0 Brightness.light
+00:01 +3: fixture contact 320.0 2.0 Brightness.light
+00:01 +4: fixture wholesale 320.0 2.0 Brightness.light
+00:01 +5: fixture registration 320.0 2.0 Brightness.light
+00:01 +6: fixture contact 390.0 1.0 Brightness.light
+00:01 +7: fixture wholesale 390.0 1.0 Brightness.light
+00:01 +8: fixture registration 390.0 1.0 Brightness.light
+00:01 +9: fixture contact 768.0 1.0 Brightness.light
+00:01 +10: fixture wholesale 768.0 1.0 Brightness.light
+00:02 +11: fixture registration 768.0 1.0 Brightness.light
+00:02 +12: fixture contact 768.0 2.0 Brightness.light
+00:02 +13: fixture wholesale 768.0 2.0 Brightness.light
+00:02 +14: fixture registration 768.0 2.0 Brightness.light
+00:02 +15: fixture contact 834.0 2.0 Brightness.light
+00:02 +16: fixture wholesale 834.0 2.0 Brightness.light
+00:02 +17: fixture registration 834.0 2.0 Brightness.light
+00:02 +18: fixture contact 1440.0 1.0 Brightness.light
+00:03 +19: fixture wholesale 1440.0 1.0 Brightness.light
+00:03 +20: fixture registration 1440.0 1.0 Brightness.light
+00:03 +21: fixture contact 1440.0 2.0 Brightness.light
+00:03 +22: fixture wholesale 1440.0 2.0 Brightness.light
+00:04 +23: fixture registration 1440.0 2.0 Brightness.light
+00:04 +24: fixture contact 1440.0 2.0 Brightness.dark
+00:04 +25: fixture wholesale 1440.0 2.0 Brightness.dark
+00:05 +26: fixture registration 1440.0 2.0 Brightness.dark
+00:05 +27: fixture contact 390.0 1.0 Brightness.dark
+00:05 +28: fixture wholesale 390.0 1.0 Brightness.dark
+00:05 +29: fixture registration 390.0 1.0 Brightness.dark
+00:05 +30: contact only opens explicit channel and preserves return
+00:05 +31: wholesale steps remain horizontal at enlarged text
+00:05 +32: normal 320px C5 WhatsApp label fits one line
+00:05 +33: received reservation copy is review-only, without operational action
+00:05 +34: wholesale footer returns to its hero
+00:05 +35: All tests passed!

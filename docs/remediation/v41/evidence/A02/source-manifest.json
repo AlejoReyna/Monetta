@@ -1,0 +1,183 @@
+{
+  "coordinator_head": "600437c3b0559b9ef7230ba2dc0628ca3d7fdf77",
+  "a02_commits": [],
+  "production_files": [
+    {
+      "path": "lib/domain/product.dart",
+      "sha256": "52bd69f8fcd3dbdc62fb17b6bb68e50ac712d0889352048ffdc9b7d5741f5ef6"
+    },
+    {
+      "path": "lib/data/shopify/queries.dart",
+      "sha256": "f4d1d0824e4c0d60458910c1173ba3e0f8abb0600bf94d75e26112e5b18a08a0"
+    },
+    {
+      "path": "lib/data/shopify/mappers.dart",
+      "sha256": "998cf720f902404414d182926dd808a3fcbc5193a3953e068bfa30065b66dba8"
+    },
+    {
+      "path": "lib/data/repositories/catalog_repository.dart",
+      "sha256": "0c40ceef68d802a46fa53c9d1ec3ae678be65880b5d14632595587a4d903aff8"
+    },
+    {
+      "path": "lib/data/repositories/realtime_catalog_repository.dart",
+      "sha256": "d9081ef6a2f578e13ac5a08cdbc5529b061cd512809574ddaee9619bd8391916"
+    },
+    {
+      "path": "lib/data/local/tables.dart",
+      "sha256": "12ab75bc0a9bff8c679b5a9953b233b2bde4da38898efdd673e702da7fe88d4e"
+    },
+    {
+      "path": "lib/data/local/database.dart",
+      "sha256": "8d1879dc4d7d76f261650f506d0b2d3dc83cac18074fad6cd6124522c643245b"
+    },
+    {
+      "path": "lib/data/local/database.g.dart",
+      "sha256": "12ddeed99e7d2944bf2ac36d3aabfbef328f1f926b946adc678c9b6303675cc8"
+    },
+    {
+      "path": "lib/data/local/catalog_cache_store.dart",
+      "sha256": "4913c599ae67f4b5da6b97676953e8bc2f8f56ded16e94ffb534cc918eb19120"
+    },
+    {
+      "path": "lib/features/catalog/product_card.dart",
+      "sha256": "060053d3e265c6c097f9f9f71236b15d187b89bfa81921975dc144614217074a"
+    },
+    {
+      "path": "lib/features/catalog/product_tile.dart",
+      "sha256": "4f0c9c6f3c8b52decd0d8616c152bca0c9b1fbb11cd9d7f61f82e76d85140ef8"
+    },
+    {
+      "path": "lib/features/catalog/product_controls.dart",
+      "sha256": "15eeca42579ea07305769fba0d7ea36ae373ba3f807c0202cdfb6dde2fc2d6f2"
+    },
+    {
+      "path": "lib/features/product/product_selection.dart",
+      "sha256": "d3a13369e4571c3b9c2a8c7b46a335cbcea0870cbb4927535e2ad5c6a8f74a71"
+    },
+    {
+      "path": "lib/features/product/variant_selection.dart",
+      "sha256": "239ac5a7637cdc92786bbd7c12d79c98d4010aef9e81349a691687ca5cd35da5"
+    },
+    {
+      "path": "lib/features/product/product_screen.dart",
+      "sha256": "872628d261feddcd9dab2e1e21a34e7c5d0a0d3c212855ea273f60be13adfca1"
+    },
+    {
+      "path": "lib/features/product/quick_view.dart",
+      "sha256": "40e124df5e8fcb7731dfebdb486f1e486c3ae4cb162deaa3775480975bd39a0c"
+    },
+    {
+      "path": "lib/features/product/purchase_dock.dart",
+      "sha256": "936a08fc30b0890106dd1335dfee12cf69c62ccec285e274827b7c83d1cf788c"
+    },
+    {
+      "path": "lib/features/product/product_zoom.dart",
+      "sha256": "38069f0faa8f9b713d4aaaf9ec0450e4f5f9fd7b7f0b0cb3db7641c4c2c985ca"
+    },
+    {
+      "path": "lib/features/product/product_recommendations.dart",
+      "sha256": "4cb4e4f0e556e8c0d759844ea8bfdd4f280404455ead5b9e9de7f33d84124cd8"
+    }
+  ],
+  "tests_and_test_assets": [
+    {
+      "path": "test/data/local/database_test.dart",
+      "sha256": "9e9f2b06c99efcd861729b4f10c35ac98b8a7b881bfdf764ed801b61ed9f8506"
+    },
+    {
+      "path": "test/features/catalog/product_card_test.dart",
+      "sha256": "faae83c127b926f44d20552c3f3b5600211a7253dae9c4b635ed8d5a9ce210c2"
+    },
+    {
+      "path": "test/features/product/product_selection_test.dart",
+      "sha256": "cf7b1edeb0ac12a4df34b1750b18605d72bdf47cab683983da65858b24dcee39"
+    },
+    {
+      "path": "test/features/product/quick_view_purchase_test.dart",
+      "sha256": "a572182290c1042befd1db8d13607692f3d6651eec8e68abed0b3a426227fa70"
+    },
+    {
+      "path": "test/features/product/purchase_dock_test.dart",
+      "sha256": "36f1df08089786d2c4888690164d070dc1aaff87988341770397af8c8c1270e2"
+    },
+    {
+      "path": "test/features/product/product_layout_responsive_test.dart",
+      "sha256": "84ada92775aa1c2421419ae9c6c8935a23b43d6a1a411abc1ed808db1f9363b5"
+    },
+    {
+      "path": "test/data/local/v41_variant_cache_test.dart",
+      "sha256": "d14a00ec898ded9f9975f67c81155d6b947c68d6c77050946585b6d61676b8e2"
+    },
+    {
+      "path": "test/data/shopify/v41_variant_mapping_test.dart",
+      "sha256": "432f5088272f3326125e6260e91b0bd27d4e0c323be1de0c2a499ed04729ec09"
+    },
+    {
+      "path": "test/data/repositories/v41_realtime_variant_test.dart",
+      "sha256": "10e9c46ee4304918ae9c935f1696a9775485d5283d20b2829e8ebe437960f231"
+    },
+    {
+      "path": "test/features/product/v41_product_flow_test.dart",
+      "sha256": "6d68d88f7810b01470b4dd93e76b92500bd79e3ae4f997a90cef312a3890782e"
+    },
+    {
+      "path": "test/features/product/v41_product_render_test.dart",
+      "sha256": "969e21a5c18c58e79d01637fcc5a2ef0f3712084284c354ef26ccb25243a84c2"
+    },
+    {
+      "path": "test/features/product/v41_product_recommendations_test.dart",
+      "sha256": "50d254f3872edff6555ca059bee1ea0943ecdefc614051837b0dda70e7b6b109"
+    },
+    {
+      "path": "test/support/v41_product_fixture.dart",
+      "sha256": "6fd3292cf549b75c12b5eb42b99e52470620f0251ccdd8866a65641ee7e0c5d5"
+    },
+    {
+      "path": "test/support/v41/iris-plateado-dorado.png",
+      "sha256": "026947bcd254e8b7356680dc5fcd29c08be280b8c2f487014e99a1e0e24976d9"
+    },
+    {
+      "path": "test/support/v41/iris-dorado.png",
+      "sha256": "a3f8174bef8c81bf43f769028306e413abe016845bc4835025cc19c451fb0715"
+    }
+  ],
+  "tracked_paths": [
+    "lib/domain/product.dart",
+    "lib/data/shopify/queries.dart",
+    "lib/data/shopify/mappers.dart",
+    "lib/data/repositories/catalog_repository.dart",
+    "lib/data/repositories/realtime_catalog_repository.dart",
+    "lib/data/local/tables.dart",
+    "lib/data/local/database.dart",
+    "lib/data/local/database.g.dart",
+    "lib/data/local/catalog_cache_store.dart",
+    "lib/features/catalog/product_card.dart",
+    "lib/features/catalog/product_tile.dart",
+    "lib/features/product/product_selection.dart",
+    "lib/features/product/product_screen.dart",
+    "lib/features/product/quick_view.dart",
+    "lib/features/product/purchase_dock.dart",
+    "test/data/local/database_test.dart",
+    "test/features/catalog/product_card_test.dart",
+    "test/features/product/product_selection_test.dart",
+    "test/features/product/quick_view_purchase_test.dart",
+    "test/features/product/purchase_dock_test.dart",
+    "test/features/product/product_layout_responsive_test.dart"
+  ],
+  "new_paths": [
+    "lib/features/catalog/product_controls.dart",
+    "lib/features/product/variant_selection.dart",
+    "lib/features/product/product_zoom.dart",
+    "lib/features/product/product_recommendations.dart",
+    "test/data/local/v41_variant_cache_test.dart",
+    "test/data/shopify/v41_variant_mapping_test.dart",
+    "test/data/repositories/v41_realtime_variant_test.dart",
+    "test/features/product/v41_product_flow_test.dart",
+    "test/features/product/v41_product_render_test.dart",
+    "test/features/product/v41_product_recommendations_test.dart",
+    "test/support/v41_product_fixture.dart",
+    "test/support/v41/iris-plateado-dorado.png",
+    "test/support/v41/iris-dorado.png"
+  ],
+  "scope": "Only these A02 source/test assets; A08 restock files excluded."
+}

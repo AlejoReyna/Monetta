@@ -59,7 +59,7 @@ void main() {
       expect(find.textContaining('320'), findsNothing);
     });
 
-    testWidgets('presents the real balance, pending and expiry', (
+    testWidgets('presents the real balance and expiry; pending stays out', (
       tester,
     ) async {
       final reader = FakeRewardsReader(
@@ -81,7 +81,8 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('\$184'), findsOneWidget);
-      expect(find.textContaining('\$54'), findsOneWidget);
+      // UI v4.1 (A05): the section shows the available balance only.
+      expect(find.textContaining('\$54'), findsNothing);
       expect(find.textContaining('10/09/2027'), findsOneWidget);
     });
 

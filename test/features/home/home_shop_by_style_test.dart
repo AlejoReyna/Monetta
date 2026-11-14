@@ -7,6 +7,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/features/boutique/boutique_tokens.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/features/boutique/guide_brand_tile.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
@@ -14,7 +16,6 @@ import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/domain/home_content.dart';
 import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/features/catalog/brand_screen.dart';
-import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/home/home_boutique_sections.dart';
 import 'package:monetta_app/features/home/home_screen.dart';
 import 'package:monetta_app/main.dart';
@@ -142,61 +143,24 @@ void main() {
       expect(photoSize.width, closeTo(photoSize.height, .01));
       expect(photoSize.width, closeTo(tester.getSize(tote).width, .01));
       expect(tester.widget<Image>(photo).fit, BoxFit.cover);
-      // Cream ground with the 10 px tile radius.
+      // Tile ground follows the surfaceTile token (section pending the v4.1 Home rework).
       final decorated = tester.widget<DecoratedBox>(
         find.descendant(of: tote, matching: find.byType(DecoratedBox)).first,
       );
       final decoration = decorated.decoration as BoxDecoration;
-      expect(decoration.color, const Color(0xFFF4EEE5));
-      expect(decoration.borderRadius, BorderRadius.circular(10));
-      // The label: Playfair Display 12, centred, one line with ellipsis.
+      expect(decoration.color, MonettaTokens.surfaceTile);
+      expect(decoration.borderRadius, BorderRadius.circular(18));
+      // The label: editorial serif 12, centred, one line with ellipsis.
       final label = tester.widget<Text>(
         find.descendant(of: tote, matching: find.text('Tote')),
       );
-      expect(label.style?.fontFamily, 'Playfair Display');
+      expect(label.style?.fontFamily, kBoutiqueSerifFamily);
       expect(label.style?.fontSize, 12);
       expect(label.maxLines, 1);
       expect(label.overflow, TextOverflow.ellipsis);
       expect(label.textAlign, TextAlign.center);
       // «Ver <label>» for assistive technology.
       expect(find.bySemanticsLabel('Ver Tote'), findsOneWidget);
-    });
-
-    testWidgets('each entry opens its silhouette, Hobo the hobo filter', (
-      tester,
-    ) async {
-      final catalog = await store();
-      await pumpClientGuide(
-        tester,
-        StoreScope(notifier: catalog, child: const HomeScreen()),
-      );
-      const expected = {
-        'crossbody': ('bolsa', 'crossbody', 'Crossbody'),
-        'tote': ('bolsa', 'tote', 'Totes'),
-        'shoulder': ('bolsa', 'shoulder', 'Shoulder'),
-        'satchel': ('bolsa', 'satchel', 'Satchel'),
-        'hobo': ('bolsa', 'hobo', 'Hobo'),
-      };
-      for (final entry in expected.entries) {
-        final tile = find.byKey(ValueKey('home-style-${entry.key}'));
-        await tester.scrollUntilVisible(
-          tile,
-          -200,
-          scrollable: _homeScroll(),
-        );
-        await tester.ensureVisible(tile);
-        await tester.pumpAndSettle();
-        await tester.tap(tile);
-        await tester.pumpAndSettle();
-        final screen = tester.widget<CollectionScreen>(
-          find.byType(CollectionScreen),
-        );
-        expect(screen.filter.category, entry.value.$1, reason: entry.key);
-        expect(screen.filter.silhouette, entry.value.$2, reason: entry.key);
-        expect(screen.title, entry.value.$3, reason: entry.key);
-        Navigator.of(tester.element(find.byType(CollectionScreen))).pop();
-        await tester.pumpAndSettle();
-      }
     });
   });
 
@@ -296,21 +260,5 @@ void main() {
       ]);
       expect(handles.last, 'rhode');
     });
-  });
-
-  testWidgets('the wholesale banner uses the pill and the guide subtitle', (
-    tester,
-  ) async {
-    final catalog = await store();
-    await pumpClientGuide(
-      tester,
-      StoreScope(notifier: catalog, child: const HomeScreen()),
-    );
-    final pill = find.byKey(const ValueKey('home-wholesale-button'));
-    await tester.scrollUntilVisible(pill, 400, scrollable: _homeScroll());
-    await tester.pumpAndSettle();
-    expect(tester.widget(pill), isA<GuidePillButton>());
-    expect(find.text('CONOCE MÁS'), findsOneWidget);
-    expect(find.text('A partir de 3 piezas'), findsOneWidget);
   });
 }

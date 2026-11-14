@@ -12,8 +12,8 @@ void main() {
   tearDown(() => db.close());
 
   group('AppDatabase', () {
-    test('opens and reports schema version 9', () {
-      expect(db.schemaVersion, 9);
+    test('opens and reports schema version 10', () {
+      expect(db.schemaVersion, 10);
     });
 
     test('round-trips a cached product and its variants', () async {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChannels;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/features/rewards/rewards_guide_screen.dart';
 import 'package:monetta_app/features/rewards/rewards_models.dart';
 import 'package:monetta_app/features/rewards/rewards_section.dart';
@@ -41,32 +40,21 @@ class _Reader implements RewardsReader {
 }
 
 void main() {
-  testWidgets('shows the contract balance and keeps points as placeholders', (
-    tester,
-  ) async {
+  testWidgets(
+      'shows real balance and history while unsupported rules stay gated',
+      (tester) async {
     await pumpClientGuide(
-      tester,
-      RewardsGuideScreen(reader: _Reader(_summary())),
-      size: const Size(390, 1400),
-    );
-    expect(find.text('\$184 Monetta'), findsOneWidget);
-    expect(find.text('Nivel: Pendiente de contrato'), findsOneWidget);
-    expect(find.text('Por cada compra'), findsOneWidget);
-    expect(find.text('Compartir catálogo en redes'), findsOneWidget);
-    expect(find.text('Comprar a mayoreo'), findsOneWidget);
-    expect(find.text('Descuentos'), findsOneWidget);
-    expect(find.text('Envío gratis'), findsOneWidget);
-    expect(find.text('Acceso anticipado'), findsOneWidget);
-    expect(find.textContaining('320'), findsNothing);
-    expect(find.textContaining('Nivel Plata'), findsNothing);
-    expect(find.textContaining('1 pt'), findsNothing);
-
-    await tester.tap(find.byKey(const ValueKey('rewards-open-share')));
+        tester, RewardsGuideScreen(reader: _Reader(_summary())),
+        size: const Size(390, 1400));
+    expect(find.textContaining('184 Monetta'), findsOneWidget);
+    expect(find.text('Tu nivel y sus beneficios aún no están disponibles.'),
+        findsOneWidget);
+    expect(find.text('Compartir catálogo en redes'), findsNothing);
+    expect(find.text('Canjear puntos'), findsNothing);
+    expect(find.textContaining('pendientes de entrega'), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('rewards-movements-toggle')));
     await tester.pumpAndSettle();
-    // The share banner carries the title; the screen no longer repeats it.
-    expect(find.byType(GuideShareEarnBanner), findsOneWidget);
-    expect(find.text('https://monetta.com/catalogo/bolsos'), findsNothing);
-    expect(find.textContaining('Pendiente de contrato'), findsWidgets);
+    expect(find.text('Aún no hay movimientos en tu cuenta.'), findsOneWidget);
   });
 
   testWidgets('a missing reader does not invent a balance', (tester) async {

@@ -262,10 +262,10 @@ void main() {
         expect(photo[1].right, closeTo(358, 0.01));
         expect(photo[1].top, closeTo(photo[0].top, 0.01));
 
-        // Row 2 is one card (307.747) plus the 8 pt row gap further down.
+        // Row 2 is one card (328.017) plus the 8 pt row gap further down.
         expect(photo[3].top, closeTo(photo[2].top, 0.01));
         expect(photo[2].left, closeTo(32, 0.01));
-        expect(photo[2].top - photo[0].top, closeTo(315.747, 0.01));
+        expect(photo[2].top - photo[0].top, closeTo(336.017, 0.01));
       },
     );
 
@@ -305,7 +305,7 @@ void main() {
     );
 
     testWidgets(
-      'UI-CAT-01 the caption is flush with the photo and 8 pt below it',
+      'UI-CAT-01 the caption is flush with the photo, under the option slot',
       (tester) async {
         _setView(tester, const Size(390, 844));
         await _pump(tester, _items(6));
@@ -317,7 +317,8 @@ void main() {
 
         expect(brand.left, closeTo(photo.left, 0.01));
         expect(name.left, closeTo(photo.left, 0.01));
-        expect(brand.top, closeTo(photo.bottom + 8, 0.01));
+        // Under the 8 pt gap and the 48 pt option slot.
+        expect(brand.top, closeTo(photo.bottom + 8 + 48, 0.01));
       },
     );
 
@@ -437,7 +438,7 @@ void main() {
     }
   });
 
-  group('UI-CAT-04 the header is centred', () {
+  group('UI-CAT-04 the header starts at the left (UI v4.1)', () {
     // Measured as an owner sees it: shoppers get the title alone, owners also
     // get the piece count under it.
     for (final pushed in [true, false]) {
@@ -448,7 +449,7 @@ void main() {
         final route = pushed ? 'with BackButton' : 'as root route';
 
         testWidgets(
-          'UI-CAT-04 title and count are centred on the screen '
+          'UI-CAT-04 title and count share the left edge '
           '($route, $label)',
           (tester) async {
             _setView(tester, const Size(390, 844));
@@ -466,14 +467,11 @@ void main() {
               find.byType(BackButton),
               pushed ? findsOneWidget : findsNothing,
             );
-            expect(
-              _rect(tester, find.text('Productos')).center.dx,
-              closeTo(195, 0.5),
-            );
-            expect(
-              _rect(tester, find.text('6 piezas')).center.dx,
-              closeTo(195, 0.5),
-            );
+            final title = _rect(tester, find.text('Productos'));
+            final count = _rect(tester, find.text('6 piezas'));
+            expect(count.left, closeTo(title.left, 0.5));
+            expect(title.center.dx, lessThan(195), reason: 'not centred');
+            expect(title.left, greaterThanOrEqualTo(16));
           },
         );
 
@@ -583,7 +581,7 @@ void main() {
         final size = tester.getSize(button);
         expect(size.width, greaterThanOrEqualTo(48));
         expect(size.height, greaterThanOrEqualTo(48));
-        expect(find.byTooltip('Filtrar y ordenar'), findsOneWidget);
+        expect(find.byTooltip('Filtros'), findsOneWidget);
         expect(find.byKey(const Key('catalog-filter-count')), findsNothing);
 
         await tester.tap(button);

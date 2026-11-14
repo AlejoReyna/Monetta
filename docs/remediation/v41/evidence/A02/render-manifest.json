@@ -1,0 +1,137 @@
+[
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/card-320-2x-light.png",
+    "sha256": "2beb64009427fbb38857af3c358d91273f6364b3c9732d75b399adf534e55b62",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/card-390-1x-dark.png",
+    "sha256": "0c6451163075bcc57ca6d73e84445478aeac96502832c74b2be7e0ef4915aa10",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/card-390-1x-light.png",
+    "sha256": "55c41f7065186418b231ba6fec348c818016c0987b138c311e48aef6d3ae7aa3",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/details-320-2x-light.png",
+    "sha256": "f177620b2572c01aac631f6110768429589e09511ae8d37877b2a41824e293e0",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/details-390-1x-dark.png",
+    "sha256": "ded1ab7fc6154853e844df6cf3798bcb12b747e7deb2f3f5bcc77d67cc327a88",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/details-390-1x-light.png",
+    "sha256": "6c33097ea7598189259c3a3cd74c81dc470ecb3dd126aae24f1152e76e9a98b0",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/details-actions-320-2x-light.png",
+    "sha256": "65ebfc85ae10a6187041d63f225d4039eb9ed14fcd0fd67418633c3eafb12853",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/details-actions-390-1x-dark.png",
+    "sha256": "ea0e14c0d5561bd5e6fedc1e48328dd27c43e714c1e8a8efc5d5f35b568c8107",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/details-actions-390-1x-light.png",
+    "sha256": "acea166abdaf1407c1ba0a180a182b8ba44f166dc1eb5d02ae68e3e826fe9f47",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/pdp-320-2x-light.png",
+    "sha256": "c96766c3c1fa9b60cf0622215448fc2fed46ed77874050122725358dd370880f",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/pdp-390-1x-dark.png",
+    "sha256": "7b6c24c7c1de6b17e1bbbcfc7efb4558c835f8168eb703bdb69904ba8ce22620",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/pdp-390-1x-light.png",
+    "sha256": "58e7377c7c66ec9b6f078b8640368561d0eb1cf4199c43da9e0e6d91073f46e4",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/quick-320-2x-light.png",
+    "sha256": "ec9bfc18a80adcee3639b1275e511b7c3f0f826b6e65efb504b6467ac21a88e5",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/quick-390-1x-dark.png",
+    "sha256": "af31257db821db993f959279f6d0efd6f999c1e3bcff49ec02662d7f140fb64b",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/quick-390-1x-light.png",
+    "sha256": "16dcde7c658217f42455ca62527caccad2ab50e2d998f470e4b41b54b434bb35",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/quick-actions-320-2x-light.png",
+    "sha256": "0139a633749c3987023f1fdae8e52a39f767b057d7d75f2ef7fdfc004db4fa4f",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/quick-actions-390-1x-dark.png",
+    "sha256": "af31257db821db993f959279f6d0efd6f999c1e3bcff49ec02662d7f140fb64b",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/quick-actions-390-1x-light.png",
+    "sha256": "16dcde7c658217f42455ca62527caccad2ab50e2d998f470e4b41b54b434bb35",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/recommendation-set-320-2x-light.png",
+    "sha256": "b2334f0d63c6e3222fd1b534e71c8e5fbf2162b4d479a0cdb02c6391816be4b4",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/recommendation-set-390-1x-dark.png",
+    "sha256": "cb1fc97e7ad09eeecee8dd465d7488204b2efbeb77997bc5a8285a6b94c68cd6",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/recommendation-set-390-1x-light.png",
+    "sha256": "23e2df83f527a1329c60a4ea26f4437358671076af3f6fec70d1aae63f760a7c",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/recommendations-320-2x-light.png",
+    "sha256": "bffb375ca71f38dc027c9f7d37b2ceb006bc34477a54aa09cb607829bc9c2f8a",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/recommendations-390-1x-dark.png",
+    "sha256": "b3657f5ac0e9c2fe961b0313f105d1a0f4e8200589d2563158b2347a3af6294d",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/recommendations-390-1x-light.png",
+    "sha256": "22f4e35d794a7c549d9e6496fcef9911bd0164b1a8aadcc22b9c4f9078afc8d5",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/zoom-320-2x-light.png",
+    "sha256": "d0cf62a11def9988f95dd07d5f4462b5528e2abda7b15bc758ebe28d2fd6a144",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/zoom-390-1x-dark.png",
+    "sha256": "eebce4c822215ea64c2542d1175891f3d3b3baf7af9ce26e488de8f0577f1e44",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  },
+  {
+    "file": "docs/remediation/v41/evidence/A02/after/zoom-390-1x-light.png",
+    "sha256": "3f0e1dbe9ac012443b548997e2f948ed115c5972c6d97edc6abf31a163b1cc99",
+    "verification": "Local deterministic fixture; not service inventory or visual approval."
+  }
+]

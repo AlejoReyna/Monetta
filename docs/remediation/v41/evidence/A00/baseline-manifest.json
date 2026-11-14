@@ -1,0 +1,1809 @@
+{
+  "original_state_backup": "/var/folders/66/385kk0b93pzcxwfy7pm4vmkw0000gn/T/monetta-v41-original-4r5sbv5b",
+  "files": [
+    {
+      "path": "assets/fonts/cormorant_garamond/CormorantGaramond-Bold.ttf",
+      "sha256": "3e5fcbf7a2ac7f3308314f878e1e35e5307a7a412a0a0d6d44aa63d18f747232"
+    },
+    {
+      "path": "assets/fonts/cormorant_garamond/CormorantGaramond-Regular.ttf",
+      "sha256": "8282f0d411e097acc5474025d9b94e888ea31deb0572c29ea3aa315c5418f4ec"
+    },
+    {
+      "path": "assets/fonts/dm_sans/DMSans-Bold.ttf",
+      "sha256": "772062f41e9e909d5c42e13510fe01a495463e12f522b31f75379d5d7e5ebebb"
+    },
+    {
+      "path": "assets/fonts/dm_sans/DMSans-Regular.ttf",
+      "sha256": "554f2bf60e4157521133ca1de917dc9c501d3944fb455d9ea4faf4b48742828c"
+    },
+    {
+      "path": "assets/fonts/dm_sans/DMSans-SemiBold.ttf",
+      "sha256": "1cdeea3f3f7f221d8895bd909ddd2d8c5b33bcf34cbf608884cad594ae8b0853"
+    },
+    {
+      "path": "assets/fonts/dm_sans/OFL.txt",
+      "sha256": "9af36190332437f5ecd09974de43c1f7c77a310a996cdd8ceb25628b458840e1"
+    },
+    {
+      "path": "assets/fonts/inter/Inter-Bold.ttf",
+      "sha256": null
+    },
+    {
+      "path": "assets/fonts/inter/Inter-Light.ttf",
+      "sha256": null
+    },
+    {
+      "path": "assets/fonts/inter/Inter-Medium.ttf",
+      "sha256": null
+    },
+    {
+      "path": "assets/fonts/inter/Inter-Regular.ttf",
+      "sha256": null
+    },
+    {
+      "path": "assets/fonts/inter/Inter-SemiBold.ttf",
+      "sha256": null
+    },
+    {
+      "path": "assets/fonts/inter/OFL.txt",
+      "sha256": null
+    },
+    {
+      "path": "assets/fonts/playfair_display/OFL.txt",
+      "sha256": null
+    },
+    {
+      "path": "assets/fonts/playfair_display/PlayfairDisplay-Bold.ttf",
+      "sha256": null
+    },
+    {
+      "path": "assets/fonts/playfair_display/PlayfairDisplay-Regular.ttf",
+      "sha256": null
+    },
+    {
+      "path": "assets/images/v41/banners/B01_inicio_productos.jpg",
+      "sha256": "1eb959abc73632f919fcdc011590406c1dfad26f0e8600ed0e888af7b131b08f"
+    },
+    {
+      "path": "assets/images/v41/banners/B02_inicio_marcas.jpg",
+      "sha256": "c51a77c308dd851869be7a633ee9da7487c3ab90763e06523b4a46d858aa15f4"
+    },
+    {
+      "path": "assets/images/v41/banners/B03_inicio_categorias.jpg",
+      "sha256": "7b5fecdb4792e9a7fefa71bccb1fa80685380105a333471c8aeb19cc282fe743"
+    },
+    {
+      "path": "assets/images/v41/banners/B04_inicio_mayoreo.jpg",
+      "sha256": "7b7526769588d7a55da5b61d0c4ffcdfb4cf9bd536c491339eab966969e58613"
+    },
+    {
+      "path": "assets/images/v41/banners/B04_inicio_mayoreo_editorial_sin_control.jpg",
+      "sha256": "2b21ec23d1011cfede708e70817db5fe6d2308bf507877f65773823357e72771"
+    },
+    {
+      "path": "assets/images/v41/banners/B05_carteras_hombre.jpg",
+      "sha256": "ff403cad5d4cbe01e5ba3922d5618b4e444844557d53559b4021d0621ebef6c7"
+    },
+    {
+      "path": "assets/images/v41/banners/B06_charms.jpg",
+      "sha256": "dab25720f8c083547a16cb80e77151335e332d14ffcb28f47894ca5ec80d89bb"
+    },
+    {
+      "path": "assets/images/v41/banners/B07_lentes.jpg",
+      "sha256": "ca80f06dcad495852d08a1edba4afc1dc25d21c06216f8dbe65a866c271806e7"
+    },
+    {
+      "path": "assets/images/v41/banners/B08_bolsos.jpg",
+      "sha256": "3d6f8e069856c55f12010eb4cb16077ad456f14b3b213c811940391f7c7320eb"
+    },
+    {
+      "path": "assets/images/v41/banners/B09_calzado_hombre.jpg",
+      "sha256": "08a99f2038e1259b6611e7cdadf12fae0ffefffb19b7d51e84bbe7ddf066afea"
+    },
+    {
+      "path": "assets/images/v41/banners/B10_munequeras.jpg",
+      "sha256": "4f395349ab1e3e683434223a4ef6925aae02af4053482dc7b30eb2ea448d0e35"
+    },
+    {
+      "path": "assets/images/v41/banners/B11_relojes.jpg",
+      "sha256": "ca4c47359001662927db893b1e8f31e47a8cd5dbb79f9b7df1f935f5a9707281"
+    },
+    {
+      "path": "assets/images/v41/banners/B12_relojes_hombre.jpg",
+      "sha256": "73c539c4cb80f8912c0829fc344075fcef4171e49fce5d5873703fb127af9e53"
+    },
+    {
+      "path": "assets/images/v41/banners/B13_calzado_mujer.jpg",
+      "sha256": "622f47dd67a655204af70d91041e748d54c4239178c563bc82f52f0ab3017b74"
+    },
+    {
+      "path": "assets/images/v41/banners/B14_bolsos_hombre.jpg",
+      "sha256": "8535134272fc829293c284acba4dc0d3bec6bf6f97a70a4e0b8df8fcd4e5f1e0"
+    },
+    {
+      "path": "assets/images/v41/banners/B15_tarjeteros.jpg",
+      "sha256": "4211aecc358a2ebe94904da2a590d745e0fc086f58d95a324876dc75d14ab190"
+    },
+    {
+      "path": "assets/images/v41/banners/B16_perfumes_todos.jpg",
+      "sha256": "7c7a434c46e6f8d6276129bbd8363db548fbd4e58a06f8f7725ab0c86b00879a"
+    },
+    {
+      "path": "assets/images/v41/banners/B17_accesorios.jpg",
+      "sha256": "04352c0fdcb446fae612c2b05d29149203232d32ba8b4db6b8f957eaedef9444"
+    },
+    {
+      "path": "assets/images/v41/banners/B18_crossbody.jpg",
+      "sha256": "a172d33409ca96a25fd187cfbcfdf2e191c5dddedfafeb2fea744de902c15ce0"
+    },
+    {
+      "path": "assets/images/v41/banners/B19_tote.jpg",
+      "sha256": "2564fd42435185afb9d52e76a8bdcb35f97226a9806ca888e0741b20e813fd86"
+    },
+    {
+      "path": "assets/images/v41/banners/B20_bolsos_hombro.jpg",
+      "sha256": "8c0b525b5ddda93fa12cc71b3b829deecc230321846bf9964b69d525bacaea2b"
+    },
+    {
+      "path": "assets/images/v41/banners/B21_carteras.jpg",
+      "sha256": "98c99cb3661d6c82e8fc00c0bf4f4445fe86666a199ed450dea376207cf7e6e4"
+    },
+    {
+      "path": "assets/images/v41/banners/B22_bolsos_mano.jpg",
+      "sha256": "9e7b2b928793181ea12e03047596610e2efb6f4122cb5b30b62c1d51f23734b4"
+    },
+    {
+      "path": "assets/images/v41/banners/B23_perfumes_alternativo.jpg",
+      "sha256": "5d038aa53080c775578e89eaa28064bc228327436694fcdacc331d123d1f5cab"
+    },
+    {
+      "path": "assets/images/v41/banners/B24_guess.jpg",
+      "sha256": "ebe43aad789f13baba7eb00c990600370dd5584a3ece61588e0d418be906607a"
+    },
+    {
+      "path": "assets/images/v41/banners/B25_tory_burch.jpg",
+      "sha256": "7c05a1188c05d64fdef471e48618b345062af8d5b6276ec2620f512ae9c798bc"
+    },
+    {
+      "path": "assets/images/v41/banners/B26_marc_jacobs.jpg",
+      "sha256": "6252e5fb0959170ce87076eb490a69c1a8a7db798f583b6b0c5814583a57b6d9"
+    },
+    {
+      "path": "assets/images/v41/banners/B27_kate_spade.jpg",
+      "sha256": "313f926bd1ea700c04a23b3284dd95d6be1ba734885707a9b8e3222b519b95d3"
+    },
+    {
+      "path": "assets/images/v41/banners/B28_coach.jpg",
+      "sha256": "13b9837bc2c773705805a576fde467aef9252fc9e73806184e4c4af313b9bf66"
+    },
+    {
+      "path": "assets/images/v41/banners/B29_michael_kors.jpg",
+      "sha256": "46ded0729c78aab254422e870b28ff84b538d60b713fc491619391b38123f8d1"
+    },
+    {
+      "path": "assets/images/v41/banners/B30_steve_madden.jpg",
+      "sha256": "6d19d16921c3dd56d0c581b17525a98aee4da0ee7a74b64929e2c119c57266fe"
+    },
+    {
+      "path": "assets/images/v41/banners/B31_contacto.jpg",
+      "sha256": "09c7d2f7dd4cc1a959b5958298a1bc0026f79a717d9afa9c9e2f070f675b97e7"
+    },
+    {
+      "path": "assets/images/v41/banners/B32_mayoreo.jpg",
+      "sha256": "e0428e271d4d15f30c79165b6b240bdf02f86595032bfa0d179596aa5012024a"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F01_calzado_mujer.jpg",
+      "sha256": "50496eb0026ea41931fc58b858150501b29480c2d7d47eb4aa91c1171fffac5c"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F02_bolsos_hombro.jpg",
+      "sha256": "71a2d2e6d000fed8c92c03099d73846f548c75661d3e05de1f2041ff24dfd121"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F03_bolsos_mano.jpg",
+      "sha256": "247070bd83300de26b46b8f6b579ea223dc743bbaf060d4afe0b7859bf761fe0"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F04_calzado_hombre.jpg",
+      "sha256": "2c4524825e9f304e8f5c83a0e2b97e1a7cd60f7ad7376464bf8baea3e7e96e5d"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F05_accesorios.jpg",
+      "sha256": "ac880377a87ab0481b4d472ef64db177951325bd98334f0176c1dd4837f2ff44"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F06_bolsos_hombre.jpg",
+      "sha256": "0f7b387e9d7281c4e107dce828f31ae972adcb6d085c36659cb27ae8f034ee4a"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F07_bolsos.jpg",
+      "sha256": "218fd113552214e15e65504646f2f38e21ca7b044cf6ef80fb3a30490d395c87"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F08_carteras.jpg",
+      "sha256": "a39422157e63bfc7f5c7059f84c8baac115637c3ed884484c86dc77d87566da9"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F09_carteras_mujer.jpg",
+      "sha256": "acdbf9c0b60660176d2ca8f5b2ec935ec4fcdfae38067c4516adff543149aacf"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F10_crossbody.jpg",
+      "sha256": "d19abd6cfc7661daebcdef874f2bc6504fa8a8fbafd938a79d825d3db2685aa7"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F11_carteras_hombre.jpg",
+      "sha256": "6f7d60e2b73dc3e44d3d9d308e8dd451d59c29f1c6da459ee8137e5b5337a240"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F12_lentes.jpg",
+      "sha256": "17bf1a5ff7b66ad5500d7aae261b0e42c5e3d805fa21a43316fb866e149f9de9"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F13_relojes_hombre.jpg",
+      "sha256": "f26de2daf977481afd22850a863a80f56d4aba7f6eb2f9be9ddb133a8e28f32c"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F14_tarjeteros.jpg",
+      "sha256": "90c3a88c408d4df86f44c61fe75e00d56d05f1e86260ec10c8714aaf62c081af"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F15_munequeras.jpg",
+      "sha256": "7577ea9d46eeeef10559e4ae7c0396254bd0fa2639e831ab3b8e0cfefdeddd1c"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F16_relojes_mujer.jpg",
+      "sha256": "1f6a02007e180b1a9dea783c868c41ae9bf88e5351c7b209b25c81c663d31b5d"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F17_tote.jpg",
+      "sha256": "6e9972640e49bacc37a603600fd3b16b37985c1b356f278916c45e6932d65f21"
+    },
+    {
+      "path": "assets/images/v41/home_photos/F18_bolsos_alt.jpg",
+      "sha256": "1cca4dd41fd7411253286c4a74b58b2596f72b03f9cfeddd9ed584df0ac43989"
+    },
+    {
+      "path": "assets/images/v41/icons/accesorios.svg",
+      "sha256": "7c478455b98b75e52a2e3800890fc97c32e77fec8ca18525d02099408a283f8c"
+    },
+    {
+      "path": "assets/images/v41/icons/ajustes.svg",
+      "sha256": "552f4fa74d1bbb257c9ad19ae42b0e8c636209a481919dbe343e69fc1a051304"
+    },
+    {
+      "path": "assets/images/v41/icons/atencion.svg",
+      "sha256": "3e05cf79e1a0066132f55df473f965b513071ba48db025d13000237b52d7b1a4"
+    },
+    {
+      "path": "assets/images/v41/icons/avisos.svg",
+      "sha256": "4aa92e59ba8bf086a690aa663a34a0d4cdd9ef8310c308f184e5577df7a947a1"
+    },
+    {
+      "path": "assets/images/v41/icons/ayuda.svg",
+      "sha256": "ecda995414061ea2dea8992d9fd355a06b4e8904241bd820bffac2b65decba2e"
+    },
+    {
+      "path": "assets/images/v41/icons/back.svg",
+      "sha256": "d4f65dbe5c824c7e0a867fed3e6df80534ded13afde7a394c3990113dd9debf1"
+    },
+    {
+      "path": "assets/images/v41/icons/bolsos-hombre.svg",
+      "sha256": "23e9063fe368516ecf4e641ce16cac6ff4fa9080b75d0b0015041db36d969236"
+    },
+    {
+      "path": "assets/images/v41/icons/bolsos-mujer.svg",
+      "sha256": "488840cd310bfc1e3002f84109ce0a3c44ae4bfa77f56c4350dcd3b950162595"
+    },
+    {
+      "path": "assets/images/v41/icons/bolsos.svg",
+      "sha256": "5966e63d3d6380f56f066b6f37f625c8f06a1d227a4b229aa1f78c65d4b9eda5"
+    },
+    {
+      "path": "assets/images/v41/icons/calzado-hombre.svg",
+      "sha256": "ca0e16e571a0ccabf222eb2b28d2fadfb5dc8ed02cae675388ef22ea1be2797f"
+    },
+    {
+      "path": "assets/images/v41/icons/calzado-mujer.svg",
+      "sha256": "628e049d1cd6b2de8f0278694d1878fd99a91a2bda9fd389ba7f8f2a442c0d92"
+    },
+    {
+      "path": "assets/images/v41/icons/calzado.svg",
+      "sha256": "517a30d64f636da240c5622baba999f7885c0068ba35107365852b931c4e7c72"
+    },
+    {
+      "path": "assets/images/v41/icons/cart.svg",
+      "sha256": "3b5ff2317831329e7ca44b13dba60c19ddfb21b75eff5417a4f56eccca72c150"
+    },
+    {
+      "path": "assets/images/v41/icons/carteras-clasicas.svg",
+      "sha256": "4f490b74beff3b343c3320efc695d49170d6664f1677084b0139ef38c0fb5ac1"
+    },
+    {
+      "path": "assets/images/v41/icons/carteras-hombre.svg",
+      "sha256": "8a2ba11cbcb2a357e3dcee3738d28e7296241dce7594f16ad2ef8c93302838eb"
+    },
+    {
+      "path": "assets/images/v41/icons/carteras-mujer.svg",
+      "sha256": "0e2086797c101f847243e04666b0072c57213445ae4f91d30be6068d252b3723"
+    },
+    {
+      "path": "assets/images/v41/icons/carteras.svg",
+      "sha256": "9d1452087821acbc634826af1a986207b74e6cfc516946bfa7e996bf9d7243a2"
+    },
+    {
+      "path": "assets/images/v41/icons/casual.svg",
+      "sha256": "693d1ce316f640c998b187a6cb0bf2ea2b433b47d097b465d6ef0d25ac6e3efc"
+    },
+    {
+      "path": "assets/images/v41/icons/charms.svg",
+      "sha256": "ba26576bd288d42edb2c9ebd6362405baea7ef4df6095751e41ddcaeed482918"
+    },
+    {
+      "path": "assets/images/v41/icons/check.svg",
+      "sha256": "4e9e20017546a623dd5a33a5045384d67ea2c77c03e89b23e0496ef093bd4527"
+    },
+    {
+      "path": "assets/images/v41/icons/close.svg",
+      "sha256": "29c753b85f0f51a50bf2e06ac3cc20286b5aa0f84abc0af7d0a0add0d5a1f82d"
+    },
+    {
+      "path": "assets/images/v41/icons/crossbody.svg",
+      "sha256": "e4c6515659923a3ad6dda9205d4881f1b28f91b10b954afaf6d97ec2e7f0959e"
+    },
+    {
+      "path": "assets/images/v41/icons/de-hombro.svg",
+      "sha256": "e6c5d8860c983da7f079ed0bff534faf1352eaf99ecac0d783c567f0bce60e11"
+    },
+    {
+      "path": "assets/images/v41/icons/de-mano.svg",
+      "sha256": "3c2b39fa08773f15ddf6559ad1f8c0e7e34328d67d6c4e1b4a59e97d59ff08b9"
+    },
+    {
+      "path": "assets/images/v41/icons/deportivo.svg",
+      "sha256": "06d1fbdd08d834f322d161abb3c30917f3411f41717be3b90cd10cd425ff38a5"
+    },
+    {
+      "path": "assets/images/v41/icons/direccion.svg",
+      "sha256": "633ed6695b56179fe4582c2e0144d74dc4c7264c98c0dec603ec7b3d31a2f289"
+    },
+    {
+      "path": "assets/images/v41/icons/down.svg",
+      "sha256": "bf0522d118843e5fad20a3863d1cd54ef7726852fe5932a26f8a25f3c7f326af"
+    },
+    {
+      "path": "assets/images/v41/icons/envio-avion.svg",
+      "sha256": "ef1902e87184bd9f5b6735385b6a556f7404162221671770e6e71d40b02d499f"
+    },
+    {
+      "path": "assets/images/v41/icons/envio-camion.svg",
+      "sha256": "4baf1d290d76a1782af64c1a7c3ef7d2a844bafd4df65e04d5a42adccd5c5de3"
+    },
+    {
+      "path": "assets/images/v41/icons/envios.svg",
+      "sha256": "4e59d33cda3dad37cf0231f09d96a8d34916e41517315dbe75a59839d03b81d0"
+    },
+    {
+      "path": "assets/images/v41/icons/facebook.svg",
+      "sha256": "548a8b8aaa31d3af03c2f8fb21a4800532c4313f351296c6f1405652fa9046f1"
+    },
+    {
+      "path": "assets/images/v41/icons/favorito.svg",
+      "sha256": "f043d9fd035e70b2a43be1ccf3978871683138f6d9bf7dc37d7258fc5606f3a0"
+    },
+    {
+      "path": "assets/images/v41/icons/favorito_guardado.svg",
+      "sha256": "fdde3ff29096b9117b70da02f73268c59fd8bec08cd01e11e6e24ed79b600f7d"
+    },
+    {
+      "path": "assets/images/v41/icons/filtros.svg",
+      "sha256": "4e232752d8c35a4f5b1f4afa7d8a8483eb1883237483236190d0a8a6dffb869a"
+    },
+    {
+      "path": "assets/images/v41/icons/grid.svg",
+      "sha256": "cef81870e930c08db42d2dd29d89d48a249055e5e14df2570ab1e01a29c0a5b0"
+    },
+    {
+      "path": "assets/images/v41/icons/home.svg",
+      "sha256": "44b309d43653a16127bf88a7f440fc3d3510827602f4833eb8987907df32c35b"
+    },
+    {
+      "path": "assets/images/v41/icons/instagram.svg",
+      "sha256": "6007608cf4fa7ca91066b74c5520f07a4c8792f972e42c2b334c4132b4ad6b59"
+    },
+    {
+      "path": "assets/images/v41/icons/lentes.svg",
+      "sha256": "ab0a05cd5bc21a468661c364a0730f03f2f5953e70ec5d6bf18ac9e4f5413184"
+    },
+    {
+      "path": "assets/images/v41/icons/marcas.svg",
+      "sha256": "2703dbceba7479ad467372374aac6b9d01fd42a8c60164e98d74b31771fbc2d9"
+    },
+    {
+      "path": "assets/images/v41/icons/mayoreo.svg",
+      "sha256": "8bae9a1f100d40534f14b521c30d5650065030da2cc8463dfa374803f567f3fd"
+    },
+    {
+      "path": "assets/images/v41/icons/menu.svg",
+      "sha256": "bd82208a69afdf2bc43838cb13be8f212edae03141299e6091098f64f15ff6a3"
+    },
+    {
+      "path": "assets/images/v41/icons/munequeras.svg",
+      "sha256": "f9a726ea62a45404ff09499a06c6146a084ffc9e6cfc604d74d2891b090855fe"
+    },
+    {
+      "path": "assets/images/v41/icons/ordenar.svg",
+      "sha256": "eb93f805fdec861e36e9c98a2cc9265830105dd597818da81b9cd5b3d5efeadc"
+    },
+    {
+      "path": "assets/images/v41/icons/originales.svg",
+      "sha256": "ccc9ac13b1103348a62f0aba3560be5aee8b46aeb3f2f1f186e50fac360e29c3"
+    },
+    {
+      "path": "assets/images/v41/icons/otros-accesorios.svg",
+      "sha256": "7050f3147bea7e785cd5326d073bbedf466f79797e1d7006b88fd9faa0f95cc7"
+    },
+    {
+      "path": "assets/images/v41/icons/pago_rechazado.svg",
+      "sha256": "ba3c5693c779951011dc8eddb8cda3a5b68322bdc99803b0fcbb0a903f56227b"
+    },
+    {
+      "path": "assets/images/v41/icons/pago_verificando.svg",
+      "sha256": "33c48826a52de92972789e61324bc840a50442aa31cbf890ecfb4994bfc36c81"
+    },
+    {
+      "path": "assets/images/v41/icons/pagos.svg",
+      "sha256": "e017b1ad66a2f24c79d0c9132429822ec0732efb46a8651e39a11a4257da3119"
+    },
+    {
+      "path": "assets/images/v41/icons/pedidos.svg",
+      "sha256": "9211928c6523a3021131e5cac4ae9d4db92ac61044124061eb3c6c65a9b785f5"
+    },
+    {
+      "path": "assets/images/v41/icons/perfumes-hombre.svg",
+      "sha256": "4a118aaa97eb2845c35b35057e5bf6288e82cb739d58c8e6afada5f47e3c7106"
+    },
+    {
+      "path": "assets/images/v41/icons/perfumes-mujer.svg",
+      "sha256": "343e464933e736c80dab2d1b19050a7cc76cd7e624d9693db7ca7338f726f409"
+    },
+    {
+      "path": "assets/images/v41/icons/perfumes.svg",
+      "sha256": "aefdf44cb58a44040db3dcca6562304298d05cc42a4a56f56b5ffd328a187110"
+    },
+    {
+      "path": "assets/images/v41/icons/relojes.svg",
+      "sha256": "2824d124131e0229793078da42f4e7df3f61487846e83953fcb31fbb2923e461"
+    },
+    {
+      "path": "assets/images/v41/icons/right.svg",
+      "sha256": "23a57558f9d7218bf9d5bb6d5782f23b37db3a83c42f7121a9c34473c80b674a"
+    },
+    {
+      "path": "assets/images/v41/icons/salir.svg",
+      "sha256": "c5d7d1330a74dd568768c7b57248706b890d4847576355b066cdf4273c48f9d8"
+    },
+    {
+      "path": "assets/images/v41/icons/search.svg",
+      "sha256": "dbd45359de631269a0e4f60d4da5711a6a376f2a6debca377bfb55765cbe7b8e"
+    },
+    {
+      "path": "assets/images/v41/icons/tarjeteros.svg",
+      "sha256": "6c07ed34bca35bdb78fa4de3d5310a4350aa7c8c31596fdabea678a3cf1b7a62"
+    },
+    {
+      "path": "assets/images/v41/icons/tiktok.svg",
+      "sha256": "03b5af41cc91eda929bb8304d2caff1783aaafc6fea1e4d63e6ee34758b5bbbd"
+    },
+    {
+      "path": "assets/images/v41/icons/tote.svg",
+      "sha256": "79479c42f8639ff6db86fb8b1ac6e99b08a3ea549456c4564595a8832a6510e2"
+    },
+    {
+      "path": "assets/images/v41/icons/user.svg",
+      "sha256": "7bed003109799b8092cba40bb4a973c06ad94e85e62cb5d87ba355326087d621"
+    },
+    {
+      "path": "assets/images/v41/icons/whatsapp.svg",
+      "sha256": "732846471a333d71a78606d215fbbb54cbc743c2724a8e839009e8843aa908df"
+    },
+    {
+      "path": "assets/images/v41/icons/whatsapp_fuente.svg",
+      "sha256": "8fb209a53a61618c3483594b3e070481a35575d6aaecbe00a6fe386670c8fb1c"
+    },
+    {
+      "path": "assets/images/v41/lettering/B31_descripcion.png",
+      "sha256": "5c1ddbd4589d1777a2d38e78b991d40f9d491c3befb967041c57bd45515a391e"
+    },
+    {
+      "path": "assets/images/v41/lettering/B31_titulo.png",
+      "sha256": "2a190be93b1cb6d8ddd6cb51e5d5711611fd9da542dc10fa7a2042950bcfcb8c"
+    },
+    {
+      "path": "assets/images/v41/lettering/B32_descripcion.png",
+      "sha256": "d1a84d241645282f714d0b3092e292e5795a2676b9182ec3ef71b914513672fe"
+    },
+    {
+      "path": "assets/images/v41/lettering/B32_titulo.png",
+      "sha256": "a5df90ee39bae0eaf05699cfafbf192132f2d72faa67224cda6f13b2676df28f"
+    },
+    {
+      "path": "design-prototype/index.html",
+      "sha256": "1da1ffb35e867a700812a9467fbad2913bb337e10aad17181b09762c17534edb"
+    },
+    {
+      "path": "design-prototype/public/fonts/cormorant_garamond/CormorantGaramond-Bold.ttf",
+      "sha256": "3e5fcbf7a2ac7f3308314f878e1e35e5307a7a412a0a0d6d44aa63d18f747232"
+    },
+    {
+      "path": "design-prototype/public/fonts/cormorant_garamond/CormorantGaramond-Regular.ttf",
+      "sha256": "8282f0d411e097acc5474025d9b94e888ea31deb0572c29ea3aa315c5418f4ec"
+    },
+    {
+      "path": "design-prototype/public/fonts/dm_sans/DMSans-Bold.ttf",
+      "sha256": "772062f41e9e909d5c42e13510fe01a495463e12f522b31f75379d5d7e5ebebb"
+    },
+    {
+      "path": "design-prototype/public/fonts/dm_sans/DMSans-Regular.ttf",
+      "sha256": "554f2bf60e4157521133ca1de917dc9c501d3944fb455d9ea4faf4b48742828c"
+    },
+    {
+      "path": "design-prototype/public/fonts/dm_sans/DMSans-SemiBold.ttf",
+      "sha256": "1cdeea3f3f7f221d8895bd909ddd2d8c5b33bcf34cbf608884cad594ae8b0853"
+    },
+    {
+      "path": "design-prototype/public/fonts/dm_sans/OFL.txt",
+      "sha256": "9af36190332437f5ecd09974de43c1f7c77a310a996cdd8ceb25628b458840e1"
+    },
+    {
+      "path": "design-prototype/public/fonts/inter/Inter-Bold.woff2",
+      "sha256": null
+    },
+    {
+      "path": "design-prototype/public/fonts/inter/Inter-Medium.woff2",
+      "sha256": null
+    },
+    {
+      "path": "design-prototype/public/fonts/inter/Inter-Regular.woff2",
+      "sha256": null
+    },
+    {
+      "path": "design-prototype/public/fonts/inter/Inter-SemiBold.woff2",
+      "sha256": null
+    },
+    {
+      "path": "design-prototype/public/fonts/inter/OFL.txt",
+      "sha256": null
+    },
+    {
+      "path": "design-prototype/public/fonts/playfair/OFL.txt",
+      "sha256": null
+    },
+    {
+      "path": "design-prototype/public/fonts/playfair/PlayfairDisplay-Regular.woff2",
+      "sha256": null
+    },
+    {
+      "path": "design-prototype/src/styles/tokens.css",
+      "sha256": "be95f752cbcf4ff27fbc3f5475e3e68054d1f3a6cfdeba2a3102f8af36edda7a"
+    },
+    {
+      "path": "design-system/build.mjs",
+      "sha256": "7a9e3cbf110d9c9ae6138a74e08d340e95c633de542ca6116534d29041f660c3"
+    },
+    {
+      "path": "design-system/monetta.tokens.json",
+      "sha256": "00a7b4f741645dfe4cc221c7fb4def28c3834225fb74dd59f97274414f17c3c9"
+    },
+    {
+      "path": "design-system/v41-assets.json",
+      "sha256": "8e84278fc766c8fa0d1e214b2c4fc3fd3d052cf8d5ee663d9f690153e5a71be5"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/REPORT.md",
+      "sha256": "129fa6ee860c7b0142457a0fa3f213d6966d07b31fe666e2fded739cd663cb66"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/VALIDATION.md",
+      "sha256": "6897ca5b5956fe9da0ab545688d0b28246bf1fde31a0468662525d18b13049bb"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/audit-evidence.json",
+      "sha256": "2a9f719e7e20982e401fa925d84958e67a0916bc2b29d0a591fba80f6ce5a53c"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/contract-matrix.csv",
+      "sha256": "0d424c23f7afd458d6f78566683f55a4a8c36c1690733c33b3bd774b54ec5414"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/account-comparison.jpg",
+      "sha256": "c9f3514d97bdacfdc86174e0dfc981ed6a3fd4372663a43a50d4f8f734fefba6"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/behavior-tests.log",
+      "sha256": "fa842ab169de6918857233e72ccbf61fbe096ab9d28570a2824ab07710fa75b8"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/capture-tests.log",
+      "sha256": "65ffbb52573135f17822dc3377f4772cc27cf656e01e287de8436821022c60f5"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/categories-comparison.jpg",
+      "sha256": "09bb9343a5d2e92d2aaf0de0077c955da1d030fd3635d3792712a083c7e30c71"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/contact-390-dark.png",
+      "sha256": "28f6c188b80394026f42f243de88de68537f40b8545c27506793cda907bc5cb5"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/contact-390-light.png",
+      "sha256": "334e8bdf4a9f8c81e85bcdb6125a3ef839db1a066892d302cd4a1ecbdeee2427"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/contact-834-light.png",
+      "sha256": "6363a5b77f1162cb8bf41d527c7e5617f6f1b9fee2fa551ace593d3c478502f0"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/contact-comparison.jpg",
+      "sha256": "ab3edcbad767de7334742a0af5f0f4d0ccd51a71a7b5fcfd72ea4d8cd56a1dc0"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/home-comparison.jpg",
+      "sha256": "30978db8f807acbee40396df19462a2e28eb8663a5522e9ffdec7801554a4643"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-01-bienvenida.png",
+      "sha256": "aea05f34a007c75a3b7d7ee446f524dfdeb09e3f10ec43ee97fccf41d3f8a4e3"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-02-personalizacion.png",
+      "sha256": "ada6ac645d0a8d9f1f568c6d261b5491832850fd9ff79bcbd4a04b9010d036db"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-03-inicio.png",
+      "sha256": "93b87011d95b264c10496ad24e0b711944a32623d2d754c9a5e70d90a60372cc"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-04-seguimiento.png",
+      "sha256": "93b87011d95b264c10496ad24e0b711944a32623d2d754c9a5e70d90a60372cc"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-05-busqueda.png",
+      "sha256": "e3ce63662940dee364e3dbfd1906af3037f3e8c4d12d8eddb27edf1e14c759ca"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-06-coleccion.png",
+      "sha256": "3d109ebed5308800d17a6d4cfbc6c89b4835848e0a05fb4edc9c37e3988f5c50"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-07-preview.png",
+      "sha256": "441562955a0cf64145e54b5018af8068495ad32bda61706981f588dd133a4bad"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-08-producto.png",
+      "sha256": "0f29880dc1170408ced0be9d3780ffb4bb568f885dc4ba32bca7f7f735780d42"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-09-coleccion.png",
+      "sha256": "18a9d1c411ed418fda08e80d8ccc99c64fb9efd4d7aad923b5f06fc20c791c9c"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-10-mayoreo.png",
+      "sha256": "09e3574670ee1c086d687473f9a4db4ff43f9dd4e2e9cc2bdcf6247acb5d072b"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-11-mayoreo-continuidad.png",
+      "sha256": "09e3574670ee1c086d687473f9a4db4ff43f9dd4e2e9cc2bdcf6247acb5d072b"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-12-pedidos.png",
+      "sha256": "118fee0e6dc51c72985cf443265df1ded2238df7cdb9d4dacca8decccbc1e9a6"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-13-cuenta.png",
+      "sha256": "c1f3792fd2af877ac43d2abae340934f6b9aefb8a8d9cb5b305c5a5a32da44b2"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-14-rewards.png",
+      "sha256": "b4ab9b47b42b67dc9f9674d6c52148e7e57679b81e0f705c07d98c175954709f"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-15-rewards-share.png",
+      "sha256": "bf1a7bd8dddbb9717c3262cd4e2d69266735e16efcacdd22c9a9907fb2a26ab5"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-16-contacto.png",
+      "sha256": "e9e112ef0263ec0557029e73ced501bdbd71ee2d427c53e9f97897806d73fbab"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-17-compra.png",
+      "sha256": "287e13fe1de745eb3a99f7794c3e4b88a91fb15885e563e47ec56f5f59e8d583"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-18-categorias.png",
+      "sha256": "b3e7a8cd78dbafcec5ee2c70bfaf26c03740025119dffb0fca06768436775288"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/p-19-menu.png",
+      "sha256": "ec162fd2eabe1cb6681d850157285980d73ab108c50368129a05f73c8c85cca5"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/render-probes.log",
+      "sha256": "a9add23766800ff2f0871beb19abbf3a852f20d59bec91ff4d55896430936859"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/rewards-comparison.jpg",
+      "sha256": "2370f519f1888321c407a2fe975d6d7520f002ca7d7e407b65ddba523622f5c5"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/viewport-contact-320-2x.png",
+      "sha256": "b44b340172dc518178343eda20dd91ad6eb296fa28951927b2db3bbadc234cad"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/viewport-favorites-390.png",
+      "sha256": "4d5399535e5e143e05b0e4001660a3c6eb75bb91fdc27bd87a9f1901ad76e6f9"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/viewport-home-1440-1x.png",
+      "sha256": "fbfba37eadde2dbddeb95f636bc30c6aa159245792fa754a6bba305d69da0d36"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/viewport-home-320-2x.png",
+      "sha256": "aa6934b6490f840c74a56c941f59354cf21b2ba9062eaae547538dfb0549be4d"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/viewport-home-390-1x.png",
+      "sha256": "2a19222232891f25e6328fabbb28cdade51439f47de7f1484576d138a1cc1341"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/viewport-home-768-1x.png",
+      "sha256": "a959e9bc024d88deb50f799fafb945d6e1836dcad636aae66eafc524981f2807"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/viewport-home-ios-390.png",
+      "sha256": "c7f458a87d4fe750980a33bc88929fc2e050458804fde4a535afcf046f721a01"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/viewport-order-390.png",
+      "sha256": "4a99a80e241dfb71f97988300b7277a1b1aaba11d4ac9a1ec2bafbdefbb030fe"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/viewport-sold-out-390.png",
+      "sha256": "b7ae80c9b02ecb7911f99c01bedb8c4d201f9b73e266fc49486f6bb4a435f435"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/viewport-wholesale-320-2x.png",
+      "sha256": "b828f5f0f24e18877c408092d4b573f0aa408cc467279f79c6adce5e344cd4d3"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/evidence/wholesale-comparison.jpg",
+      "sha256": "9e9377e231ae436c2fe3d5fd4d6fd0c7af282c3a7f36f0736ffb64afba633fed"
+    },
+    {
+      "path": "docs/audits/2026-11-11-v41/render_probes_test.dart",
+      "sha256": "bd4e045f736894031db01d2e53c959eec34e8849e84d28c69245c7a3ae9e3b5b"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/COMMON.md",
+      "sha256": "a5fe6c31dd6551e320b4fb1c00922a0e7aa7f990051d51593198d4a1c9cd546d"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/README.md",
+      "sha256": "55a2f85fcd00fc2b3026465688a4462611dc145f5b3923aa4d8c16428602529c"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/contract-ownership.csv",
+      "sha256": "23bb14303904ae3c0075ba246fd3ffd8881d08f55b071b4f0627b04b82334c78"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/prompts/a00-coordinator.md",
+      "sha256": "44e097e5fd93ec59c795759cc31fd131079b23472d1e89b770d9726a2422dd19"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/prompts/a01.md",
+      "sha256": "f3be852e495e6b5ef854e953385a11c40b601123cc88059df34c1245d8331dc4"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/prompts/a02.md",
+      "sha256": "1464885f2f0640ee2320cfcbe0495fac770331205eaa4abc4fe81fa274616ac4"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/prompts/a03.md",
+      "sha256": "d54492b90206c3085133ce39bb38af46413fe045d0dc15429a9ff6173e8ac8f1"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/prompts/a04.md",
+      "sha256": "8c75a4b25ab5de62b6a843c65fb03b8b99b33565d24e3d47512835829fdf442b"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/prompts/a05.md",
+      "sha256": "ab25d4127457d17c6dff206006c8fa505151c5f55833cdc2479b16e606d45496"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/prompts/a06.md",
+      "sha256": "c8043b02686fa63bfb725bae2c69606f086c04f8ca6400b2bad84d0395b322e9"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/prompts/a07.md",
+      "sha256": "57863180c15fd3a813e9c80602f2da60bb8c90af75903b064e71eaa1c69ac9cd"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/prompts/a08.md",
+      "sha256": "8c074ba58c9bea3e32ca25028f22d1dc4639564dc904b74198a7b90ff65f89b9"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/prompts/a09.md",
+      "sha256": "7bdaf16bc63d9c24de45684bc672e932f72e2b201bcb72d412e8cc233f65c884"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/prompts/a10.md",
+      "sha256": "14efb4214d694312eed61b23d221a0abe161a1e06605d9d50f4f907b7dc04e46"
+    },
+    {
+      "path": "docs/plans/v41-multi-agent/work-packages.json",
+      "sha256": "60a2ef8e4b6ed663ce6903db665d0a108cb1c433718da49847ef2882e3a64140"
+    },
+    {
+      "path": "docs/remediation/v41/decisions.md",
+      "sha256": "d815c9f56130701f3a28d307532c80c3b687f2cf197946bb8332018d1b044a37"
+    },
+    {
+      "path": "docs/remediation/v41/evidence/A00/preflight-hashes.json",
+      "sha256": "84ff94f34d77051b7ebd05c5c45e19b0199e7c4161c5d6bbb507c08ee5293ab2"
+    },
+    {
+      "path": "docs/remediation/v41/file-ownership.md",
+      "sha256": "e7456581205c152e2fe71eb93cc2bf59cbf209ccf4a5a85b318415cfc060727d"
+    },
+    {
+      "path": "docs/remediation/v41/integration-log.md",
+      "sha256": "e7a60c992a68ac493a6bd6c09739780502f156079169c4e4d031eabdf6f2fb6d"
+    },
+    {
+      "path": "docs/remediation/v41/interfaces.md",
+      "sha256": "55239e4e1e41e0d29d57c23c5609ca221be756301ad87821e9e7d387214f5bad"
+    },
+    {
+      "path": "docs/remediation/v41/tracker.csv",
+      "sha256": "de41cb0fd912061c251ed3da0f812d53639182727da659d0f3b2a2a07e93cb60"
+    },
+    {
+      "path": "lib/app/monetta_tokens.g.dart",
+      "sha256": "0661675155f7da8f24dc02cf2e760a403d8104120823ab278ec100424f139e03"
+    },
+    {
+      "path": "lib/app/theme.dart",
+      "sha256": "e055eb3b169a709fb2a18501446c67fc453ef36b98be38b275f25600ac16903d"
+    },
+    {
+      "path": "lib/features/boutique/boutique_tokens.dart",
+      "sha256": "3bf88d2784b23013f5d7995b9035291498cd68fa616b6322c360851beabe9e10"
+    },
+    {
+      "path": "lib/features/navigation/monetta_bottom_navigation.dart",
+      "sha256": "21fc29854dfe9a72d76167291c8396d9d1423a3d763d3f6c84f548d79080d19a"
+    },
+    {
+      "path": "lib/features/product/product_screen.dart",
+      "sha256": "22105d16ccca6be03745f1a0662fecb6f3e53c6d1aa0dcc5d0ce738b611b8c47"
+    },
+    {
+      "path": "lib/features/rewards/rewards_section.dart",
+      "sha256": "8fe4e6001c89efcf4a4288b4d8367a6ccb3ae3d323ffbbabdb678da9d84c6e4c"
+    },
+    {
+      "path": "pubspec.yaml",
+      "sha256": "66aba65d45f14100032d017dee0df1375b46a913e6192e1c03c181403f30ee46"
+    },
+    {
+      "path": "storefront-theme/assets/CormorantGaramond-Bold.ttf",
+      "sha256": "3e5fcbf7a2ac7f3308314f878e1e35e5307a7a412a0a0d6d44aa63d18f747232"
+    },
+    {
+      "path": "storefront-theme/assets/CormorantGaramond-Regular.ttf",
+      "sha256": "8282f0d411e097acc5474025d9b94e888ea31deb0572c29ea3aa315c5418f4ec"
+    },
+    {
+      "path": "storefront-theme/assets/DMSans-Bold.ttf",
+      "sha256": "772062f41e9e909d5c42e13510fe01a495463e12f522b31f75379d5d7e5ebebb"
+    },
+    {
+      "path": "storefront-theme/assets/DMSans-Regular.ttf",
+      "sha256": "554f2bf60e4157521133ca1de917dc9c501d3944fb455d9ea4faf4b48742828c"
+    },
+    {
+      "path": "storefront-theme/assets/DMSans-SemiBold.ttf",
+      "sha256": "1cdeea3f3f7f221d8895bd909ddd2d8c5b33bcf34cbf608884cad594ae8b0853"
+    },
+    {
+      "path": "storefront-theme/assets/Inter-Bold.woff2",
+      "sha256": null
+    },
+    {
+      "path": "storefront-theme/assets/Inter-Medium.woff2",
+      "sha256": null
+    },
+    {
+      "path": "storefront-theme/assets/Inter-Regular.woff2",
+      "sha256": null
+    },
+    {
+      "path": "storefront-theme/assets/Inter-SemiBold.woff2",
+      "sha256": null
+    },
+    {
+      "path": "storefront-theme/assets/PlayfairDisplay-Bold.ttf",
+      "sha256": null
+    },
+    {
+      "path": "storefront-theme/assets/PlayfairDisplay-Regular.woff2",
+      "sha256": null
+    },
+    {
+      "path": "storefront-theme/assets/monetta-DMSans-OFL.txt",
+      "sha256": "9af36190332437f5ecd09974de43c1f7c77a310a996cdd8ceb25628b458840e1"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-Inter-OFL.txt",
+      "sha256": null
+    },
+    {
+      "path": "storefront-theme/assets/monetta-PlayfairDisplay-OFL.txt",
+      "sha256": null
+    },
+    {
+      "path": "storefront-theme/assets/monetta-tokens.css",
+      "sha256": "f4dd524f157ffb773f2dc989e5bf76a9dcd73a505dc3c316420bc733d7daa25b"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B01_inicio_productos-1280.jpg",
+      "sha256": "1eb959abc73632f919fcdc011590406c1dfad26f0e8600ed0e888af7b131b08f"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B01_inicio_productos-1920.jpg",
+      "sha256": "a4f9b30d4786288bf7ff7f2a9614e6dcb71a613798edd512d486112754dc23af"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B01_inicio_productos-768.jpg",
+      "sha256": "58572016f5912ad19b8f12dc6ea6000af7d251ca5d86ff2b58234da4351a91c6"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B02_inicio_marcas-1280.jpg",
+      "sha256": "c51a77c308dd851869be7a633ee9da7487c3ab90763e06523b4a46d858aa15f4"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B02_inicio_marcas-1920.jpg",
+      "sha256": "e591a1dc40a69424637b7296424b9fc1e495abd01bf83a3ad43b2e8c25703d8c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B02_inicio_marcas-768.jpg",
+      "sha256": "1e898da7c56ad423a8e6740b3aeeb7b76daf2be08af512febd3b7fbcb7254a3c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B03_inicio_categorias-1280.jpg",
+      "sha256": "7b5fecdb4792e9a7fefa71bccb1fa80685380105a333471c8aeb19cc282fe743"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B03_inicio_categorias-1920.jpg",
+      "sha256": "bbb13be0fcc72ff9b68b603130cc49d18719093df3f7509bf3275dc004785444"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B03_inicio_categorias-768.jpg",
+      "sha256": "4756c0947dd7ea4cba935631f56c24b2da0cb261644f1e22415277d71e256068"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B04_inicio_mayoreo-1280.jpg",
+      "sha256": "7b7526769588d7a55da5b61d0c4ffcdfb4cf9bd536c491339eab966969e58613"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B04_inicio_mayoreo-1920.jpg",
+      "sha256": "d0d5dd785106ff138ab9a6c7e433d89c6f1721298c653835c181be3a2684ac9a"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B04_inicio_mayoreo-768.jpg",
+      "sha256": "07110b56a681507d5e1bf8b5a96f3e6bb4054d51db10c065c7b68ea60950dca1"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B04_inicio_mayoreo_editorial_sin_control-1280.jpg",
+      "sha256": "2b21ec23d1011cfede708e70817db5fe6d2308bf507877f65773823357e72771"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B04_inicio_mayoreo_editorial_sin_control-1920.jpg",
+      "sha256": "2dfd60db55b85555ef4e4591bf6f51e173b759223a11324af58fcdfa406a5745"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B04_inicio_mayoreo_editorial_sin_control-768.jpg",
+      "sha256": "1dca61788982b39589ab1fad40b793337d44ef8ad2b0fdc941ee2185fa0254c1"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B05_carteras_hombre-1280.jpg",
+      "sha256": "ff403cad5d4cbe01e5ba3922d5618b4e444844557d53559b4021d0621ebef6c7"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B05_carteras_hombre-1920.jpg",
+      "sha256": "844fc991a59a312d625cba0a351464993587693e4df95cdcb153b35d7817ad4e"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B05_carteras_hombre-768.jpg",
+      "sha256": "701c1e421be9d1466d516a3467d6ce769ebdacab3a127633f9ab6f1d5cc4fed0"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B06_charms-1280.jpg",
+      "sha256": "dab25720f8c083547a16cb80e77151335e332d14ffcb28f47894ca5ec80d89bb"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B06_charms-1920.jpg",
+      "sha256": "6364c3ee82b1209af00e87d5186a1f911d131ad5db9a2b63e39b54e6b20cdf55"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B06_charms-768.jpg",
+      "sha256": "97667f88d916725f481447e5667dbb7649aa38ca9003bae6b368a3cc27b21081"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B07_lentes-1280.jpg",
+      "sha256": "ca80f06dcad495852d08a1edba4afc1dc25d21c06216f8dbe65a866c271806e7"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B07_lentes-1920.jpg",
+      "sha256": "c252592dd8122849f7c97dcc9930e5b9636bcd9010b4480886cd5a9b08c35a36"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B07_lentes-768.jpg",
+      "sha256": "d6d26bf27c459b25f8d14566b8a1cc4ebfedb30425712deda79be3177f4541ad"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B08_bolsos-1280.jpg",
+      "sha256": "3d6f8e069856c55f12010eb4cb16077ad456f14b3b213c811940391f7c7320eb"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B08_bolsos-1920.jpg",
+      "sha256": "06615b385d62e9c794bd9694e3fb6f1d8ad06d29fc68ff829ca0a790ebb6ca73"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B08_bolsos-768.jpg",
+      "sha256": "d6abdcae3e0165ff4ddabaf9fe726e1e17db16a7b71ee98c0a18b07fbd296d3c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B09_calzado_hombre-1280.jpg",
+      "sha256": "08a99f2038e1259b6611e7cdadf12fae0ffefffb19b7d51e84bbe7ddf066afea"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B09_calzado_hombre-1920.jpg",
+      "sha256": "044916c9aeb7038cec3336fe08c877025f863d63986e9e15620f801e81968bf5"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B09_calzado_hombre-768.jpg",
+      "sha256": "485843c42c369d8de37228fbb99794b6845e2f175edfed61a71b79834ca12f72"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B10_munequeras-1280.jpg",
+      "sha256": "4f395349ab1e3e683434223a4ef6925aae02af4053482dc7b30eb2ea448d0e35"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B10_munequeras-1920.jpg",
+      "sha256": "43f3b1fe8350c2220e923154b6c2096d3a0406357851c84fdb678ad3830b26ee"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B10_munequeras-768.jpg",
+      "sha256": "ccb3fcd81f1949dd4c0fdff3bef9fa7b2170b4b60ef554d8eb67839d71206758"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B11_relojes-1280.jpg",
+      "sha256": "ca4c47359001662927db893b1e8f31e47a8cd5dbb79f9b7df1f935f5a9707281"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B11_relojes-1920.jpg",
+      "sha256": "a7280d0bb2f89d334f84e0cf414374189cf6fe497c0c4a6d41a10d51ecd84af8"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B11_relojes-768.jpg",
+      "sha256": "b7b447b78ae9dfdd36c84979ed4c252d9b2e2e56bb348cd2e5690a23e0e57abf"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B12_relojes_hombre-1280.jpg",
+      "sha256": "73c539c4cb80f8912c0829fc344075fcef4171e49fce5d5873703fb127af9e53"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B12_relojes_hombre-1920.jpg",
+      "sha256": "2986560e948006b3475f0058fc0ee3442a06eb1eb2b5dfd6b362419647f6edc5"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B12_relojes_hombre-768.jpg",
+      "sha256": "c0536c3df656b9e5ee4f51cf1374a45ad6b7f1d7eccae7d76a5bc32c147c7ce4"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B13_calzado_mujer-1280.jpg",
+      "sha256": "622f47dd67a655204af70d91041e748d54c4239178c563bc82f52f0ab3017b74"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B13_calzado_mujer-1920.jpg",
+      "sha256": "9905ca70719eac6158e5175796465d8f62b6fa3a6b5dc898e99e35474e530ed3"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B13_calzado_mujer-768.jpg",
+      "sha256": "b919e3a23e08486770a423528cd8a79c968af262a077da70566734581c63776d"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B14_bolsos_hombre-1280.jpg",
+      "sha256": "8535134272fc829293c284acba4dc0d3bec6bf6f97a70a4e0b8df8fcd4e5f1e0"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B14_bolsos_hombre-1920.jpg",
+      "sha256": "282b3e874d3d3efcbca2ea2e4364a797c8873825158a20c55692e8a8b705f58f"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B14_bolsos_hombre-768.jpg",
+      "sha256": "49af41f4653878d988475d8b3e54e52cdc664f3e2d14f0f265ce13f488e13c53"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B15_tarjeteros-1280.jpg",
+      "sha256": "4211aecc358a2ebe94904da2a590d745e0fc086f58d95a324876dc75d14ab190"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B15_tarjeteros-1920.jpg",
+      "sha256": "63d7a2e066d85981cd8b7716d23a54f0fab750da1cc9df586aac213cc2279e5f"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B15_tarjeteros-768.jpg",
+      "sha256": "46fb8bd004f8eab6101d7d6cf90edb114273ea2f855109251b01a827727ec178"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B16_perfumes_todos-1280.jpg",
+      "sha256": "7c7a434c46e6f8d6276129bbd8363db548fbd4e58a06f8f7725ab0c86b00879a"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B16_perfumes_todos-1920.jpg",
+      "sha256": "8032045610fe317aecf898c01728ce7728e08de638f3db36ace1449ce44ece0c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B16_perfumes_todos-768.jpg",
+      "sha256": "259b72f79312089325dd1881b1da37702fe87ecd8ec1409ed45630abe8b10ed0"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B17_accesorios-1280.jpg",
+      "sha256": "04352c0fdcb446fae612c2b05d29149203232d32ba8b4db6b8f957eaedef9444"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B17_accesorios-1920.jpg",
+      "sha256": "dc13383fa71c2efc53fc47bf6b5a8432ab9d1b81c3dc8f05a610ef6427111889"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B17_accesorios-768.jpg",
+      "sha256": "0fc17da2b6bec23b5a85464e61133172c202d9146192b6c0324cb42e9f5ffa8e"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B18_crossbody-1280.jpg",
+      "sha256": "a172d33409ca96a25fd187cfbcfdf2e191c5dddedfafeb2fea744de902c15ce0"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B18_crossbody-1920.jpg",
+      "sha256": "a670de8e5a7354418d7a67ff7150fec2b5ab79431c5c79ec93e08ab015365b37"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B18_crossbody-768.jpg",
+      "sha256": "42ab70925800a00f74ac7828908f63823592f74461deac0405a539da98cc8ff9"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B19_tote-1280.jpg",
+      "sha256": "2564fd42435185afb9d52e76a8bdcb35f97226a9806ca888e0741b20e813fd86"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B19_tote-1920.jpg",
+      "sha256": "256f71315041f2fab0df25a7396b2033bcfd447da3854b71580ec08350baa1d1"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B19_tote-768.jpg",
+      "sha256": "9751be5509a24bc930f992c84dd229d1084a5163c90aa3af6cded0405dc79e0c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B20_bolsos_hombro-1280.jpg",
+      "sha256": "8c0b525b5ddda93fa12cc71b3b829deecc230321846bf9964b69d525bacaea2b"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B20_bolsos_hombro-1920.jpg",
+      "sha256": "e315c2007040cee1042bf83d4f1550d7073a8a20832d6c9083ac951e8a44f2b4"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B20_bolsos_hombro-768.jpg",
+      "sha256": "92595f6c8c7230893eb760bcdb186482b96fdd82b3bbc362e4371b67a744d8b4"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B21_carteras-1280.jpg",
+      "sha256": "98c99cb3661d6c82e8fc00c0bf4f4445fe86666a199ed450dea376207cf7e6e4"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B21_carteras-1920.jpg",
+      "sha256": "103869978beb67360ff820c903fd38f07e5a8970c0ed507c7f478fd27f05b789"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B21_carteras-768.jpg",
+      "sha256": "22333bf214e319b10f6af7b66dbdbd9634785a6d45d90839f548dd3e2967eabb"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B22_bolsos_mano-1280.jpg",
+      "sha256": "9e7b2b928793181ea12e03047596610e2efb6f4122cb5b30b62c1d51f23734b4"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B22_bolsos_mano-1920.jpg",
+      "sha256": "8ba714bc272768af4e51720704a071b7c671dd71efd7502ee49ccdd8b290e4bb"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B22_bolsos_mano-768.jpg",
+      "sha256": "02c8b89f7d8b335894f0e44eaea2ca551c94c3c202a0c604b3118bea264139e4"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B23_perfumes_alternativo-1280.jpg",
+      "sha256": "5d038aa53080c775578e89eaa28064bc228327436694fcdacc331d123d1f5cab"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B23_perfumes_alternativo-1920.jpg",
+      "sha256": "e7bee5bad1f0105af6bde115580c99ee853ac3d7a5221b136e3c3896794140e4"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B23_perfumes_alternativo-768.jpg",
+      "sha256": "d4e1791415953ffadf9f8c1225f292b56ce9f1f32ea229e1790eae7e98e6c631"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B24_guess-1280.jpg",
+      "sha256": "ebe43aad789f13baba7eb00c990600370dd5584a3ece61588e0d418be906607a"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B24_guess-1920.jpg",
+      "sha256": "50f84648ed12f0ab9970e52f717c8b00a2b53ff099bc2cf9de789cde07ef3ad2"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B24_guess-768.jpg",
+      "sha256": "d24b607e597ec5bae8c62343508f309076638ff5b5aa6349d3898ab2c9ddb6c4"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B25_tory_burch-1280.jpg",
+      "sha256": "7c05a1188c05d64fdef471e48618b345062af8d5b6276ec2620f512ae9c798bc"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B25_tory_burch-1920.jpg",
+      "sha256": "f881a3415f84247fbd5c863e456422c81a1a7651de65e6948cbd0f79786ecca3"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B25_tory_burch-768.jpg",
+      "sha256": "a6f486b6a17b09cfd014b8848a00c09c6e4e166c0215faed1a3ca5d9b6176757"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B26_marc_jacobs-1280.jpg",
+      "sha256": "6252e5fb0959170ce87076eb490a69c1a8a7db798f583b6b0c5814583a57b6d9"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B26_marc_jacobs-1920.jpg",
+      "sha256": "b930cf5981cca68978da0a1029dd9e4b1a4fc67cd4cfea7a7fe98cfe61793884"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B26_marc_jacobs-768.jpg",
+      "sha256": "930aaca22f767c1509a5e11108939afa4a0912d85d45a123810b0f12d75621d1"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B27_kate_spade-1280.jpg",
+      "sha256": "313f926bd1ea700c04a23b3284dd95d6be1ba734885707a9b8e3222b519b95d3"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B27_kate_spade-1920.jpg",
+      "sha256": "9fd061793c57b72ab1eee005923d589655f0032ab0be38e934da6b3b4e1bdf1d"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B27_kate_spade-768.jpg",
+      "sha256": "a71e9efe14d633b07ebdeabe87a749d1e92057d112bfccaa9ce0f4aa7cad9ebe"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B28_coach-1280.jpg",
+      "sha256": "13b9837bc2c773705805a576fde467aef9252fc9e73806184e4c4af313b9bf66"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B28_coach-1920.jpg",
+      "sha256": "e3f866882fe1643c37f7d820de9ab0897edfafee91435787706914b8ef30e514"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B28_coach-768.jpg",
+      "sha256": "f30fa006fcfaa1f51bcd5e45c9dc145fa9a44e2993cfcf8764bb0a49c150659c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B29_michael_kors-1280.jpg",
+      "sha256": "46ded0729c78aab254422e870b28ff84b538d60b713fc491619391b38123f8d1"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B29_michael_kors-1920.jpg",
+      "sha256": "da55ce87cef44866116847df3b631bad0fd62331e584456229c840fa8278ed72"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B29_michael_kors-768.jpg",
+      "sha256": "6bc8e383a076621b670ab9cef40238680b41641bdeabc932ab8258224aad70ba"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B30_steve_madden-1280.jpg",
+      "sha256": "6d19d16921c3dd56d0c581b17525a98aee4da0ee7a74b64929e2c119c57266fe"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B30_steve_madden-1920.jpg",
+      "sha256": "58c3ecce0958cf5a4653972420f328fa3664ba8fa1823da2cb98271f9290baf0"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B30_steve_madden-768.jpg",
+      "sha256": "708d4daf4752a85e54bdb5a80426658f29def4fd6c3708759aceb28527d0751f"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B31_contacto-1280.jpg",
+      "sha256": "09c7d2f7dd4cc1a959b5958298a1bc0026f79a717d9afa9c9e2f070f675b97e7"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B31_contacto-1920.jpg",
+      "sha256": "1037e38505f3799c1c1eff9dd11202e6445532f4e526bf3b53a2016ecc5f5905"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B31_contacto-768.jpg",
+      "sha256": "f15d6d77995bfae82946a53c847aada5142cedd641d308d443c8b9f1eb2b5ff2"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B32_mayoreo-1280.jpg",
+      "sha256": "e0428e271d4d15f30c79165b6b240bdf02f86595032bfa0d179596aa5012024a"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B32_mayoreo-1920.jpg",
+      "sha256": "d2c456c533b16142fa298f97c08b4db4b59ad5d04c9d9821508f4802db72c365"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-B32_mayoreo-768.jpg",
+      "sha256": "976201bf1909a15aa74df4e98255f6d57b8d5328e59fa650f921a61dc80cf80c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F01_calzado_mujer-300.jpg",
+      "sha256": "f38c4b3c8737c305dc27ff978522f8c3e3547a0b5e4bb256e246019bcec61205"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F01_calzado_mujer-600.jpg",
+      "sha256": "50496eb0026ea41931fc58b858150501b29480c2d7d47eb4aa91c1171fffac5c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F02_bolsos_hombro-300.jpg",
+      "sha256": "30967ce001023c4c885664e0adf5a74637367b87f6f113afd6c31fb8e9e98cbe"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F02_bolsos_hombro-600.jpg",
+      "sha256": "71a2d2e6d000fed8c92c03099d73846f548c75661d3e05de1f2041ff24dfd121"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F03_bolsos_mano-300.jpg",
+      "sha256": "4cc73f54c4582356dc39df1cd8c15fa89d1f33f89a68045797d4b488b2c7f448"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F03_bolsos_mano-600.jpg",
+      "sha256": "247070bd83300de26b46b8f6b579ea223dc743bbaf060d4afe0b7859bf761fe0"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F04_calzado_hombre-300.jpg",
+      "sha256": "9b9242a930ada91fe9a5543f58d150665933ce7bdbb8a5f01dbf4821703a67cd"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F04_calzado_hombre-600.jpg",
+      "sha256": "2c4524825e9f304e8f5c83a0e2b97e1a7cd60f7ad7376464bf8baea3e7e96e5d"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F05_accesorios-300.jpg",
+      "sha256": "8991bad230e4954311d57219bca8af41f7d0b51a463a64e71638014c244475f0"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F05_accesorios-600.jpg",
+      "sha256": "ac880377a87ab0481b4d472ef64db177951325bd98334f0176c1dd4837f2ff44"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F06_bolsos_hombre-300.jpg",
+      "sha256": "fc180c45dec7cda0d8e58b1bcf6377f3e836f0f6270fa97d39a15444aec1ed55"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F06_bolsos_hombre-600.jpg",
+      "sha256": "0f7b387e9d7281c4e107dce828f31ae972adcb6d085c36659cb27ae8f034ee4a"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F07_bolsos-300.jpg",
+      "sha256": "49622ae829262f6e3eda14b2dc65637bffbaa9719793f65e8e46e6d7e4308919"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F07_bolsos-600.jpg",
+      "sha256": "218fd113552214e15e65504646f2f38e21ca7b044cf6ef80fb3a30490d395c87"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F08_carteras-300.jpg",
+      "sha256": "62d2cd51172aae43475f6bbd3a835a352eef08de2fb659f6957786e44817e66c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F08_carteras-600.jpg",
+      "sha256": "a39422157e63bfc7f5c7059f84c8baac115637c3ed884484c86dc77d87566da9"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F09_carteras_mujer-300.jpg",
+      "sha256": "eae7beac0d2145f4cdfcaa60309b767d2a26f2e55913e73ee6531551d14e5012"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F09_carteras_mujer-600.jpg",
+      "sha256": "acdbf9c0b60660176d2ca8f5b2ec935ec4fcdfae38067c4516adff543149aacf"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F10_crossbody-300.jpg",
+      "sha256": "bdf39381f3366100d0c0840ff78fe236472656bfdcfb29ad1994afb95a7b4535"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F10_crossbody-600.jpg",
+      "sha256": "d19abd6cfc7661daebcdef874f2bc6504fa8a8fbafd938a79d825d3db2685aa7"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F11_carteras_hombre-300.jpg",
+      "sha256": "697dd96971107d706d1ccd6b9980b6da3ff707134091af3cbf1ff90358b9d3db"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F11_carteras_hombre-600.jpg",
+      "sha256": "6f7d60e2b73dc3e44d3d9d308e8dd451d59c29f1c6da459ee8137e5b5337a240"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F12_lentes-300.jpg",
+      "sha256": "d6b1ce4a160e29b3a500ec356b1aa7b19a469c2e177031ca2682e4e2be49d79b"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F12_lentes-600.jpg",
+      "sha256": "17bf1a5ff7b66ad5500d7aae261b0e42c5e3d805fa21a43316fb866e149f9de9"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F13_relojes_hombre-300.jpg",
+      "sha256": "ce1e08c147ec00258194f9c5ccc97e324d1c0f09cc42d2e21d117cb73e4d5a0f"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F13_relojes_hombre-600.jpg",
+      "sha256": "f26de2daf977481afd22850a863a80f56d4aba7f6eb2f9be9ddb133a8e28f32c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F14_tarjeteros-300.jpg",
+      "sha256": "acc0621a0db0b9b77494642f56812bb883636898ac1413bc0170ea172de508fc"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F14_tarjeteros-600.jpg",
+      "sha256": "90c3a88c408d4df86f44c61fe75e00d56d05f1e86260ec10c8714aaf62c081af"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F15_munequeras-300.jpg",
+      "sha256": "40c9fe3edab7be3a92e14de8e6ca21370b3c0448835518fed8724d3194723558"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F15_munequeras-600.jpg",
+      "sha256": "7577ea9d46eeeef10559e4ae7c0396254bd0fa2639e831ab3b8e0cfefdeddd1c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F16_relojes_mujer-300.jpg",
+      "sha256": "25a3b694a3ba26b3053c392fc0525b9f5f4cf02531b81b3189ae6939b73eade1"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F16_relojes_mujer-600.jpg",
+      "sha256": "1f6a02007e180b1a9dea783c868c41ae9bf88e5351c7b209b25c81c663d31b5d"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F17_tote-300.jpg",
+      "sha256": "46274ebadb7e67bc87f276a97e5b719551d8bb435aa07d7af92c89d98b33f37e"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F17_tote-600.jpg",
+      "sha256": "6e9972640e49bacc37a603600fd3b16b37985c1b356f278916c45e6932d65f21"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F18_bolsos_alt-300.jpg",
+      "sha256": "7886ad95c067867ab47f64c8487be3cdf8b97b26b4f4e2ad8ac74edab1a1b598"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-foto-F18_bolsos_alt-600.jpg",
+      "sha256": "1cca4dd41fd7411253286c4a74b58b2596f72b03f9cfeddd9ed584df0ac43989"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-accesorios.svg",
+      "sha256": "7c478455b98b75e52a2e3800890fc97c32e77fec8ca18525d02099408a283f8c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-ajustes.svg",
+      "sha256": "552f4fa74d1bbb257c9ad19ae42b0e8c636209a481919dbe343e69fc1a051304"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-atencion.svg",
+      "sha256": "3e05cf79e1a0066132f55df473f965b513071ba48db025d13000237b52d7b1a4"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-avisos.svg",
+      "sha256": "4aa92e59ba8bf086a690aa663a34a0d4cdd9ef8310c308f184e5577df7a947a1"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-ayuda.svg",
+      "sha256": "ecda995414061ea2dea8992d9fd355a06b4e8904241bd820bffac2b65decba2e"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-back.svg",
+      "sha256": "d4f65dbe5c824c7e0a867fed3e6df80534ded13afde7a394c3990113dd9debf1"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-bolsos-hombre.svg",
+      "sha256": "23e9063fe368516ecf4e641ce16cac6ff4fa9080b75d0b0015041db36d969236"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-bolsos-mujer.svg",
+      "sha256": "488840cd310bfc1e3002f84109ce0a3c44ae4bfa77f56c4350dcd3b950162595"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-bolsos.svg",
+      "sha256": "5966e63d3d6380f56f066b6f37f625c8f06a1d227a4b229aa1f78c65d4b9eda5"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-calzado-hombre.svg",
+      "sha256": "ca0e16e571a0ccabf222eb2b28d2fadfb5dc8ed02cae675388ef22ea1be2797f"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-calzado-mujer.svg",
+      "sha256": "628e049d1cd6b2de8f0278694d1878fd99a91a2bda9fd389ba7f8f2a442c0d92"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-calzado.svg",
+      "sha256": "517a30d64f636da240c5622baba999f7885c0068ba35107365852b931c4e7c72"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-cart.svg",
+      "sha256": "3b5ff2317831329e7ca44b13dba60c19ddfb21b75eff5417a4f56eccca72c150"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-carteras-clasicas.svg",
+      "sha256": "4f490b74beff3b343c3320efc695d49170d6664f1677084b0139ef38c0fb5ac1"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-carteras-hombre.svg",
+      "sha256": "8a2ba11cbcb2a357e3dcee3738d28e7296241dce7594f16ad2ef8c93302838eb"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-carteras-mujer.svg",
+      "sha256": "0e2086797c101f847243e04666b0072c57213445ae4f91d30be6068d252b3723"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-carteras.svg",
+      "sha256": "9d1452087821acbc634826af1a986207b74e6cfc516946bfa7e996bf9d7243a2"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-casual.svg",
+      "sha256": "693d1ce316f640c998b187a6cb0bf2ea2b433b47d097b465d6ef0d25ac6e3efc"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-charms.svg",
+      "sha256": "ba26576bd288d42edb2c9ebd6362405baea7ef4df6095751e41ddcaeed482918"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-check.svg",
+      "sha256": "4e9e20017546a623dd5a33a5045384d67ea2c77c03e89b23e0496ef093bd4527"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-close.svg",
+      "sha256": "29c753b85f0f51a50bf2e06ac3cc20286b5aa0f84abc0af7d0a0add0d5a1f82d"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-crossbody.svg",
+      "sha256": "e4c6515659923a3ad6dda9205d4881f1b28f91b10b954afaf6d97ec2e7f0959e"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-de-hombro.svg",
+      "sha256": "e6c5d8860c983da7f079ed0bff534faf1352eaf99ecac0d783c567f0bce60e11"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-de-mano.svg",
+      "sha256": "3c2b39fa08773f15ddf6559ad1f8c0e7e34328d67d6c4e1b4a59e97d59ff08b9"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-deportivo.svg",
+      "sha256": "06d1fbdd08d834f322d161abb3c30917f3411f41717be3b90cd10cd425ff38a5"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-direccion.svg",
+      "sha256": "633ed6695b56179fe4582c2e0144d74dc4c7264c98c0dec603ec7b3d31a2f289"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-down.svg",
+      "sha256": "bf0522d118843e5fad20a3863d1cd54ef7726852fe5932a26f8a25f3c7f326af"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-envio-avion.svg",
+      "sha256": "ef1902e87184bd9f5b6735385b6a556f7404162221671770e6e71d40b02d499f"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-envio-camion.svg",
+      "sha256": "4baf1d290d76a1782af64c1a7c3ef7d2a844bafd4df65e04d5a42adccd5c5de3"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-envios.svg",
+      "sha256": "4e59d33cda3dad37cf0231f09d96a8d34916e41517315dbe75a59839d03b81d0"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-facebook.svg",
+      "sha256": "548a8b8aaa31d3af03c2f8fb21a4800532c4313f351296c6f1405652fa9046f1"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-favorito.svg",
+      "sha256": "f043d9fd035e70b2a43be1ccf3978871683138f6d9bf7dc37d7258fc5606f3a0"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-favorito_guardado.svg",
+      "sha256": "fdde3ff29096b9117b70da02f73268c59fd8bec08cd01e11e6e24ed79b600f7d"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-filtros.svg",
+      "sha256": "4e232752d8c35a4f5b1f4afa7d8a8483eb1883237483236190d0a8a6dffb869a"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-grid.svg",
+      "sha256": "cef81870e930c08db42d2dd29d89d48a249055e5e14df2570ab1e01a29c0a5b0"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-home.svg",
+      "sha256": "44b309d43653a16127bf88a7f440fc3d3510827602f4833eb8987907df32c35b"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-instagram.svg",
+      "sha256": "6007608cf4fa7ca91066b74c5520f07a4c8792f972e42c2b334c4132b4ad6b59"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-lentes.svg",
+      "sha256": "ab0a05cd5bc21a468661c364a0730f03f2f5953e70ec5d6bf18ac9e4f5413184"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-marcas.svg",
+      "sha256": "2703dbceba7479ad467372374aac6b9d01fd42a8c60164e98d74b31771fbc2d9"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-mayoreo.svg",
+      "sha256": "8bae9a1f100d40534f14b521c30d5650065030da2cc8463dfa374803f567f3fd"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-menu.svg",
+      "sha256": "bd82208a69afdf2bc43838cb13be8f212edae03141299e6091098f64f15ff6a3"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-munequeras.svg",
+      "sha256": "f9a726ea62a45404ff09499a06c6146a084ffc9e6cfc604d74d2891b090855fe"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-ordenar.svg",
+      "sha256": "eb93f805fdec861e36e9c98a2cc9265830105dd597818da81b9cd5b3d5efeadc"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-originales.svg",
+      "sha256": "ccc9ac13b1103348a62f0aba3560be5aee8b46aeb3f2f1f186e50fac360e29c3"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-otros-accesorios.svg",
+      "sha256": "7050f3147bea7e785cd5326d073bbedf466f79797e1d7006b88fd9faa0f95cc7"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-pago_rechazado.svg",
+      "sha256": "ba3c5693c779951011dc8eddb8cda3a5b68322bdc99803b0fcbb0a903f56227b"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-pago_verificando.svg",
+      "sha256": "33c48826a52de92972789e61324bc840a50442aa31cbf890ecfb4994bfc36c81"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-pagos.svg",
+      "sha256": "e017b1ad66a2f24c79d0c9132429822ec0732efb46a8651e39a11a4257da3119"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-pedidos.svg",
+      "sha256": "9211928c6523a3021131e5cac4ae9d4db92ac61044124061eb3c6c65a9b785f5"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-perfumes-hombre.svg",
+      "sha256": "4a118aaa97eb2845c35b35057e5bf6288e82cb739d58c8e6afada5f47e3c7106"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-perfumes-mujer.svg",
+      "sha256": "343e464933e736c80dab2d1b19050a7cc76cd7e624d9693db7ca7338f726f409"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-perfumes.svg",
+      "sha256": "aefdf44cb58a44040db3dcca6562304298d05cc42a4a56f56b5ffd328a187110"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-relojes.svg",
+      "sha256": "2824d124131e0229793078da42f4e7df3f61487846e83953fcb31fbb2923e461"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-right.svg",
+      "sha256": "23a57558f9d7218bf9d5bb6d5782f23b37db3a83c42f7121a9c34473c80b674a"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-salir.svg",
+      "sha256": "c5d7d1330a74dd568768c7b57248706b890d4847576355b066cdf4273c48f9d8"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-search.svg",
+      "sha256": "dbd45359de631269a0e4f60d4da5711a6a376f2a6debca377bfb55765cbe7b8e"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-tarjeteros.svg",
+      "sha256": "6c07ed34bca35bdb78fa4de3d5310a4350aa7c8c31596fdabea678a3cf1b7a62"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-tiktok.svg",
+      "sha256": "03b5af41cc91eda929bb8304d2caff1783aaafc6fea1e4d63e6ee34758b5bbbd"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-tote.svg",
+      "sha256": "79479c42f8639ff6db86fb8b1ac6e99b08a3ea549456c4564595a8832a6510e2"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-user.svg",
+      "sha256": "7bed003109799b8092cba40bb4a973c06ad94e85e62cb5d87ba355326087d621"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-whatsapp.svg",
+      "sha256": "732846471a333d71a78606d215fbbb54cbc743c2724a8e839009e8843aa908df"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-icon-whatsapp_fuente.svg",
+      "sha256": "8fb209a53a61618c3483594b3e070481a35575d6aaecbe00a6fe386670c8fb1c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-lettering-B31_descripcion.png",
+      "sha256": "5c1ddbd4589d1777a2d38e78b991d40f9d491c3befb967041c57bd45515a391e"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-lettering-B31_titulo.png",
+      "sha256": "2a190be93b1cb6d8ddd6cb51e5d5711611fd9da542dc10fa7a2042950bcfcb8c"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-lettering-B32_descripcion.png",
+      "sha256": "d1a84d241645282f714d0b3092e292e5795a2676b9182ec3ef71b914513672fe"
+    },
+    {
+      "path": "storefront-theme/assets/monetta-v41-lettering-B32_titulo.png",
+      "sha256": "a5df90ee39bae0eaf05699cfafbf192132f2d72faa67224cda6f13b2676df28f"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-guia-welcome.liquid",
+      "sha256": "468342422c7b16bdf40c2fc90e7527533f3efa06d646e17a5ec222a67a5c864d"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-atelier-bridge.liquid",
+      "sha256": "4f152606c0c043d5f68620e4b460265794423e7bac60bca78a8548ada9780a20"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-fonts.liquid",
+      "sha256": "3781d10415ce6c407ff45a99d6e58d7b74c76d020ee4f34897b17054375eff49"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-head.liquid",
+      "sha256": "19b749abcd05299cb8fcb08594f9663a0bab85526a12dfcf8923d96f0df6bb27"
+    },
+    {
+      "path": "test/app/boutique_palette_test.dart",
+      "sha256": "0b0523605c99f7e4bbe870394bf35c68543c8cb803bf8ec6d238d0341c80031e"
+    },
+    {
+      "path": "test/app/v41_base_tokens_test.dart",
+      "sha256": "52c86c7a8bd2672073898d855ec8200dd8cbd74025618c03b2c28730fb13286e"
+    },
+    {
+      "path": "test/features/account/account_screen_test.dart",
+      "sha256": "ba4451d118d288b2084e6ab22ecd91eff614c57e2a1b768cb1a2d7ddf18ec6c7"
+    },
+    {
+      "path": "test/features/catalog/product_card_redesign_test.dart",
+      "sha256": "fa31d41018ad5dcd5d588fae877212edf8ea24fe18c149e8a2781f5e5385ec1c"
+    },
+    {
+      "path": "test/features/home/home_shop_by_style_test.dart",
+      "sha256": "04c45f942df4d9c824d955162b7e357201f448728b50353c1a852ce16b0e10cd"
+    },
+    {
+      "path": "test/features/navigation/monetta_bottom_navigation_test.dart",
+      "sha256": "41cacba42b1478881e96e54a8da98ec18e238fc46c4a6b0181eed20bf638e6f9"
+    },
+    {
+      "path": "test/support/bundled_fonts.dart",
+      "sha256": "e746eba6951331a9b611036974f1686f5f73ce2ba22fb9ad37128d3aef18a6ef"
+    }
+  ]
+}

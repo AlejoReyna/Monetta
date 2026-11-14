@@ -15,6 +15,23 @@ Widget _host(CatalogStore store) => MaterialApp(
       ),
     );
 
+/// A tall phone, so the saved grid under the two recommendation rows is
+/// built.
+void _tall(WidgetTester tester) {
+  tester.view.physicalSize = const Size(390, 3200);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+}
+
+/// Saved pieces only; the v4.1 «Basado en tus gustos» rows add their own
+/// cards above the grid.
+Finder _savedCards() => find.byWidgetPredicate(
+      (widget) =>
+          widget is ProductCard &&
+          widget.key is ValueKey<String> &&
+          (widget.key! as ValueKey<String>).value.startsWith('favorite-card-'),
+    );
+
 void main() {
   group('FavoritesScreen', () {
     testWidgets('empty state explains and offers the catalog', (
@@ -28,6 +45,8 @@ void main() {
       });
       await store.loadFromAsset();
 
+      _tall(tester);
+
       await tester.pumpWidget(_host(store));
       await tester.pumpAndSettle();
 
@@ -37,7 +56,7 @@ void main() {
         find.text('Explorar el catálogo'),
         findsOneWidget,
       );
-      expect(find.byType(ProductCard), findsNothing);
+      expect(_savedCards(), findsNothing);
     });
 
     testWidgets('lists saved pieces with the shared card', (tester) async {
@@ -53,11 +72,13 @@ void main() {
         await store.toggleWishlist(id);
       }
 
+      _tall(tester);
+
       await tester.pumpWidget(_host(store));
       await tester.pumpAndSettle();
 
       expect(find.text('2 piezas guardadas en esta cuenta.'), findsOneWidget);
-      expect(find.byType(ProductCard), findsNWidgets(2));
+      expect(_savedCards(), findsNWidgets(2));
     });
 
     testWidgets('unhearting from the grid removes the piece', (tester) async {
@@ -71,11 +92,18 @@ void main() {
       final product = store.products.first;
       await store.toggleWishlist(product.id);
 
+      _tall(tester);
+
       await tester.pumpWidget(_host(store));
       await tester.pumpAndSettle();
-      expect(find.byType(ProductCard), findsOneWidget);
+      expect(_savedCards(), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.favorite));
+      await tester.tap(
+        find.descendant(
+          of: _savedCards(),
+          matching: find.byTooltip('Quitar de favoritos'),
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(store.wishlist, isNot(contains(product.id)));
@@ -95,10 +123,12 @@ void main() {
       await store.toggleWishlist(product.id);
       await store.toggleWishlist('gid://shopify/Product/999999');
 
+      _tall(tester);
+
       await tester.pumpWidget(_host(store));
       await tester.pumpAndSettle();
 
-      expect(find.byType(ProductCard), findsOneWidget);
+      expect(_savedCards(), findsOneWidget);
       expect(
         find.text(
           '1 pieza guardada ya no está disponible en el catálogo.',
@@ -114,7 +144,7 @@ void main() {
         isNot(contains('gid://shopify/Product/999999')),
       );
       expect(store.wishlist, contains(product.id));
-      expect(find.byType(ProductCard), findsOneWidget);
+      expect(_savedCards(), findsOneWidget);
     });
 
     testWidgets('scopes isolate two accounts on the same device',
@@ -135,13 +165,15 @@ void main() {
       expect(store.wishlist, isEmpty);
       await store.toggleWishlist(second);
 
+      _tall(tester);
+
       await tester.pumpWidget(_host(store));
       await tester.pumpAndSettle();
-      expect(find.byType(ProductCard), findsOneWidget);
+      expect(_savedCards(), findsOneWidget);
 
       await store.setAccountScope('acct-A');
       await tester.pumpAndSettle();
-      expect(find.byType(ProductCard), findsOneWidget);
+      expect(_savedCards(), findsOneWidget);
       // La pieza visible es la de A, no la de B.
       expect(store.wishlist, contains(first));
       expect(store.wishlist, isNot(contains(second)));

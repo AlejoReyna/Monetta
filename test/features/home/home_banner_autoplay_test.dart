@@ -50,7 +50,11 @@ Future<void> _pumpBanner(
           disableAnimations: disableAnimations,
         ),
         child: Scaffold(
-          body: HomeEditorialBanner(playing: playing, onOpenNew: () {}),
+          body: HomeEditorialBanner(
+              playing: playing,
+              onOpenProducts: () {},
+              onOpenBrands: () {},
+              onOpenCategories: () {}),
         ),
       ),
     ),
@@ -127,7 +131,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: HomeEditorialBanner(playing: true, onOpenNew: () {}),
+          body: HomeEditorialBanner(
+              playing: true,
+              onOpenProducts: () {},
+              onOpenBrands: () {},
+              onOpenCategories: () {}),
         ),
       ),
     );
@@ -142,7 +150,11 @@ void main() {
           home: TickerMode(
             enabled: !covered,
             child: Scaffold(
-              body: HomeEditorialBanner(playing: true, onOpenNew: () {}),
+              body: HomeEditorialBanner(
+                  playing: true,
+                  onOpenProducts: () {},
+                  onOpenBrands: () {},
+                  onOpenCategories: () {}),
             ),
           ),
         );

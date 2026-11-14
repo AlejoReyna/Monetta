@@ -2,7 +2,7 @@
   Preview card of the client's 29 Oct reference (quick_view.dart), rendered by Shopify for one product through the Section
   Rendering API (/products/<handle>?section_id=monetta-quick-view) and shown by assets/monetta-guia.js in the #quick-view dialog:
   a centred card over the dimmed page on every width. It opens from a tap on any product card with the card's variant chosen,
-  so «Agregar a bolsa» works at once; changing an option re-reads price, photo and stock from the variants below. Prices,
+  so «Agregar al carrito» works at once; changing an option re-reads price, photo and stock from the variants below. Prices,
   availability and the low-stock count are Shopify's; the count shows only when Shopify tracks the piece and refuses overselling.
 {%- endcomment -%}
 {%- liquid
@@ -65,7 +65,8 @@
     {%- endunless -%}
     <p class="quick-view__stock"><span class="quick-view__stock-label">Stock</span><span class="quick-view__stock-pill" data-quick-view-stock role="status">{% if current.available %}Disponible{% else %}Agotado{% endif %}</span></p>
     <p class="quick-view__hint" data-quick-view-hint role="status" hidden></p>
-    <button type="button" class="btn btn--primary btn--block" data-quick-view-add{% unless current.available %} disabled{% endunless %}>Agregar a bolsa</button>
+    <button type="button" class="btn btn--primary btn--block" data-quick-view-add{% unless current.available %} disabled{% endunless %}>Agregar al carrito</button>
+    <p class="quick-view__added" data-quick-view-added role="status" hidden>Agregado al carrito</p>
     <a class="btn btn--outline btn--block" href="{{ product.url }}">Ver producto</a>
   </div>
   <script type="application/json" data-quick-view-variants>

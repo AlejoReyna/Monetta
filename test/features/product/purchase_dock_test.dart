@@ -6,9 +6,9 @@ import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/domain/product.dart';
-import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/features/checkout/checkout_screen.dart';
 import 'package:monetta_app/features/product/product_selection.dart';
+import 'package:monetta_app/features/product/product_screen.dart';
 import '../../support/product_screen_harness.dart';
 import '../../support/scripted_catalog_store.dart';
 
@@ -17,8 +17,8 @@ import '../../support/scripted_catalog_store.dart';
 // "Otras formas de comprar" section (BRIEF 2.5).
 
 const double _inset = 34;
-const String _addLabel = 'AGREGAR A BOLSA';
-const String _pendingLabel = 'AGREGANDO…';
+const String _addLabel = 'Agregar al carrito';
+const String _pendingLabel = 'Agregando…';
 const Key _bottomNavKey = Key('bottom-nav-surface');
 const String _restockLabel = 'Avísame cuando vuelva';
 const String _failureMessage = 'No pudimos agregar la pieza. Intenta de nuevo.';
@@ -79,7 +79,7 @@ void main() {
         expect(_primary(), findsOneWidget);
         expect(tester.getSize(_primary()).height, greaterThanOrEqualTo(48));
         expect(_inPrimary(find.text(_addLabel)), findsOneWidget);
-        expect(find.text('COMPRAR AHORA'), findsOneWidget);
+        expect(find.text('Comprar ahora'), findsOneWidget);
 
         final before = tester.getRect(find.byKey(_bottomNavKey));
         await scrollToEnd(tester);
@@ -176,131 +176,109 @@ void main() {
     }
   });
 
-  group('CART-02 the secondary purchase section', () {
-    testWidgets(
-      'CART-02 sits after the accordions and the WhatsApp link and before '
-      '"Más de ...", with the secondary actions',
-      (tester) async {
-        setPhoneView(tester);
-        final store = await loadedStore();
-        final (:product, other: _) = productWithBrandRail(store);
-        await pumpFicha(tester, store, product.id);
+  group('G10/G10-A purchase continuation', () {
+    Future<void> openMethods(WidgetTester tester) async {
+      final heading = find.text('Otras formas de comprar');
+      tester.state<ScrollableState>(mainScrollable()).position.jumpTo(0);
+      await tester.pump();
+      for (var i = 0; i < 15 && heading.hitTestable().evaluate().isEmpty; i++) {
+        await tester.drag(mainList(), const Offset(0, -150));
+        await tester.pump();
+      }
+      await tester.tap(heading.hitTestable());
+      await tester.pump();
+    }
 
-        final section = find.byKey(kPurchaseSectionKey);
-        final whatsapp = await contentOffsetOf(
-          tester,
-          find.text('Escribir por WhatsApp'),
-        );
-        final lastAccordion = await contentOffsetOf(
-          tester,
-          find.text('Envíos y devoluciones'),
-        );
-        final sectionTop = await contentOffsetOf(tester, section);
-        final related = await contentOffsetOf(
-          tester,
-          find.text('Productos relacionados'),
-        );
-        final buyNowTop = await contentOffsetOf(tester, find.byKey(kBuyNowKey));
-        expect(buyNowTop, lessThan(lastAccordion));
-        expect(sectionTop, greaterThan(whatsapp));
-        expect(sectionTop, greaterThan(lastAccordion));
-        expect(sectionTop, lessThan(related));
-
-        await scrollTo(tester, section);
-        final heading = find.descendant(
-          of: section,
-          matching: find.text('Otras formas de comprar'),
-        );
-        expect(heading, findsOneWidget);
-        final style = styleOf(tester, heading);
-        expect(style.fontFamily, kBoutiqueSerifFamily);
-        expect(style.fontWeight, FontWeight.w400);
-        expect(style.fontSize, kBoutiqueSectionHeadingSize);
-
-        final apartar = find.descendant(
-          of: section,
-          matching: find.byKey(kApartarKey),
-        );
-        expect(apartar, findsOneWidget);
-        expect(
-          find.descendant(
-            of: find.byKey(kBuyNowKey),
-            matching: find.text('COMPRAR AHORA'),
+    testWidgets('accordions follow required order and WhatsApp is lazy',
+        (tester) async {
+      setPhoneView(tester);
+      final store = await loadedStore();
+      final (:product, other: _) = productWithBrandRail(store);
+      await tester.pumpWidget(
+        fichaApp(
+          store,
+          ProductScreen(
+            productId: product.id,
+            shippingPolicy: 'Política de envíos de prueba.',
+            returnsPolicy: 'Política de cambios de prueba.',
           ),
-          findsOneWidget,
-        );
-        expect(
-          find.descendant(of: apartar, matching: find.text('Apartar')),
-          findsOneWidget,
-        );
-        expect(
-          find.descendant(
-            of: find.byKey(_bottomNavKey),
-            matching: find.byKey(kBuyNowKey),
-          ),
-          findsNothing,
-        );
-      },
-    );
-
+        ),
+      );
+      await tester.pump();
+      final description =
+          await contentOffsetOf(tester, find.text('Descripción'));
+      final methods =
+          await contentOffsetOf(tester, find.text('Otras formas de comprar'));
+      final shipping = await contentOffsetOf(tester, find.text('Envíos'));
+      final returns =
+          await contentOffsetOf(tester, find.text('Cambios y devoluciones'));
+      expect(description, lessThan(methods));
+      expect(methods, lessThan(shipping));
+      expect(shipping, lessThan(returns));
+      expect(find.byKey(kApartarKey), findsNothing);
+      await openMethods(tester);
+      expect(find.byKey(kApartarKey), findsOneWidget);
+      expect(
+        find.text(
+          'Enviar una solicitud no confirma el apartado ni realiza un cobro.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(kBuyNowKey), findsOneWidget);
+    });
     testWidgets(
-      'CART-02b "Comprar ahora" adds one unit of the chosen variant and '
-      'opens the bag',
-      (tester) async {
-        setPhoneView(tester);
-        final store = await loadedStore();
-        final product = syntheticProduct(variants: chipVariants());
-        addProducts(store, [product]);
-        await pumpFicha(tester, store, product.id);
-        await selectOption(tester, 'Talla mediana');
-
-        final buyNow = find.byKey(kBuyNowKey);
-        await scrollTo(tester, buyNow);
-        await tester.tap(buyNow);
-        await tester.pumpAndSettle();
-
-        expect(store.bagQuantity, 1);
-        expect(store.bagLines.single.variant.id, 'v-mediana');
-        expect(find.byType(BagScreen), findsOneWidget);
-      },
-    );
-
+        'Comprar ahora adds chosen variant and preserves other bag lines',
+        (tester) async {
+      setPhoneView(tester);
+      final store = await loadedStore();
+      final product = syntheticProduct(variants: chipVariants());
+      addProducts(store, [product]);
+      await store.addToBag(product, variantId: 'v-chica');
+      await pumpFicha(tester, store, product.id);
+      await selectOption(tester, 'Talla mediana');
+      await scrollTo(tester, find.byKey(kBuyNowKey));
+      await tester.tap(find.byKey(kBuyNowKey));
+      await tester.pumpAndSettle();
+      expect(store.bagQuantity, 2);
+      expect(
+        store.bagLines.map((line) => line.variant.id).toSet(),
+        {'v-chica', 'v-mediana'},
+      );
+      expect(find.byType(BagScreen), findsOneWidget);
+    });
     testWidgets(
-      'CART-02b "Apartar" opens the WhatsApp request and records the event',
-      (tester) async {
-        setPhoneView(tester);
-        final launches = mockUrlLauncher();
-        final store = await loadedStore();
-        final product = syntheticProduct(title: 'Cartera Mini');
-        addProducts(store, [product]);
-        await pumpFicha(tester, store, product.id);
-        final eventsBefore = store.eventCount;
-
-        final apartar = find.byKey(kApartarKey);
-        await scrollTo(tester, apartar);
-        await tester.tap(apartar);
-        await tester.pumpAndSettle();
-
-        expect(launches, hasLength(1));
-        expect(launches.single.method, 'launch');
-        final url = Uri.parse(
-          (launches.single.arguments as Map<Object?, Object?>)['url']!
-              as String,
-        );
-        expect(url.scheme, 'https');
-        expect(url.host, 'wa.me');
-        expect(url.path, '/528261066868');
-        final message = url.queryParameters['text']!;
-        expect(message, contains('*Cartera Mini*'));
-        expect(message, contains('Precio: \$1299.00 MXN'));
-        expect(
-          message,
-          contains('https://monetta.mx/products/${product.handle}'),
-        );
-        expect(message, contains('Código: MN-'));
-        expect(store.eventCount, eventsBefore + 1);
-      },
-    );
+        'lazy apartado opens contextual WhatsApp without fabricated deposit terms',
+        (tester) async {
+      setPhoneView(tester);
+      final launches = mockUrlLauncher();
+      final store = await loadedStore();
+      final product = syntheticProduct(title: 'Cartera Mini');
+      addProducts(store, [product]);
+      await pumpFicha(tester, store, product.id);
+      final eventsBefore = store.eventCount;
+      expect(launches, isEmpty);
+      expect(find.byKey(kApartarKey), findsNothing);
+      await openMethods(tester);
+      await scrollTo(tester, find.byKey(kApartarKey));
+      await tester.tap(find.byKey(kApartarKey));
+      await tester.pumpAndSettle();
+      expect(launches, hasLength(1));
+      expect(launches.single.method, 'launch');
+      final url = Uri.parse(
+        (launches.single.arguments as Map<Object?, Object?>)['url']! as String,
+      );
+      expect(url.scheme, 'https');
+      expect(url.host, 'wa.me');
+      expect(url.path, '/528261066868');
+      final message = url.queryParameters['text']!;
+      expect(message, contains('Cartera Mini'));
+      expect(message, contains('Variante: ${product.variants.single.id}'));
+      expect(message, contains('Precio: ${formatShopperPrice(product.price)}'));
+      expect(message, contains('Código: MN-'));
+      expect(message, isNot(contains('anticipo es')));
+      expect(message, isNot(contains('20 días')));
+      expect(store.eventCount, eventsBefore + 1);
+    });
   });
 
   group('CART-03 pending and failing adds', () {
@@ -331,10 +309,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(store.addCalls, 1);
         expect(store.bagQuantity, 1);
-        expect(find.text('En tu bolsa'), findsOneWidget);
-
-        await tester.tapAt(const Offset(195, 40));
-        await tester.pumpAndSettle();
+        expect(find.text('Agregado al carrito'), findsOneWidget);
         expect(find.text('En tu bolsa'), findsNothing);
         expect(_inPrimary(find.text(_addLabel)), findsOneWidget);
 
@@ -380,58 +355,27 @@ void main() {
     );
   });
 
-  group('CART-04 availability', () {
+  group('G12 availability capability gate', () {
     testWidgets(
-      'CART-04 a fully sold-out piece offers the restock alert and only '
-      '"Apartar"',
-      (tester) async {
-        setPhoneView(tester);
-        final store = await loadedStore();
-        final product = syntheticProduct(
-          variants: [syntheticVariant(id: 'v-agotada', available: false)],
-        );
-        addProducts(store, [product]);
-        await pumpFicha(tester, store, product.id);
-
-        expect(_primary(), findsOneWidget);
-        expect(find.byKey(kRestockKey), findsOneWidget);
-        expect(
-          find.descendant(of: find.byKey(kRestockKey), matching: _primary()),
-          findsOneWidget,
-          reason: 'the restock key wraps the primary button',
-        );
-        expect(_inPrimary(find.text(_restockLabel)), findsOneWidget);
-        expect(find.text(_addLabel, skipOffstage: false), findsNothing);
-        expect(_inMainList(find.textContaining('Agotado')), findsWidgets);
-        expect(
-          find.descendant(
-            of: find.byKey(_bottomNavKey),
-            matching: find.textContaining('Agotado'),
-          ),
-          findsNothing,
-        );
-
-        await scrollTo(tester, _primary());
-        await tester.tap(_primary());
-        await tester.pump();
-        expect(store.bagQuantity, 0);
-        expect(
-          find.text('Los avisos todavía no están disponibles en esta versión.'),
-          findsOneWidget,
-        );
-
-        await scrollTo(tester, find.byKey(kApartarKey));
-        expect(find.byKey(kApartarKey), findsOneWidget);
-        expect(find.byKey(kBuyNowKey), findsNothing);
-        expect(find.text('COMPRAR AHORA'), findsNothing);
-      },
-    );
-
-    testWidgets(
-        'CART-04b with a sold-out variant selected the dock offers the '
-        'alert; with an available one it adds exactly that variant', (
-      tester,
-    ) async {
+        'exhausted product hides add/buy/unsupported restock and keeps details',
+        (tester) async {
+      setPhoneView(tester);
+      final store = await loadedStore();
+      final product = syntheticProduct(
+        variants: [syntheticVariant(id: 'v-agotada', available: false)],
+      );
+      addProducts(store, [product]);
+      await pumpFicha(tester, store, product.id);
+      expect(_primary(), findsNothing);
+      expect(find.byKey(kRestockKey), findsNothing);
+      expect(find.text(_restockLabel), findsNothing);
+      expect(find.byKey(kBuyNowKey), findsNothing);
+      expect(find.text('AGOTADO'), findsOneWidget);
+      expect(store.bagQuantity, 0);
+      expect(find.text('Otras formas de comprar'), findsOneWidget);
+    });
+    testWidgets('available option restores add and sends exactly that variant',
+        (tester) async {
       setPhoneView(tester);
       final store = await loadedStore();
       final product = syntheticProduct(
@@ -439,16 +383,12 @@ void main() {
       );
       addProducts(store, [product]);
       await pumpFicha(tester, store, product.id);
-
       await selectOption(tester, 'Talla chica');
-      expect(_primary(), findsOneWidget);
-      expect(_inPrimary(find.text(_restockLabel)), findsOneWidget);
-      expect(find.text(_addLabel, skipOffstage: false), findsNothing);
-
+      expect(_primary(), findsNothing);
+      expect(find.byKey(kRestockKey), findsNothing);
       await selectOption(tester, 'Talla mediana');
       expect(_inPrimary(find.text(_addLabel)), findsOneWidget);
-      expect(find.byKey(kRestockKey), findsNothing);
-
+      await scrollTo(tester, _primary());
       await tester.tap(_primary());
       await tester.pumpAndSettle();
       expect(store.bagQuantity, 1);

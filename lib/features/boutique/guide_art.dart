@@ -6,10 +6,176 @@
 /// this catalog are opaque packshots, not cutouts.
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'client_guide_components.dart';
 
 import '../../app/monetta_tokens.g.dart';
 import 'boutique_tokens.dart';
+
+part 'guide_assets.g.dart';
+
+/// A delivered asset. Destinations are deliberately absent: feature owners
+/// supply real callbacks and hide dependent production actions without them.
+@immutable
+class GuideAssetSpec {
+  const GuideAssetSpec(this.path, this.copy, this.kind, this.sha256);
+  final String path;
+  final String copy;
+  final String kind;
+  final String sha256;
+}
+
+/// IDs are namespaced to keep banner/home-photo/icon identifiers unambiguous.
+/// Home photography may only be resolved explicitly for Home.
+GuideAssetSpec? guideAsset(String id, {bool forHome = false}) {
+  final asset = _guideAssets[id];
+  if (asset?.kind == 'homePhoto' && !forHome) return null;
+  return asset;
+}
+
+class GuideSemanticImage extends StatelessWidget {
+  const GuideSemanticImage(
+      {required this.id,
+      this.forHome = false,
+      this.width,
+      this.height,
+      this.semanticLabel,
+      super.key});
+  final String id;
+  final bool forHome;
+  final double? width;
+  final double? height;
+  final String? semanticLabel;
+  @override
+  Widget build(BuildContext context) {
+    final spec = guideAsset(id, forHome: forHome);
+    if (spec == null) return const SizedBox.shrink();
+    final image = spec.kind == 'icon'
+        ? SvgPicture.asset(spec.path,
+            width: width, height: height, excludeFromSemantics: true)
+        : Image.asset(spec.path,
+            width: width,
+            height: height,
+            fit: BoxFit.contain,
+            excludeFromSemantics: true);
+    return Semantics(
+        label: semanticLabel, excludeSemantics: true, child: image);
+  }
+}
+
+/// Native controls remain separate from exact delivered outlined lettering.
+/// At enlarged text sizes, native exact copy reflows over the photo. Normal
+/// narrow layouts use the original transparent lettering layers, not fonts.
+class GuideBanner extends StatelessWidget {
+  const GuideBanner({required this.id, this.action, this.onTap, super.key});
+  final String id;
+  final Widget? action;
+  final VoidCallback? onTap;
+  @override
+  Widget build(BuildContext context) {
+    final spec = guideAsset('banner:$id');
+    if (spec == null) return const SizedBox.shrink();
+    return LayoutBuilder(builder: (context, constraints) {
+      final width = constraints.maxWidth;
+      final enlarged = MediaQuery.textScalerOf(context).scale(16) > 16;
+      final layered = id == 'B31' || id == 'B32';
+      Widget art;
+      if (layered && (width < 768 || enlarged)) {
+        final lines = spec.copy.split('\n');
+        final title = id == 'B31' ? lines.take(3).join(' ') : lines.first;
+        final body = lines.skip(id == 'B31' ? 3 : 1).join(' ');
+        art = ColoredBox(
+            color: const Color(0xFFF4F1EE),
+            child: Stack(children: [
+              Positioned.fill(
+                  child: Image.asset(
+                      'assets/images/v41/banners/${id}_photo.png',
+                      fit: BoxFit.cover,
+                      alignment: Alignment.centerRight,
+                      excludeFromSemantics: true)),
+              const Positioned.fill(
+                  child: GuideScrim(textSide: GuideTextSide.left)),
+              Padding(
+                  padding: EdgeInsets.all(MonettaTokens.gutterFor(width)),
+                  child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox(
+                          width: (width - 32) * (enlarged ? 1 : .67),
+                          child: enlarged
+                              ? DecoratedBox(
+                                  decoration: BoxDecoration(
+                                      color: const Color(0xFFF4F1EE)
+                                          .withValues(alpha: .94)),
+                                  child: Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(title,
+                                                style: guideSerifStyle(context,
+                                                    size: 28)),
+                                            const SizedBox(height: 16),
+                                            Text(body,
+                                                style: boutiqueText(size: 16)),
+                                          ])))
+                              : Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                      Image.asset(
+                                          'assets/images/v41/lettering/${id}_titulo.png',
+                                          excludeFromSemantics: true),
+                                      const SizedBox(height: 16),
+                                      Image.asset(
+                                          'assets/images/v41/lettering/${id}_descripcion.png',
+                                          excludeFromSemantics: true),
+                                    ])))),
+            ]));
+      } else if (constraints.hasBoundedHeight && !enlarged && action == null) {
+        // A fixed slot (the home carousel) may be shorter than the 2.4:1
+        // artwork on wide screens: fit the whole banner inside it.
+        art = SizedBox(
+            width: width,
+            height: math.min(width / 2.4, constraints.maxHeight),
+            child: Image.asset(spec.path,
+                fit: BoxFit.contain, excludeFromSemantics: true));
+      } else {
+        art = AspectRatio(
+            aspectRatio: 2.4,
+            child: Image.asset(spec.path,
+                fit: BoxFit.contain, excludeFromSemantics: true));
+      }
+      if (enlarged && !layered) {
+        art = Column(mainAxisSize: MainAxisSize.min, children: [
+          art,
+          Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(spec.copy, style: boutiqueText(size: 16))),
+        ]);
+      }
+      // One semantic reading, including when native text replaces the artwork.
+      final editorial =
+          Semantics(label: spec.copy, excludeSemantics: true, child: art);
+      final column = Column(mainAxisSize: MainAxisSize.min, children: [
+        if (onTap != null)
+          InkWell(onTap: onTap, child: editorial)
+        else
+          editorial,
+        if (action != null)
+          Padding(padding: const EdgeInsets.all(16), child: action),
+      ]);
+      // In a fixed slot, enlarged text scrolls inside the banner instead of
+      // overflowing it.
+      if (!constraints.hasBoundedHeight) return column;
+      return ClipRect(
+          child: SingleChildScrollView(primary: false, child: column));
+    });
+  }
+}
 
 const String kGuideWelcomeBackground =
     'assets/images/guide/bienvenida_fondo.jpg';
@@ -282,72 +448,14 @@ class GuidePillButton extends StatelessWidget {
   static const Color labelColor = Color(0xFF2B2118);
 
   /// Minimum tap target, in logical pixels.
-  static const double minTarget = 44;
+  static const double minTarget = 48;
 
   final String label;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final enabled = onPressed != null;
-    final width = MediaQuery.sizeOf(context).width;
-    final size = (width * 0.033).clamp(12.0, 16.0);
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      label: label,
-      excludeSemantics: true,
-      onTap: onPressed,
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(minTarget),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minWidth: minTarget,
-              minHeight: minTarget,
-            ),
-            child: Center(
-              widthFactor: 1,
-              heightFactor: 1,
-              child: Opacity(
-                opacity: enabled ? 1 : 0.55,
-                child: DecoratedBox(
-                  decoration: const ShapeDecoration(
-                    color: fill,
-                    shape: StadiumBorder(),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: size * 1.4,
-                      vertical: size * 0.45,
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        label.toUpperCase(),
-                        maxLines: 1,
-                        softWrap: false,
-                        textAlign: TextAlign.center,
-                        style: guideSerifStyle(
-                          context,
-                          size: size,
-                          color: labelColor,
-                          weight: FontWeight.w500,
-                          height: 1.1,
-                          letterSpacing: size * 0.08,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    return ClientGuideButton(label: label.toUpperCase(), onPressed: onPressed);
   }
 }
 
@@ -398,11 +506,11 @@ class GuideScrim extends StatelessWidget {
             begin: fromLeft ? Alignment.centerLeft : Alignment.centerRight,
             end: fromLeft ? Alignment.centerRight : Alignment.centerLeft,
             colors: const [
-              Color(0xE6FBF6EE),
-              Color(0x99FBF6EE),
-              Color(0x00FBF6EE),
+              Color(0xFAF4F1EE),
+              Color(0xF2F4F1EE),
+              Color(0x00F4F1EE),
             ],
-            stops: const [0, 0.42, 0.78],
+            stops: const [0, 0.65, 0.85],
           ),
         ),
       ),
@@ -477,164 +585,69 @@ class GuideHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.boutique;
-    final width = MediaQuery.sizeOf(context).width;
-    final resolved = height ?? (width / 1.85).clamp(180.0, 280.0);
-    final onRight = textSide == GuideTextSide.right;
-    final gutter = MonettaTokens.gutterFor(width);
-    final columnWidth = textWidthFactor == null
-        ? (width - gutter * 2).clamp(0, width).toDouble()
-        : (width * textWidthFactor! - gutter).clamp(0, width).toDouble();
-    final subtitleWidth = subtitleWidthFactor == null
-        ? (textWidthFactor == null ? width * 0.62 : columnWidth)
-        : (width * subtitleWidthFactor! - gutter).clamp(0, width).toDouble();
-    final align = onRight ? TextAlign.end : TextAlign.start;
-    final titleFontSize =
-        titleSize ?? MonettaTokens.campaign.sizeFor(width).toDouble();
-    final bodySize = subtitleSize ?? (width * 0.04).clamp(14.0, 20.0);
-    final titleStyle = titleItalic
-        ? guideSerifItalicStyle(
-            context,
-            size: titleFontSize,
-            color: palette.ink,
-            weight: FontWeight.w300,
-            height: 1.0,
-          )
-        : guideSerifStyle(
-            context,
-            size: titleFontSize,
-            color: palette.ink,
-            height: 1.02,
-          );
-    final bodyStyle = guideSerifItalicStyle(
-      context,
-      size: bodySize,
-      color: palette.ink,
-      weight: FontWeight.w500,
-      height: 1.18,
-    );
-    return SizedBox(
-      height: resolved,
-      width: double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          GuideArt(
-            asset: asset,
-            alignment: imageAlignment ??
-                (onRight ? Alignment.centerLeft : Alignment.center),
-          ),
-          GuideScrim(textSide: textSide),
-          Material(
+    final id = asset == kGuideContactHero
+        ? 'B31'
+        : asset == kGuideWholesaleHero
+            ? 'B32'
+            : null;
+    if (id != null) {
+      return GuideBanner(id: id, action: action, onTap: onTap);
+    }
+    return LayoutBuilder(builder: (context, constraints) {
+      final width = constraints.maxWidth;
+      final enlarged = MediaQuery.textScalerOf(context).scale(16) > 20;
+      final gutter = MonettaTokens.gutterFor(width);
+      final onRight = textSide == GuideTextSide.right;
+      final fraction = enlarged || width < 400 ? 1.0 : (textWidthFactor ?? .62);
+      final copy = SizedBox(
+        width: (width - 2 * gutter) * fraction,
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment:
+                onRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              if (eyebrow != null) Text(eyebrow!, style: boutiqueText()),
+              Text(title,
+                  style: guideSerifStyle(context, size: titleSize ?? 32)
+                      .copyWith(
+                          fontStyle: titleItalic
+                              ? FontStyle.italic
+                              : FontStyle.normal)),
+              if (titleAccent != null)
+                Text(titleAccent!,
+                    style: guideAccentStyle(context, size: titleSize ?? 36)),
+              if (subtitle != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                    [subtitle!, if (subtitleAccent != null) subtitleAccent!]
+                        .join(' '),
+                    style:
+                        boutiqueText(size: (subtitleSize ?? 16).clamp(14, 20))),
+              ],
+              if (action != null) ...[const SizedBox(height: 16), action!],
+            ]),
+      );
+      return Stack(children: [
+        Positioned.fill(
+            child: GuideArt(
+                asset: asset, alignment: imageAlignment ?? Alignment.center)),
+        Positioned.fill(child: GuideScrim(textSide: textSide)),
+        Material(
             type: MaterialType.transparency,
             child: InkWell(
-              onTap: onTap,
-              child: Padding(
-                padding: EdgeInsets.all(gutter),
-                child: Align(
-                  alignment:
-                      onRight ? Alignment.centerRight : Alignment.centerLeft,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment:
-                        onRight ? Alignment.centerRight : Alignment.centerLeft,
-                    child: SizedBox(
-                      width: columnWidth,
-                      child: Column(
-                        crossAxisAlignment: onRight
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (eyebrow != null)
-                            Text(
-                              eyebrow!,
-                              textAlign: align,
-                              style: guideSerifStyle(
-                                context,
-                                size: bodySize,
-                                color: palette.ink,
-                                letterSpacing: bodySize * 0.12,
-                              ),
-                            ),
-                          if (title.contains(' '))
-                            Text(title, textAlign: align, style: titleStyle)
-                          else
-                            // A single word cannot wrap: it scales to fit.
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: onRight
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                              child: Text(
-                                title,
-                                softWrap: false,
-                                textAlign: align,
-                                style: titleStyle,
-                              ),
-                            ),
-                          if (titleAccent != null)
-                            Text(
-                              titleAccent!,
-                              textAlign: align,
-                              style: guideAccentStyle(
-                                context,
-                                size: titleFontSize * 1.45,
-                                underline: true,
-                              ),
-                            ),
-                          if (subtitle != null) ...[
-                            SizedBox(height: MonettaTokens.space[2]),
-                            ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: subtitleWidth,
-                              ),
-                              child: Text.rich(
-                                TextSpan(
-                                  text: subtitle,
-                                  children: [
-                                    if (subtitleAccent != null)
-                                      TextSpan(
-                                        text: ' $subtitleAccent',
-                                        style: TextStyle(
-                                          decoration: TextDecoration.underline,
-                                          decorationColor: palette.gold,
-                                          decorationThickness: 1.4,
-                                          color: palette.goldText,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                                textAlign: align,
-                                style: bodyStyle,
-                              ),
-                            ),
-                          ],
-                          if (action != null) ...[
-                            SizedBox(height: MonettaTokens.space[2]),
-                            Align(
-                              alignment: onRight
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 240,
-                                ),
-                                child: action!,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+                onTap: onTap,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: height ?? width / 2.4),
+                  child: Padding(
+                      padding: EdgeInsets.all(gutter),
+                      child: Align(
+                          alignment: onRight
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: copy)),
+                ))),
+      ]);
+    });
   }
 }
 
