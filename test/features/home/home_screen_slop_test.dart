@@ -46,9 +46,12 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const ValueKey('home-compact-hero')), findsOneWidget);
-    expect(find.text('Nueva colección'), findsOneWidget);
-    expect(find.text('Compra por estilo'), findsOneWidget);
-    expect(find.byKey(const ValueKey('home-style-rail')), findsOneWidget);
+    // UI v4.1 opening: category photographs, then the brands.
+    expect(
+      find.byKey(const ValueKey('home-section-category-photos')),
+      findsOneWidget,
+    );
+    expect(find.text('Compra por estilo'), findsNothing);
   });
 
   testWidgets('shopper home does not narrate the engine or the scrape', (
@@ -92,13 +95,12 @@ void main() {
 
     expect(search.bottom, lessThanOrEqualTo(banner.top));
     expect(find.byKey(const ValueKey('home-search-bar')), findsNothing);
-    // The brief's 25–32% of the viewport, never the whole first fold.
-    expect(banner.height / 844, greaterThanOrEqualTo(0.25));
+    // The delivered 2.4:1 artwork (B01–B03), never the whole first fold.
+    expect(banner.height / 844, greaterThanOrEqualTo(0.2));
     expect(banner.height / 844, lessThanOrEqualTo(0.32));
-    // Full bleed, as on figure 03 — the photograph runs rail to rail.
+    // Full bleed — the banner runs rail to rail.
     expect(banner.left, 0);
     expect(banner.right, 390);
-    expect(find.text('desde México'), findsOneWidget);
   });
 
   testWidgets('modules sit on a 24–32px rhythm, not a 64–72px one', (
@@ -116,19 +118,15 @@ void main() {
     final banner = tester.getRect(
       find.byKey(const ValueKey('home-compact-hero')),
     );
-    final style = tester.getRect(
-      find.byKey(const ValueKey('home-section-bag-types')),
-    );
-    final collections = tester.getRect(
-      find.byKey(const ValueKey('home-section-collections')),
+    final categories = tester.getRect(
+      find.byKey(const ValueKey('home-section-category-photos')),
     );
     final brands = tester.getRect(
       find.byKey(const ValueKey('home-section-brands')),
     );
 
-    expect(style.top - banner.bottom, inInclusiveRange(24, 40));
-    expect(collections.top - style.bottom, inInclusiveRange(24, 40));
-    expect(brands.top - collections.bottom, inInclusiveRange(24, 40));
+    expect(categories.top - banner.bottom, inInclusiveRange(24, 40));
+    expect(brands.top - categories.bottom, inInclusiveRange(24, 40));
   });
 
   testWidgets('new arrivals are a rail of the shared product card', (

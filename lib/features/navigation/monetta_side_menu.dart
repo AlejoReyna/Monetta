@@ -322,7 +322,7 @@ class MonettaSideMenu extends StatelessWidget {
                   height: 28,
                   excludeFromSemantics: true,
                 ),
-                title: const Text('Contacto por WhatsApp'),
+                title: const Text('Contactar por WhatsApp'),
                 onTap: () => _select(context, onWhatsApp!),
               ),
           ],

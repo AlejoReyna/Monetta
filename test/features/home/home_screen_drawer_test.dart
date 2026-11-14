@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
-import 'package:monetta_app/app/theme.dart';
-import 'package:monetta_app/app/theme_controller.dart';
 import 'package:monetta_app/app/admin_config.dart';
 import 'package:monetta_app/app/admin_controller.dart';
-import 'package:monetta_app/data/local/appearance_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/catalog/search_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
@@ -31,25 +28,6 @@ Widget _app(CatalogStore store, {AdminController? admin}) {
             notifier: admin,
             child: home,
           ),
-  );
-}
-
-Widget _themedApp(CatalogStore store, ThemeController themeController) {
-  final home = StoreScope(
-    notifier: store,
-    child: const HomeScreen(),
-  );
-  return ListenableBuilder(
-    listenable: themeController,
-    builder: (context, _) => ThemeScope(
-      notifier: themeController,
-      child: MaterialApp(
-        theme: buildLightTheme(),
-        darkTheme: buildDarkTheme(),
-        themeMode: themeController.mode,
-        home: home,
-      ),
-    ),
   );
 }
 
@@ -95,65 +73,24 @@ void main() {
     final menu = find.byKey(const Key('monetta-side-menu'));
     Finder menuText(String text) =>
         find.descendant(of: menu, matching: find.text(text));
-    // Guide v2: the menu lists exactly these links. Search, Categorías,
-    // Maquillaje y skincare, Mayoreo, Contacto and Nuestra historia left it.
-    expect(menuText('Bolsas'), findsOneWidget);
-    expect(menuText('Carteras'), findsOneWidget);
-    expect(menuText('Relojes'), findsOneWidget);
-    expect(menuText('Perfumes'), findsOneWidget);
-    expect(menuText('Todas las marcas'), findsOneWidget);
-    expect(menuText('Contacto por WhatsApp'), findsOneWidget);
+    // UI v4.1 menu: the five families, all brands, wholesale, social and the
+    // WhatsApp contact. No search, no theme switch, no story.
+    for (final label in [
+      'Bolsos',
+      'Carteras',
+      'Perfumes',
+      'Calzado',
+      'Accesorios',
+      'Todas las marcas',
+      'Mayoreo',
+      'Contactar por WhatsApp',
+    ]) {
+      expect(menuText(label), findsOneWidget, reason: label);
+    }
     expect(menuText('Buscar una pieza'), findsNothing);
-    expect(menuText('Categorías'), findsNothing);
-    expect(menuText('Maquillaje y skincare'), findsNothing);
-    expect(menuText('Mayoreo'), findsNothing);
-    expect(menuText('Contacto'), findsNothing);
     expect(menuText('Nuestra historia'), findsNothing);
-    expect(menuText('TIENDA'), findsNothing);
-    expect(menuText('MÁS DE MONETTA'), findsNothing);
-    expect(menuText('Mis notificaciones'), findsNothing);
     expect(menuText('Apariencia'), findsNothing);
-    expect(find.byKey(const Key('side-menu-appearance')), findsOneWidget);
-    expect(find.text('Todo lo que buscas,\nen un solo lugar.'), findsNothing);
-    expect(find.text('Explorar catálogo'), findsNothing);
-    expect(find.text('Mi bolsa'), findsNothing);
-    expect(find.text('Mi cuenta'), findsNothing);
-    expect(
-      tester.widget<Text>(menuText('Bolsas')).style?.fontFamily,
-      kEditorialFontFamily,
-    );
-  });
-
-  testWidgets('side-menu theme icon switches modes without opening a picker',
-      (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1.0;
-
-    final store = await _loadedStore();
-    final appearanceDatabase = openTestDatabase();
-    final themeController = ThemeController(
-      store: AppearanceStore(appearanceDatabase),
-    );
-    addTearDown(store.dispose);
-    addTearDown(themeController.dispose);
-    addTearDown(appearanceDatabase.close);
-    await themeController.setMode(ThemeMode.light);
-
-    await tester.pumpWidget(_themedApp(store, themeController));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('home-menu-button')));
-    await tester.pumpAndSettle();
-
-    expect(find.byTooltip('Activar modo oscuro'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('side-menu-appearance')));
-    await tester.pumpAndSettle();
-
-    expect(themeController.mode, ThemeMode.dark);
-    expect(find.byKey(const Key('monetta-side-menu')), findsOneWidget);
-    expect(find.byTooltip('Activar modo claro'), findsOneWidget);
-    expect(find.byIcon(Icons.dark_mode_outlined), findsOneWidget);
-    expect(find.text('Elige cómo se ve Monetta'), findsNothing);
+    expect(find.byKey(const Key('side-menu-appearance')), findsNothing);
   });
 
   testWidgets('storefront menu opens its matching internal collection',
@@ -168,11 +105,13 @@ void main() {
 
     await tester.tap(find.byKey(const Key('home-menu-button')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('side-menu-bags')));
+    await tester.tap(find.text('Bolsos'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('category-open-bags')));
     await tester.pumpAndSettle();
 
     expect(find.byType(CollectionScreen), findsOneWidget);
-    expect(find.text('BOLSAS'), findsOneWidget);
+    expect(find.text('Bolsos'), findsWidgets);
   });
 
   testWidgets('side menu no longer carries a search field', (tester) async {

@@ -6,14 +6,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
 import 'package:monetta_app/data/local/database.dart';
-import 'package:monetta_app/features/boutique/guide_art.dart';
-import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/home/home_boutique_sections.dart';
 import 'package:monetta_app/features/home/home_screen.dart';
 import 'package:monetta_app/main.dart';
 
 import '../../support/client_guide_capture.dart';
-import '../../support/guide_photo_finders.dart';
 
 Finder _dots() => find.byWidgetPredicate(
       (widget) =>

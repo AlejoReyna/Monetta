@@ -16,7 +16,6 @@ import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/domain/home_content.dart';
 import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/features/catalog/brand_screen.dart';
-import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/home/home_boutique_sections.dart';
 import 'package:monetta_app/features/home/home_screen.dart';
 import 'package:monetta_app/main.dart';
@@ -163,43 +162,6 @@ void main() {
       // «Ver <label>» for assistive technology.
       expect(find.bySemanticsLabel('Ver Tote'), findsOneWidget);
     });
-
-    testWidgets('each entry opens its silhouette, Hobo the hobo filter', (
-      tester,
-    ) async {
-      final catalog = await store();
-      await pumpClientGuide(
-        tester,
-        StoreScope(notifier: catalog, child: const HomeScreen()),
-      );
-      const expected = {
-        'crossbody': ('bolsa', 'crossbody', 'Crossbody'),
-        'tote': ('bolsa', 'tote', 'Totes'),
-        'shoulder': ('bolsa', 'shoulder', 'Shoulder'),
-        'satchel': ('bolsa', 'satchel', 'Satchel'),
-        'hobo': ('bolsa', 'hobo', 'Hobo'),
-      };
-      for (final entry in expected.entries) {
-        final tile = find.byKey(ValueKey('home-style-${entry.key}'));
-        await tester.scrollUntilVisible(
-          tile,
-          -200,
-          scrollable: _homeScroll(),
-        );
-        await tester.ensureVisible(tile);
-        await tester.pumpAndSettle();
-        await tester.tap(tile);
-        await tester.pumpAndSettle();
-        final screen = tester.widget<CollectionScreen>(
-          find.byType(CollectionScreen),
-        );
-        expect(screen.filter.category, entry.value.$1, reason: entry.key);
-        expect(screen.filter.silhouette, entry.value.$2, reason: entry.key);
-        expect(screen.title, entry.value.$3, reason: entry.key);
-        Navigator.of(tester.element(find.byType(CollectionScreen))).pop();
-        await tester.pumpAndSettle();
-      }
-    });
   });
 
   group('Tus marcas favoritas', () {
@@ -298,21 +260,5 @@ void main() {
       ]);
       expect(handles.last, 'rhode');
     });
-  });
-
-  testWidgets('the wholesale banner uses the pill and the guide subtitle', (
-    tester,
-  ) async {
-    final catalog = await store();
-    await pumpClientGuide(
-      tester,
-      StoreScope(notifier: catalog, child: const HomeScreen()),
-    );
-    final pill = find.byKey(const ValueKey('home-wholesale-button'));
-    await tester.scrollUntilVisible(pill, 400, scrollable: _homeScroll());
-    await tester.pumpAndSettle();
-    expect(tester.widget(pill), isA<GuidePillButton>());
-    expect(find.text('CONOCE MÁS'), findsOneWidget);
-    expect(find.text('A partir de 3 piezas'), findsOneWidget);
   });
 }

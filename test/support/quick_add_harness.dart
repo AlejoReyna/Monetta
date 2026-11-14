@@ -493,7 +493,8 @@ Rect? heartRectOf(WidgetTester tester, Finder inside) {
     of: inside,
     matching: find.byType(MonettaProductTile),
   );
-  final heart = find.descendant(of: tile, matching: find.byTooltip('Guardar en favoritos'));
+  final heart = find.descendant(
+      of: tile, matching: find.byTooltip('Guardar en favoritos'));
   return heart.evaluate().isEmpty ? null : tester.getRect(heart.first);
 }
 

@@ -14,28 +14,10 @@ import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/boutique/client_guide_sections.dart';
 import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
-import 'package:monetta_app/features/home/home_boutique_sections.dart';
 import 'package:monetta_app/features/rewards/rewards_share_screen.dart';
 import 'package:monetta_app/main.dart';
 
 import '../../support/client_guide_capture.dart';
-
-/// Style of the first span whose text is exactly [text], inside any
-/// [RichText] (a `Text.rich` run such as «fácil»).
-TextStyle? _spanStyle(WidgetTester tester, String text) {
-  TextStyle? found;
-  for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
-    rich.text.visitChildren((span) {
-      if (span is TextSpan && span.text == text) {
-        found = span.style;
-        return false;
-      }
-      return true;
-    });
-    if (found != null) break;
-  }
-  return found;
-}
 
 TextStyle _textStyle(WidgetTester tester, String text) =>
     tester.widget<Text>(find.text(text)).style!;
