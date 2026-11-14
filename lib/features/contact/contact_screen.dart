@@ -3,20 +3,35 @@ library;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/monetta_tokens.g.dart';
 import '../../app/shopper_copy.dart';
 import '../../domain/home_content.dart';
 import '../../main.dart';
-import '../../app/monetta_tokens.g.dart';
+import '../boutique/boutique_tokens.dart';
 import '../boutique/client_guide_components.dart';
 import '../boutique/client_guide_scaffold.dart';
 import '../boutique/guide_art.dart';
 import 'contact_links.dart';
-import '../boutique/boutique_tokens.dart';
 
-/// Contacto web verificado (partner hub lo usa como "contacto").
-final Uri kMonettaContactPageUri = Uri.parse(
-  'https://monetta.mx/pages/contact',
-);
+/// Accessible name of the hero. The visible title and description are the
+/// delivered B31 lettering layers, not a second typeface.
+const String kContactHeroAccessibleLabel =
+    'Tu boutique y proveedor de confianza. '
+    'Bienvenida a nuestro paraíso de modelos originales de marcas que amas, '
+    'importados y con envíos garantizados a todo México.';
+
+const String kContactWhatsAppLabel =
+    'Enviar Whatsapp al $kWhatsAppNumberDisplay';
+
+/// Mobile lettering from v4.1 B31, already on main as
+/// `storefront-theme/assets/monetta-v41-b31-*.png`.
+const String kContactLetteringTitle =
+    'assets/images/guide/monetta-v41-b31-titulo.png';
+const String kContactLetteringDescription =
+    'assets/images/guide/monetta-v41-b31-descripcion.png';
+
+const double _kLetteringTitleAspect = 720 / 406;
+const double _kLetteringDescriptionAspect = 720 / 240;
 
 class ContactChannel {
   const ContactChannel({
@@ -38,11 +53,25 @@ class ContactChannel {
   final Uri uri;
 }
 
+/// A configured http(s) destination. Empty, blank, and unusable values are
+/// not links: the screen hides that button instead of claiming it opens.
+Uri? contactCommunityUri(String raw) {
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) return null;
+  final uri = Uri.tryParse(trimmed);
+  if (uri == null || !uri.hasScheme || uri.host.isEmpty) return null;
+  if (uri.scheme != 'https' && uri.scheme != 'http') return null;
+  return uri;
+}
+
 /// Canales reales de la app. [socialLinks] permite a un propietario
 /// sobreescribir las redes (p. ej. desde Shopify); por defecto, las
-/// configuradas en el contenido editorial.
+/// configuradas en el contenido editorial. Un grupo sin URI no entra
+/// en la lista.
 List<ContactChannel> monettaContactChannels({
   List<HomeSocialLink>? socialLinks,
+  List<String> whatsAppGroups = monettaWhatsAppGroups,
+  String facebookGroup = monettaFacebookGroup,
 }) {
   final socials = socialLinks ?? HomeContent.fallback.socialLinks;
   return [
@@ -50,42 +79,29 @@ List<ContactChannel> monettaContactChannels({
       key: 'whatsapp',
       icon: Icons.chat_outlined,
       iconAsset: kGuideIconContactWhatsApp,
-      title: 'WhatsApp',
-      // The guide shows the number with its country code.
-      subtitle: '+52 $kWhatsAppNumberDisplay',
+      title: kContactWhatsAppLabel,
+      subtitle: '',
       uri: conciergeWhatsAppUri(),
     ),
-    for (var i = 0; i < monettaWhatsAppGroups.length; i++)
+    for (var i = 0; i < whatsAppGroups.length; i++)
+      if (contactCommunityUri(whatsAppGroups[i]) case final uri?)
+        ContactChannel(
+          key: 'grupo-${i + 1}',
+          icon: Icons.groups_outlined,
+          iconAsset: kGuideIconContactGroup,
+          title: 'Grupo ${i + 1}',
+          subtitle: 'Únete a nuestro grupo de WhatsApp',
+          uri: uri,
+        ),
+    if (contactCommunityUri(facebookGroup) case final uri?)
       ContactChannel(
-        key: 'grupo-${i + 1}',
-        icon: Icons.groups_outlined,
+        key: 'facebook-group',
+        icon: Icons.facebook,
         iconAsset: kGuideIconContactGroup,
-        title: 'Grupo ${i + 1}',
-        subtitle: 'Únete a nuestro grupo de WhatsApp',
-        uri: Uri.parse(monettaWhatsAppGroups[i]),
+        title: 'Grupo de Facebook',
+        subtitle: 'Únete a nuestra comunidad',
+        uri: uri,
       ),
-    ContactChannel(
-      key: 'facebook-group',
-      icon: Icons.facebook,
-      iconAsset: kGuideIconContactGroup,
-      title: 'Grupo de Facebook',
-      subtitle: 'Únete a nuestra comunidad',
-      uri: Uri.parse(monettaFacebookGroup),
-    ),
-    ContactChannel(
-      key: 'mayoreo',
-      icon: Icons.storefront_outlined,
-      title: 'Mayoreo por WhatsApp',
-      subtitle: 'Consulta las condiciones vigentes',
-      uri: wholesaleWhatsAppUri(),
-    ),
-    ContactChannel(
-      key: 'sitio',
-      icon: Icons.language_rounded,
-      title: 'Contacto en monetta.mx',
-      subtitle: 'Formulario y datos del sitio',
-      uri: kMonettaContactPageUri,
-    ),
     for (final link in socials)
       if (link.uri != null)
         ContactChannel(
@@ -120,18 +136,33 @@ Future<void> openContact(
 }) {
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => ContactScreen(socialLinks: socialLinks, openUri: openUri),
+      builder: (_) => ContactScreen(
+        socialLinks: socialLinks,
+        openUri: openUri,
+      ),
     ),
   );
 }
 
 class ContactScreen extends StatelessWidget {
-  const ContactScreen({this.socialLinks, this.openUri, super.key});
+  const ContactScreen({
+    this.socialLinks,
+    this.openUri,
+    this.whatsAppGroups = monettaWhatsAppGroups,
+    this.facebookGroup = monettaFacebookGroup,
+    super.key,
+  });
 
   final List<HomeSocialLink>? socialLinks;
 
   /// Inyectable para pruebas; por defecto abre la app externa real.
   final Future<bool> Function(Uri uri)? openUri;
+
+  /// Invitaciones de Grupo 1, Grupo 2, … Un valor vacío oculta ese botón.
+  final List<String> whatsAppGroups;
+
+  /// Invitación del grupo de Facebook. Vacía oculta ese botón.
+  final String facebookGroup;
 
   Future<void> _open(BuildContext context, Uri uri) async {
     final open =
@@ -154,17 +185,20 @@ class ContactScreen extends StatelessWidget {
     final channels = monettaContactChannels(
       socialLinks:
           socialLinks ?? HomeContentScope.maybeOf(context)?.content.socialLinks,
+      whatsAppGroups: whatsAppGroups,
+      facebookGroup: facebookGroup,
     );
-    final primary = channels.where(
-      (c) =>
-          c.key == 'whatsapp' ||
-          c.key.startsWith('grupo-') ||
-          c.key == 'facebook-group',
+    final whatsapp =
+        channels.firstWhere((channel) => channel.key == 'whatsapp');
+    final groups = channels.where(
+      (channel) =>
+          channel.key.startsWith('grupo-') || channel.key == 'facebook-group',
     );
-    // The guide lists Instagram, Facebook and TikTok, in that order.
     const socialOrder = ['instagram', 'facebook', 'tiktok'];
-    int socialRank(ContactChannel c) {
-      final index = socialOrder.indexOf(c.key.substring('social-'.length));
+    int socialRank(ContactChannel channel) {
+      final index = socialOrder.indexOf(
+        channel.key.substring('social-'.length),
+      );
       return index < 0 ? socialOrder.length : index;
     }
 
@@ -176,24 +210,7 @@ class ContactScreen extends StatelessWidget {
         key: const ValueKey('contact-scroll'),
         padding: EdgeInsets.zero,
         children: [
-          GuideHero(
-            asset: kGuideContactHero,
-            imageAlignment: const Alignment(0.25, 0),
-            textWidthFactor: 0.52,
-            height: guidePhotoHeroHeight(context),
-            titleSize: (MediaQuery.sizeOf(context).width * 0.075).clamp(
-              24.0,
-              40.0,
-            ),
-            subtitleSize: (MediaQuery.sizeOf(context).width * 0.032).clamp(
-              11.0,
-              16.0,
-            ),
-            title: 'Tu boutique y proveedor de',
-            titleAccent: 'confianza.',
-            subtitle:
-                'Bienvenida a nuestro paraíso de modelos originales de marcas que amas, importados y con envíos garantizados a todo México.',
-          ),
+          const _ContactHero(),
           Padding(
             padding: EdgeInsets.all(MonettaTokens.space[4]),
             child: Column(
@@ -213,7 +230,25 @@ class ContactScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: MonettaTokens.space[3]),
-                for (final channel in primary) ...[
+                _WhatsAppButton(
+                  onTap: () => _open(context, whatsapp.uri),
+                ),
+                SizedBox(height: MonettaTokens.space[5]),
+                Text(
+                  'Únete',
+                  style: clientGuideStyle(context, MonettaTokens.sectionTitle),
+                ),
+                SizedBox(height: MonettaTokens.space[1]),
+                Text(
+                  'A nuestros grupos de emprendedores',
+                  style: clientGuideStyle(
+                    context,
+                    MonettaTokens.body,
+                    color: palette.inkMuted,
+                  ),
+                ),
+                SizedBox(height: MonettaTokens.space[3]),
+                for (final channel in groups) ...[
                   _ChannelRow(
                     channel: channel,
                     onTap: () => _open(context, channel.uri),
@@ -255,6 +290,176 @@ class ContactScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Photograph with the B31 title and description layered on the free side.
+/// The copy is not a text block under the image, and it is not redrawn in
+/// another font.
+class _ContactHero extends StatelessWidget {
+  const _ContactHero();
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final gutter = MonettaTokens.gutterFor(width);
+    final maxColumn = width > gutter ? width - gutter : 0.0;
+    final preferred = width * 0.42;
+    final columnWidth = preferred < maxColumn ? preferred : maxColumn;
+    return Semantics(
+      container: true,
+      header: true,
+      label: kContactHeroAccessibleLabel,
+      child: SizedBox(
+        key: const ValueKey('contact-hero'),
+        height: guidePhotoHeroHeight(context),
+        width: double.infinity,
+        child: ExcludeSemantics(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              const GuideArt(
+                asset: kGuideContactHero,
+                alignment: Alignment(0.25, 0),
+              ),
+              Positioned(
+                left: gutter,
+                top: MonettaTokens.space[2],
+                bottom: MonettaTokens.space[2],
+                width: columnWidth,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    width: columnWidth,
+                    child: const Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _LetteringLayer(
+                          asset: kContactLetteringTitle,
+                          aspectRatio: _kLetteringTitleAspect,
+                          layerKey: ValueKey('contact-hero-title'),
+                        ),
+                        SizedBox(height: 6),
+                        _LetteringLayer(
+                          asset: kContactLetteringDescription,
+                          aspectRatio: _kLetteringDescriptionAspect,
+                          layerKey: ValueKey('contact-hero-body'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LetteringLayer extends StatelessWidget {
+  const _LetteringLayer({
+    required this.asset,
+    required this.aspectRatio,
+    required this.layerKey,
+  });
+
+  final String asset;
+  final double aspectRatio;
+  final Key layerKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: aspectRatio,
+      child: Image.asset(
+        asset,
+        key: layerKey,
+        fit: BoxFit.fill,
+        excludeFromSemantics: true,
+        gaplessPlayback: true,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      ),
+    );
+  }
+}
+
+/// One control: the guide's WhatsApp mark and the concierge label on one
+/// line at the body size. Opening it does not send the message.
+class _WhatsAppButton extends StatelessWidget {
+  const _WhatsAppButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    final oneLine = scale <= 1.15;
+    final label = Text(
+      kContactWhatsAppLabel,
+      key: const ValueKey('contact-whatsapp-label'),
+      maxLines: oneLine ? 1 : null,
+      softWrap: !oneLine,
+      overflow: TextOverflow.visible,
+      textAlign: TextAlign.center,
+      style: clientGuideStyle(context, MonettaTokens.body),
+    );
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const ValueKey('contact-channel-whatsapp'),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(MonettaTokens.radiusPill),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: MonettaTokens.tapTarget),
+          child: Row(
+            children: [
+              const _ChannelIcon(
+                asset: kGuideIconContactWhatsApp,
+                fallback: Icons.chat_outlined,
+                size: 40,
+              ),
+              SizedBox(width: MonettaTokens.space[2]),
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: palette.surface,
+                    borderRadius: BorderRadius.circular(
+                      MonettaTokens.radiusPill,
+                    ),
+                    border: Border.all(color: palette.hairline),
+                    boxShadow: [
+                      BoxShadow(
+                        color: palette.ink.withValues(alpha: 0.08),
+                        blurRadius: 2,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: MonettaTokens.space[3],
+                      vertical: MonettaTokens.space[2],
+                    ),
+                    child: oneLine
+                        ? FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.center,
+                            child: label,
+                          )
+                        : label,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
