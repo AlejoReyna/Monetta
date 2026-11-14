@@ -74,6 +74,9 @@ describe("catalog mapping", () => {
       price: 1299,
       compareAtPrice: 1499,
       sku: "MN-123",
+      // Exact-variant metadata (no inventory): empty for a row without options.
+      selectedOptions: {},
+      imageUrls: [],
       available: true,
     });
     expect(variant).toHaveProperty("sku", "MN-123");
