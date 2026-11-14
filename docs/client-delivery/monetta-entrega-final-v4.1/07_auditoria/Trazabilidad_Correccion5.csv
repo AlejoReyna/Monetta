@@ -1,0 +1,147 @@
+﻿Marca,Página,Tipo,Texto fuente,Criterio,Estado
+1,8,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+2,8,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+3,8,FreeText,"Esto debe de aparecer mas pequeño, mucho mas, en ese lugar, mas abajo y mas pequeño, como una etiqueta, al cual esta con fondo negro y texto blanco",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+4,11,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+5,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+6,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+7,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+8,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+9,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+10,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+11,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+12,12,FreeText,"El texto debe decir: 
+Registrate en MONETTA REWARDS
+
+ENVÍO GRATIS para siempre
+GANA CASHBACK con cada compra",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+13,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+14,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+15,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+16,12,FreeText,Color negro,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+17,12,FreeText,"Color dorado las mayusculas, lo demas negro",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+18,12,FreeText,"GANA CASHBACK en verde, lo demas negro",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+19,12,FreeText,Todo debe ser en horizontal y en una sola linea en cada texto,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+20,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+21,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+22,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+23,12,FreeText,El boton debe tener el contorno dorado que hemos utilizado,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+24,12,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+25,12,FreeText,"Añade un fondo gris muy tenue al pie de pagina, tambien añade los segmentos que necesita un pie de pagina, elimina el boton buscar y añade los demas necesarios, sin llenar demasiado",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+26,13,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+27,13,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+28,18,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+29,18,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+30,18,FreeText,"En general tanto en categoria, como marca, debes de hacer que este texto sea mas pequeño, para que no tome tanta relevancia y pueda que el banner luzca mucho mas
+
+Quiero que igualmente el banner tenga un pequeño sombreado en la parte inferior y superior, esto para dar el efecto de que flota dentro de la pantalla, el sombreado es tenue como lo hemos manejado en este diseño liquid",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+31,24,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+32,24,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+33,24,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+34,24,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+35,24,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+36,24,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+37,24,FreeText,"Toma como base para el diseño de la pagina de mayoreo, el  diseño del png diseño de nueva pagina de mayoreo 1 y el 2, esto para saber como se pondra la distribuicion y diseño, utiliza los colores que hemos usado en la app para realizarlo, pero debe quedar igualmente distribuido, con 3 conenedores que iran uno al lado de otro, al igual de los botones y todo lo ncesario para que se vea como debe ser el diseño de la pagina en general, utilizando sombreados y tambien añadiendo todos los elementos y componentes para que sea muy similar el diseño que te envie con el que se va a subir finalmente",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+38,24,FreeText,"Este texto, tanto titulo como descripcion, deben de estar superpuestos en el banner",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+39,24,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+40,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+41,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+42,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+43,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+44,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+45,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+46,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+47,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+48,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+49,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+50,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+51,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+52,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+53,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+54,30,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+55,30,FreeText,"Al tener notificaciones recibidasd, el apartado de cuenta en la barra de herramientas, va a contener un circulo en la parte superior del icono, el cual le avisara de las notificaciones que tengas, no modificas el icono, solamente se añade en caso de notificacion, el circulo es en dorado con numero en negro",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+56,37,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+57,37,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+58,37,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+59,37,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+60,37,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+61,37,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+62,37,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+63,37,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+64,37,FreeText,Seguir como invitado es el texto que debe decir este boton,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+65,37,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+66,39,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+67,39,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+68,39,FreeText,"Este es un espacio para tarjetas de publicidad, las cuales estaremos añadiendo periodicamente y se pueden permitir modificar, estas van a tener un diseño igual al de como funcionan las tarjetas en todas las marcas. con el mismo diseño, sombreado y con la misma animacion al deslizar, solamente toma en cuenta que el tamaño del contenedor debe ser como el de los banners, los cuales se añadiran posteriormente y deben ser clicables",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+69,44,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+70,44,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+71,44,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+72,44,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+73,44,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+74,44,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+75,44,FreeText,"Para este espacio, quiero que se añada una barra de progreso en formato horizontal, que tenga un contorno grueso, premium y que se vaya llenando conforme el pedido vaya progresando, con circulos grandes que se rellenan igualmente en las secciones cuando el pedido progrese, tendra las siguientes iconos y textos, te los comparto en orden de izquierda a derecha, cuando llegue al punto donde 
+
+Icono de camion
+Preparando tu pedido
+
+Icono de Avion
+Tu pedido va en camino
+
+Icono de Casa
+Tu pedido fue entregado",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+76,45,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+77,45,FreeText,Basado en tus gustos,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+78,45,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+79,45,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+80,45,FreeText,"Añade aqui una seccion de productos que sea tipo carrusel, esta seccion va a tener 2 filas y sera un carrusel con minimo 60 modelos del interes del cliente, los cuales van cambiando segun el gusto y busquedas",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+81,45,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+82,45,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+83,45,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+84,45,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+85,45,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+86,49,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+87,49,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+88,49,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+89,49,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+90,49,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+91,49,FreeText,"Aqui debe decir el nivel en el que se encuentra, tal que asi: Miembro PRO",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+92,49,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+93,49,FreeText,"En este espacio viene el saldo disponible, con el tecto asi
+
+Saldo
+$1,345",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+94,59,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+95,59,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+96,59,FreeText,"Tienes que basarte en la pagina de diseño de contacto, la cual dice diseño de nueva pagina de contacto, pero con las modificaciones que se te pidio en las otras paginas de este documento",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+97,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+98,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+99,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+100,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+101,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+102,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+103,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+104,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+105,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+106,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+107,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+108,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+109,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+110,61,FreeText,"El banner debe de tener el texto superpuesto, tienes que basarte en la  imagen de diseño de nueva pagina de contacto para realizarlo de la mejor forma y con el texto y tipografia que es
+
+",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+111,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+112,61,FreeText,"Aqui debes de poner Enviar Whatsapp al 826 106 6868 dentro del boton, todo en una sola linea y con el margen suficiente en cada costado",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+113,61,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+114,61,FreeText,"Despues del boton de Whatsapp va a decir algo igualmente justificado desde la izquierda
+Unete 
+A nuestros grupos de emprendedores
+
+Ahora si aqui, se añaden los 3 botones de los grupos y sigues con el diseño igual al que hiciste en el siguenos en reds",Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+115,63,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+116,63,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+117,63,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+118,64,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+119,64,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+120,64,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+121,89,Ink,,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada
+122,89,FreeText,este icono es de cartera de hombre,Ver Cambios_Correccion5 y ficha vinculada,Aplicación documental revisable; implementación no probada

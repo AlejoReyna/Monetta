@@ -1,0 +1,127 @@
+{
+  "version": "4.1",
+  "date": "2026-11-05",
+  "status": {
+    "colors_halo": "CONFIRMADO",
+    "numeric_geometry": "PROPUESTO para validar en build"
+  },
+  "color": {
+    "canvas": "#FFFFFF",
+    "gold": "#A58248",
+    "success": "#3B7030",
+    "text": "#242622",
+    "muted": "#595D56",
+    "error_proposed": "#A63535"
+  },
+  "type": {
+    "editorial": "Cormorant Garamond 400/700",
+    "ui": "DM Sans 400/600/700",
+    "logo": "Activo original, no reconstruir",
+    "banner": "Texto original delineado, copy exacto en manifiesto"
+  },
+  "material": {
+    "halo": "C Amplia",
+    "gold_alpha": 0.18,
+    "blur_px": 10,
+    "spread_px": 2,
+    "center": "transparente/blanco",
+    "shadow_proposed": "0 2px 8px rgb(36 38 34 / 0.05)",
+    "opaque_fallback": "#FFFFFF"
+  },
+  "spacing_px": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48
+  ],
+  "radius_proposed": {
+    "button": 24,
+    "panel": 24,
+    "card": 18
+  },
+  "focus_proposed": {
+    "color": "#1F211F",
+    "width_px": 2,
+    "offset_px": 3
+  },
+  "target_internal_px": 48,
+  "favorites": {
+    "size_px_proposed": 24,
+    "stroke_px_proposed": 2.6,
+    "container_visible": false,
+    "saved": "contorno y relleno oro dentro de la silueta"
+  },
+  "sold_badge": {
+    "copy": "AGOTADO",
+    "foreground": "#FFFFFF",
+    "background": "#111111",
+    "size_px_proposed": [
+      64,
+      18
+    ],
+    "position": "Más abajo, junto a borde inferior de foto",
+    "glow": false,
+    "animation": false
+  },
+  "reward_arc": {
+    "degrees": 270,
+    "width_px_proposed": 18,
+    "gold_alpha_proposed": 0.82,
+    "constant_shimmer": false
+  },
+  "motion_proposed_ms": {
+    "cart_color": 320,
+    "cart_settle": 360,
+    "cart_notice": 4000,
+    "payment_spinner_rotation": 900,
+    "rejection_stroke_1": 180,
+    "rejection_stroke_2": 180,
+    "rejection_settle": 180
+  },
+  "autoplay": {
+    "requested_product_ms": 3000,
+    "requested_story_ms": 4000,
+    "enabled_before_accessible_external_control": false,
+    "fallback": "manual",
+    "visible_pause_on_product": false
+  },
+  "shipping": {
+    "requires_account": true,
+    "guest_purchase_allowed": true,
+    "guest_rate": "servicio real",
+    "identity": "autenticada reconocida por checkout, no correo introducido"
+  },
+  "photos_category_scope": "Inicio únicamente",
+  "retired_ui": [
+    "UI:G36"
+  ],
+  "reduced_motion": "Respetar sistema sin ajustes propios; estado final y texto sin gota/giro/destellos.",
+  "registration": {
+    "copy": {
+      "title": "Regístrate en MONETTA REWARDS",
+      "lines": [
+        "ENVÍO GRATIS para siempre",
+        "GANA CASHBACK con cada compra"
+      ],
+      "rule": "Registro: Regístrate en MONETTA REWARDS en negro; ENVÍO GRATIS en oro + para siempre negro; GANA CASHBACK verde + con cada compra negro. Cada texto en una línea al tamaño base; botón con halo oro. A zoom/reflow se permite crecer sin cortar."
+    },
+    "gold_type_px_bold_proposed": 20,
+    "rule": "Tres líneas al tamaño base; reflow/zoom sin recortar"
+  },
+  "account_notification_badge": {
+    "confirmed": "Oro/número negro sobre Cuenta, sin alterar icono",
+    "count_proposed": "Notificaciones no leídas de fuente autorizada; cero oculto; 99+ visual y total real accesible",
+    "scope": "No asumir push, WhatsApp o email activos."
+  },
+  "favorites_recommendations": {
+    "title": "Basado en tus gustos",
+    "rows": 2,
+    "minimum_unique_if_available": 60,
+    "fallback": "Selección editorial, no inferir gustos sin datos",
+    "loading": "Progresiva, paginación estable, sin duplicados; menos de60 muestra todos los reales",
+    "close_proposed": "Flecha Glass y acceso textual al mismo conjunto recomendado"
+  }
+}

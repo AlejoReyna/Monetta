@@ -1,0 +1,282 @@
+{
+  "version": "4.1",
+  "date": "2026-11-05",
+  "scope": "Corrección documental/visual, no implementación o checkout",
+  "master_pages": 117,
+  "models": 129,
+  "changed_models": 50,
+  "preserved_banner_compositions": 32,
+  "new_annotations": 122,
+  "marked_source_pages": 17,
+  "checks": {
+    "50_contracts": true,
+    "122_new_marks": true,
+    "no_pdf_text_outside": true,
+    "changed_svg_png_under_threshold": true,
+    "no_pdf_annotations": true,
+    "all_assets_present": true,
+    "new_shipping_rule_preserved": true,
+    "retired_G36_absent": true,
+    "all_action_ids_unique": true,
+    "all_action_refs_resolve": true,
+    "banner_pngs_unchanged_from_base": true,
+    "master_hash_current": true
+  },
+  "bounds_failures": [],
+  "model_comparisons": [
+    {
+      "model": "feature",
+      "svg_png_mean_0_255": 1.2184,
+      "pass_under_3": true
+    },
+    {
+      "model": "feature_end",
+      "svg_png_mean_0_255": 1.1602,
+      "pass_under_3": true
+    },
+    {
+      "model": "footer",
+      "svg_png_mean_0_255": 1.2698,
+      "pass_under_3": true
+    },
+    {
+      "model": "collection",
+      "svg_png_mean_0_255": 1.1835,
+      "pass_under_3": true
+    },
+    {
+      "model": "filtered",
+      "svg_png_mean_0_255": 1.0312,
+      "pass_under_3": true
+    },
+    {
+      "model": "sold",
+      "svg_png_mean_0_255": 0.929,
+      "pass_under_3": true
+    },
+    {
+      "model": "cart_multi",
+      "svg_png_mean_0_255": 1.0654,
+      "pass_under_3": true
+    },
+    {
+      "model": "guest",
+      "svg_png_mean_0_255": 0.5216,
+      "pass_under_3": true
+    },
+    {
+      "model": "login",
+      "svg_png_mean_0_255": 0.7902,
+      "pass_under_3": true
+    },
+    {
+      "model": "account",
+      "svg_png_mean_0_255": 0.7194,
+      "pass_under_3": true
+    },
+    {
+      "model": "account_bottom",
+      "svg_png_mean_0_255": 0.4474,
+      "pass_under_3": true
+    },
+    {
+      "model": "order_detail",
+      "svg_png_mean_0_255": 0.7707,
+      "pass_under_3": true
+    },
+    {
+      "model": "favorites",
+      "svg_png_mean_0_255": 0.8619,
+      "pass_under_3": true
+    },
+    {
+      "model": "favorites_account",
+      "svg_png_mean_0_255": 0.775,
+      "pass_under_3": true
+    },
+    {
+      "model": "wholesale",
+      "svg_png_mean_0_255": 1.6365,
+      "pass_under_3": true
+    },
+    {
+      "model": "brand_collection",
+      "svg_png_mean_0_255": 0.9691,
+      "pass_under_3": true
+    },
+    {
+      "model": "registration_clear",
+      "svg_png_mean_0_255": 1.2698,
+      "pass_under_3": true
+    },
+    {
+      "model": "tablet_collection",
+      "svg_png_mean_0_255": 0.8774,
+      "pass_under_3": true
+    },
+    {
+      "model": "home_wholesale",
+      "svg_png_mean_0_255": 1.5382,
+      "pass_under_3": true
+    },
+    {
+      "model": "contact",
+      "svg_png_mean_0_255": 1.3663,
+      "pass_under_3": true
+    },
+    {
+      "model": "contact_links",
+      "svg_png_mean_0_255": 1.0435,
+      "pass_under_3": true
+    },
+    {
+      "model": "wholesale_steps",
+      "svg_png_mean_0_255": 0.9441,
+      "pass_under_3": true
+    },
+    {
+      "model": "brand_coach",
+      "svg_png_mean_0_255": 0.9691,
+      "pass_under_3": true
+    },
+    {
+      "model": "brand_guess",
+      "svg_png_mean_0_255": 1.2399,
+      "pass_under_3": true
+    },
+    {
+      "model": "brand_tory_burch",
+      "svg_png_mean_0_255": 1.0325,
+      "pass_under_3": true
+    },
+    {
+      "model": "brand_marc_jacobs",
+      "svg_png_mean_0_255": 1.0777,
+      "pass_under_3": true
+    },
+    {
+      "model": "brand_kate_spade",
+      "svg_png_mean_0_255": 0.9681,
+      "pass_under_3": true
+    },
+    {
+      "model": "brand_michael_kors",
+      "svg_png_mean_0_255": 1.1537,
+      "pass_under_3": true
+    },
+    {
+      "model": "brand_steve_madden",
+      "svg_png_mean_0_255": 1.1929,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_carteras_hombre",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_charms",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_lentes",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_calzado_hombre",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_munequeras",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_relojes",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_relojes_hombre",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_calzado_mujer",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_bolsos_hombre",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_tarjeteros",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_perfumes_todos",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_accesorios",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_crossbody",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_tote",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_bolsos_hombro",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_carteras",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "category_bolsos_mano",
+      "svg_png_mean_0_255": 0.9807,
+      "pass_under_3": true
+    },
+    {
+      "model": "desktop_contact",
+      "svg_png_mean_0_255": 0.6029,
+      "pass_under_3": true
+    },
+    {
+      "model": "desktop_wholesale",
+      "svg_png_mean_0_255": 0.6018,
+      "pass_under_3": true
+    },
+    {
+      "model": "home_sequence",
+      "svg_png_mean_0_255": 1.2343,
+      "pass_under_3": true
+    },
+    {
+      "model": "favorites_recommendations",
+      "svg_png_mean_0_255": 0.9391,
+      "pass_under_3": true
+    }
+  ],
+  "master_sha256": "b6028cce2b216a6eb72f8f13fb3930fa42e77e42723712b2ef1954649af86306",
+  "implementation_tests": "No ejecutadas por alcance",
+  "components": 22,
+  "icons": 61
+}

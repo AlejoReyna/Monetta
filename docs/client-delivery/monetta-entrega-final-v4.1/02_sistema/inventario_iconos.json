@@ -1,0 +1,285 @@
+{
+  "vector_icons": [
+    "bolsos",
+    "bolsos-mujer",
+    "crossbody",
+    "tote",
+    "de-mano",
+    "de-hombro",
+    "bolsos-hombre",
+    "carteras",
+    "carteras-mujer",
+    "munequeras",
+    "carteras-clasicas",
+    "tarjeteros",
+    "carteras-hombre",
+    "perfumes",
+    "perfumes-mujer",
+    "perfumes-hombre",
+    "calzado",
+    "calzado-mujer",
+    "deportivo",
+    "casual",
+    "calzado-hombre",
+    "accesorios",
+    "lentes",
+    "relojes",
+    "charms",
+    "otros-accesorios",
+    "marcas",
+    "mayoreo",
+    "instagram",
+    "facebook",
+    "tiktok",
+    "whatsapp",
+    "envios",
+    "pagos",
+    "originales",
+    "atencion",
+    "pedidos",
+    "avisos",
+    "direccion",
+    "ajustes",
+    "ayuda",
+    "salir",
+    "ordenar",
+    "filtros",
+    "favorito",
+    "home",
+    "grid",
+    "cart",
+    "user",
+    "search",
+    "menu",
+    "close",
+    "right",
+    "down",
+    "back",
+    "check",
+    "favorito_guardado",
+    "pago_rechazado",
+    "pago_verificando",
+    "envio-camion",
+    "envio-avion"
+  ],
+  "count": 61,
+  "photos_home_only": [
+    {
+      "id": "F01",
+      "source": "ICONO  CALZADO DE DAMA.JPG",
+      "png": "04_iconos/fotos_inicio/F01_ICONO  CALZADO DE DAMA.png",
+      "dimensions": [
+        1013,
+        1013
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "b9c6c522883c05581184cb511c2a4429dd34b9ff1d1c491332fda824ad620f6e",
+      "original_preserved": true
+    },
+    {
+      "id": "F02",
+      "source": "ICONO BOLSO DE HOMBRO.JPG",
+      "png": "04_iconos/fotos_inicio/F02_ICONO BOLSO DE HOMBRO.png",
+      "dimensions": [
+        1199,
+        799
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "6c95b3904b2d13c934033b0b20339e089896ed729bfc9344399d2fd011fb9c3b",
+      "original_preserved": true
+    },
+    {
+      "id": "F03",
+      "source": "ICONO BOLSO DE MANO.JPG",
+      "png": "04_iconos/fotos_inicio/F03_ICONO BOLSO DE MANO.png",
+      "dimensions": [
+        810,
+        1080
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "134f9d9ae30e1301a179c2f6ff4ba800367f225594490bcd0b8c403e5e08722a",
+      "original_preserved": true
+    },
+    {
+      "id": "F04",
+      "source": "ICONO CALZADO DE HOMBRE.JPG",
+      "png": "04_iconos/fotos_inicio/F04_ICONO CALZADO DE HOMBRE.png",
+      "dimensions": [
+        1200,
+        1615
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "070164c6bc87612662b8e85343f701e20e36e085ff64c4d24b47810bc854961e",
+      "original_preserved": true
+    },
+    {
+      "id": "F05",
+      "source": "ICONO DE ACCESORIOS.JPG",
+      "png": "04_iconos/fotos_inicio/F05_ICONO DE ACCESORIOS.png",
+      "dimensions": [
+        2368,
+        2160
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "2a507d364531d71ee8e74d97efe5d32176133fdbf845db2deca7ddc5939189e9",
+      "original_preserved": true
+    },
+    {
+      "id": "F06",
+      "source": "ICONO DE BOLSOS DE HOMBRE.JPG",
+      "png": "04_iconos/fotos_inicio/F06_ICONO DE BOLSOS DE HOMBRE.png",
+      "dimensions": [
+        2368,
+        2160
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "5743d9bde3b80169c9e236977ca1e11be43f5f14f4d46ace6e6af25a0abb425e",
+      "original_preserved": true
+    },
+    {
+      "id": "F07",
+      "source": "ICONO DE BOLSOS.JPG",
+      "png": "04_iconos/fotos_inicio/F07_ICONO DE BOLSOS.png",
+      "dimensions": [
+        2368,
+        2160
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "ea07ccbdd9181477f5a85702767f4b759e8d0e80ba2a96f7f64bfa5744e44873",
+      "original_preserved": true
+    },
+    {
+      "id": "F08",
+      "source": "ICONO DE CARTERAS .AVIF",
+      "png": "04_iconos/fotos_inicio/F08_ICONO DE CARTERAS .png",
+      "dimensions": [
+        2368,
+        2160
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "c2d45bc7ee1b2cdd9504d5e72395cc156f1ab46dc8706c8aa4577f770c45ba52",
+      "original_preserved": true
+    },
+    {
+      "id": "F09",
+      "source": "ICONO DE CARTERAS DE MUJER.JPG",
+      "png": "04_iconos/fotos_inicio/F09_ICONO DE CARTERAS DE MUJER.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "f4f54c6149b642779757fe0ba55f1e31310d45310d92168d40039db2af38a216",
+      "original_preserved": true
+    },
+    {
+      "id": "F10",
+      "source": "ICONO DE CROSSBODY.png",
+      "png": "04_iconos/fotos_inicio/F10_ICONO DE CROSSBODY.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "92a681fb3a61c844db7f3564e282bc96cd920547f2f178ebc26d042f17fe0dea",
+      "original_preserved": true
+    },
+    {
+      "id": "F11",
+      "source": "ICONO DE LENTES(1).JPG",
+      "png": "04_iconos/fotos_inicio/F11_ICONO DE LENTES(1).png",
+      "dimensions": [
+        2368,
+        2160
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "2a0d8ece98dcdfccf35093d4c0d89dac4b41a8fe35092597fe75f9b74c652689",
+      "original_preserved": true
+    },
+    {
+      "id": "F12",
+      "source": "ICONO DE LENTES.JPG",
+      "png": "04_iconos/fotos_inicio/F12_ICONO DE LENTES.png",
+      "dimensions": [
+        1200,
+        1467
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "66195d2ef66b5f72292eeed1ce2f2f29ddbc92033a2bca299f1487e9016fcc05",
+      "original_preserved": true
+    },
+    {
+      "id": "F13",
+      "source": "ICONO DE RELOJES DE HOMBRE.PNG",
+      "png": "04_iconos/fotos_inicio/F13_ICONO DE RELOJES DE HOMBRE.png",
+      "dimensions": [
+        1465,
+        1762
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "02b00e96f87c464c91838949b2de427e768634e1ebd8c256afcd7768ae2cebd1",
+      "original_preserved": true
+    },
+    {
+      "id": "F14",
+      "source": "ICONO DE TARJETEROS.PNG",
+      "png": "04_iconos/fotos_inicio/F14_ICONO DE TARJETEROS.png",
+      "dimensions": [
+        1172,
+        874
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "fe02ea515bd7210cf40247429c789018534c8d0b5692110321b1cb7c861fe42f",
+      "original_preserved": true
+    },
+    {
+      "id": "F15",
+      "source": "ICONO MUÑEQUERA.JPG",
+      "png": "04_iconos/fotos_inicio/F15_ICONO MUÑEQUERA.png",
+      "dimensions": [
+        544,
+        544
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "7ff10f6ae73dbada1410ff5ed79d0cb8f348f48c4a7b2779e79b98a277e50875",
+      "original_preserved": true
+    },
+    {
+      "id": "F16",
+      "source": "ICONO RELOJ DE MUJER.JPG",
+      "png": "04_iconos/fotos_inicio/F16_ICONO RELOJ DE MUJER.png",
+      "dimensions": [
+        1200,
+        1840
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "22c79528ea61c19c291ce2bfbc0a6767bd8e038c7b5dc422775d2fe0c75c972b",
+      "original_preserved": true
+    },
+    {
+      "id": "F17",
+      "source": "ICONO TOTE.JPG",
+      "png": "04_iconos/fotos_inicio/F17_ICONO TOTE.png",
+      "dimensions": [
+        544,
+        680
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "da13bd419a9d22c6ef00081a992eefaf7bf6efab798ebaec92c843701bcfb0a7",
+      "original_preserved": true
+    },
+    {
+      "id": "F18",
+      "source": "INCONO DE BOLSOS.JPG",
+      "png": "04_iconos/fotos_inicio/F18_INCONO DE BOLSOS.png",
+      "dimensions": [
+        1000,
+        1000
+      ],
+      "scope": "Inicio únicamente; nodo/alternativa en manifiesto",
+      "original_sha256": "f4d21f6d5612d0b521465f244927f2402fea1d1282aeba152dab7190a55ee590",
+      "original_preserved": true
+    }
+  ],
+  "vector_note": "SVG puros de interfaz con texto/paths delineados. No son trazados de producto. PNG iconos60px transparentes; área activable implementada por separado."
+}

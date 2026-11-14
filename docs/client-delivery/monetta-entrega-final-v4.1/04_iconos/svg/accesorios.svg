@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" version="1.1" width="30" height="30" viewBox="0 0 30 30">
+<path transform="matrix(1,0,0,-1,3,27)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#a58248" d="M4 3H12C13.1056 3 14 3.8944 14 5V13C14 14.1056 13.1056 15 12 15H4C2.8944 15 2 14.1056 2 13V5C2 3.8944 2.8944 3 4 3Z"/>
+<path transform="matrix(1,0,0,-1,3,27)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#a58248" d="M5 15V18C5 22 11 22 11 18V15"/>
+<path transform="matrix(1,0,0,-1,3,27)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#a58248" d="M21 19C21 20.10457 20.10457 21 19 21 17.89543 21 17 20.10457 17 19 17 17.89543 17.89543 17 19 17 20.10457 17 21 17.89543 21 19"/>
+<path transform="matrix(1,0,0,-1,3,27)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#a58248" d="M19 17V14"/>
+<path transform="matrix(1,0,0,-1,3,27)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#a58248" d="M19 14 21 11 23 10 21 8V4L19 6 16 4 17 8 15 10 18 11Z"/>
+<path transform="matrix(1,0,0,-1,2.88,26.8)" stroke-width=".27" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#ffffff" stroke-opacity=".7" d="M4 3H12C13.1056 3 14 3.8944 14 5V13C14 14.1056 13.1056 15 12 15H4C2.8944 15 2 14.1056 2 13V5C2 3.8944 2.8944 3 4 3Z"/>
+<path transform="matrix(1,0,0,-1,2.88,26.8)" stroke-width=".27" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#ffffff" stroke-opacity=".7" d="M5 15V18C5 22 11 22 11 18V15"/>
+<path transform="matrix(1,0,0,-1,2.88,26.8)" stroke-width=".27" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#ffffff" stroke-opacity=".7" d="M21 19C21 20.10457 20.10457 21 19 21 17.89543 21 17 20.10457 17 19 17 17.89543 17.89543 17 19 17 20.10457 17 21 17.89543 21 19"/>
+<path transform="matrix(1,0,0,-1,2.88,26.8)" stroke-width=".27" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#ffffff" stroke-opacity=".7" d="M19 17V14"/>
+<path transform="matrix(1,0,0,-1,2.88,26.8)" stroke-width=".27" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#ffffff" stroke-opacity=".7" d="M19 14 21 11 23 10 21 8V4L19 6 16 4 17 8 15 10 18 11Z"/>
+</svg>

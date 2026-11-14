@@ -1,0 +1,200 @@
+[
+  {
+    "id": "comprar_ahora",
+    "viewport": [
+      390,
+      84
+    ],
+    "png": "04_iconos/componentes/png/comprar_ahora.png",
+    "svg": "04_iconos/componentes/svg/comprar_ahora.svg"
+  },
+  {
+    "id": "chip_aplicado",
+    "viewport": [
+      240,
+      84
+    ],
+    "png": "04_iconos/componentes/png/chip_aplicado.png",
+    "svg": "04_iconos/componentes/svg/chip_aplicado.svg"
+  },
+  {
+    "id": "busqueda_orden_filtros",
+    "viewport": [
+      390,
+      84
+    ],
+    "png": "04_iconos/componentes/png/busqueda_orden_filtros.png",
+    "svg": "04_iconos/componentes/svg/busqueda_orden_filtros.svg"
+  },
+  {
+    "id": "campo",
+    "viewport": [
+      390,
+      84
+    ],
+    "png": "04_iconos/componentes/png/campo.png",
+    "svg": "04_iconos/componentes/svg/campo.svg"
+  },
+  {
+    "id": "agotado",
+    "viewport": [
+      110,
+      64
+    ],
+    "png": "04_iconos/componentes/png/agotado.png",
+    "svg": "04_iconos/componentes/svg/agotado.svg"
+  },
+  {
+    "id": "favorito",
+    "viewport": [
+      80,
+      80
+    ],
+    "png": "04_iconos/componentes/png/favorito.png",
+    "svg": "04_iconos/componentes/svg/favorito.svg"
+  },
+  {
+    "id": "favorito_guardado",
+    "viewport": [
+      80,
+      80
+    ],
+    "png": "04_iconos/componentes/png/favorito_guardado.png",
+    "svg": "04_iconos/componentes/svg/favorito_guardado.svg"
+  },
+  {
+    "id": "avatar",
+    "viewport": [
+      96,
+      96
+    ],
+    "png": "04_iconos/componentes/png/avatar.png",
+    "svg": "04_iconos/componentes/svg/avatar.svg"
+  },
+  {
+    "id": "divisor",
+    "viewport": [
+      390,
+      70
+    ],
+    "png": "04_iconos/componentes/png/divisor.png",
+    "svg": "04_iconos/componentes/svg/divisor.svg"
+  },
+  {
+    "id": "whatsapp",
+    "viewport": [
+      390,
+      90
+    ],
+    "png": "04_iconos/componentes/png/whatsapp.png",
+    "svg": "04_iconos/componentes/svg/whatsapp.svg"
+  },
+  {
+    "id": "servicios",
+    "viewport": [
+      390,
+      154
+    ],
+    "png": "04_iconos/componentes/png/servicios.png",
+    "svg": "04_iconos/componentes/svg/servicios.svg"
+  },
+  {
+    "id": "check_pago",
+    "viewport": [
+      100,
+      100
+    ],
+    "png": "04_iconos/componentes/png/check_pago.png",
+    "svg": "04_iconos/componentes/svg/check_pago.svg"
+  },
+  {
+    "id": "x_pago",
+    "viewport": [
+      100,
+      100
+    ],
+    "png": "04_iconos/componentes/png/x_pago.png",
+    "svg": "04_iconos/componentes/svg/x_pago.svg"
+  },
+  {
+    "id": "espera_pago",
+    "viewport": [
+      100,
+      100
+    ],
+    "png": "04_iconos/componentes/png/espera_pago.png",
+    "svg": "04_iconos/componentes/svg/espera_pago.svg"
+  },
+  {
+    "id": "recien_llegado",
+    "viewport": [
+      165,
+      64
+    ],
+    "png": "04_iconos/componentes/png/recien_llegado.png",
+    "svg": "04_iconos/componentes/svg/recien_llegado.svg"
+  },
+  {
+    "id": "nav_0",
+    "viewport": [
+      390,
+      112
+    ],
+    "png": "04_iconos/componentes/png/nav_0.png",
+    "svg": "04_iconos/componentes/svg/nav_0.svg"
+  },
+  {
+    "id": "nav_1",
+    "viewport": [
+      390,
+      112
+    ],
+    "png": "04_iconos/componentes/png/nav_1.png",
+    "svg": "04_iconos/componentes/svg/nav_1.svg"
+  },
+  {
+    "id": "nav_2",
+    "viewport": [
+      390,
+      112
+    ],
+    "png": "04_iconos/componentes/png/nav_2.png",
+    "svg": "04_iconos/componentes/svg/nav_2.svg"
+  },
+  {
+    "id": "nav_3",
+    "viewport": [
+      390,
+      112
+    ],
+    "png": "04_iconos/componentes/png/nav_3.png",
+    "svg": "04_iconos/componentes/svg/nav_3.svg"
+  },
+  {
+    "id": "nav_carrito_mayoreo",
+    "viewport": [
+      390,
+      112
+    ],
+    "png": "04_iconos/componentes/png/nav_carrito_mayoreo.png",
+    "svg": "04_iconos/componentes/svg/nav_carrito_mayoreo.svg"
+  },
+  {
+    "id": "progreso_pedido",
+    "viewport": [
+      390,
+      160
+    ],
+    "png": "04_iconos/componentes/png/progreso_pedido.png",
+    "svg": "04_iconos/componentes/svg/progreso_pedido.svg"
+  },
+  {
+    "id": "cuenta_avisos",
+    "viewport": [
+      390,
+      112
+    ],
+    "png": "04_iconos/componentes/png/cuenta_avisos.png",
+    "svg": "04_iconos/componentes/svg/cuenta_avisos.svg"
+  }
+]

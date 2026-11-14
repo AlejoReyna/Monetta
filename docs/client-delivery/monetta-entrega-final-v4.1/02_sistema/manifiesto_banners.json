@@ -1,0 +1,3624 @@
+{
+  "version": "4.1",
+  "date": "2026-11-05",
+  "banners": [
+    {
+      "id": "B01",
+      "key": "inicio_productos",
+      "stem": "B01_inicio_productos",
+      "pdf_page": 1,
+      "source_png": "BANNERS/BANNER INICIO 1_3 COMPRA FACIL.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "Compra fácil\ndesde México",
+      "png": "03_banners/png/B01_inicio_productos.png",
+      "svg": "03_banners/svg/B01_inicio_productos.svg",
+      "overlay": "03_banners/capas_texto/B01_inicio_productos.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Todos los productos",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": "Original RGB plus original SMask combined as lossless RGBA; source letter shapes unchanged"
+    },
+    {
+      "id": "B02",
+      "key": "inicio_marcas",
+      "stem": "B02_inicio_marcas",
+      "pdf_page": 2,
+      "source_png": "BANNERS/BANNER INICIO 2_3 TUS MARCAS FAV.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "Tus marcas fav\nen un sólo lugar",
+      "png": "03_banners/png/B02_inicio_marcas.png",
+      "svg": "03_banners/svg/B02_inicio_marcas.svg",
+      "overlay": "03_banners/capas_texto/B02_inicio_marcas.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Todas las marcas",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": "Original RGB plus original SMask combined as lossless RGBA; source letter shapes unchanged"
+    },
+    {
+      "id": "B03",
+      "key": "inicio_categorias",
+      "stem": "B03_inicio_categorias",
+      "pdf_page": 3,
+      "source_png": "BANNERS/BANNER INICIO 3_3.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "Miles\nde modelos\noriginales por descubrir",
+      "png": "03_banners/png/B03_inicio_categorias.png",
+      "svg": "03_banners/svg/B03_inicio_categorias.svg",
+      "overlay": "03_banners/capas_texto/B03_inicio_categorias.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Todas las categorías",
+      "live_route": null,
+      "original_match": "visual_correspondence_different_raster_or_framing",
+      "photo_frame": "Original PNG fitted proportionally to banner viewport; PDF crop matrix removed",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B04",
+      "key": "inicio_mayoreo",
+      "stem": "B04_inicio_mayoreo",
+      "pdf_page": 4,
+      "source_png": "BANNERS/BANNER INICIO PRECIO DE MAYOREO.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "PRECIOS DE\nmayoreo\nA partir de 3 piezas\nCONOCE MÁS",
+      "png": "03_banners/png/B04_inicio_mayoreo.png",
+      "svg": "03_banners/svg/B04_inicio_mayoreo.svg",
+      "overlay": "03_banners/capas_texto/B04_inicio_mayoreo.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Página de Mayoreo",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B05",
+      "key": "carteras_hombre",
+      "stem": "B05_carteras_hombre",
+      "pdf_page": 5,
+      "source_png": null,
+      "source_mode": "Fondo extraído del PDF proporcionado, sin original separado",
+      "copy_exact": "CARTERAS\nDE HOMBRE",
+      "png": "03_banners/png/B05_carteras_hombre.png",
+      "svg": "03_banners/svg/B05_carteras_hombre.svg",
+      "overlay": "03_banners/capas_texto/B05_carteras_hombre.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Carteras de Hombre",
+      "live_route": null,
+      "original_match": "original_png_missing",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B06",
+      "key": "charms",
+      "stem": "B06_charms",
+      "pdf_page": 6,
+      "source_png": "BANNERS/BANNER DE CHARMS.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "CHARMS",
+      "png": "03_banners/png/B06_charms.png",
+      "svg": "03_banners/svg/B06_charms.svg",
+      "overlay": "03_banners/capas_texto/B06_charms.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Charms",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B07",
+      "key": "lentes",
+      "stem": "B07_lentes",
+      "pdf_page": 7,
+      "source_png": "BANNERS/BANNER DE LENTES.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "LENTES",
+      "png": "03_banners/png/B07_lentes.png",
+      "svg": "03_banners/svg/B07_lentes.svg",
+      "overlay": "03_banners/capas_texto/B07_lentes.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Lentes",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B08",
+      "key": "bolsos",
+      "stem": "B08_bolsos",
+      "pdf_page": 8,
+      "source_png": "BANNERS/BANNER DE BOLSOS.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "BOLSOS",
+      "png": "03_banners/png/B08_bolsos.png",
+      "svg": "03_banners/svg/B08_bolsos.svg",
+      "overlay": "03_banners/capas_texto/B08_bolsos.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Bolsos",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B09",
+      "key": "calzado_hombre",
+      "stem": "B09_calzado_hombre",
+      "pdf_page": 9,
+      "source_png": "BANNERS/BANNER DE CALZADO DE HOMBRE.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "CALZADO\nDE HOMBRE",
+      "png": "03_banners/png/B09_calzado_hombre.png",
+      "svg": "03_banners/svg/B09_calzado_hombre.svg",
+      "overlay": "03_banners/capas_texto/B09_calzado_hombre.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Calzado de Hombre",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B10",
+      "key": "munequeras",
+      "stem": "B10_munequeras",
+      "pdf_page": 10,
+      "source_png": "BANNERS/BANNER DE MUÑEQUERAS.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "MUÑEQUERAS",
+      "png": "03_banners/png/B10_munequeras.png",
+      "svg": "03_banners/svg/B10_munequeras.svg",
+      "overlay": "03_banners/capas_texto/B10_munequeras.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Muñequeras",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B11",
+      "key": "relojes",
+      "stem": "B11_relojes",
+      "pdf_page": 11,
+      "source_png": "BANNERS/BANNER DE RELOJES DE MUJER.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "RELOJES",
+      "png": "03_banners/png/B11_relojes.png",
+      "svg": "03_banners/svg/B11_relojes.svg",
+      "overlay": "03_banners/capas_texto/B11_relojes.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Relojes de Mujer",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B12",
+      "key": "relojes_hombre",
+      "stem": "B12_relojes_hombre",
+      "pdf_page": 12,
+      "source_png": "BANNERS/Banner RELOJES DE HOMBRE.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "RELOJES\nDE HOMBRE",
+      "png": "03_banners/png/B12_relojes_hombre.png",
+      "svg": "03_banners/svg/B12_relojes_hombre.svg",
+      "overlay": "03_banners/capas_texto/B12_relojes_hombre.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Relojes de Hombre",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B13",
+      "key": "calzado_mujer",
+      "stem": "B13_calzado_mujer",
+      "pdf_page": 13,
+      "source_png": "BANNERS/BANNER CALZADO DE DAMA.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "CALZADO\nDE DAMA",
+      "png": "03_banners/png/B13_calzado_mujer.png",
+      "svg": "03_banners/svg/B13_calzado_mujer.svg",
+      "overlay": "03_banners/capas_texto/B13_calzado_mujer.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Calzado de Mujer",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B14",
+      "key": "bolsos_hombre",
+      "stem": "B14_bolsos_hombre",
+      "pdf_page": 14,
+      "source_png": "BANNERS/BANNER BOLSOS DE HOMBRE.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "BOLSOS\nDE HOMBRE",
+      "png": "03_banners/png/B14_bolsos_hombre.png",
+      "svg": "03_banners/svg/B14_bolsos_hombre.svg",
+      "overlay": "03_banners/capas_texto/B14_bolsos_hombre.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Bolsos de Hombre",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B15",
+      "key": "tarjeteros",
+      "stem": "B15_tarjeteros",
+      "pdf_page": 15,
+      "source_png": "BANNERS/BANNER TARJETEROS.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "TARJETEROS",
+      "png": "03_banners/png/B15_tarjeteros.png",
+      "svg": "03_banners/svg/B15_tarjeteros.svg",
+      "overlay": "03_banners/capas_texto/B15_tarjeteros.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Tarjeteros",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B16",
+      "key": "perfumes_todos",
+      "stem": "B16_perfumes_todos",
+      "pdf_page": 16,
+      "source_png": "BANNERS/BANNER DE PERFUMES.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "PERFUMES",
+      "png": "03_banners/png/B16_perfumes_todos.png",
+      "svg": "03_banners/svg/B16_perfumes_todos.svg",
+      "overlay": "03_banners/capas_texto/B16_perfumes_todos.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Perfumes",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B17",
+      "key": "accesorios",
+      "stem": "B17_accesorios",
+      "pdf_page": 17,
+      "source_png": null,
+      "source_mode": "Fondo extraído del PDF proporcionado, sin original separado",
+      "copy_exact": "ACCESORIOS",
+      "png": "03_banners/png/B17_accesorios.png",
+      "svg": "03_banners/svg/B17_accesorios.svg",
+      "overlay": "03_banners/capas_texto/B17_accesorios.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Accesorios",
+      "live_route": null,
+      "original_match": "original_png_missing",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B18",
+      "key": "crossbody",
+      "stem": "B18_crossbody",
+      "pdf_page": 18,
+      "source_png": "BANNERS/BANNER DE CROSSBODY.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "CROSSBODY",
+      "png": "03_banners/png/B18_crossbody.png",
+      "svg": "03_banners/svg/B18_crossbody.svg",
+      "overlay": "03_banners/capas_texto/B18_crossbody.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Crossbody",
+      "live_route": null,
+      "original_match": "visual_correspondence_different_raster_or_framing",
+      "photo_frame": "Original PNG fitted proportionally to banner viewport; PDF crop matrix removed",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B19",
+      "key": "tote",
+      "stem": "B19_tote",
+      "pdf_page": 19,
+      "source_png": "BANNERS/Banner COLECCION TOTES.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "TOTES",
+      "png": "03_banners/png/B19_tote.png",
+      "svg": "03_banners/svg/B19_tote.svg",
+      "overlay": "03_banners/capas_texto/B19_tote.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Tote",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B20",
+      "key": "bolsos_hombro",
+      "stem": "B20_bolsos_hombro",
+      "pdf_page": 20,
+      "source_png": "BANNERS/BANNER BOLSOS DE HOMBRO.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "BOLSOS\nDE HOMBRO",
+      "png": "03_banners/png/B20_bolsos_hombro.png",
+      "svg": "03_banners/svg/B20_bolsos_hombro.svg",
+      "overlay": "03_banners/capas_texto/B20_bolsos_hombro.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "De hombro",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B21",
+      "key": "carteras",
+      "stem": "B21_carteras",
+      "pdf_page": 21,
+      "source_png": "BANNERS/BANNER COLECCION CARTERAS .png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "CARTERAS",
+      "png": "03_banners/png/B21_carteras.png",
+      "svg": "03_banners/svg/B21_carteras.svg",
+      "overlay": "03_banners/capas_texto/B21_carteras.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Carteras de Mujer",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B22",
+      "key": "bolsos_mano",
+      "stem": "B22_bolsos_mano",
+      "pdf_page": 22,
+      "source_png": "BANNERS/BANNER BOLSOS DE MANO.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "BOLSOS\nDE MANO",
+      "png": "03_banners/png/B22_bolsos_mano.png",
+      "svg": "03_banners/svg/B22_bolsos_mano.svg",
+      "overlay": "03_banners/capas_texto/B22_bolsos_mano.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "De mano",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B23",
+      "key": "perfumes_alternativo",
+      "stem": "B23_perfumes_alternativo",
+      "pdf_page": 23,
+      "source_png": null,
+      "source_mode": "Fondo extraído del PDF proporcionado, sin original separado",
+      "copy_exact": "PERFUMES",
+      "png": "03_banners/png/B23_perfumes_alternativo.png",
+      "svg": "03_banners/svg/B23_perfumes_alternativo.svg",
+      "overlay": "03_banners/capas_texto/B23_perfumes_alternativo.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Perfumes; alcance femenino por confirmar",
+      "live_route": null,
+      "original_match": "original_png_missing",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B24",
+      "key": "guess",
+      "stem": "B24_guess",
+      "pdf_page": 24,
+      "source_png": "BANNERS/BANNER MARCA GUESS.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "GUESS",
+      "png": "03_banners/png/B24_guess.png",
+      "svg": "03_banners/svg/B24_guess.svg",
+      "overlay": "03_banners/capas_texto/B24_guess.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Guess",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B25",
+      "key": "tory_burch",
+      "stem": "B25_tory_burch",
+      "pdf_page": 25,
+      "source_png": "BANNERS/BANNER MARCA TORY BURCH(1).png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "TORY\nBURCH",
+      "png": "03_banners/png/B25_tory_burch.png",
+      "svg": "03_banners/svg/B25_tory_burch.svg",
+      "overlay": "03_banners/capas_texto/B25_tory_burch.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Tory Burch",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B26",
+      "key": "marc_jacobs",
+      "stem": "B26_marc_jacobs",
+      "pdf_page": 26,
+      "source_png": "BANNERS/BANNER MARCA TORY BURCH.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "MARC\nJACOBS",
+      "png": "03_banners/png/B26_marc_jacobs.png",
+      "svg": "03_banners/svg/B26_marc_jacobs.svg",
+      "overlay": "03_banners/capas_texto/B26_marc_jacobs.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Marc Jacobs",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B27",
+      "key": "kate_spade",
+      "stem": "B27_kate_spade",
+      "pdf_page": 27,
+      "source_png": "BANNERS/BANNER MARCA KATE SPADE.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "KATE\nSPADE",
+      "png": "03_banners/png/B27_kate_spade.png",
+      "svg": "03_banners/svg/B27_kate_spade.svg",
+      "overlay": "03_banners/capas_texto/B27_kate_spade.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Kate Spade",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B28",
+      "key": "coach",
+      "stem": "B28_coach",
+      "pdf_page": 28,
+      "source_png": "BANNERS/BANNER MRCA COACH.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "COACH",
+      "png": "03_banners/png/B28_coach.png",
+      "svg": "03_banners/svg/B28_coach.svg",
+      "overlay": "03_banners/capas_texto/B28_coach.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Coach",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B29",
+      "key": "michael_kors",
+      "stem": "B29_michael_kors",
+      "pdf_page": 29,
+      "source_png": "BANNERS/BANNER MARCA MICHAEL KORS.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "MICHAEL\nKORS",
+      "png": "03_banners/png/B29_michael_kors.png",
+      "svg": "03_banners/svg/B29_michael_kors.svg",
+      "overlay": "03_banners/capas_texto/B29_michael_kors.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Michael Kors",
+      "live_route": null,
+      "original_match": "visual_correspondence_different_raster_or_framing",
+      "photo_frame": "Original PNG fitted proportionally to banner viewport; PDF crop matrix removed",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B30",
+      "key": "steve_madden",
+      "stem": "B30_steve_madden",
+      "pdf_page": 30,
+      "source_png": "BANNERS/BANNER MARCA STEVE MADDEN.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "STEVE\nMADDEN",
+      "png": "03_banners/png/B30_steve_madden.png",
+      "svg": "03_banners/svg/B30_steve_madden.svg",
+      "overlay": "03_banners/capas_texto/B30_steve_madden.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Steve Madden",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B31",
+      "key": "contacto",
+      "stem": "B31_contacto",
+      "pdf_page": 31,
+      "source_png": "BANNERS/BANNER DE CONTACTO.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "Tu boutique y\nproveedor de\nconfianza.\nBienvenida a nuestro paraíso de\nmodelos originales de marcas que\namas, importados y con envíos\ngarantizados a todo México.",
+      "png": "03_banners/png/B31_contacto.png",
+      "svg": "03_banners/svg/B31_contacto.svg",
+      "overlay": "03_banners/capas_texto/B31_contacto.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Contacto",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    },
+    {
+      "id": "B32",
+      "key": "mayoreo",
+      "stem": "B32_mayoreo",
+      "pdf_page": 32,
+      "source_png": "BANNERS/BANNER PAGINA DE MAYOREO.png",
+      "source_mode": "PNG entregado y tipografía delineada del PDF",
+      "copy_exact": "MAYOREO\nObtén precios especiales\nen productos originales\nimportados de tus\nmarcas favoritas",
+      "png": "03_banners/png/B32_mayoreo.png",
+      "svg": "03_banners/svg/B32_mayoreo.svg",
+      "overlay": "03_banners/capas_texto/B32_mayoreo.svg",
+      "viewport": [
+        1456.5,
+        606.75
+      ],
+      "pixels": [
+        1920,
+        800
+      ],
+      "semantic_destination": "Mayoreo",
+      "live_route": null,
+      "original_match": "exact_decoded_pixels",
+      "photo_frame": "PDF source framing",
+      "overlay_transparent": true,
+      "soft_mask_artwork": null
+    }
+  ],
+  "source_manifest": {
+    "version": "4.0-assets-1",
+    "evidence_date": "2026-11-05",
+    "scope": "Read-only inspection of user ZIP assets; 32 PDF pages visually inspected using full renders and overview sheets. No original altered, no live storefront or commerce configuration inspected.",
+    "pdf": {
+      "path": "BANNERS/Banners con letras  2.pdf",
+      "filename": "Banners con letras  2.pdf",
+      "bytes": 60539473,
+      "sha256": "883cbd9e06e86ecfea3cf5682a51f50c52cad58d42368b5cdae7306423a3569f",
+      "inventory_match": true,
+      "pages": 32,
+      "page_size_points": [
+        1456.5,
+        606.75
+      ],
+      "annotations_count": 0
+    },
+    "counts": {
+      "incoming_files": 51,
+      "banner_pngs": 29,
+      "pdf_pages": 32,
+      "mapped_original_pngs": 29,
+      "pdf_only_without_separate_png": 3,
+      "exact_decoded_background_matches": 26,
+      "visual_correspondences_different_raster_or_framing": 3,
+      "design_reference_files": 3,
+      "icon_files": 18
+    },
+    "copy_policy": "text_visible_exact is a human transcription of visible copy with exact case/accents and visual line breaks. raw_extracted_text preserves original extraction including repeated layers and tracking spaces. Repeated2–3 layers are not repeated UI copy. No spelling/copy correction was made. Product/logo markings inside photographs are not retyped as interface copy.",
+    "bbox_policy": "[x0,y0,x1,y1], normalized to PDF page, top-left origin; text font metric rectangles include ascenders/descenders and are not pixel-tight. These describe source composition, not responsive positioning. Banners with different PNG framing need separate visual layout validation.",
+    "route_policy": "Semantic destinations only. Category paths here are proposed mapping to existing hierarchy, not new navigation or verified live URLs. Do not infer feminine/masculine category from model photograph alone.",
+    "banner_pages": [
+      {
+        "id": "B01",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 1,
+        "original_png": {
+          "path": "BANNERS/BANNER INICIO 1_3 COMPRA FACIL.png",
+          "filename": "BANNER INICIO 1_3 COMPRA FACIL.png",
+          "bytes": 2408050,
+          "sha256": "1d287cc5c4c3f073831a40a0c2f364c8b595082812e8178c229c81f909c42704",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "Compra fácil\ndesde México",
+        "text_visible_lines_exact": [
+          "Compra fácil",
+          "desde México"
+        ],
+        "raw_extracted_text": "fácil\nfácil \nfácil \nCompra\nCompra\ndesde México\ndesde México\ndesde México\n",
+        "text_bboxes": [
+          {
+            "text_exact": "Compra fácil",
+            "bbox_normalized": [
+              0.584281,
+              0.269431,
+              0.976082,
+              0.557691
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "ATBScript-Rg",
+              "Reglarik-Italic",
+              "Type3 (560 0 R)"
+            ],
+            "raw_text_spans": [
+              "fácil",
+              "fácil ",
+              "Compra"
+            ]
+          },
+          {
+            "text_exact": "desde México",
+            "bbox_normalized": [
+              0.563323,
+              0.46317,
+              0.971871,
+              0.695067
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik-Italic",
+              "Type3 (564 0 R)"
+            ],
+            "raw_text_spans": [
+              "desde México"
+            ]
+          }
+        ],
+        "surface": "inicio",
+        "semantic_destination": "Todos los productos",
+        "category_path_proposed_mapping": null,
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 49,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "d57163ef8396712c404a2b365284448ecf0fcb8a40631ff48c9f983ef220fc7c",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-01.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B02",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 2,
+        "original_png": {
+          "path": "BANNERS/BANNER INICIO 2_3 TUS MARCAS FAV.png",
+          "filename": "BANNER INICIO 2_3 TUS MARCAS FAV.png",
+          "bytes": 2730546,
+          "sha256": "b6fee167293df4a7762a6caa20cb12d4f78288a28927ea91a9daf486554fb87e",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "Tus marcas fav\nen un sólo lugar",
+        "text_visible_lines_exact": [
+          "Tus marcas fav",
+          "en un sólo lugar"
+        ],
+        "raw_extracted_text": "en un sólo lugar\nen un sólo lugar\nen un sólo lugar\nmarcas fav\nmarcas fav \nmarcas fav \nTus\nTus\n",
+        "text_bboxes": [
+          {
+            "text_exact": "Tus marcas fav",
+            "bbox_normalized": [
+              0.33959,
+              0.265843,
+              0.673025,
+              0.476009
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "ATBScript-Rg",
+              "Reglarik-Italic",
+              "Type3 (569 0 R)"
+            ],
+            "raw_text_spans": [
+              "marcas fav",
+              "marcas fav ",
+              "Tus"
+            ]
+          },
+          {
+            "text_exact": "en un sólo lugar",
+            "bbox_normalized": [
+              0.395056,
+              0.420832,
+              0.709697,
+              0.570514
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik-Italic",
+              "Type3 (567 0 R)"
+            ],
+            "raw_text_spans": [
+              "en un sólo lugar"
+            ]
+          }
+        ],
+        "surface": "inicio",
+        "semantic_destination": "Todas las marcas",
+        "category_path_proposed_mapping": null,
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 55,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "5849bca0d118eb2d852132ce4c4a0fdd247b2a7f50dd010fe5937d46bd6e9885",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-02.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B03",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 3,
+        "original_png": {
+          "path": "BANNERS/BANNER INICIO 3_3.png",
+          "filename": "BANNER INICIO 3_3.png",
+          "bytes": 2367809,
+          "sha256": "83e416221e35da16a0ff0faa009b501586d290c877cabc4535b370f097e47f3d",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "Miles\nde modelos\noriginales por descubrir",
+        "text_visible_lines_exact": [
+          "Miles",
+          "de modelos",
+          "originales por descubrir"
+        ],
+        "raw_extracted_text": "de modelos\nMiles\nMiles \nMiles \noriginales por descubrir\noriginales por descubrir\noriginales por descubrir\n",
+        "text_bboxes": [
+          {
+            "text_exact": "Miles",
+            "bbox_normalized": [
+              0.026503,
+              0.272357,
+              0.258632,
+              0.63956
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "ATBScript-Rg",
+              "Type3 (575 0 R)"
+            ],
+            "raw_text_spans": [
+              "Miles",
+              "Miles "
+            ]
+          },
+          {
+            "text_exact": "de modelos",
+            "bbox_normalized": [
+              0.024444,
+              0.577668,
+              0.263691,
+              0.738256
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik-Italic"
+            ],
+            "raw_text_spans": [
+              "de modelos"
+            ]
+          },
+          {
+            "text_exact": "originales por descubrir",
+            "bbox_normalized": [
+              0.02895,
+              0.686012,
+              0.507507,
+              0.840001
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik-Italic",
+              "Type3 (577 0 R)"
+            ],
+            "raw_text_spans": [
+              "originales por descubrir"
+            ]
+          }
+        ],
+        "surface": "inicio",
+        "semantic_destination": "Todas las categorías",
+        "category_path_proposed_mapping": null,
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 61,
+          "width_px": 1659,
+          "height_px": 948,
+          "decoded_rgb_sha256": "f7ea415e475ba590590beb46728da2b496c2c7b48964cd74e0b988b7cb52e1f1",
+          "exact_decoded_pixels_match_original": false,
+          "review_extraction": "work/final_v4/assets_review/pdf-background-03.png"
+        },
+        "match_state": "visual_correspondence_different_raster_or_framing",
+        "ambiguities": [
+          "La fotografía/composición corresponde visualmente al PNG, pero el raster o encuadre incluido en PDF difiere. Usar el original intacto y comprobar colocación del texto sin deformar ni recortar producto."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-03.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B04",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 4,
+        "original_png": {
+          "path": "BANNERS/BANNER INICIO PRECIO DE MAYOREO.png",
+          "filename": "BANNER INICIO PRECIO DE MAYOREO.png",
+          "bytes": 1513166,
+          "sha256": "4f3d25588b2fb8a4359c28a9618e0fa799083cb792f97e9a5133fdb9f4ff8ec6",
+          "inventory_match": true,
+          "width_px": 1536,
+          "height_px": 639,
+          "format": "PNG"
+        },
+        "text_visible_exact": "PRECIOS DE\nmayoreo\nA partir de 3 piezas\nCONOCE MÁS",
+        "text_visible_lines_exact": [
+          "PRECIOS DE",
+          "mayoreo",
+          "A partir de 3 piezas",
+          "CONOCE MÁS"
+        ],
+        "raw_extracted_text": "PRECIOS DE\nPRECIOS DE \nPRECIOS DE \nmayoreo\nmayoreo \nmayoreo \nA partir de 3 piezas\nA partir de 3 piezas\nA partir de 3 piezas\nCO N O CE MÁS\nCO N O CE MÁS\nCO N O CE MÁS\n",
+        "text_bboxes": [
+          {
+            "text_exact": "PRECIOS DE",
+            "bbox_normalized": [
+              0.584588,
+              0.163766,
+              0.955549,
+              0.348256
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (580 0 R)"
+            ],
+            "raw_text_spans": [
+              "PRECIOS DE",
+              "PRECIOS DE "
+            ]
+          },
+          {
+            "text_exact": "mayoreo",
+            "bbox_normalized": [
+              0.650242,
+              0.18995,
+              0.910483,
+              0.496667
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "ATBScript-Rg",
+              "Type3 (583 0 R)"
+            ],
+            "raw_text_spans": [
+              "mayoreo",
+              "mayoreo "
+            ]
+          },
+          {
+            "text_exact": "A partir de 3 piezas",
+            "bbox_normalized": [
+              0.63376,
+              0.504314,
+              0.903174,
+              0.602629
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik-Italic",
+              "Type3 (589 0 R)"
+            ],
+            "raw_text_spans": [
+              "A partir de 3 piezas"
+            ]
+          },
+          {
+            "text_exact": "CONOCE MÁS",
+            "bbox_normalized": [
+              0.692769,
+              0.703147,
+              0.840927,
+              0.769635
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (590 0 R)"
+            ],
+            "raw_text_spans": [
+              "CO N O CE MÁS"
+            ]
+          }
+        ],
+        "surface": "inicio",
+        "semantic_destination": "Página de Mayoreo",
+        "category_path_proposed_mapping": null,
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 67,
+          "width_px": 1536,
+          "height_px": 639,
+          "decoded_rgb_sha256": "800ef90b8100b07f293e0de866d0014e0e97dbb0faec118bb74ab59816e0af5f",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-04.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B05",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 5,
+        "original_png": null,
+        "text_visible_exact": "CARTERAS\nDE HOMBRE",
+        "text_visible_lines_exact": [
+          "CARTERAS",
+          "DE HOMBRE"
+        ],
+        "raw_extracted_text": "CARTERAS\nCARTERAS\nDE HOMBRE\nDE HOMBRE\nCARTERAS\nDE HOMBRE\n",
+        "text_bboxes": [
+          {
+            "text_exact": "CARTERAS",
+            "bbox_normalized": [
+              0.084448,
+              0.271715,
+              0.49326,
+              0.516118
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (593 0 R)"
+            ],
+            "raw_text_spans": [
+              "CARTERAS"
+            ]
+          },
+          {
+            "text_exact": "DE HOMBRE",
+            "bbox_normalized": [
+              0.060089,
+              0.479374,
+              0.517603,
+              0.723777
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (593 0 R)"
+            ],
+            "raw_text_spans": [
+              "DE HOMBRE"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Carteras de Hombre",
+        "category_path_proposed_mapping": "Carteras > Carteras de Hombre",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 76,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "9cadf68cf44ab84bf45e10e6e314144461e732d9a147c220cf0ea5ec8c7bb60e",
+          "exact_decoded_pixels_match_original": false,
+          "review_extraction": "work/final_v4/assets_review/pdf-background-05.png"
+        },
+        "match_state": "original_png_missing",
+        "ambiguities": [
+          "No hay PNG original equivalente entre los 29 banners del ZIP. El PDF contiene la imagen; extracción de revisión disponible, no es un archivo PNG entregado por separado."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-05.png",
+        "missing_original_png": true
+      },
+      {
+        "id": "B06",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 6,
+        "original_png": {
+          "path": "BANNERS/BANNER DE CHARMS.png",
+          "filename": "BANNER DE CHARMS.png",
+          "bytes": 1930406,
+          "sha256": "43319411b574976b42dc5f987ec8642af31d17479b86b3d5bd131817066d039b",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "CHARMS",
+        "text_visible_lines_exact": [
+          "CHARMS"
+        ],
+        "raw_extracted_text": "CHARMS\nCHARMS\nCHARMS\n",
+        "text_bboxes": [
+          {
+            "text_exact": "CHARMS",
+            "bbox_normalized": [
+              0.058303,
+              0.330696,
+              0.508142,
+              0.663183
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (596 0 R)"
+            ],
+            "raw_text_spans": [
+              "CHARMS"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Charms",
+        "category_path_proposed_mapping": "Accesorios > Charms",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 80,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "51a361d31a49049b0f41e498c7be7a4139a0294db09793fe9b14b184efc4b19c",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-06.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B07",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 7,
+        "original_png": {
+          "path": "BANNERS/BANNER DE LENTES.png",
+          "filename": "BANNER DE LENTES.png",
+          "bytes": 1607280,
+          "sha256": "6097e4cca9af602160745c0e24d75c3a115cccec22e3869cd3490747eeaf7c39",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "LENTES",
+        "text_visible_lines_exact": [
+          "LENTES"
+        ],
+        "raw_extracted_text": "LENTE S\nLENTE S\nLENTE S\n",
+        "text_bboxes": [
+          {
+            "text_exact": "LENTES",
+            "bbox_normalized": [
+              0.080363,
+              0.345495,
+              0.507081,
+              0.711021
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (599 0 R)"
+            ],
+            "raw_text_spans": [
+              "LENTE S"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Lentes",
+        "category_path_proposed_mapping": "Accesorios > Lentes",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 84,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "49160913c17abf10ffdbe6521b59f21a5732c61ce9830fd34845814d0c0622fc",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-07.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B08",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 8,
+        "original_png": {
+          "path": "BANNERS/BANNER DE BOLSOS.png",
+          "filename": "BANNER DE BOLSOS.png",
+          "bytes": 1990560,
+          "sha256": "fd84544a1168c72c599b0371dc0e5db572e91b280913f0b8985e0752c644d6dd",
+          "inventory_match": true,
+          "width_px": 1944,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "BOLSOS",
+        "text_visible_lines_exact": [
+          "BOLSOS"
+        ],
+        "raw_extracted_text": "B OL S OS\nB OL S OS\nB OL S OS\n",
+        "text_bboxes": [
+          {
+            "text_exact": "BOLSOS",
+            "bbox_normalized": [
+              0.047602,
+              0.344271,
+              0.451732,
+              0.650099
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (602 0 R)"
+            ],
+            "raw_text_spans": [
+              "B OL S OS"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Bolsos",
+        "category_path_proposed_mapping": "Bolsos",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 88,
+          "width_px": 1944,
+          "height_px": 809,
+          "decoded_rgb_sha256": "0e9f223fb9675ca57c11f12fafb2a6a2d6ad944091ec51d102328eec41eefd12",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-08.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B09",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 9,
+        "original_png": {
+          "path": "BANNERS/BANNER DE CALZADO DE HOMBRE.png",
+          "filename": "BANNER DE CALZADO DE HOMBRE.png",
+          "bytes": 1898896,
+          "sha256": "6f242ac1c6a1e6a508f0231ebd4d11af817919fe6de3669c33ae17f5d8ef8e07",
+          "inventory_match": true,
+          "width_px": 1944,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "CALZADO\nDE HOMBRE",
+        "text_visible_lines_exact": [
+          "CALZADO",
+          "DE HOMBRE"
+        ],
+        "raw_extracted_text": "CALZAD O\nCALZAD O\nDE HOMBRE\nDE HOMBRE\nCALZAD O\nDE HOMBRE\n",
+        "text_bboxes": [
+          {
+            "text_exact": "CALZADO",
+            "bbox_normalized": [
+              0.112974,
+              0.283492,
+              0.464403,
+              0.515286
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (605 0 R)"
+            ],
+            "raw_text_spans": [
+              "CALZAD O"
+            ]
+          },
+          {
+            "text_exact": "DE HOMBRE",
+            "bbox_normalized": [
+              0.071734,
+              0.480438,
+              0.505645,
+              0.712232
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (605 0 R)"
+            ],
+            "raw_text_spans": [
+              "DE HOMBRE"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Calzado de Hombre",
+        "category_path_proposed_mapping": "Calzado > Calzado de Hombre",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 92,
+          "width_px": 1944,
+          "height_px": 809,
+          "decoded_rgb_sha256": "25c4b81834669b754e3ffc04a926e98decb7d9e3015fca8e32cad0399a12b6dd",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-09.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B10",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 10,
+        "original_png": {
+          "path": "BANNERS/BANNER DE MUÑEQUERAS.png",
+          "filename": "BANNER DE MUÑEQUERAS.png",
+          "bytes": 1857910,
+          "sha256": "66ac73187afdb058f1146e546a689751f82f6906250a45c2867fb0aa6dc031cc",
+          "inventory_match": true,
+          "width_px": 1944,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "MUÑEQUERAS",
+        "text_visible_lines_exact": [
+          "MUÑEQUERAS"
+        ],
+        "raw_extracted_text": "MUÑEQUERAS\nMUÑEQUERAS\nMUÑEQUERAS\n",
+        "text_bboxes": [
+          {
+            "text_exact": "MUÑEQUERAS",
+            "bbox_normalized": [
+              0.055989,
+              0.39812,
+              0.615845,
+              0.658374
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (395 0 R)"
+            ],
+            "raw_text_spans": [
+              "MUÑEQUERAS"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Muñequeras",
+        "category_path_proposed_mapping": "Carteras > Carteras de Mujer > Muñequeras",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 96,
+          "width_px": 1944,
+          "height_px": 809,
+          "decoded_rgb_sha256": "0f2ae15ccd42e55a5bc463a2b94bb9b1b7e36f8357b21b1cfdcc3f1bcaeb0a15",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-10.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B11",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 11,
+        "original_png": {
+          "path": "BANNERS/BANNER DE RELOJES DE MUJER.png",
+          "filename": "BANNER DE RELOJES DE MUJER.png",
+          "bytes": 1860745,
+          "sha256": "c66754caa3be4e90ef8a9cb0fb11a96cb4e2f474c4fa2a322e4baea69839af09",
+          "inventory_match": true,
+          "width_px": 1944,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "RELOJES",
+        "text_visible_lines_exact": [
+          "RELOJES"
+        ],
+        "raw_extracted_text": "RELOJE S\nRELOJE S\nRELOJE S\n",
+        "text_bboxes": [
+          {
+            "text_exact": "RELOJES",
+            "bbox_normalized": [
+              0.054849,
+              0.332487,
+              0.49508,
+              0.661457
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (614 0 R)"
+            ],
+            "raw_text_spans": [
+              "RELOJE S"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Relojes de Mujer",
+        "category_path_proposed_mapping": "Accesorios > Relojes > Relojes de Mujer",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 100,
+          "width_px": 1944,
+          "height_px": 809,
+          "decoded_rgb_sha256": "22efb4c75ce780ad4b44719ff58151c04b9029c060ad54c88a9b0ba37f6cd072",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [
+          "El nombre del PNG indica RELOJES DE MUJER; el texto visible dice solo RELOJES. El destino fino es mapeo propuesto, no copiar DE MUJER en el banner."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-11.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B12",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 12,
+        "original_png": {
+          "path": "BANNERS/Banner RELOJES DE HOMBRE.png",
+          "filename": "Banner RELOJES DE HOMBRE.png",
+          "bytes": 1479650,
+          "sha256": "57ea0eef31f928e614a4fefae015c4e4a63694ff0321d74da54184ec35cb755b",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "RELOJES\nDE HOMBRE",
+        "text_visible_lines_exact": [
+          "RELOJES",
+          "DE HOMBRE"
+        ],
+        "raw_extracted_text": "RELOJE S\nRELOJE S \nDE HOMBRE\nDE HOMBRE\nRELOJE S \nDE HOMBRE\n",
+        "text_bboxes": [
+          {
+            "text_exact": "RELOJES",
+            "bbox_normalized": [
+              0.145364,
+              0.290627,
+              0.480127,
+              0.522421
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (617 0 R)"
+            ],
+            "raw_text_spans": [
+              "RELOJE S",
+              "RELOJE S "
+            ]
+          },
+          {
+            "text_exact": "DE HOMBRE",
+            "bbox_normalized": [
+              0.095791,
+              0.487573,
+              0.529703,
+              0.719368
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (617 0 R)"
+            ],
+            "raw_text_spans": [
+              "DE HOMBRE"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Relojes de Hombre",
+        "category_path_proposed_mapping": "Accesorios > Relojes > Relojes de Hombre",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 104,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "6ad1d83a6b7cdeb311403bf945c0a869a8fba4ad9cb2f6bc7469745e60e054ba",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-12.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B13",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 13,
+        "original_png": {
+          "path": "BANNERS/BANNER CALZADO DE DAMA.png",
+          "filename": "BANNER CALZADO DE DAMA.png",
+          "bytes": 2342844,
+          "sha256": "89f32f048ae174ec776ed85350a40fc6d83dc135864f3444023375ca332e53c7",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "CALZADO\nDE DAMA",
+        "text_visible_lines_exact": [
+          "CALZADO",
+          "DE DAMA"
+        ],
+        "raw_extracted_text": "CALZAD O\nCALZAD O\nDE DAMA\nDE DAMA\nCALZAD O\nDE DAMA\n",
+        "text_bboxes": [
+          {
+            "text_exact": "CALZADO",
+            "bbox_normalized": [
+              0.131174,
+              0.308448,
+              0.508908,
+              0.557592
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (621 0 R)"
+            ],
+            "raw_text_spans": [
+              "CALZAD O"
+            ]
+          },
+          {
+            "text_exact": "DE DAMA",
+            "bbox_normalized": [
+              0.138841,
+              0.520135,
+              0.50125,
+              0.769279
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (621 0 R)"
+            ],
+            "raw_text_spans": [
+              "DE DAMA"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Calzado de Mujer",
+        "category_path_proposed_mapping": "Calzado > Calzado de Mujer",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 108,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "285e4eaf4300a5b9dc2c507c3852a5f329929993f54f5cc575d44e9e4b5b7998",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [
+          "El texto exacto del banner dice DE DAMA; navegación vigente usa Calzado de Mujer. No sustituir el texto del activo."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-13.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B14",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 14,
+        "original_png": {
+          "path": "BANNERS/BANNER BOLSOS DE HOMBRE.png",
+          "filename": "BANNER BOLSOS DE HOMBRE.png",
+          "bytes": 1764026,
+          "sha256": "ef2fa02a66031eb2ac219a1068d21ce0f749a1c28ef316d3d81fcee3700ed53c",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "BOLSOS\nDE HOMBRE",
+        "text_visible_lines_exact": [
+          "BOLSOS",
+          "DE HOMBRE"
+        ],
+        "raw_extracted_text": "B OL S OS\nB OL S OS \nDE HOMBRE\nDE HOMBRE\nB OL S OS \nDE HOMBRE\n",
+        "text_bboxes": [
+          {
+            "text_exact": "BOLSOS",
+            "bbox_normalized": [
+              0.151145,
+              0.299073,
+              0.506787,
+              0.548217
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (624 0 R)"
+            ],
+            "raw_text_spans": [
+              "B OL S OS",
+              "B OL S OS "
+            ]
+          },
+          {
+            "text_exact": "DE HOMBRE",
+            "bbox_normalized": [
+              0.09578,
+              0.510761,
+              0.56217,
+              0.759904
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (624 0 R)"
+            ],
+            "raw_text_spans": [
+              "DE HOMBRE"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Bolsos de Hombre",
+        "category_path_proposed_mapping": "Bolsos > Bolsos de Hombre",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 112,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "e1b88dfe5208fee12d87a5e544bf76aab7041d50b9b00736e932bfb8ea30ea2e",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-14.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B15",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 15,
+        "original_png": {
+          "path": "BANNERS/BANNER TARJETEROS.png",
+          "filename": "BANNER TARJETEROS.png",
+          "bytes": 2142320,
+          "sha256": "c101b64a943f9b62068871afc81c11a47694295fb805e941b9010269047f31e1",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "TARJETEROS",
+        "text_visible_lines_exact": [
+          "TARJETEROS"
+        ],
+        "raw_extracted_text": "TARJETEROS\nTARJETEROS\nTARJETEROS\n",
+        "text_bboxes": [
+          {
+            "text_exact": "TARJETEROS",
+            "bbox_normalized": [
+              0.07337,
+              0.399422,
+              0.467369,
+              0.596942
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (628 0 R)"
+            ],
+            "raw_text_spans": [
+              "TARJETEROS"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Tarjeteros",
+        "category_path_proposed_mapping": "Carteras > Carteras de Mujer > Tarjeteros",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 116,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "85a9eb4dd77542eff6274a962ec1bb94dfbc79a65599ccec02e98be90ca4e0bf",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-15.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B16",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 16,
+        "original_png": {
+          "path": "BANNERS/BANNER DE PERFUMES.png",
+          "filename": "BANNER DE PERFUMES.png",
+          "bytes": 1738646,
+          "sha256": "27872e8dc6d9447d95582633078984f2918b12a9db1f112449dd6c78b18fb570",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "PERFUMES",
+        "text_visible_lines_exact": [
+          "PERFUMES"
+        ],
+        "raw_extracted_text": "PERFUME S\nPERFUME S\nPERFUME S\n",
+        "text_bboxes": [
+          {
+            "text_exact": "PERFUMES",
+            "bbox_normalized": [
+              0.271022,
+              0.063229,
+              0.695718,
+              0.316167
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (631 0 R)"
+            ],
+            "raw_text_spans": [
+              "PERFUME S"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Perfumes",
+        "category_path_proposed_mapping": "Perfumes",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 120,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "63f774b8340eaf56f9986f71a228d172f478a04f33c9567aac70f69ed0b0816d",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-16.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B17",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 17,
+        "original_png": null,
+        "text_visible_exact": "ACCESORIOS",
+        "text_visible_lines_exact": [
+          "ACCESORIOS"
+        ],
+        "raw_extracted_text": "ACCE S ORIOS\nACCE S ORIOS\nACCE S ORIOS\n",
+        "text_bboxes": [
+          {
+            "text_exact": "ACCESORIOS",
+            "bbox_normalized": [
+              0.060104,
+              0.385397,
+              0.529409,
+              0.61046
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (634 0 R)"
+            ],
+            "raw_text_spans": [
+              "ACCE S ORIOS"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Accesorios",
+        "category_path_proposed_mapping": "Accesorios",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 124,
+          "width_px": 1945,
+          "height_px": 809,
+          "decoded_rgb_sha256": "bb0fab4f14321b09eaebae0f6489d631ffc93582069946499661f19522e017a0",
+          "exact_decoded_pixels_match_original": false,
+          "review_extraction": "work/final_v4/assets_review/pdf-background-17.png"
+        },
+        "match_state": "original_png_missing",
+        "ambiguities": [
+          "No hay PNG original equivalente entre los 29 banners del ZIP. El PDF contiene la imagen; extracción de revisión disponible, no es un archivo PNG entregado por separado."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-17.png",
+        "missing_original_png": true
+      },
+      {
+        "id": "B18",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 18,
+        "original_png": {
+          "path": "BANNERS/BANNER DE CROSSBODY.png",
+          "filename": "BANNER DE CROSSBODY.png",
+          "bytes": 2022815,
+          "sha256": "a5485465717caeb3ee7b0b4feed9d08d110c1ba1f9c39524065854d480bc08e9",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "CROSSBODY",
+        "text_visible_lines_exact": [
+          "CROSSBODY"
+        ],
+        "raw_extracted_text": "CROS SB ODY\nCROS SB ODY\nCROS SB ODY\n",
+        "text_bboxes": [
+          {
+            "text_exact": "CROSSBODY",
+            "bbox_normalized": [
+              0.067902,
+              0.448631,
+              0.52159,
+              0.673694
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (637 0 R)"
+            ],
+            "raw_text_spans": [
+              "CROS SB ODY"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Crossbody",
+        "category_path_proposed_mapping": "Bolsos > Bolsos de Mujer > Crossbody",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 128,
+          "width_px": 1672,
+          "height_px": 941,
+          "decoded_rgb_sha256": "8515680aed36a645e8e457b1019c17e26e6321521eeda90dc6a7ba3ecc531ee1",
+          "exact_decoded_pixels_match_original": false,
+          "review_extraction": "work/final_v4/assets_review/pdf-background-18.png"
+        },
+        "match_state": "visual_correspondence_different_raster_or_framing",
+        "ambiguities": [
+          "La fotografía/composición corresponde visualmente al PNG, pero el raster o encuadre incluido en PDF difiere. Usar el original intacto y comprobar colocación del texto sin deformar ni recortar producto."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-18.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B19",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 19,
+        "original_png": {
+          "path": "BANNERS/Banner COLECCION TOTES.png",
+          "filename": "Banner COLECCION TOTES.png",
+          "bytes": 1632371,
+          "sha256": "7409293fd066c2492f871b467a2e73fa0dd3b52b0a62a5826956384e6caddbce",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "TOTES",
+        "text_visible_lines_exact": [
+          "TOTES"
+        ],
+        "raw_extracted_text": "TOTE S\nTOTE S\nTOTE S\n",
+        "text_bboxes": [
+          {
+            "text_exact": "TOTES",
+            "bbox_normalized": [
+              0.155321,
+              0.342988,
+              0.466853,
+              0.651336
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (640 0 R)"
+            ],
+            "raw_text_spans": [
+              "TOTE S"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Tote",
+        "category_path_proposed_mapping": "Bolsos > Bolsos de Mujer > Tote",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 132,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "178a24388c90b1ed5a946a744aeb57796e1ddf1aa91064bd6220c71b7202e555",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [
+          "El texto exacto del banner dice TOTES; navegación vigente usa Tote. No sustituir el texto del activo."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-19.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B20",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 20,
+        "original_png": {
+          "path": "BANNERS/BANNER BOLSOS DE HOMBRO.png",
+          "filename": "BANNER BOLSOS DE HOMBRO.png",
+          "bytes": 1669408,
+          "sha256": "60b461a1bc23356785e872c9a32eaa652c9ac2c7c4de8c4b044d7a306b07bdf9",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "BOLSOS\nDE HOMBRO",
+        "text_visible_lines_exact": [
+          "BOLSOS",
+          "DE HOMBRO"
+        ],
+        "raw_extracted_text": "BOLSOS\nBOLSOS \nDE HOMBRO\nDE HOMBRO\nBOLSOS \nDE HOMBRO\n",
+        "text_bboxes": [
+          {
+            "text_exact": "BOLSOS",
+            "bbox_normalized": [
+              0.14535,
+              0.248906,
+              0.510122,
+              0.519817
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (643 0 R)"
+            ],
+            "raw_text_spans": [
+              "BOLSOS",
+              "BOLSOS "
+            ]
+          },
+          {
+            "text_exact": "DE HOMBRO",
+            "bbox_normalized": [
+              0.078219,
+              0.479257,
+              0.577249,
+              0.750168
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (643 0 R)"
+            ],
+            "raw_text_spans": [
+              "DE HOMBRO"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "De hombro",
+        "category_path_proposed_mapping": "Bolsos > Bolsos de Mujer > De hombro",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 136,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "8b6de457b6a569c623c6aade47bdb7f8f7b0611c9d5e509372d4bad383115c41",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-20.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B21",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 21,
+        "original_png": {
+          "path": "BANNERS/BANNER COLECCION CARTERAS .png",
+          "filename": "BANNER COLECCION CARTERAS .png",
+          "bytes": 1332543,
+          "sha256": "f785684c038c6b153f1bab7bf4453d87feaa3d63765761bc8b4347ea19ce31e6",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "CARTERAS",
+        "text_visible_lines_exact": [
+          "CARTERAS"
+        ],
+        "raw_extracted_text": "CARTERAS\nCARTERAS\nCARTERAS\n",
+        "text_bboxes": [
+          {
+            "text_exact": "CARTERAS",
+            "bbox_normalized": [
+              0.122596,
+              0.411233,
+              0.550157,
+              0.682144
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (647 0 R)"
+            ],
+            "raw_text_spans": [
+              "CARTERAS"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Carteras de Mujer",
+        "category_path_proposed_mapping": "Carteras > Carteras de Mujer",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 140,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "470440ca797493a176c77102b9783bd5c9c930c552b6431d42a3fa295f9f1cf2",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [
+          "Texto dice CARTERAS, sin indicar mujer. La asociación a Carteras de Mujer depende del catálogo/ruta real."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-21.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B22",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 22,
+        "original_png": {
+          "path": "BANNERS/BANNER BOLSOS DE MANO.png",
+          "filename": "BANNER BOLSOS DE MANO.png",
+          "bytes": 2622347,
+          "sha256": "eaa9af223b6ac706cfe45eecbce42ceced64d4fcb2ba43561a2713f1e51af5ee",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "BOLSOS\nDE MANO",
+        "text_visible_lines_exact": [
+          "BOLSOS",
+          "DE MANO"
+        ],
+        "raw_extracted_text": "BOLSOS\nBOLSOS\nDE MANO\nDE MANO\nBOLSOS\nDE MANO\n",
+        "text_bboxes": [
+          {
+            "text_exact": "BOLSOS",
+            "bbox_normalized": [
+              0.114976,
+              0.274018,
+              0.439249,
+              0.532596
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (650 0 R)"
+            ],
+            "raw_text_spans": [
+              "BOLSOS"
+            ]
+          },
+          {
+            "text_exact": "DE MANO",
+            "bbox_normalized": [
+              0.093028,
+              0.467509,
+              0.461203,
+              0.726087
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (650 0 R)"
+            ],
+            "raw_text_spans": [
+              "DE MANO"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "De mano",
+        "category_path_proposed_mapping": "Bolsos > Bolsos de Mujer > De mano",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 144,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "96c9bbd71d08ef931da68ffcfe93a7c9ad75d74d4d78b91d87e1762bdaf8e70e",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-22.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B23",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 23,
+        "original_png": null,
+        "text_visible_exact": "PERFUMES",
+        "text_visible_lines_exact": [
+          "PERFUMES"
+        ],
+        "raw_extracted_text": "PERFUMES\nPERFUMES\nPERFUMES\n",
+        "text_bboxes": [
+          {
+            "text_exact": "PERFUMES",
+            "bbox_normalized": [
+              0.098345,
+              0.370763,
+              0.508122,
+              0.629341
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (653 0 R)"
+            ],
+            "raw_text_spans": [
+              "PERFUMES"
+            ]
+          }
+        ],
+        "surface": "categoría",
+        "semantic_destination": "Perfumes; alcance femenino por confirmar",
+        "category_path_proposed_mapping": "Perfumes",
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 148,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "2498ea000eeda08d36dc071f79a34b69a61408967f784aa6d97e8904d2715ba1",
+          "exact_decoded_pixels_match_original": false,
+          "review_extraction": "work/final_v4/assets_review/pdf-background-23.png"
+        },
+        "match_state": "original_png_missing",
+        "ambiguities": [
+          "No hay PNG original equivalente entre los 29 banners del ZIP. El PDF contiene la imagen; extracción de revisión disponible, no es un archivo PNG entregado por separado.",
+          "Segunda composición PERFUMES (frasco Prada en mano). No permite concluir por sí sola una colección exclusiva de mujer ni sustituir el banner general PDF16."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-23.png",
+        "missing_original_png": true
+      },
+      {
+        "id": "B24",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 24,
+        "original_png": {
+          "path": "BANNERS/BANNER MARCA GUESS.png",
+          "filename": "BANNER MARCA GUESS.png",
+          "bytes": 2071614,
+          "sha256": "1fc0d781944381d760800dd4a587ec4357c16395c7937b87033715cc69d0ff38",
+          "inventory_match": true,
+          "width_px": 1536,
+          "height_px": 639,
+          "format": "PNG"
+        },
+        "text_visible_exact": "GUESS",
+        "text_visible_lines_exact": [
+          "GUESS"
+        ],
+        "raw_extracted_text": "GUESS\nGUESS\nGUESS\n",
+        "text_bboxes": [
+          {
+            "text_exact": "GUESS",
+            "bbox_normalized": [
+              0.593411,
+              0.373809,
+              0.917444,
+              0.698207
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (656 0 R)"
+            ],
+            "raw_text_spans": [
+              "GUESS"
+            ]
+          }
+        ],
+        "surface": "marca",
+        "semantic_destination": "Guess",
+        "category_path_proposed_mapping": null,
+        "brand_observed": "Guess",
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 152,
+          "width_px": 1536,
+          "height_px": 639,
+          "decoded_rgb_sha256": "19838d6dc80989d6fd5072cdf9d61da92429a5d7ac5e34e8b1819cdd5a57aef6",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-24.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B25",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 25,
+        "original_png": {
+          "path": "BANNERS/BANNER MARCA TORY BURCH(1).png",
+          "filename": "BANNER MARCA TORY BURCH(1).png",
+          "bytes": 1350536,
+          "sha256": "2f37d0dd91a5ad33d348671cb63f7009d5e396e46931155fc5b4a1c009bdcc2b",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "TORY\nBURCH",
+        "text_visible_lines_exact": [
+          "TORY",
+          "BURCH"
+        ],
+        "raw_extracted_text": "TORY\nTORY\nBURCH\nBURCH\nTORY\nBURCH\n",
+        "text_bboxes": [
+          {
+            "text_exact": "TORY",
+            "bbox_normalized": [
+              0.551164,
+              0.262074,
+              0.806268,
+              0.586472
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (659 0 R)"
+            ],
+            "raw_text_spans": [
+              "TORY"
+            ]
+          },
+          {
+            "text_exact": "BURCH",
+            "bbox_normalized": [
+              0.512289,
+              0.504817,
+              0.845145,
+              0.829215
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (659 0 R)"
+            ],
+            "raw_text_spans": [
+              "BURCH"
+            ]
+          }
+        ],
+        "surface": "marca",
+        "semantic_destination": "Tory Burch",
+        "category_path_proposed_mapping": null,
+        "brand_observed": "Tory Burch",
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 156,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "24372be8753924fe9060b606e702b4aaae3fa0e5e8accaf783cd354ad7b190e9",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-25.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B26",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 26,
+        "original_png": {
+          "path": "BANNERS/BANNER MARCA TORY BURCH.png",
+          "filename": "BANNER MARCA TORY BURCH.png",
+          "bytes": 1608976,
+          "sha256": "20a2fb73e1285c188b413ca51cbf9b872e5f1e32db3c231242849e08371dfa45",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "MARC\nJACOBS",
+        "text_visible_lines_exact": [
+          "MARC",
+          "JACOBS"
+        ],
+        "raw_extracted_text": "MARC\nMARC\nJACOBS\nJACOBS\nMARC\nJACOBS\n",
+        "text_bboxes": [
+          {
+            "text_exact": "MARC",
+            "bbox_normalized": [
+              0.127799,
+              0.26962,
+              0.398469,
+              0.565105
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (662 0 R)"
+            ],
+            "raw_text_spans": [
+              "MARC"
+            ]
+          },
+          {
+            "text_exact": "JACOBS",
+            "bbox_normalized": [
+              0.09303,
+              0.490728,
+              0.433245,
+              0.786214
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (662 0 R)"
+            ],
+            "raw_text_spans": [
+              "JACOBS"
+            ]
+          }
+        ],
+        "surface": "marca",
+        "semantic_destination": "Marc Jacobs",
+        "category_path_proposed_mapping": null,
+        "brand_observed": "Marc Jacobs",
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 160,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "a8f1a2658671dc7b0c43947d2d19b268048dc3df08dacb7bafc18dbb67bf38e6",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [
+          "Nombre original rotulado TORY BURCH, contenido visual y texto PDF MARC JACOBS. No es duplicado del archivo con sufijo (1). Conservar archivo y registrar asociación correcta."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-26.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B27",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 27,
+        "original_png": {
+          "path": "BANNERS/BANNER MARCA KATE SPADE.png",
+          "filename": "BANNER MARCA KATE SPADE.png",
+          "bytes": 1590368,
+          "sha256": "3c5d298ab18ebf0d8858f5ddccc3fb11f81862d35fd9663884d5a30fa0034cd5",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "KATE\nSPADE",
+        "text_visible_lines_exact": [
+          "KATE",
+          "SPADE"
+        ],
+        "raw_extracted_text": "KATE\nKATE\nSPADE\nSPADE\nKATE\nSPADE\n",
+        "text_bboxes": [
+          {
+            "text_exact": "KATE",
+            "bbox_normalized": [
+              0.581385,
+              0.240434,
+              0.797681,
+              0.535919
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (665 0 R)"
+            ],
+            "raw_text_spans": [
+              "KATE"
+            ]
+          },
+          {
+            "text_exact": "SPADE",
+            "bbox_normalized": [
+              0.54917,
+              0.461542,
+              0.829903,
+              0.757027
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (665 0 R)"
+            ],
+            "raw_text_spans": [
+              "SPADE"
+            ]
+          }
+        ],
+        "surface": "marca",
+        "semantic_destination": "Kate Spade",
+        "category_path_proposed_mapping": null,
+        "brand_observed": "Kate Spade",
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 164,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "d59210f99c892ee0ac583012176a4805094676798c99dab48c31bd49efa939b2",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-27.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B28",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 28,
+        "original_png": {
+          "path": "BANNERS/BANNER MRCA COACH.png",
+          "filename": "BANNER MRCA COACH.png",
+          "bytes": 1613373,
+          "sha256": "21075c2a8c124e1cab81544684f2e4754b534505395ef08424b25b80d1aacff1",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "COACH",
+        "text_visible_lines_exact": [
+          "COACH"
+        ],
+        "raw_extracted_text": "COACH\nCOACH\nCOACH\n",
+        "text_bboxes": [
+          {
+            "text_exact": "COACH",
+            "bbox_normalized": [
+              0.492547,
+              0.34043,
+              0.864873,
+              0.706378
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (668 0 R)"
+            ],
+            "raw_text_spans": [
+              "COACH"
+            ]
+          }
+        ],
+        "surface": "marca",
+        "semantic_destination": "Coach",
+        "category_path_proposed_mapping": null,
+        "brand_observed": "Coach",
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 168,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "37f9dffe34fcd29a92b33240233bddff8b8b5d86530e8ef746fe9533b0d8f4eb",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-28.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B29",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 29,
+        "original_png": {
+          "path": "BANNERS/BANNER MARCA MICHAEL KORS.png",
+          "filename": "BANNER MARCA MICHAEL KORS.png",
+          "bytes": 1746140,
+          "sha256": "4469abc458a4c27ee93c2c1ce90be8bdb9810dfa434ae294ed0384f5dc2af5e8",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "MICHAEL\nKORS",
+        "text_visible_lines_exact": [
+          "MICHAEL",
+          "KORS"
+        ],
+        "raw_extracted_text": "MICHAEL\nMICHAEL\nKORS\nKORS\nMICHAEL\nKORS\n",
+        "text_bboxes": [
+          {
+            "text_exact": "MICHAEL",
+            "bbox_normalized": [
+              0.53624,
+              0.266389,
+              0.884776,
+              0.533697
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (671 0 R)"
+            ],
+            "raw_text_spans": [
+              "MICHAEL"
+            ]
+          },
+          {
+            "text_exact": "KORS",
+            "bbox_normalized": [
+              0.597829,
+              0.466412,
+              0.823188,
+              0.73372
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (671 0 R)"
+            ],
+            "raw_text_spans": [
+              "KORS"
+            ]
+          }
+        ],
+        "surface": "marca",
+        "semantic_destination": "Michael Kors",
+        "category_path_proposed_mapping": null,
+        "brand_observed": "Michael Kors",
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 172,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "8f062e8ecb8951aac8b722181c85524eeb8ad1437416f77a0a1cdf26b4f3a2c8",
+          "exact_decoded_pixels_match_original": false,
+          "review_extraction": "work/final_v4/assets_review/pdf-background-29.png"
+        },
+        "match_state": "visual_correspondence_different_raster_or_framing",
+        "ambiguities": [
+          "La fotografía/composición corresponde visualmente al PNG, pero el raster o encuadre incluido en PDF difiere. Usar el original intacto y comprobar colocación del texto sin deformar ni recortar producto."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-29.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B30",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 30,
+        "original_png": {
+          "path": "BANNERS/BANNER MARCA STEVE MADDEN.png",
+          "filename": "BANNER MARCA STEVE MADDEN.png",
+          "bytes": 2033592,
+          "sha256": "787afbc940e712af265aab894d79c7b04b4950019d3d02798a4fb347f25dc1f7",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "STEVE\nMADDEN",
+        "text_visible_lines_exact": [
+          "STEVE",
+          "MADDEN"
+        ],
+        "raw_extracted_text": "STEVE\nSTEVE\nMADDEN\nMADDEN\nSTEVE\nMADDEN\n",
+        "text_bboxes": [
+          {
+            "text_exact": "STEVE",
+            "bbox_normalized": [
+              0.618563,
+              0.260212,
+              0.863013,
+              0.527519
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (674 0 R)"
+            ],
+            "raw_text_spans": [
+              "STEVE"
+            ]
+          },
+          {
+            "text_exact": "MADDEN",
+            "bbox_normalized": [
+              0.565325,
+              0.460234,
+              0.916238,
+              0.727542
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (674 0 R)"
+            ],
+            "raw_text_spans": [
+              "MADDEN"
+            ]
+          }
+        ],
+        "surface": "marca",
+        "semantic_destination": "Steve Madden",
+        "category_path_proposed_mapping": null,
+        "brand_observed": "Steve Madden",
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 176,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "c53d3e2d42ff12120588f45d461df2c0151c771a05432a2ea36084576ad5d64e",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [],
+        "preview": "work/final_v4/assets_review/pdf-page-30.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B31",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 31,
+        "original_png": {
+          "path": "BANNERS/BANNER DE CONTACTO.png",
+          "filename": "BANNER DE CONTACTO.png",
+          "bytes": 1476498,
+          "sha256": "f1257f41528cdcc8f18c768b259ee2d320f3139044e329a7d9edc47bd9f1a51c",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "Tu boutique y\nproveedor de\nconfianza.\nBienvenida a nuestro paraíso de\nmodelos originales de marcas que\namas, importados y con envíos\ngarantizados a todo México.",
+        "text_visible_lines_exact": [
+          "Tu boutique y",
+          "proveedor de",
+          "confianza.",
+          "Bienvenida a nuestro paraíso de",
+          "modelos originales de marcas que",
+          "amas, importados y con envíos",
+          "garantizados a todo México."
+        ],
+        "raw_extracted_text": "Tu boutique y\nTu boutique y\nproveedor de\nproveedor de \nTu boutique y\nproveedor de \nBienvenida a nuestro paraíso de\nBienvenida a nuestro paraíso de\nmo delos originales de marcas que\nmo delos originales de marcas que\namas, importados y con envíos\namas, importados y con envíos\ngarantizados a to do México.\ngarantizados a to do México.\nBienvenida a nuestro paraíso de\nmo delos originales de marcas que\namas, importados y con envíos\ngarantizados a to do México.\nconfianza.\nconfianza.\nconfianza.\n",
+        "text_bboxes": [
+          {
+            "text_exact": "Tu boutique y",
+            "bbox_normalized": [
+              0.075564,
+              0.097321,
+              0.432416,
+              0.302846
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (677 0 R)"
+            ],
+            "raw_text_spans": [
+              "Tu boutique y"
+            ]
+          },
+          {
+            "text_exact": "proveedor de",
+            "bbox_normalized": [
+              0.076619,
+              0.225357,
+              0.431345,
+              0.430882
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (677 0 R)"
+            ],
+            "raw_text_spans": [
+              "proveedor de",
+              "proveedor de "
+            ]
+          },
+          {
+            "text_exact": "confianza.",
+            "bbox_normalized": [
+              0.075305,
+              0.326845,
+              0.370262,
+              0.583725
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "ATBScript-Rg",
+              "Type3 (681 0 R)"
+            ],
+            "raw_text_spans": [
+              "confianza",
+              "confianza."
+            ]
+          },
+          {
+            "text_exact": "Bienvenida a nuestro paraíso de",
+            "bbox_normalized": [
+              0.078603,
+              0.599468,
+              0.425329,
+              0.676178
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (679 0 R)"
+            ],
+            "raw_text_spans": [
+              "Bienvenida a nuestro paraíso de"
+            ]
+          },
+          {
+            "text_exact": "modelos originales de marcas que",
+            "bbox_normalized": [
+              0.078603,
+              0.67193,
+              0.446009,
+              0.74864
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (679 0 R)"
+            ],
+            "raw_text_spans": [
+              "mo delos originales de marcas que"
+            ]
+          },
+          {
+            "text_exact": "amas, importados y con envíos",
+            "bbox_normalized": [
+              0.078603,
+              0.744392,
+              0.414044,
+              0.821102
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (679 0 R)"
+            ],
+            "raw_text_spans": [
+              "amas, importados y con envíos"
+            ]
+          },
+          {
+            "text_exact": "garantizados a todo México.",
+            "bbox_normalized": [
+              0.078603,
+              0.816854,
+              0.374923,
+              0.893564
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (679 0 R)"
+            ],
+            "raw_text_spans": [
+              "garantizados a to do México."
+            ]
+          }
+        ],
+        "surface": "página",
+        "semantic_destination": "Contacto",
+        "category_path_proposed_mapping": null,
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 180,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "c77d4796b8911ef348abf1791b85989fb26bb88efe1f63fd229c270f1600827e",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [
+          "Transcripción fiel del banner; no es una validación independiente de condiciones comerciales ni funcionalidades del sitio."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-31.png",
+        "missing_original_png": false
+      },
+      {
+        "id": "B32",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05",
+        "pdf_page": 32,
+        "original_png": {
+          "path": "BANNERS/BANNER PAGINA DE MAYOREO.png",
+          "filename": "BANNER PAGINA DE MAYOREO.png",
+          "bytes": 1823719,
+          "sha256": "3a598c767dd858ff968a6be67124ee8d8da09f233663b2fd20bce7cf04dd2514",
+          "inventory_match": true,
+          "width_px": 1942,
+          "height_px": 809,
+          "format": "PNG"
+        },
+        "text_visible_exact": "MAYOREO\nObtén precios especiales\nen productos originales\nimportados de tus\nmarcas favoritas",
+        "text_visible_lines_exact": [
+          "MAYOREO",
+          "Obtén precios especiales",
+          "en productos originales",
+          "importados de tus",
+          "marcas favoritas"
+        ],
+        "raw_extracted_text": "MAYOREO\nMAYOREO\nMAYOREO\nObtén pre c io s e sp e c iale s\nObtén pre c io s e sp e c iale s\nen pro ducto s or iginale s\nen pro ducto s or iginale s\nimp ortado s de tus\nimp ortado s de tus \nObtén pre c io s e sp e c iale s\nen pro ducto s or iginale s\nimp ortado s de tus \nmarcas favor itas\nmarcas favor itas\nmarcas favor itas\n",
+        "text_bboxes": [
+          {
+            "text_exact": "MAYOREO",
+            "bbox_normalized": [
+              0.065552,
+              0.250526,
+              0.513867,
+              0.549753
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik-Italic",
+              "Type3 (685 0 R)"
+            ],
+            "raw_text_spans": [
+              "MAYOREO"
+            ]
+          },
+          {
+            "text_exact": "Obtén precios especiales",
+            "bbox_normalized": [
+              0.061602,
+              0.490466,
+              0.40766,
+              0.584262
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (687 0 R)"
+            ],
+            "raw_text_spans": [
+              "Obtén pre c io s e sp e c iale s"
+            ]
+          },
+          {
+            "text_exact": "en productos originales",
+            "bbox_normalized": [
+              0.061602,
+              0.561433,
+              0.385014,
+              0.655229
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (687 0 R)"
+            ],
+            "raw_text_spans": [
+              "en pro ducto s or iginale s"
+            ]
+          },
+          {
+            "text_exact": "importados de tus",
+            "bbox_normalized": [
+              0.061602,
+              0.632399,
+              0.321742,
+              0.726195
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik",
+              "Type3 (687 0 R)"
+            ],
+            "raw_text_spans": [
+              "imp ortado s de tus",
+              "imp ortado s de tus "
+            ]
+          },
+          {
+            "text_exact": "marcas favoritas",
+            "bbox_normalized": [
+              0.061602,
+              0.697736,
+              0.292872,
+              0.7915
+            ],
+            "bbox_source": "PDF text spans; font-metric rectangle, not tight visible-ink crop",
+            "font_names_observed": [
+              "Reglarik-Italic",
+              "Type3 (689 0 R)"
+            ],
+            "raw_text_spans": [
+              "marcas favor itas"
+            ]
+          }
+        ],
+        "surface": "página",
+        "semantic_destination": "Mayoreo",
+        "category_path_proposed_mapping": null,
+        "brand_observed": null,
+        "destination_url": null,
+        "destination_state": "Semantic mapping only; live route not verified",
+        "pdf_background": {
+          "xref": 186,
+          "width_px": 1942,
+          "height_px": 809,
+          "decoded_rgb_sha256": "7e8d56fe8407632c0b5b28f6c480df92b28a5f01e2b209a0df1d791bbab9ab96",
+          "exact_decoded_pixels_match_original": true
+        },
+        "match_state": "exact_decoded_pixels",
+        "ambiguities": [
+          "Transcripción fiel del banner; no es una validación independiente de condiciones comerciales ni funcionalidades del sitio."
+        ],
+        "preview": "work/final_v4/assets_review/pdf-page-32.png",
+        "missing_original_png": false
+      }
+    ],
+    "icons": [
+      {
+        "path": "BANNERS/ICONO  CALZADO DE DAMA.JPG",
+        "filename": "ICONO  CALZADO DE DAMA.JPG",
+        "bytes": 73326,
+        "sha256": "b9c6c522883c05581184cb511c2a4429dd34b9ff1d1c491332fda824ad620f6e",
+        "inventory_match": true,
+        "width_px": 1013,
+        "height_px": 1013,
+        "format": "JPEG",
+        "home_category_lookup_key": "calzado-mujer",
+        "semantic_label": "Calzado de Mujer",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO BOLSO DE HOMBRO.JPG",
+        "filename": "ICONO BOLSO DE HOMBRO.JPG",
+        "bytes": 96571,
+        "sha256": "6c95b3904b2d13c934033b0b20339e089896ed729bfc9344399d2fd011fb9c3b",
+        "inventory_match": true,
+        "width_px": 1199,
+        "height_px": 799,
+        "format": "JPEG",
+        "home_category_lookup_key": "bolsos-hombro",
+        "semantic_label": "De hombro",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO BOLSO DE MANO.JPG",
+        "filename": "ICONO BOLSO DE MANO.JPG",
+        "bytes": 71437,
+        "sha256": "134f9d9ae30e1301a179c2f6ff4ba800367f225594490bcd0b8c403e5e08722a",
+        "inventory_match": true,
+        "width_px": 810,
+        "height_px": 1080,
+        "format": "JPEG",
+        "home_category_lookup_key": "bolsos-mano",
+        "semantic_label": "De mano",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO CALZADO DE HOMBRE.JPG",
+        "filename": "ICONO CALZADO DE HOMBRE.JPG",
+        "bytes": 89150,
+        "sha256": "070164c6bc87612662b8e85343f701e20e36e085ff64c4d24b47810bc854961e",
+        "inventory_match": true,
+        "width_px": 1200,
+        "height_px": 1615,
+        "format": "JPEG",
+        "home_category_lookup_key": "calzado-hombre",
+        "semantic_label": "Calzado de Hombre",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO DE ACCESORIOS.JPG",
+        "filename": "ICONO DE ACCESORIOS.JPG",
+        "bytes": 199919,
+        "sha256": "2a507d364531d71ee8e74d97efe5d32176133fdbf845db2deca7ddc5939189e9",
+        "inventory_match": true,
+        "width_px": 2368,
+        "height_px": 2160,
+        "format": "JPEG",
+        "home_category_lookup_key": "accesorios",
+        "semantic_label": "Accesorios",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO DE BOLSOS DE HOMBRE.JPG",
+        "filename": "ICONO DE BOLSOS DE HOMBRE.JPG",
+        "bytes": 260870,
+        "sha256": "5743d9bde3b80169c9e236977ca1e11be43f5f14f4d46ace6e6af25a0abb425e",
+        "inventory_match": true,
+        "width_px": 2368,
+        "height_px": 2160,
+        "format": "JPEG",
+        "home_category_lookup_key": "bolsos-hombre",
+        "semantic_label": "Bolsos de Hombre",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO DE BOLSOS.JPG",
+        "filename": "ICONO DE BOLSOS.JPG",
+        "bytes": 177044,
+        "sha256": "ea07ccbdd9181477f5a85702767f4b759e8d0e80ba2a96f7f64bfa5744e44873",
+        "inventory_match": true,
+        "width_px": 2368,
+        "height_px": 2160,
+        "format": "JPEG",
+        "home_category_lookup_key": "bolsos",
+        "semantic_label": "Bolsos",
+        "mapping_status": "PENDING_SELECTION_WITH_SECOND_BAG_ASSET",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO DE CARTERAS .AVIF",
+        "filename": "ICONO DE CARTERAS .AVIF",
+        "bytes": 162698,
+        "sha256": "c2d45bc7ee1b2cdd9504d5e72395cc156f1ab46dc8706c8aa4577f770c45ba52",
+        "inventory_match": true,
+        "width_px": 2368,
+        "height_px": 2160,
+        "format": "AVIF",
+        "home_category_lookup_key": "carteras",
+        "semantic_label": "Carteras",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO DE CARTERAS DE MUJER.JPG",
+        "filename": "ICONO DE CARTERAS DE MUJER.JPG",
+        "bytes": 183219,
+        "sha256": "f4f54c6149b642779757fe0ba55f1e31310d45310d92168d40039db2af38a216",
+        "inventory_match": true,
+        "width_px": 1024,
+        "height_px": 1024,
+        "format": "JPEG",
+        "home_category_lookup_key": "carteras-mujer",
+        "semantic_label": "Carteras de Mujer",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO DE CROSSBODY.png",
+        "filename": "ICONO DE CROSSBODY.png",
+        "bytes": 1800678,
+        "sha256": "92a681fb3a61c844db7f3564e282bc96cd920547f2f178ebc26d042f17fe0dea",
+        "inventory_match": true,
+        "width_px": 1122,
+        "height_px": 1402,
+        "format": "PNG",
+        "home_category_lookup_key": "crossbody",
+        "semantic_label": "Crossbody",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO DE LENTES(1).JPG",
+        "filename": "ICONO DE LENTES(1).JPG",
+        "bytes": 263585,
+        "sha256": "2a0d8ece98dcdfccf35093d4c0d89dac4b41a8fe35092597fe75f9b74c652689",
+        "inventory_match": true,
+        "width_px": 2368,
+        "height_px": 2160,
+        "format": "JPEG",
+        "home_category_lookup_key": "carteras-hombre",
+        "semantic_label": "Carteras de Hombre",
+        "mapping_status": "CONFIRMED_CURRENT_ROOT_DIRECTION",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": true,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO DE LENTES.JPG",
+        "filename": "ICONO DE LENTES.JPG",
+        "bytes": 75048,
+        "sha256": "66195d2ef66b5f72292eeed1ce2f2f29ddbc92033a2bca299f1487e9016fcc05",
+        "inventory_match": true,
+        "width_px": 1200,
+        "height_px": 1467,
+        "format": "JPEG",
+        "home_category_lookup_key": "lentes",
+        "semantic_label": "Lentes",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO DE RELOJES DE HOMBRE.PNG",
+        "filename": "ICONO DE RELOJES DE HOMBRE.PNG",
+        "bytes": 341955,
+        "sha256": "02b00e96f87c464c91838949b2de427e768634e1ebd8c256afcd7768ae2cebd1",
+        "inventory_match": true,
+        "width_px": 1465,
+        "height_px": 1762,
+        "format": "JPEG",
+        "home_category_lookup_key": "relojes-hombre",
+        "semantic_label": "Relojes de Hombre",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO DE TARJETEROS.PNG",
+        "filename": "ICONO DE TARJETEROS.PNG",
+        "bytes": 243646,
+        "sha256": "fe02ea515bd7210cf40247429c789018534c8d0b5692110321b1cb7c861fe42f",
+        "inventory_match": true,
+        "width_px": 1172,
+        "height_px": 874,
+        "format": "JPEG",
+        "home_category_lookup_key": "tarjeteros",
+        "semantic_label": "Tarjeteros",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO MUÑEQUERA.JPG",
+        "filename": "ICONO MUÑEQUERA.JPG",
+        "bytes": 34113,
+        "sha256": "7ff10f6ae73dbada1410ff5ed79d0cb8f348f48c4a7b2779e79b98a277e50875",
+        "inventory_match": true,
+        "width_px": 544,
+        "height_px": 544,
+        "format": "JPEG",
+        "home_category_lookup_key": "munequeras",
+        "semantic_label": "Muñequeras",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO RELOJ DE MUJER.JPG",
+        "filename": "ICONO RELOJ DE MUJER.JPG",
+        "bytes": 152116,
+        "sha256": "22c79528ea61c19c291ce2bfbc0a6767bd8e038c7b5dc422775d2fe0c75c972b",
+        "inventory_match": true,
+        "width_px": 1200,
+        "height_px": 1840,
+        "format": "JPEG",
+        "home_category_lookup_key": "relojes-mujer",
+        "semantic_label": "Relojes de Mujer",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/ICONO TOTE.JPG",
+        "filename": "ICONO TOTE.JPG",
+        "bytes": 51397,
+        "sha256": "da13bd419a9d22c6ef00081a992eefaf7bf6efab798ebaec92c843701bcfb0a7",
+        "inventory_match": true,
+        "width_px": 544,
+        "height_px": 680,
+        "format": "JPEG",
+        "home_category_lookup_key": "tote",
+        "semantic_label": "Tote",
+        "mapping_status": "PROPOSED_SEMANTIC_MAPPING",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      },
+      {
+        "path": "BANNERS/INCONO DE BOLSOS.JPG",
+        "filename": "INCONO DE BOLSOS.JPG",
+        "bytes": 110054,
+        "sha256": "f4d21f6d5612d0b521465f244927f2402fea1d1282aeba152dab7190a55ee590",
+        "inventory_match": true,
+        "width_px": 1000,
+        "height_px": 1000,
+        "format": "JPEG",
+        "home_category_lookup_key": "bolsos-mujer",
+        "semantic_label": "Bolsos de Mujer",
+        "mapping_status": "PENDING_SELECTION_WITH_SECOND_BAG_ASSET",
+        "usage_scope": "Home category photographic image only. These supplied product photographs are not shared navigation/action glyphs and must not replace minimal UI icons elsewhere.",
+        "mislabeled_filename": false,
+        "destination_url": null
+      }
+    ],
+    "duplicate_and_mislabel_review": [
+      {
+        "files": [
+          "BANNER MARCA TORY BURCH(1).png",
+          "BANNER MARCA TORY BURCH.png"
+        ],
+        "classification": "different_content_name_collision",
+        "observation": "(1) muestra bolso negro Tory Burch y se asocia a PDF25. Sin sufijo muestra productos Marc Jacobs y se asocia a PDF26. No son duplicados ni intercambiables."
+      },
+      {
+        "files": [
+          "ICONO DE LENTES.JPG",
+          "ICONO DE LENTES(1).JPG"
+        ],
+        "classification": "different_content_mislabeled",
+        "observation": "Sin sufijo: lentes redondos oscuros con detalle dorado. Con sufijo (1): cartera negra de hombre; no usar como icono de lentes. Asociación propuesta: Carteras de Hombre, sujeta a la selección de catálogo."
+      },
+      {
+        "files": [
+          "ICONO DE BOLSOS.JPG",
+          "INCONO DE BOLSOS.JPG"
+        ],
+        "classification": "different_products_same_semantic_role_ambiguous_choice",
+        "observation": "ICONO: bolso café horizontal Coach con asas cortas y correa larga. INCONO: bolso gris/taupe vertical Coach con asa y charms. No son duplicados binarios ni visuales. La selección para Bolsos/Bolsos de Mujer queda pendiente; no inventar categorías separadas a partir del nombre."
+      }
+    ],
+    "exact_binary_duplicate_groups": [],
+    "design_references": [
+      {
+        "original": {
+          "path": "BANNERS/Diseño de nueva pagina de contacto.png",
+          "filename": "Diseño de nueva pagina de contacto.png",
+          "bytes": 1001302,
+          "sha256": "b0ecea859f9ae3cbe04dc5dbcfd165020360ff24e456a8d53c5e265f631ada60",
+          "inventory_match": true,
+          "width_px": 800,
+          "height_px": 2000,
+          "format": "PNG"
+        },
+        "classification": "design_reference_full_page",
+        "intended_context": "Contacto",
+        "observed_scope": "Referencia de composición de página completa; no banner intercambiable ni iconos oficiales separados. Encabezado, hero equivalente a PDF31, tarjetas WhatsApp/Grupo1/Grupo2/Grupo Facebook, redes y navegación inferior.",
+        "implementation_gate": "Contacto y enlaces comunitarios requieren destinos reales. El teléfono visible en la referencia no se considera verificado por leer una imagen.",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05"
+      },
+      {
+        "original": {
+          "path": "BANNERS/Diseño de nueva pagina de mayoreo.png",
+          "filename": "Diseño de nueva pagina de mayoreo.png",
+          "bytes": 1860512,
+          "sha256": "853c90df75dc79abeb69c1196abd434006cd75986096de003b74cd8069e70384",
+          "inventory_match": true,
+          "width_px": 793,
+          "height_px": 1984,
+          "format": "PNG"
+        },
+        "classification": "design_reference_full_page",
+        "intended_context": "Mayoreo / parte superior",
+        "observed_scope": "Referencia de distribución de página completa. Hero equivalente a PDF32, Cómo comprar, tres pasos, comunidad/Grupo1/Grupo2 y beneficios. No usar como fondo único de una página funcional.",
+        "implementation_gate": "Incluye $800 y20 días, descuento automático y promesas comerciales. Son texto de una referencia; no elevar a política aprobada sin fuente vigente. Mantener estructura sin introducir condiciones por inferencia.",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05"
+      },
+      {
+        "original": {
+          "path": "BANNERS/Diseño de nueva pagina de mayoreo 2.jpg",
+          "filename": "Diseño de nueva pagina de mayoreo 2.jpg",
+          "bytes": 195128,
+          "sha256": "9076ee17c0a2badbb9dfc5eeb685e288b1bae13c01d85338e80c110f4f317a75",
+          "inventory_match": true,
+          "width_px": 712,
+          "height_px": 1262,
+          "format": "JPEG"
+        },
+        "classification": "design_reference_full_page",
+        "intended_context": "Mayoreo / continuación inferior",
+        "observed_scope": "Referencia de continuación de página: contacto WhatsApp, recomendados, invitación a registro para envío gratis y footer. Es un JPG de composición; producto y precio mostrados son ilustraciones del diseño, no datos de catálogo verificados.",
+        "implementation_gate": "El banner de registro dice envío gratis asociado al registro, coherente en sentido general con la decisión más reciente cuenta requerida; precios, copyright2024 y suscripciones no se asumen actuales.",
+        "status": "OBSERVADO",
+        "evidence_date": "2026-11-05"
+      }
+    ],
+    "integrity": {
+      "all_files_match_inventory": true,
+      "originals_modified": false,
+      "commercial_claims_validated": false
+    }
+  },
+  "exception_ui_cta": {
+    "banner": "B04",
+    "source_copy": "CONOCE MÁS",
+    "ui_control": "Comenzar a vender",
+    "source": "Corrección4 p9/p11",
+    "rule": "Texto editorial intacto; control de UI separado obedece corrección expresa. Fuente exacta conserva CONOCE MÁS; variante editorial omite solo el control antiguo."
+  },
+  "assets_base_version": "4.0 sin cambios en32composiciones"
+}

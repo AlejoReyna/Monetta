@@ -1,0 +1,2145 @@
+[
+  {
+    "id": "home",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/home.png",
+    "svg": "05_maquetas/svg/home.svg",
+    "state": "Modelo de UI; datos de ejemplo, no implementación",
+    "outside_text": [],
+    "png_sha256": "1c58bf4b68d44488e1680e2c1450303b80c9be48416824de3ac7e6a4047f4907",
+    "svg_sha256": "72b685fea75c23f2a5272d0c4cb16b8e8ed7fb8bd6670022ec7404a94dcc0bee"
+  },
+  {
+    "id": "feature",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/feature.png",
+    "svg": "05_maquetas/svg/feature.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "70747994a2dd930d1b2e214667c544f49eddc46ab224de6424c7af364ede000c",
+    "svg_sha256": "37a2eb903ee6e2ddf0bf5a58c24f4063f6ed4bb569d8f86379c922461bc1a425"
+  },
+  {
+    "id": "feature_end",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/feature_end.png",
+    "svg": "05_maquetas/svg/feature_end.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "61d293189c807704241d003cb69e67d3c1323ce66eb5566843cd12c61d5c12c8",
+    "svg_sha256": "eb54d4eb8721b0e1d1c046661249bc389f36d6639a18c2dfa1443d109abba89a"
+  },
+  {
+    "id": "feed",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/feed.png",
+    "svg": "05_maquetas/svg/feed.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "e916af034336b9c12929912f521cdbe4d6810e2edf450edb4cc9682c2b3e7cad",
+    "svg_sha256": "81a9fd7cd761b8906649d9dbc497e98d9f2be6d672008be21629d13ccc69d7c4"
+  },
+  {
+    "id": "campaign",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/campaign.png",
+    "svg": "05_maquetas/svg/campaign.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "f3aa95cbd4be37602e80f368370a838fc87b1b3b548191fcc5048a712dce4a36",
+    "svg_sha256": "68e19ee27f8f2744157fe9383269343855c150e325b8d18095d7a71fb0b52088"
+  },
+  {
+    "id": "footer",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/footer.png",
+    "svg": "05_maquetas/svg/footer.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "4d8af684419a3012e33c2ce4e75490973de40d19f7d10cd1db6427c5582b8586",
+    "svg_sha256": "e9dd97e6878273d6639cbbf3a946fa6f3ac5b056e50fe9ff4f3104a394f40ecc"
+  },
+  {
+    "id": "menu",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/menu.png",
+    "svg": "05_maquetas/svg/menu.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "4137fb9dd8807b9c9f2c453e84807a641249b88f7d71650a9946f0d21833fbf3",
+    "svg_sha256": "601d1462bd35e02d6750455778af36ed3f8c8fcb47938dd5cbc9ae4a55185eea"
+  },
+  {
+    "id": "submenu",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/submenu.png",
+    "svg": "05_maquetas/svg/submenu.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "cf9422fe7b61906e08d3e7eb968af5adeb35d11e3f2f8b83673e6dcc8579eac2",
+    "svg_sha256": "ffead0cdaa5186708494bba7e51b7706c5d7758013bd99eef361259952b2cf18"
+  },
+  {
+    "id": "categories",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/categories.png",
+    "svg": "05_maquetas/svg/categories.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "04e22106ed843261cac30d54ce7bf2480c2616726d03346cb3d8c2ae522f705b",
+    "svg_sha256": "e49b07c8694fd5edcce1d325b426c29d9a3f3001b99d3d5d02ea60af33a87e1c"
+  },
+  {
+    "id": "categories_open",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/categories_open.png",
+    "svg": "05_maquetas/svg/categories_open.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "39823ede211e2aa65c3ae32be86be40a248f15cc317ebe8be6636411e1780483",
+    "svg_sha256": "7d8f540123333148c61863771a28cffa5b01afb8f593d26ba4ea920f6864f09e"
+  },
+  {
+    "id": "brands",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/brands.png",
+    "svg": "05_maquetas/svg/brands.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "125ffe3c3ff7261626f2d64435b5158c7555e01d42640e861a6cb4b45403f315",
+    "svg_sha256": "07ed193ebf26b45496e8e3d68ebc767595184a2168570e3862e56053721e02be"
+  },
+  {
+    "id": "brands_stack",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/brands_stack.png",
+    "svg": "05_maquetas/svg/brands_stack.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "ab729c03863201c3795cf87205d7fc74f01b330d2bb871c41b64d5bc202f261f",
+    "svg_sha256": "82642fd2a52b941a9551f0d6560d84a05dd3ff12d340bb722857a2e04d6cf9d7"
+  },
+  {
+    "id": "collection",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/collection.png",
+    "svg": "05_maquetas/svg/collection.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "11b89dd8e985fed122e980edfb3f6f8028c0112bb595133b6d1ea98fdad0483c",
+    "svg_sha256": "a1069d307459a94f1b3e8910d642c2c980c8a3c32aed89c60694bb529e38c5b1"
+  },
+  {
+    "id": "filtered",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/filtered.png",
+    "svg": "05_maquetas/svg/filtered.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "5da9b2fc6bba41847bb62579861b7eb80adecd36f265ee97a54773852bb0aa86",
+    "svg_sha256": "1ebfcd319fe91d0d2c72420775f452c9045fedaca21bdb6c19e15c09c514c56f"
+  },
+  {
+    "id": "search",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/search.png",
+    "svg": "05_maquetas/svg/search.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "dd6683b10b8a1c108622b614d30297a8552b50018d59f02e3c2606cf2b1bdaac",
+    "svg_sha256": "41275080fa22ae173f97405c53132177783a858af8594f17c82e5e5a00f793db"
+  },
+  {
+    "id": "filters",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/filters.png",
+    "svg": "05_maquetas/svg/filters.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "d4182ad978a8325eb1aa419b832dcbfcc733cb2d166911ae24e693ea8d9fab05",
+    "svg_sha256": "9fdc675164cca4b380c1625d780ca51c11a43fabc2ddebda247983fb61b0606a"
+  },
+  {
+    "id": "sort",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/sort.png",
+    "svg": "05_maquetas/svg/sort.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "b3e93864cbd8d93e124416a8285a69605e89c2d238ec12676c7f82f93ab1a378",
+    "svg_sha256": "e8823d432f7d706b83aeb7a758e056cdf79245fb706cf2e40426ad71e326b021"
+  },
+  {
+    "id": "quick",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/quick.png",
+    "svg": "05_maquetas/svg/quick.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "dc23c516e2326fde06fd7046be08e88c9e2b51d595d24277d3cf303ee90a2329",
+    "svg_sha256": "4e3fd38c4083ce4488aace551abca05384c28c2dfe03e4e987be6ddfdc221a21"
+  },
+  {
+    "id": "quick_alt",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/quick_alt.png",
+    "svg": "05_maquetas/svg/quick_alt.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "22983441807592a96e664cb548b643d43b2e3a45d85962bd2d9868e0759ac4d2",
+    "svg_sha256": "a612fcddccdbf1611eb2a2319bcfbf273f31c484de062b3d44cf2b3d9c35cd80"
+  },
+  {
+    "id": "pdp",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/pdp.png",
+    "svg": "05_maquetas/svg/pdp.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "8a72f5a473fec56d19186c55b9b7f5be80a764ba3726cb8a9a4d08e1caefdbfa",
+    "svg_sha256": "6ba2a18e3a5b63b0a457f3230b4d17bf9a807fc1dbbd3d3488dd47a4bdaec025"
+  },
+  {
+    "id": "pdp_alt",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/pdp_alt.png",
+    "svg": "05_maquetas/svg/pdp_alt.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "dba9a00eb4542bc7c1d8d2b61b8ceb1cd462b0b9c313b4a97e529909885e3eb4",
+    "svg_sha256": "f3cac6ea5941dc699e8af21e2add8e5c86d7460495bf7aa0fd0e322810dcfa2f"
+  },
+  {
+    "id": "sold",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/sold.png",
+    "svg": "05_maquetas/svg/sold.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "f29f9dc390588c4f7d43354ce473624c4c2ac1374c78c01bf0dafae96982895a",
+    "svg_sha256": "0605adc2b6051c2013416dee36ceeb1d1ddfc04afc8e35c945c28dd88f8ae3d0"
+  },
+  {
+    "id": "details",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/details.png",
+    "svg": "05_maquetas/svg/details.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "65ce1c62dfdeb95592bea2afcad8955c4fecbf8eb3899ff6d5fc6e2938acd3d3",
+    "svg_sha256": "9ec97daba6484227111b285b2f961d7c1899bd38c3f540afee43a5ec534eaed3"
+  },
+  {
+    "id": "details_open",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/details_open.png",
+    "svg": "05_maquetas/svg/details_open.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "087d544967c9a5bc9f6153c1e4a02b986fb549347e680d2f86170f0c3bb69222",
+    "svg_sha256": "e4e0e14f13f194fa72dc105d6baf3b03a7d1242208d1ab497b901219eaa6a0a1"
+  },
+  {
+    "id": "zoom",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/zoom.png",
+    "svg": "05_maquetas/svg/zoom.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "2321db597ecc57492c90ed6792ea2e4f24a203e7bbab2fb17eb2f2e856448781",
+    "svg_sha256": "f4a901df52b194f87ec2b0b9d4b2cf624b9b2afd9b76aa991b0ff053a672505e"
+  },
+  {
+    "id": "restock",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/restock.png",
+    "svg": "05_maquetas/svg/restock.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "d57d545332645eb1d705b090d8bfe348092bc912f6abb3f3fb056aa6b9da5961",
+    "svg_sha256": "ae77dc28396c7fbdcedf89ff91d0522d01328c0c69ebdda6b40cb7e0fea045b1"
+  },
+  {
+    "id": "recos",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/recos.png",
+    "svg": "05_maquetas/svg/recos.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "6f8fa98d5d76b0e4e160eb2599901dc6f78b3042262b3cd9490f7653e5b7f336",
+    "svg_sha256": "c7601f51aaad4ea6bb6c9935d4cfe67a2b3a807cf2a0feef27686970c3502791"
+  },
+  {
+    "id": "empty_results",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/empty_results.png",
+    "svg": "05_maquetas/svg/empty_results.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "2d93844200f2acc135bb79685e01d3bd3791b4b97969ff4216b3d20904bf310b",
+    "svg_sha256": "5fc246d28909af352a5adb0000d42be10e405d1936895ef30f9f6f4d9a6143bb"
+  },
+  {
+    "id": "error_results",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/error_results.png",
+    "svg": "05_maquetas/svg/error_results.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "91594717e31038d3cc744749955d474767f6f695f29b791191b43c580b467093",
+    "svg_sha256": "877e284147104d0f39e7c7f171c1ee783225648add4f4f49560192e14e192279"
+  },
+  {
+    "id": "added",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/added.png",
+    "svg": "05_maquetas/svg/added.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "8033248af592ae02d7516b57c979e119f15eee54408d63eb07bb5d7bfd039cda",
+    "svg_sha256": "215d82bda25bb7a5571bdd6f35e394a7c9b9ff4ef914ee9f18dfd6bd255cf595"
+  },
+  {
+    "id": "cart_empty",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/cart_empty.png",
+    "svg": "05_maquetas/svg/cart_empty.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "2900d57a5dfd0e767df7c85a67fccaa92e48fbfae933124b1a4246bd86781d46",
+    "svg_sha256": "e287e38f1d17099f88e1bc50bf15ecf4d63bb57d87c4206c5d71296f73784cf0"
+  },
+  {
+    "id": "cart",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/cart.png",
+    "svg": "05_maquetas/svg/cart.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "c822f1a325c1d2ba1f1e38a55018f79226e4a661df5a8aabed748c632766728e",
+    "svg_sha256": "eaf7d998e9c48557506d9ad75d185d2f3c1bb6fe03590a93cd6da77623b6d834"
+  },
+  {
+    "id": "cart_multi",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/cart_multi.png",
+    "svg": "05_maquetas/svg/cart_multi.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "bbfdc363077c196178d4ca607b88b01aac11e22ba8731ab185682a40a6f29961",
+    "svg_sha256": "0ea69fe35341de8fe838ffd5e090a680674d83c4dc4bbca2192ba8a8ec1681b5"
+  },
+  {
+    "id": "cart_loading",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/cart_loading.png",
+    "svg": "05_maquetas/svg/cart_loading.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "2f6705981d0021d8e5b58afe2de49f4b53c8f2abfc46246bf033d7333226b436",
+    "svg_sha256": "b6d0cbc0baf2c8eb8c95a2af9aa82946ae894eee5f2ef3cc7a81717074379d95"
+  },
+  {
+    "id": "cart_error",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/cart_error.png",
+    "svg": "05_maquetas/svg/cart_error.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "9e544f1c94c67132442c85168ec8b9430919a5c3aa6980cf562e94dd33ded3c0",
+    "svg_sha256": "645b30ad6a538fef6e69d21cd6130128abe1b10c0c67d3b2ca61cb1046592367"
+  },
+  {
+    "id": "stock_error",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/stock_error.png",
+    "svg": "05_maquetas/svg/stock_error.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "5685c5efa901cc0818860abd192d1fd56d15d2c290eaeb42e6969d81b25036eb",
+    "svg_sha256": "9b5bdffd4b1f1e533ad4499faeae44e4975ee9a87de38d49ab86c16c93a2bbfd"
+  },
+  {
+    "id": "checkout",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/checkout.png",
+    "svg": "05_maquetas/svg/checkout.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "48d3ce32afaea0be8a8dc3fc5c995b5c35977d84d779fd320595cce9809dbecc",
+    "svg_sha256": "8a83caf04ec64327d0d4730e26eace17d9a9ada8eeea9bd4b53e616a92e631cd"
+  },
+  {
+    "id": "pay_pending",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/pay_pending.png",
+    "svg": "05_maquetas/svg/pay_pending.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "fa9276bc09bcf9a3f8f6d85fbd29f1de653af93a891e1c565063c12aca2c87a4",
+    "svg_sha256": "c0fe254e48921b1c6e8c56eb4b28ddd30e7f0a5606817fa50d00f00f2ce56357"
+  },
+  {
+    "id": "pay_declined",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/pay_declined.png",
+    "svg": "05_maquetas/svg/pay_declined.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "8fa6bb2651cc8da89999b9a97a16f5c98ce03e5a7b31e686ae77f5376af83a92",
+    "svg_sha256": "08e2b5720cb9419c50b6de037117cc3d3cf0d86817e6cdad03e626f562536927"
+  },
+  {
+    "id": "pay_unknown",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/pay_unknown.png",
+    "svg": "05_maquetas/svg/pay_unknown.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "048e56a733e6a0fd939d351f555889d9c3f65e3b15c3934a5d977b029099d9a5",
+    "svg_sha256": "7155176c4476d7ebca0d3c9eeede53523ae97dd1e6df53cdb5add719172bd8e1"
+  },
+  {
+    "id": "pay_confirmed",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/pay_confirmed.png",
+    "svg": "05_maquetas/svg/pay_confirmed.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "07cb7a1c6e2476a55f451d3eedccb94f8aea06f20a16c0abc09a9e81a0adabfa",
+    "svg_sha256": "6335f345636d074f2be170df067423cc0ca3fa36e1af3a4bf0c88c4625365d74"
+  },
+  {
+    "id": "guest",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/guest.png",
+    "svg": "05_maquetas/svg/guest.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "d09d1cd6240ee8e90d05d469c8e2a8ea4186043bd685f354367b0ab72eb563ee",
+    "svg_sha256": "cbe0d1b1fcb7ed31d2c3443e3a3df910b990c3b4f204826cc8c84d0d5d247daa"
+  },
+  {
+    "id": "login",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/login.png",
+    "svg": "05_maquetas/svg/login.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "f64a0f743a618e18d34c9e75ff4e7124c6965d57b5377043fc23a50ff44e8d89",
+    "svg_sha256": "78ee101781b8deca5fc371b386739e80079dfa31d07864a20b01848a1170b498"
+  },
+  {
+    "id": "account",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/account.png",
+    "svg": "05_maquetas/svg/account.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "61092e3d0b151f48a2af81fa71e57030cef03f68a8e480929185345330b4a70d",
+    "svg_sha256": "eb4070fc7a9f5b3f79967fb89a7e906b5f7ad677a5f35534ed9b7b0445d43ded"
+  },
+  {
+    "id": "account_bottom",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/account_bottom.png",
+    "svg": "05_maquetas/svg/account_bottom.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "c10b64b1c57e01ba60948799a87fd747793b6fa09d1f9f74ec7f4f67baa66f20",
+    "svg_sha256": "09c4f5a5d48dad3f6f99151591d6986f6e7402fb96e74a67940447efa5108b43"
+  },
+  {
+    "id": "rewards",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/rewards.png",
+    "svg": "05_maquetas/svg/rewards.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "780312cef34e607be3036f798269fa4f0a114a07e159d6bc5ba28a9414a043c7",
+    "svg_sha256": "a5f9725f03c573b54a6865f8d0f620b4e59b4cd54df33ec102445ce2d7f1bb5a"
+  },
+  {
+    "id": "rewards_zero",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/rewards_zero.png",
+    "svg": "05_maquetas/svg/rewards_zero.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "c319640ecdfd8d4039ccb2a7529e187fb7a61efa22305a28463da21d3998dff3",
+    "svg_sha256": "f9882a862c6ae79bcc430e083af580f10321e1c3e419724d5aa88f88ba380e07"
+  },
+  {
+    "id": "rewards_end",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/rewards_end.png",
+    "svg": "05_maquetas/svg/rewards_end.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "88fb31d1d853b000969cd3db238320c861f1e2e885668bb25e3b37c39ed31dc8",
+    "svg_sha256": "a404fc2dd8c5d9112dd89e9f9ccbd88e805ae956c930024f46deadb432801d7a"
+  },
+  {
+    "id": "movements",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/movements.png",
+    "svg": "05_maquetas/svg/movements.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "b72be73a0220cbb84f14a2e8f40cfed0e1ea7fbed361f2aaa4784c40bc9dde27",
+    "svg_sha256": "1e3971bc8eba915b6810bbdf2f6d3050008400f40f0893974030ec48fa84cc2a"
+  },
+  {
+    "id": "orders",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/orders.png",
+    "svg": "05_maquetas/svg/orders.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "92a8f96e1a4908583264f27002193fb94345bd2c2133f6d5c158778f87a94bde",
+    "svg_sha256": "7092ae08f57ef3496f96d4fc17254078a1f1c0d0e0daf9bf0e4942536ce53a60"
+  },
+  {
+    "id": "order_detail",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/order_detail.png",
+    "svg": "05_maquetas/svg/order_detail.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e530aff90019a818d3d49c5acc27f83d19de81006feda1de922be42e36c08de7",
+    "svg_sha256": "d1b4251e55c1345fa0298b3da8de313a4917c416dfbbad6f4835aa653e32c662"
+  },
+  {
+    "id": "favorites",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/favorites.png",
+    "svg": "05_maquetas/svg/favorites.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "541a939a9c7d73de6e375ef482b5d4e1f1d057a3d6f2f12c743325124a7bff7e",
+    "svg_sha256": "d9e61e893d26d580239cbd2d229ef934124aec758a84dee2ed21945a54569776"
+  },
+  {
+    "id": "favorites_account",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/favorites_account.png",
+    "svg": "05_maquetas/svg/favorites_account.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "41acdb230aa587999954c39b42d90a4f7c56be00d0475b39ecd82072823e430f",
+    "svg_sha256": "d22b82b533836575d70cb4386eb237693b7edf00615c29fd445764a49aaa896a"
+  },
+  {
+    "id": "notifications",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/notifications.png",
+    "svg": "05_maquetas/svg/notifications.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "cab644ddd4fe7825c3df38576e059c2c3d5f3193d309c7053b64c1008621de68",
+    "svg_sha256": "7320666168280dd9c37683da1f9b7b7ac9b30eec71cdd9de7283b05277207d4e"
+  },
+  {
+    "id": "notification_missing",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/notification_missing.png",
+    "svg": "05_maquetas/svg/notification_missing.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "6d064d4352d2c3eefd20f7f3bf5d9e5b412958314440a3656bb3db8f57602ab0",
+    "svg_sha256": "d20af89461136d36f947034601ba0ca3761effec430fa4dc1bcb2b7c625c19fb"
+  },
+  {
+    "id": "profile",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/profile.png",
+    "svg": "05_maquetas/svg/profile.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "103adff335dae0b34cad164191039be4bda3861445adc1b8780b03828a45f1e8",
+    "svg_sha256": "4bdf6b2f4210d0ab907502506b16d998f4ebd48575f27b328f0587c0727cab26"
+  },
+  {
+    "id": "addresses",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/addresses.png",
+    "svg": "05_maquetas/svg/addresses.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "bb83301164518a5df3c48460af9a4196f4893e06d997232f491029fb6adad4a4",
+    "svg_sha256": "b03bd9ba5784e6457296dfb0c98810ba2df46e787816bbd0ce0ea9616512cc51"
+  },
+  {
+    "id": "address_form",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/address_form.png",
+    "svg": "05_maquetas/svg/address_form.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "71c4a09737892d01bae62f429c1035996852901efdb270c61c93d3813fd10771",
+    "svg_sha256": "8aec954501ded7bd0adc3d681460ea3e997bb155d3bbe4b7b29804693fd680ee"
+  },
+  {
+    "id": "preferences",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/preferences.png",
+    "svg": "05_maquetas/svg/preferences.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "d22d223a54be0ee8cd59b29cc6f2bb166697d03660528a5cdd347bd960d47cad",
+    "svg_sha256": "b342e3140cd052b521c397d105185d6d4d644d1df7a8b8b0e648ead6c910b8d4"
+  },
+  {
+    "id": "help",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/help.png",
+    "svg": "05_maquetas/svg/help.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "9973241d5dcd3657a4a0dcd563ee23fd1ddf57c8f73e76fc4183b3ffa55f3173",
+    "svg_sha256": "41456413241c879f4a6e521485d342d3bc8c93431448fc3f1e8813394a96a584"
+  },
+  {
+    "id": "help_article",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/help_article.png",
+    "svg": "05_maquetas/svg/help_article.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "d3b711313ba23eacac5657fb6d368998077d557cb219a224ac5267ba3beaa441",
+    "svg_sha256": "e50b025e4c115150e3d88d5cfdd9c091726278964198f423c243cfb832389b0f"
+  },
+  {
+    "id": "wholesale",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/wholesale.png",
+    "svg": "05_maquetas/svg/wholesale.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "d8e810131b2eedc9571102bd93e0afcb402cf0b2f5dd2facab063b26db21432f",
+    "svg_sha256": "aaa8f4136c321d2a8782f0a6a6da7643b4938ea53aa26826ffa0a22d402c86dd"
+  },
+  {
+    "id": "brand_collection",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/brand_collection.png",
+    "svg": "05_maquetas/svg/brand_collection.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "dd5114c610a8a9f9d859dde4b1e35077beb10c3ea77a5484771e0433398ceb42",
+    "svg_sha256": "1d6bff70bf07b6e2c0cd61ddff0eaff0e729eb0976d3891786d08872b4655e69"
+  },
+  {
+    "id": "faq",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/faq.png",
+    "svg": "05_maquetas/svg/faq.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "b1aaf5cb7bbbda1cbfd01d4eca7bd23ca1c2ef4b7d2692554433ae1975de0ec6",
+    "svg_sha256": "7d6042fb4c836127b46cbd739f577d4f00c83c4b2460e186e615dde7d0a762c7"
+  },
+  {
+    "id": "shipping",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/shipping.png",
+    "svg": "05_maquetas/svg/shipping.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "f38c1bdbc39b4dbafc9d99cea85ce97e0f2986beba622af889245ba5ed155490",
+    "svg_sha256": "ace29a6afa0a9ef9106d0be6ac80702186004f9dccc77f4b2da167dd823654c2"
+  },
+  {
+    "id": "checkout_summary",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/checkout_summary.png",
+    "svg": "05_maquetas/svg/checkout_summary.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "0aa8c14fb05f147fcd06d798a164ac4c25868c9f81a1be30720f629226874b96",
+    "svg_sha256": "769d1c4bd60cb031bd3c1b6efa90cc9d9745fd0017f40086e73c13244b86be6f"
+  },
+  {
+    "id": "filters_tail",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/filters_tail.png",
+    "svg": "05_maquetas/svg/filters_tail.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "2ae77c25ff6424759362a104515b6f5ad816204106fcfe8dd9dec8557cf7bb90",
+    "svg_sha256": "071b0272f0d87befd7a9e1bbea33a20fb3c2b23336df4c179703b636450b688d"
+  },
+  {
+    "id": "sort_search",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/sort_search.png",
+    "svg": "05_maquetas/svg/sort_search.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "a552e17d4c3bff0e1cfe1ee7bccac8a14b0962d5b9bc7caca63a68d050a7d7e2",
+    "svg_sha256": "5a91213cbf76739b24a06b00426cc45f2f3b0c8e2c92dbc58a242449189edf4a"
+  },
+  {
+    "id": "address_dropdown",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/address_dropdown.png",
+    "svg": "05_maquetas/svg/address_dropdown.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "1b7ae3cd4fface7202eebd6ed34ff2c100acb7d62a5e118213ef6ee9f0e8de38",
+    "svg_sha256": "9460e9987c687e8a4b2b5813548e6dc694f12e25bea77988dcfb1d4e2ee5891c"
+  },
+  {
+    "id": "email",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/email.png",
+    "svg": "05_maquetas/svg/email.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "624930b4563d71422377d98bf3fe46d74bc695e66be775d7bb05e8ace8ebe58b",
+    "svg_sha256": "d59e0850cc0f6204d0d33dde1dad09069354587735a57d3e30e9daaa7a3b5fcd"
+  },
+  {
+    "id": "code",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/code.png",
+    "svg": "05_maquetas/svg/code.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "b13c2bb8d9c6163f56962ccca44549748b68894d277f4dbf878bda462d9f5954",
+    "svg_sha256": "37ef1c2ff92adc5e79cf827ad4ba2e38fa699d9b3f0aee13a1b47f17e732b8f6"
+  },
+  {
+    "id": "overlay_return",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/overlay_return.png",
+    "svg": "05_maquetas/svg/overlay_return.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "65e9b951220862f9be05486c0c11c06ac772624f8b65418b80947c1a68b9d41a",
+    "svg_sha256": "a5bce49fb1374ceaa541e1e73d1624b599e44707d823489500109081f97cba8e"
+  },
+  {
+    "id": "auth_failure",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/auth_failure.png",
+    "svg": "05_maquetas/svg/auth_failure.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "be81f26084aab7ab7070932ee5b8e2ffb621cb746aa5878fa54ae0b8a6afc9aa",
+    "svg_sha256": "88fb1da17327283ad39003ccd70d913a8567060f4870fe37d2aa833526e34123"
+  },
+  {
+    "id": "not_found",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/not_found.png",
+    "svg": "05_maquetas/svg/not_found.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "9bdaf5c37b32d8c2ff85dbb5c8794f67590934d1229279435459a4b4a53fe52c",
+    "svg_sha256": "a5572c12ee702beec9c0ea28e580bd32109a52cf7c2233f7f428a181dbf09c69"
+  },
+  {
+    "id": "app_permissions",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/app_permissions.png",
+    "svg": "05_maquetas/svg/app_permissions.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "07ca917deb24d4942ae82bcef325a7bb843101448fd2fa09833fabcab51d1ce7",
+    "svg_sha256": "e9428283757db368027926e96c23d449cc7f2eec0013850d08ab0b8c9bd9b50f"
+  },
+  {
+    "id": "size_selector",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/size_selector.png",
+    "svg": "05_maquetas/svg/size_selector.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "401e4319dcf20cdd8221194b7685c2f2b67b5b9fc0d1344f69752cc58335d800",
+    "svg_sha256": "69dadc842debcd2d4fb5985ff07dceb46f846372779cb66a9013800057cd2c23"
+  },
+  {
+    "id": "search_recovery",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/search_recovery.png",
+    "svg": "05_maquetas/svg/search_recovery.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "91594717e31038d3cc744749955d474767f6f695f29b791191b43c580b467093",
+    "svg_sha256": "877e284147104d0f39e7c7f171c1ee783225648add4f4f49560192e14e192279"
+  },
+  {
+    "id": "help_contact",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/help_contact.png",
+    "svg": "05_maquetas/svg/help_contact.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "08fe38e20665daf789ec964a2ce8d7cccecda592480d3ad52d256caabb2564a5",
+    "svg_sha256": "00a6ac2f132e3f9cf99d23df54fd415d1133f407cc2c5c05c5aa798b53a15dbb"
+  },
+  {
+    "id": "registration_clear",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/registration_clear.png",
+    "svg": "05_maquetas/svg/registration_clear.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "4d8af684419a3012e33c2ce4e75490973de40d19f7d10cd1db6427c5582b8586",
+    "svg_sha256": "e9dd97e6878273d6639cbbf3a946fa6f3ac5b056e50fe9ff4f3104a394f40ecc"
+  },
+  {
+    "id": "mobile320",
+    "viewport_css": [
+      320,
+      844
+    ],
+    "png_pixels": [
+      640,
+      1688
+    ],
+    "png": "05_maquetas/png/mobile320.png",
+    "svg": "05_maquetas/svg/mobile320.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "086dc33457d198eb0bef0bb4f38ae5f3c0a638c97e0fc8144541c4a9fd5c90ba",
+    "svg_sha256": "98861979edc563209fc1e36674dc75dcb2ca364d6ac980cee4fd4d5e41eac0e9"
+  },
+  {
+    "id": "desktop_home",
+    "viewport_css": [
+      1440,
+      1024
+    ],
+    "png_pixels": [
+      2880,
+      2048
+    ],
+    "png": "05_maquetas/png/desktop_home.png",
+    "svg": "05_maquetas/svg/desktop_home.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "48ae144708bc16f35a759ac6189297a2ba1751df8f80f23585c1ae45ca1556d0",
+    "svg_sha256": "908da3d14c03e185a8dfb9fa4b25cfc7adbb2831f8eaa157cae54da81fcf5d0c"
+  },
+  {
+    "id": "tablet_collection",
+    "viewport_css": [
+      768,
+      1120
+    ],
+    "png_pixels": [
+      1536,
+      2240
+    ],
+    "png": "05_maquetas/png/tablet_collection.png",
+    "svg": "05_maquetas/svg/tablet_collection.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e37118af9c604fa92af7557a67418a13a45ab90e50c5e24e31f92cc29046b980",
+    "svg_sha256": "c4de81fe58f5de9de4bf270a2dbb4b2b796ca8512e55c1496129c6a8e3f787fd"
+  },
+  {
+    "id": "cart_guest",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/cart_guest.png",
+    "svg": "05_maquetas/svg/cart_guest.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "17ecd465dbaf836844a0c370efbd5126f572a8ccbfc9ae574c0bf5fc2e949757",
+    "svg_sha256": "1e765b0639cd9081b842367c870ede92a3b0c06e8ac289961b085f7aad1053dd"
+  },
+  {
+    "id": "shipping_guest",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/shipping_guest.png",
+    "svg": "05_maquetas/svg/shipping_guest.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "109c5120ab3eb2f38f345d19f985ed564a4d240397943d122e97502981d4ddb4",
+    "svg_sha256": "49903674e102dc179cfed85e5962ba40a1516f860c2c2959571e82bccd910ae8"
+  },
+  {
+    "id": "pay_confirmed_guest",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/pay_confirmed_guest.png",
+    "svg": "05_maquetas/svg/pay_confirmed_guest.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "c230b73d6f5e83bc93aaedb48b137c99a39d895be130c07608abf2f83579a5a4",
+    "svg_sha256": "eb5226a2c248d55fd76001c161da780cb8adc91bb837378d641e4c85b2b22752"
+  },
+  {
+    "id": "home_brands",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/home_brands.png",
+    "svg": "05_maquetas/svg/home_brands.svg",
+    "state": "Modelo de UI; datos de ejemplo, no implementación",
+    "outside_text": [],
+    "png_sha256": "dc0aa324b22a51c08d0f058fd3762373e95377236574b057f5f4d25004104e6c",
+    "svg_sha256": "a8d4f1c346e826df0cd12f64bd0eb385f2b9c1bd481345e07854649659783c0c"
+  },
+  {
+    "id": "home_categories",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/home_categories.png",
+    "svg": "05_maquetas/svg/home_categories.svg",
+    "state": "Modelo de UI; datos de ejemplo, no implementación",
+    "outside_text": [],
+    "png_sha256": "e197afe67038bb058d7eca1a49b6b9fa037b6e96c2e88117d47580255290b2c9",
+    "svg_sha256": "3bad1b53b47415a00db17b38c273b618cee42b45a523ec5e817a8c51c1bdefca"
+  },
+  {
+    "id": "home_wholesale",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/home_wholesale.png",
+    "svg": "05_maquetas/svg/home_wholesale.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "f2032c883e67d741bb83cebf13fc74c897eb237b729e12da883f5c7d93f5849a",
+    "svg_sha256": "b6c06fbed4f3261abcb86640ce367fa9cf0fed24be2f4d58f20b398d9d22d0b2"
+  },
+  {
+    "id": "menu_account",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/menu_account.png",
+    "svg": "05_maquetas/svg/menu_account.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "7ba8aff50df8ba84d487d618d2d5333a0af0ecbda4ea443f21658173cbd7e868",
+    "svg_sha256": "ec9551db5b799bbc2fa3b41893d06e55a04f833352c3c146a16617857f2aa5c6"
+  },
+  {
+    "id": "benefits_pro",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/benefits_pro.png",
+    "svg": "05_maquetas/svg/benefits_pro.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "9253d13ac33a1f6f71a00920e153fb1053d2dc54591b43f3dc147acaf55be423",
+    "svg_sha256": "c14ba5525437c42a22686e4a61ae6efe06d266787e7f9e3b63404e13b168002e"
+  },
+  {
+    "id": "benefits_vip",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/benefits_vip.png",
+    "svg": "05_maquetas/svg/benefits_vip.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "ee966035e664e953fd171ea8c3a992715873c1b15f00901a017d47caf3b3e2d5",
+    "svg_sha256": "87a345294f7ec4783ca2f1db56431caf075d45ffcea810ceb8955b981aae1a9b"
+  },
+  {
+    "id": "benefits_elite",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/benefits_elite.png",
+    "svg": "05_maquetas/svg/benefits_elite.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "eec862bc53b68b8bdc1f413b78d5e6e09af6227ba3b97e49a6828ff7d1e7fa6c",
+    "svg_sha256": "0932a28e26d702a2a89642cc94ff4610508f74cfab7f2bf654d30b4aa92a1df3"
+  },
+  {
+    "id": "contact",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/contact.png",
+    "svg": "05_maquetas/svg/contact.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "49b93d7261ccab7d2e5a70db50682629776f3680af7040c678604c2c8b77cf31",
+    "svg_sha256": "932293bbbfd607dac3ef7ced33fe0d570104fc550cbedad702234b11ebf214c7"
+  },
+  {
+    "id": "contact_links",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/contact_links.png",
+    "svg": "05_maquetas/svg/contact_links.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "16c2de18fd0e80bdbbf80eb6b44d655224be774cba67b539f41d381394d437c4",
+    "svg_sha256": "8a81eda876a1b71ab372389c1614429ed3895bee95e3092cd0d5b033eec809c7"
+  },
+  {
+    "id": "wholesale_steps",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/wholesale_steps.png",
+    "svg": "05_maquetas/svg/wholesale_steps.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "7d3ecee0dfba82350bf4b3ed2ee1d72422ce286a28c6c318fcdbe27dbdffd156",
+    "svg_sha256": "d0f5f4ef239e0279d023415269dea8598123b0eb894f1b0faba7cb308d3aee39"
+  },
+  {
+    "id": "wholesale_community",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/wholesale_community.png",
+    "svg": "05_maquetas/svg/wholesale_community.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "687a4d62caaa367326f4c337897e5ca00c575c048e4eaac535423785cf493b63",
+    "svg_sha256": "47304c28cde93179775161472a0b9486c3a0d102ec47e509aedce4d842282a14"
+  },
+  {
+    "id": "wholesale_help",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/wholesale_help.png",
+    "svg": "05_maquetas/svg/wholesale_help.svg",
+    "state": "Modelo de UI; datos de ejemplo, no implementación",
+    "outside_text": [],
+    "png_sha256": "ec62635025e2a13a01cd67b1e16c5aa7b43a42079b661a55348359bfe01b222f",
+    "svg_sha256": "fa36005bb10e35a40f90eb8ee834614602f3e3ac64388c1ea9d7137b82b46bf0"
+  },
+  {
+    "id": "desktop_collection",
+    "viewport_css": [
+      1440,
+      1240
+    ],
+    "png_pixels": [
+      2880,
+      2480
+    ],
+    "png": "05_maquetas/png/desktop_collection.png",
+    "svg": "05_maquetas/svg/desktop_collection.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "b8eb36ef52650cb2d05687a6ca04ceccf186835392a9c07dd033f0f4a7baf8ff",
+    "svg_sha256": "3066caff1664631cfb1c02c5420aa1c3f35b191b2f2b253cdc8b24352bedb645"
+  },
+  {
+    "id": "desktop_pdp",
+    "viewport_css": [
+      1440,
+      960
+    ],
+    "png_pixels": [
+      2880,
+      1920
+    ],
+    "png": "05_maquetas/png/desktop_pdp.png",
+    "svg": "05_maquetas/svg/desktop_pdp.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "63b0a6b75055c854fa00435723c7cbc04368e80a904da7bcc31d56a849547b55",
+    "svg_sha256": "b53890790374e394c9a438bd4984fcd751c96f7ba187cacde13fb4e35e238eb1"
+  },
+  {
+    "id": "desktop_account",
+    "viewport_css": [
+      1440,
+      1040
+    ],
+    "png_pixels": [
+      2880,
+      2080
+    ],
+    "png": "05_maquetas/png/desktop_account.png",
+    "svg": "05_maquetas/svg/desktop_account.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "3978954dd27065e6fb63570e3daec180a3f2702f3f315ba946acace2a587a433",
+    "svg_sha256": "8041a0ffd5c159777c0470d4f55d224a7e343f21097560f5c8472e3f75e7ba29"
+  },
+  {
+    "id": "tablet_pdp",
+    "viewport_css": [
+      768,
+      1024
+    ],
+    "png_pixels": [
+      1536,
+      2048
+    ],
+    "png": "05_maquetas/png/tablet_pdp.png",
+    "svg": "05_maquetas/svg/tablet_pdp.svg",
+    "state": "Modelo de UI, no captura de una implementación",
+    "outside_text": [],
+    "png_sha256": "20033c630f5dd5f8e8fd56ad1da5f75364ae873e581fada9d8d2fbf4f75b06d2",
+    "svg_sha256": "b196663ecd05a2d59e95ad6c46ca0f2e9637446bc1219408f8a83b283c9bdbda"
+  },
+  {
+    "id": "brand_coach",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/brand_coach.png",
+    "svg": "05_maquetas/svg/brand_coach.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "dd5114c610a8a9f9d859dde4b1e35077beb10c3ea77a5484771e0433398ceb42",
+    "svg_sha256": "1d6bff70bf07b6e2c0cd61ddff0eaff0e729eb0976d3891786d08872b4655e69"
+  },
+  {
+    "id": "brand_guess",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/brand_guess.png",
+    "svg": "05_maquetas/svg/brand_guess.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "b21f202e99ce5f3ee1f3175e92237e9e6d29eb392a0378fe483abc2c01c9be41",
+    "svg_sha256": "63e7175a1475a81b803fa2ef75d2b90f74318a04a39fb2920b240b63ec933a16"
+  },
+  {
+    "id": "brand_tory_burch",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/brand_tory_burch.png",
+    "svg": "05_maquetas/svg/brand_tory_burch.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "f557befc0a2e00d8be45bde74a853c49a4320df94c20ac8b79c61f658c30672e",
+    "svg_sha256": "da579547318eb84b416088987617af8816d6c89b5d6e204c60ac3e2fbcc64d8d"
+  },
+  {
+    "id": "brand_marc_jacobs",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/brand_marc_jacobs.png",
+    "svg": "05_maquetas/svg/brand_marc_jacobs.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "15c50efd648fa3a10c5b6d76332a05839fd2406b7caf56351f35930191d71e12",
+    "svg_sha256": "2007469b9f6fa4abb1a1c3db8869f20a4029cc6f0d410100a79bc766d8bd9b40"
+  },
+  {
+    "id": "brand_kate_spade",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/brand_kate_spade.png",
+    "svg": "05_maquetas/svg/brand_kate_spade.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "c06e34e8d98d85e7e4e1738fc59c66e179794c80482ef2b559e8d23216a4f536",
+    "svg_sha256": "e86f215615c3a60e26b1aef0377e36907ed362926917ff098d202c2d604e9008"
+  },
+  {
+    "id": "brand_michael_kors",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/brand_michael_kors.png",
+    "svg": "05_maquetas/svg/brand_michael_kors.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e5fd0cd06bae9bcfe7ddf0d0168bb45770817ae212de522c3999f3ccef098c81",
+    "svg_sha256": "e128258c75d45e5200fc84822b903b7f327df3c139ff27b336b29a1d9f2c28fc"
+  },
+  {
+    "id": "brand_steve_madden",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/brand_steve_madden.png",
+    "svg": "05_maquetas/svg/brand_steve_madden.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "4c5b8190857abc0551ae48ba9e9b719e11eee269df6f86061117237b5d0d1e3f",
+    "svg_sha256": "a0c455d67f7fdf778cb3c04b668a3a652201d2678b2ad0e9ac1fd8c76fdefeb1"
+  },
+  {
+    "id": "category_carteras_hombre",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_carteras_hombre.png",
+    "svg": "05_maquetas/svg/category_carteras_hombre.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_charms",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_charms.png",
+    "svg": "05_maquetas/svg/category_charms.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_lentes",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_lentes.png",
+    "svg": "05_maquetas/svg/category_lentes.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_calzado_hombre",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_calzado_hombre.png",
+    "svg": "05_maquetas/svg/category_calzado_hombre.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_munequeras",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_munequeras.png",
+    "svg": "05_maquetas/svg/category_munequeras.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_relojes",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_relojes.png",
+    "svg": "05_maquetas/svg/category_relojes.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_relojes_hombre",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_relojes_hombre.png",
+    "svg": "05_maquetas/svg/category_relojes_hombre.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_calzado_mujer",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_calzado_mujer.png",
+    "svg": "05_maquetas/svg/category_calzado_mujer.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_bolsos_hombre",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_bolsos_hombre.png",
+    "svg": "05_maquetas/svg/category_bolsos_hombre.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_tarjeteros",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_tarjeteros.png",
+    "svg": "05_maquetas/svg/category_tarjeteros.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_perfumes_todos",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_perfumes_todos.png",
+    "svg": "05_maquetas/svg/category_perfumes_todos.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_accesorios",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_accesorios.png",
+    "svg": "05_maquetas/svg/category_accesorios.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_crossbody",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_crossbody.png",
+    "svg": "05_maquetas/svg/category_crossbody.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_tote",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_tote.png",
+    "svg": "05_maquetas/svg/category_tote.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_bolsos_hombro",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_bolsos_hombro.png",
+    "svg": "05_maquetas/svg/category_bolsos_hombro.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_carteras",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_carteras.png",
+    "svg": "05_maquetas/svg/category_carteras.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "category_bolsos_mano",
+    "viewport_css": [
+      390,
+      844
+    ],
+    "png_pixels": [
+      780,
+      1688
+    ],
+    "png": "05_maquetas/png/category_bolsos_mano.png",
+    "svg": "05_maquetas/svg/category_bolsos_mano.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "e36bea4a0a30ef917595f26cd39b04aa46ed548dc45a3c4fb2369f744b0ec191",
+    "svg_sha256": "e9730bceced8d28ee910931ffeece928d89074940202651ae003945eccf6430f"
+  },
+  {
+    "id": "desktop_contact",
+    "viewport_css": [
+      1440,
+      1760
+    ],
+    "png_pixels": [
+      2880,
+      3520
+    ],
+    "png": "05_maquetas/png/desktop_contact.png",
+    "svg": "05_maquetas/svg/desktop_contact.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "8eebfa2b47092cdf34b9a1d0e1e6687ebb6260844f3c606ac56b2b280d3eb030",
+    "svg_sha256": "ab78db461105c00d1dde97e14987ae02ddf06d36c1dd5890ed1b9fed6688365a"
+  },
+  {
+    "id": "desktop_wholesale",
+    "viewport_css": [
+      1440,
+      3650
+    ],
+    "png_pixels": [
+      2880,
+      7300
+    ],
+    "png": "05_maquetas/png/desktop_wholesale.png",
+    "svg": "05_maquetas/svg/desktop_wholesale.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "1d0b5f24332525a965abfacb39dc437cb93fbdaaa41e9e331e2b32696802cc66",
+    "svg_sha256": "f875f63becaf73b34ad10265d9282781d3f6570d1910109b7e27daa8fc92b4d3"
+  },
+  {
+    "id": "home_sequence",
+    "viewport_css": [
+      390,
+      3470
+    ],
+    "png_pixels": [
+      780,
+      6940
+    ],
+    "png": "05_maquetas/png/home_sequence.png",
+    "svg": "05_maquetas/svg/home_sequence.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "925ee599b0a2724963b0152f81925620062488f051983d472bc47eaa059f3bc3",
+    "svg_sha256": "8abb73f30443fa9bd63882ba7bbcab329b8293ced5cebf7588f49b8411009141"
+  },
+  {
+    "id": "favorites_recommendations",
+    "viewport_css": [
+      390,
+      984
+    ],
+    "png_pixels": [
+      780,
+      1968
+    ],
+    "png": "05_maquetas/png/favorites_recommendations.png",
+    "svg": "05_maquetas/svg/favorites_recommendations.svg",
+    "state": "Maqueta; datos ilustrativos",
+    "png_sha256": "713efbffd7660870a0c15d0162430bb5e3f41981acbfa8d3a53cc70c2228ce21",
+    "svg_sha256": "403b5d89108a3cb9118b882288cd126627b3b0b588d2a4d0dbe2cd07d69611a4"
+  }
+]
