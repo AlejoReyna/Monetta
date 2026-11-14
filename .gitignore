@@ -80,3 +80,6 @@ tools/audit/.env
 tools/audit/secrets/
 tools/audit/**/secrets.json
 *.audit-secrets.json
+
+# Flutter golden diff output
+test/goldens/failures/
