@@ -110,7 +110,8 @@
     -%}
     {%- capture brand_tiles -%}
       {%- for entry in brand_entries -%}
-        {%- render 'monetta-guia-brand-tile', entry: entry, sold_only: true -%}
+        {%- comment -%}As the app: every logo tile shows (a brand not on sale today opens its search); text-only tiles only when sold.{%- endcomment -%}
+        {%- render 'monetta-guia-brand-tile', entry: entry -%}
       {%- endfor -%}
     {%- endcapture -%}
     {%- assign brand_tiles = brand_tiles | strip -%}
