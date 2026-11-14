@@ -88,24 +88,26 @@ void main() {
 
       expect(find.byType(MonettaCardLift), findsOneWidget);
 
-      // Caption: flush with the photo's left edge, 8 pt below its bottom.
+      // Caption: flush with the photo's left edge, under the 8 pt gap and
+      // the 48 pt option slot (UI v4.1: colour changes the variant in place).
       final brand = tester.getRect(find.text('Guess'));
       expect(brand.left, closeTo(photo.left, 0.01));
-      expect(brand.top, closeTo(photo.bottom + 8, 0.01));
+      expect(brand.top, closeTo(photo.bottom + 8 + 48, 0.01));
     },
   );
 
   testWidgets(
     'UI-CAT-02 productGridDelegate without extras uses 8/8 spacing and '
-    'reserves padding, a square photo, the caption and the pill',
+    'reserves padding, a square photo, the option slot and the caption',
     (tester) async {
       final delegate = await _delegateFor(tester, availableWidth: 350);
       expect(delegate.crossAxisCount, 2);
       expect(delegate.crossAxisSpacing, 8);
       expect(delegate.mainAxisSpacing, 8);
-      // tile 171: 12 + 147 photo + caption + 48 pill + 12; the caption is
-      // 8 + 2 + 4 + 0.5 allowance + 1.015 * (15*1.25 + 14*1.3*2 + 15*1.2).
-      expect(delegate.mainAxisExtent, closeTo(307.747, 0.01));
+      // tile 171: 12 + 147 photo + 48 option slot + caption + 12 (no pill in
+      // UI v4.1); the caption reserves two price lines:
+      // 8 + 2 + 4 + 2 + 0.5 + 1.015 * (15*1.25 + 14*1.3*2 + 15*1.2*2).
+      expect(delegate.mainAxisExtent, closeTo(328.017, 0.01));
     },
   );
 
@@ -118,9 +120,9 @@ void main() {
         textScaler: const TextScaler.linear(2),
       );
       expect(delegate.crossAxisCount, 1);
-      // Each type size scales on its own; padding, gaps and the pill do not:
-      // 12 + 326 + caption + 48 + 12, the caption being 14.5 + 1.015 * 146.3.
-      expect(delegate.mainAxisExtent, closeTo(560.994, 0.01));
+      // Each type size scales on its own; padding and gaps do not. Enlarged
+      // text reserves 3 brand and 6 name lines and a taller option slot.
+      expect(delegate.mainAxisExtent, closeTo(853.443, 0.01));
     },
   );
 

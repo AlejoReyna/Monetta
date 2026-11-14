@@ -17,8 +17,8 @@ import '../../support/scripted_catalog_store.dart';
 // "Otras formas de comprar" section (BRIEF 2.5).
 
 const double _inset = 34;
-const String _addLabel = 'AGREGAR A BOLSA';
-const String _pendingLabel = 'AGREGANDO…';
+const String _addLabel = 'Agregar al carrito';
+const String _pendingLabel = 'Agregando…';
 const Key _bottomNavKey = Key('bottom-nav-surface');
 const String _restockLabel = 'Avísame cuando vuelva';
 const String _failureMessage = 'No pudimos agregar la pieza. Intenta de nuevo.';
@@ -79,7 +79,7 @@ void main() {
         expect(_primary(), findsOneWidget);
         expect(tester.getSize(_primary()).height, greaterThanOrEqualTo(48));
         expect(_inPrimary(find.text(_addLabel)), findsOneWidget);
-        expect(find.text('COMPRAR AHORA'), findsOneWidget);
+        expect(find.text('Comprar ahora'), findsOneWidget);
 
         final before = tester.getRect(find.byKey(_bottomNavKey));
         await scrollToEnd(tester);

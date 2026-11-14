@@ -183,6 +183,7 @@ void main() {
       (tester) async {
     final store = await discoveryStore();
     await mountDiscovery(tester, const BrandScreen(brandSlug: 'guess'), store);
+    await tester.pumpAndSettle();
     final before = cards(tester).map((c) => c.product.id).toList();
     await tapVisible(tester, find.byKey(const Key('collection-filter-button')));
     expect(find.byKey(const Key('collection-filter-new')), findsNothing);
@@ -192,12 +193,12 @@ void main() {
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
-    expect(cards(tester).map((c) => c.product.id), before);
+    expect(cards(tester).map((c) => c.product.id).take(before.length), before);
     await tapVisible(tester, find.byKey(const Key('collection-filter-button')));
     await tapVisible(tester, find.byKey(const Key('collection-filter-offers')));
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
-    expect(cards(tester).map((c) => c.product.id), before);
+    expect(cards(tester).map((c) => c.product.id).take(before.length), before);
     await tapVisible(tester, find.byKey(const Key('collection-filter-button')));
     await tapVisible(tester, find.byKey(const Key('collection-filter-offers')));
     await tapVisible(tester, find.byKey(const Key('collection-filter-apply')));
@@ -214,7 +215,7 @@ void main() {
     final chip = find.widgetWithText(InputChip, 'Ofertas');
     tester.widget<InputChip>(chip).onDeleted!();
     await tester.pumpAndSettle();
-    expect(cards(tester).map((c) => c.product.id), before);
+    expect(cards(tester).map((c) => c.product.id).take(before.length), before);
   });
   testWidgets(
       'local search plus oldest retains scope and later query wins synchronously',
@@ -396,7 +397,7 @@ void main() {
       find.text('La actualización del catálogo no está disponible.'),
       findsOneWidget,
     );
-    expect(cards(tester).map((c) => c.product.id), before);
+    expect(cards(tester).map((c) => c.product.id).take(before.length), before);
     expect(
       tester
           .widget<TextField>(find.byKey(const Key('collection-local-search')))

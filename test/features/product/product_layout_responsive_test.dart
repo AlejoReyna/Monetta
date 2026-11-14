@@ -198,11 +198,11 @@ void main() {
           );
           expect(
             accessibleName(tester.getSemantics(find.byKey(kDockPrimaryKey))),
-            contains('AGREGAR A BOLSA'),
+            contains('Agregar al carrito'),
           );
 
           await scrollTo(tester, find.byKey(kBuyNowKey));
-          expectButton(tester, find.byKey(kBuyNowKey), what: 'COMPRAR AHORA');
+          expectButton(tester, find.byKey(kBuyNowKey), what: 'Comprar ahora');
           await scrollTo(tester, find.text('Otras formas de comprar'));
           await tester.tap(find.text('Otras formas de comprar'));
           await tester.pump();

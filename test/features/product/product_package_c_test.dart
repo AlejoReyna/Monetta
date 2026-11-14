@@ -70,7 +70,7 @@ void main() {
 
     // Thumbnails + wishlist + share live on the gallery.
     expect(find.byKey(const ValueKey('thumb-0')), findsOneWidget);
-    expect(find.byTooltip('Guardar'), findsWidgets);
+    expect(find.byTooltip('Guardar en favoritos'), findsWidgets);
     expect(find.byTooltip('Compartir'), findsOneWidget);
 
     // Trust row from the reference strip.
@@ -89,9 +89,9 @@ void main() {
     );
     expect(find.text('Entrega estimada'), findsWidgets);
 
-    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
-    await scrollTo(tester, find.text('COMPRAR AHORA'));
-    expect(find.text('COMPRAR AHORA'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsOneWidget);
+    await scrollTo(tester, find.text('Comprar ahora'));
+    expect(find.text('Comprar ahora'), findsOneWidget);
     await scrollTo(tester, find.text('Apartar'));
     expect(find.text('Apartar'), findsOneWidget);
   });
@@ -177,7 +177,7 @@ void main() {
     expect(store.wishlist.contains(product.id), isFalse);
     await _pumpFicha(tester, store, product.id);
 
-    await tester.tap(find.byTooltip('Guardar').first);
+    await tester.tap(find.byTooltip('Guardar en favoritos').first);
     await tester.pump();
     expect(store.wishlist.contains(product.id), isTrue);
 
@@ -205,7 +205,7 @@ void main() {
     await tester.pump();
     expect(find.text('AGOTADO'), findsWidgets);
     expect(find.text('Avísame cuando vuelva'), findsOneWidget);
-    expect(find.text('AGREGAR A BOLSA'), findsNothing);
+    expect(find.text('Agregar al carrito'), findsNothing);
   });
 
   testWidgets('ficha sin foto no rompe y permite comprar', (tester) async {
@@ -238,7 +238,7 @@ void main() {
     ];
     await _pumpFicha(tester, store, 'test-sin-foto');
     expect(find.text('Bolsa Test Sin Foto'), findsWidgets);
-    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsOneWidget);
   });
 
   testWidgets('quick-view Fig.06: ver, agregar y volver', (tester) async {
@@ -278,7 +278,7 @@ void main() {
     expect(find.byKey(const Key('quick-view-card')), findsOneWidget);
     expect(find.byTooltip('Cerrar vista previa'), findsOneWidget);
     expect(find.byTooltip('Regresar'), findsOneWidget);
-    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsOneWidget);
     expect(find.text('VER PRODUCTO'), findsOneWidget);
     expect(find.textContaining('Últimas'), findsNothing);
 
@@ -324,8 +324,8 @@ void main() {
     await tester.tap(find.text('VER PRODUCTO'));
     await tester.pumpAndSettle();
     expect(find.byType(ProductScreen), findsOneWidget);
-    await scrollTo(tester, find.text('COMPRAR AHORA'));
-    expect(find.text('COMPRAR AHORA'), findsOneWidget);
+    await scrollTo(tester, find.text('Comprar ahora'));
+    expect(find.text('Comprar ahora'), findsOneWidget);
   });
 
   testWidgets('ficha aguanta texto ampliado y modo oscuro', (tester) async {
@@ -353,7 +353,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

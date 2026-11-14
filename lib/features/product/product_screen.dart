@@ -480,7 +480,7 @@ class _ProductScreenState extends State<ProductScreen> {
                       if (inStock) ...[
                         PurchaseDockButton(
                           key: const Key('purchase-dock-primary'),
-                          label: _adding ? 'AGREGANDO…' : 'AGREGAR A BOLSA',
+                          label: _adding ? 'Agregando…' : 'Agregar al carrito',
                           pending: _adding,
                           large: true,
                           onPressed: _adding ? null : () => _add(product),
@@ -488,7 +488,7 @@ class _ProductScreenState extends State<ProductScreen> {
                         const SizedBox(height: BoutiqueSpace.sm),
                         PurchaseOutlineButton(
                           key: const Key('purchase-buy-now'),
-                          label: 'COMPRAR AHORA',
+                          label: 'Comprar ahora',
                           textColor: palette.ink,
                           onPressed: _adding ? null : () => _buyNow(product),
                         ),

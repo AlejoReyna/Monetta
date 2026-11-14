@@ -321,7 +321,7 @@ void main() {
 
   group('PREVIEW-04 the exact variant is added (invariant 4)', () {
     testWidgets(
-        'PREVIEW-04 «AGREGAR A BOLSA» adds the variant chosen, once, then '
+        'PREVIEW-04 «Agregar al carrito» adds the variant chosen, once, then '
         'closes and confirms', (tester) async {
       setPhoneView(tester);
       final store = await scriptedStore();
@@ -568,7 +568,7 @@ void main() {
       final label = tester.widget<Text>(
         find.descendant(
           of: find.byKey(kBuyNowKey),
-          matching: find.text('COMPRAR AHORA'),
+          matching: find.text('Comprar ahora'),
         ),
       );
       expect(label.style!.color, palette.ink);

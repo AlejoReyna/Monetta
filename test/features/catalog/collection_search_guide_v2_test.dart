@@ -68,8 +68,8 @@ void main() {
     });
 
     testWidgets(
-        '«VER PRODUCTO» opens the ficha; the card has no "+" and keeps its heart',
-        (tester) async {
+        'a card opens the quick view and its «Ver producto» opens the ficha; '
+        'the card has no "+" nor pill and keeps its heart', (tester) async {
       final store = await _loadedStore();
       addTearDown(store.dispose);
       await _pumpCollection(
@@ -83,17 +83,14 @@ void main() {
       final card = tester.widgetList<ProductCard>(find.byType(ProductCard));
       expect(card, isNotEmpty);
       final first = card.first.product;
-      final button = find.byKey(Key('view-product-${first.id}'));
-      expect(button, findsOneWidget);
-      expect(
-        find.descendant(of: button, matching: find.text('VER PRODUCTO')),
-        findsOneWidget,
-      );
-      // The card has no purchase shortcut any more; the favourite stays.
+      expect(find.byKey(Key('view-product-${first.id}')), findsNothing);
+      // The card has no purchase shortcut; the favourite stays.
       expect(find.byKey(Key('quick-add-${first.id}')), findsNothing);
       expect(find.byTooltip('Guardar en favoritos'), findsWidgets);
 
-      await tester.tap(button);
+      await tester.tap(find.byType(MonettaProductTile).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ver producto'));
       await tester.pumpAndSettle();
       expect(
         tester.widget<ProductScreen>(find.byType(ProductScreen)).productId,

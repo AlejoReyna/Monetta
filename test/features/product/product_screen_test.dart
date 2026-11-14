@@ -66,7 +66,7 @@ void main() {
     await tester.pump();
 
     expect(find.text(product.title), findsWidgets);
-    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsOneWidget);
     // "Apartar" lives in the secondary purchase section, below the fold.
     await scrollTo(tester, find.text('Apartar'));
     expect(find.text('Apartar'), findsOneWidget);
@@ -103,9 +103,9 @@ void main() {
     );
     await tester.pump();
 
-    await tester.ensureVisible(find.text('AGREGAR A BOLSA'));
+    await tester.ensureVisible(find.text('Agregar al carrito'));
     await tester.pump();
-    await tester.tap(find.text('AGREGAR A BOLSA'));
+    await tester.tap(find.text('Agregar al carrito'));
     await tester.pumpAndSettle();
 
     expect(store.bagQuantity, 1);

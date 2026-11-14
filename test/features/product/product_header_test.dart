@@ -255,7 +255,7 @@ void main() {
       expect(heart, findsOneWidget);
       expect(tester.getSize(heart).width, greaterThanOrEqualTo(48));
       expect(tester.getSize(heart).height, greaterThanOrEqualTo(48));
-      expect(find.byTooltip('Guardar'), findsWidgets);
+      expect(find.byTooltip('Guardar en favoritos'), findsWidgets);
 
       await tester.tap(heart);
       await tester.pump();
@@ -265,7 +265,7 @@ void main() {
       await tester.tap(heart);
       await tester.pump();
       expect(store.wishlist.contains(product.id), isFalse);
-      expect(find.byTooltip('Guardar'), findsWidgets);
+      expect(find.byTooltip('Guardar en favoritos'), findsWidgets);
     });
 
     testWidgets('HDR-03 the bag tab opens the bag', (tester) async {
@@ -328,7 +328,7 @@ void main() {
 
       expect(find.byKey(kHeaderFavoriteKey), findsNothing);
       expect(find.byType(BagAction), findsNothing);
-      expect(inAppBar(find.byTooltip('Guardar')), findsNothing);
+      expect(inAppBar(find.byTooltip('Guardar en favoritos')), findsNothing);
       expect(
         inAppBar(
           find.byWidgetPredicate(

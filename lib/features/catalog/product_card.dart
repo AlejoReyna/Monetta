@@ -70,7 +70,7 @@ class ProductCard extends StatefulWidget {
     this.density = ProductTileDensity.grid,
     this.showWishlist = true,
     this.showQuickAdd = false,
-    this.showViewProduct = true,
+    this.showViewProduct = false,
     this.onQuickView,
     this.onTap,
     this.initialVariantId,
@@ -98,11 +98,13 @@ class ProductCard extends StatefulWidget {
   final bool showWishlist;
 
   /// Retained for source compatibility. The card no longer draws a "+": the
-  /// quick view carries «AGREGAR A BOLSA». The value is ignored.
+  /// quick view carries «Agregar al carrito». The value is ignored.
   final bool showQuickAdd;
 
-  /// Draws the brown «VER PRODUCTO» pill under the price. On by default; the
-  /// grids reserve [kTileFooterExtent] per row for it.
+  /// Draws a «VER PRODUCTO» pill under the price. Off by default: the UI v4.1
+  /// card is photo, brand, name and price, and the quick view carries «Ver
+  /// producto». A grid that turns it on passes [kTileFooterExtent] as its
+  /// footer reserve.
   final bool showViewProduct;
 
   /// Overrides what a long press does. By default a long press opens the

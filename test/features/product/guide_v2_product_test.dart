@@ -10,7 +10,7 @@ void main() {
   setUpAll(mockPathProvider);
 
   group('PREVIEW-GUIDE quick view (slide 12)', () {
-    testWidgets('no «COMPRAR AHORA»; thumbnails, add and ver producto stay',
+    testWidgets('no «Comprar ahora»; thumbnails, add and ver producto stay',
         (tester) async {
       setPhoneView(tester, height: 1700);
       final store = await loadedStore();
@@ -23,9 +23,9 @@ void main() {
       );
       await pumpQuickView(tester, store, product);
 
-      expect(find.text('COMPRAR AHORA'), findsNothing);
+      expect(find.text('Comprar ahora'), findsNothing);
       expect(find.byKey(const Key('quick-view-buy-now')), findsNothing);
-      expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
+      expect(find.text('Agregar al carrito'), findsOneWidget);
       expect(find.byKey(const Key('quick-view-view-product')), findsOneWidget);
       expect(find.text('VER PRODUCTO'), findsOneWidget);
       // Thumbnails under the gallery.
@@ -83,7 +83,7 @@ void main() {
       expect(hasReliableColorOptions(colored), isTrue);
       await pumpQuickView(tester, store, colored);
       expect(find.text('Colores'), findsOneWidget);
-      expect(find.text('COMPRAR AHORA'), findsNothing);
+      expect(find.text('Comprar ahora'), findsNothing);
     });
   });
 
@@ -125,11 +125,11 @@ void main() {
       final buy = find.byKey(kBuyNowKey);
       final addLabel = find.descendant(
         of: add,
-        matching: find.text('AGREGAR A BOLSA'),
+        matching: find.text('Agregar al carrito'),
       );
       final buyLabel = find.descendant(
         of: buy,
-        matching: find.text('COMPRAR AHORA'),
+        matching: find.text('Comprar ahora'),
       );
       expect(addLabel, findsOneWidget);
       expect(buyLabel, findsOneWidget);

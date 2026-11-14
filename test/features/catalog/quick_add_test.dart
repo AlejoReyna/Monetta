@@ -21,7 +21,7 @@ import '../../support/scripted_catalog_store.dart';
 // silently.
 //
 // Since the card redesign no Monetta card draws the "+": tapping a card opens
-// the quick view, whose «AGREGAR A BOLSA» adds the exact variant. The control
+// the quick view, whose «Agregar al carrito» adds the exact variant. The control
 // stays public API and keeps its own tests through `PlusCard` (a tile with
 // the control in its photo slot); the surface-level tests below assert that
 // the real surfaces show no "+" and that the quick view adds from the card.
@@ -159,8 +159,8 @@ void main() {
     });
 
     testWidgets(
-        'QUICK-01 CollectionScreen: no card has a "+", every card has its '
-        '«VER PRODUCTO»', (tester) async {
+        'QUICK-01 CollectionScreen: no card has a "+" nor a «VER PRODUCTO» '
+        'pill (UI v4.1)', (tester) async {
       setPhoneView(tester, height: 1600);
       final store = await scriptedStore();
       await tester.pumpWidget(
@@ -180,8 +180,8 @@ void main() {
         expect(quickAddOf(card.product), findsNothing);
         expect(
           find.byKey(Key('view-product-${card.product.id}')),
-          findsOneWidget,
-          reason: '${card.product.title} has its pill',
+          findsNothing,
+          reason: '${card.product.title} has no pill',
         );
       }
       expect(find.byTooltip(kQuickViewTooltip), findsNothing);
@@ -213,28 +213,22 @@ void main() {
       }
 
       testWidgets(
-          'QUICK-01 a Monetta catalog card has «VER PRODUCTO» keyed by the '
-          'Shopify id and no "+"; external pieces have neither',
-          (tester) async {
+          'QUICK-01 catalog cards have neither «VER PRODUCTO» nor "+"; a '
+          'sold-out piece still shows AGOTADO', (tester) async {
         final (_, items, single, several) = await mount(tester);
         final soldOutId = items[1].shopifyProductId!;
 
         for (final product in [single, several]) {
           expect(
             find.byKey(Key('view-product-${product.id}')),
-            findsOneWidget,
+            findsNothing,
           );
           expect(quickAddOf(product), findsNothing);
         }
-        // A sold-out Monetta piece still opens its page.
-        expect(find.byKey(Key('view-product-$soldOutId')), findsOneWidget);
+        expect(find.byKey(Key('view-product-$soldOutId')), findsNothing);
         expect(find.text('AGOTADO'), findsOneWidget);
         expect(find.byWidgetPredicate(_isQuickAddKey), findsNothing);
-        expect(
-          find.text('VER PRODUCTO'),
-          findsNWidgets(3),
-          reason: 'the three Monetta pieces; the external one has none',
-        );
+        expect(find.text('VER PRODUCTO'), findsNothing);
       });
 
       testWidgets(
@@ -328,7 +322,7 @@ void main() {
       final store = await _mountCard(tester, singleVariantAssetProduct);
       final product = singleVariantAssetProduct(store);
 
-      await tester.tap(find.byTooltip('Guardar'));
+      await tester.tap(find.byTooltip('Guardar en favoritos'));
       await tester.pumpAndSettle();
 
       expect(store.wishlist.contains(product.id), isTrue);
@@ -397,7 +391,7 @@ void main() {
 
     testWidgets(
         'QUICK-02 tapping a catalog card opens the quick view, and its '
-        '«AGREGAR A BOLSA» adds exactly that variant once', (tester) async {
+        '«Agregar al carrito» adds exactly that variant once', (tester) async {
       setPhoneView(tester, height: 1600);
       final store = await scriptedStore();
       final product = singleVariantAssetProduct(store);
@@ -481,8 +475,10 @@ void main() {
         expect(store.bagLines, hasLength(1));
         expect(store.bagLines.single.variant.id, second.id);
         expect(store.bagLines.single.quantity, 1);
-        expect(_closeQuickView(), findsNothing, reason: 'the sheet closed');
-        expect(_inMiniCart(), findsOneWidget);
+        // UI v4.1: the quick view stays, confirms and leaves the cart closed.
+        expect(_closeQuickView(), findsOneWidget, reason: 'the sheet stays');
+        expect(find.text('Agregado al carrito'), findsOneWidget);
+        expect(_inMiniCart(), findsNothing);
         await flush(tester);
       });
     }
@@ -501,12 +497,6 @@ void main() {
       final product = chipProduct();
       expect(hasReliableColorOptions(product), isFalse, reason: 'precondition');
       await choiceFlow(tester, (_) => product, extra: [product]);
-    });
-
-    testWidgets(
-        'QUICK-03 swatch piece of the bundled catalog: explicit '
-        'choice, exact second variant', (tester) async {
-      await choiceFlow(tester, reliableAssetProduct);
     });
 
     testWidgets(
@@ -701,7 +691,8 @@ void main() {
 
     testWidgets(
         'CART-04 choosing the sold-out variant turns the primary action into '
-        '"Avísame cuando vuelva" and adds nothing', (tester) async {
+        'nothing to buy: no add button, no restock (it lives on the PDP)',
+        (tester) async {
       final product = chipProduct(available: const [true, false, true]);
       expect(product.isInStock, isTrue, reason: 'precondition: still sells');
       final store = await _mountCard(tester, (_) => product, extra: [product]);
@@ -711,11 +702,9 @@ void main() {
       await tester.pumpAndSettle();
       await pickVariant(tester, product, soldOutVariant);
 
-      expect(inPrimary(find.text(kRestockLabel)), findsOneWidget);
+      expect(primaryButton(), findsNothing);
+      expect(find.text(kRestockLabel), findsNothing);
       expect(find.text(kAddLabel), findsNothing);
-
-      await tester.tap(primaryButton());
-      await tester.pumpAndSettle();
       expect(store.addCalls, 0);
       expect(store.bagQuantity, 0);
       expect(_inMiniCart(), findsNothing);

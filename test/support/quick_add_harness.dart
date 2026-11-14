@@ -35,11 +35,11 @@ const Key kQuickViewPrimaryKey = Key('quick-view-primary');
 const Key kQuickViewViewProductKey = Key('quick-view-view-product');
 const Key kQuickViewErrorKey = Key('quick-view-error');
 
-const String kAddLabel = 'AGREGAR A BOLSA';
-const String kPendingLabel = 'AGREGANDO…';
+const String kAddLabel = 'Agregar al carrito';
+const String kPendingLabel = 'Agregando…';
 const String kChooseLabel = 'Elige una opción';
 const String kRestockLabel = 'Avísame cuando vuelva';
-const String kViewProductLabel = 'VER PRODUCTO';
+const String kViewProductLabel = 'Ver producto';
 const String kAddFailureMessage =
     'No pudimos agregar la pieza. Intenta de nuevo.';
 const String kQuickViewTooltip = 'Vista rápida';
@@ -71,6 +71,9 @@ Product swatchProduct({
           title: titles[i],
           price: 1500.0 + i * 100,
           available: available[i],
+          // Shopify names the colour option explicitly; only then is a
+          // swatch reliable.
+          selectedOptions: {'Color': titles[i]},
         ),
     ],
   );
@@ -490,7 +493,7 @@ Rect? heartRectOf(WidgetTester tester, Finder inside) {
     of: inside,
     matching: find.byType(MonettaProductTile),
   );
-  final heart = find.descendant(of: tile, matching: find.byTooltip('Guardar'));
+  final heart = find.descendant(of: tile, matching: find.byTooltip('Guardar en favoritos'));
   return heart.evaluate().isEmpty ? null : tester.getRect(heart.first);
 }
 

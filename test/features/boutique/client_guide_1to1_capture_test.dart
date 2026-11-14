@@ -238,7 +238,7 @@ void main() {
     );
     await tester.tap(find.text('Abrir'));
     await tester.pumpAndSettle();
-    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsOneWidget);
     await captureClientGuide(tester, 'p-07-preview');
   });
 
@@ -253,7 +253,7 @@ void main() {
       ),
       size: _phone,
     );
-    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsOneWidget);
     await captureClientGuide(tester, 'p-08-producto');
   });
 

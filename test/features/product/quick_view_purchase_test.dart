@@ -232,7 +232,7 @@ void main() {
 
   group('CART-03 pending and failing adds in the sheet', () {
     testWidgets(
-        'CART-03 while pending the primary button says "AGREGANDO…", is '
+        'CART-03 while pending the primary button says "Agregando…", is '
         'disabled, and a second tap adds nothing', (tester) async {
       await withSemantics(tester, () async {
         final (store, product) = await _open(tester);

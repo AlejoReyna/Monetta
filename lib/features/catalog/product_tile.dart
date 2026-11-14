@@ -273,9 +273,10 @@ extension ProductTileVariantMetrics on ProductTileVariant {
 
 /// Total height of one tile [tileWidth] wide.
 ///
-/// A card is its padding, a square photograph, the caption and (when
-/// [footerExtent] is not zero) the «VER PRODUCTO» pill. Grids and rails use
-/// this instead of repeating the arithmetic.
+/// A card is its padding, a square photograph, the option selector, the
+/// caption and (only when [footerExtent] is given) a footer control. The
+/// UI v4.1 card has no «VER PRODUCTO» pill: the quick view carries it. Grids
+/// and rails use this instead of repeating the arithmetic.
 double productTileExtent({
   required double tileWidth,
   required TextScaler textScaler,
@@ -284,10 +285,7 @@ double productTileExtent({
   int priceLines = 1,
   double? footerExtent,
 }) {
-  final footer = footerExtent ??
-      (variant == ProductTileVariant.card
-          ? _tileFooterExtent(textScaler, tileWidth - 2 * density.cardPadding)
-          : 0);
+  final footer = footerExtent ?? 0;
   if (variant == ProductTileVariant.edgeToEdge) {
     return tileWidth * density.imageHeightFactor +
         variant.captionExtent(density, textScaler) +
@@ -451,7 +449,7 @@ class TileViewProductButton extends StatelessWidget {
 
 // Serif caption of the card. The family is bundled; the fallback list keeps a
 // platform serif until it is registered.
-TextStyle _tileSerif({
+TextStyle _tileText({
   required double size,
   required FontWeight weight,
   required Color color,
@@ -607,7 +605,7 @@ class MonettaProductTile extends StatelessWidget {
                     color: palette.ink,
                     height: _brandLineHeight,
                   )
-                : _tileSerif(
+                : _tileText(
                     size: density.cardBrandSize,
                     weight: FontWeight.w700,
                     color: palette.ink,
@@ -629,7 +627,7 @@ class MonettaProductTile extends StatelessWidget {
                   color: palette.inkMuted,
                   height: _nameLineHeight,
                 )
-              : _tileSerif(
+              : _tileText(
                   size: density.cardNameSize,
                   weight: FontWeight.w400,
                   color: palette.ink,
@@ -656,7 +654,7 @@ class MonettaProductTile extends StatelessWidget {
       final painter = TextPainter(
         text: TextSpan(
           text: value,
-          style: _tileSerif(
+          style: _tileText(
             size: size,
             weight: weight,
             color: context.boutique.ink,
@@ -780,16 +778,30 @@ class MonettaProductTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: fill ? MainAxisSize.max : MainAxisSize.min,
                   children: [
-                    SizedBox(
-                      height: photoHeight,
-                      width: double.infinity,
-                      child: _TileImage(
-                        data: data,
-                        variant: variant,
-                        quickAction: quickAction,
-                        overlay: imageOverlay,
+                    // Square whenever the cell holds it (the reserve of
+                    // [productTileExtent]); shorter only in a cell that
+                    // cannot, so the caption is never pushed out.
+                    if (photoHeight >= constraints.maxWidth - 0.5)
+                      AspectRatio(
+                        aspectRatio: variant.photoAspectRatio(density),
+                        child: _TileImage(
+                          data: data,
+                          variant: variant,
+                          quickAction: quickAction,
+                          overlay: imageOverlay,
+                        ),
+                      )
+                    else
+                      SizedBox(
+                        height: photoHeight,
+                        width: double.infinity,
+                        child: _TileImage(
+                          data: data,
+                          variant: variant,
+                          quickAction: quickAction,
+                          overlay: imageOverlay,
+                        ),
                       ),
-                    ),
                     SizedBox(height: variant.captionGap),
                     SizedBox(height: optionHeight, child: optionControl),
                     _caption(context),
@@ -908,7 +920,7 @@ class _PriceLine extends StatelessWidget {
           maxLines: 1,
           softWrap: false,
           style: card
-              ? _tileSerif(
+              ? _tileText(
                   size: density.cardPriceSize,
                   weight: FontWeight.w700,
                   color: palette.ink,
@@ -928,7 +940,7 @@ class _PriceLine extends StatelessWidget {
               maxLines: 1,
               softWrap: false,
               style: card
-                  ? _tileSerif(
+                  ? _tileText(
                       size: density.cardPriceSize - 2,
                       weight: FontWeight.w400,
                       color: palette.inkMuted,
@@ -1188,9 +1200,9 @@ int productGridColumns(double width) =>
 /// A grid delegate sized from the real tile width and the shopper's own text
 /// scale, so large type produces taller rows instead of clipped captions.
 ///
-/// [spacing] and [rowSpacing] default to the [variant]'s own gaps. A card
-/// reserves its «VER PRODUCTO» pill by default ([footerExtent] null); pass 0
-/// only for a grid whose cards show none. [priceLines] is 2 when any product
+/// [spacing] and [rowSpacing] default to the [variant]'s own gaps. Pass
+/// [footerExtent] (e.g. [kTileFooterExtent]) only for a grid whose cards
+/// draw a footer control. [priceLines] is 2 when any product
 /// of the grid carries a compare-at price (see [tilePriceLinesFor]).
 SliverGridDelegate productGridDelegate(
   BuildContext context, {

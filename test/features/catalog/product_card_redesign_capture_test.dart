@@ -64,7 +64,8 @@ void main() {
       tiles.every((tile) => tile.variant == ProductTileVariant.card),
       isTrue,
     );
-    expect(find.text('VER PRODUCTO'), findsWidgets);
+    // UI v4.1: the card carries no «VER PRODUCTO» pill.
+    expect(find.text('VER PRODUCTO'), findsNothing);
   }
 
   testWidgets('a-01 coleccion Bolsas (claro)', (tester) async {

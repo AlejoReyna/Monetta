@@ -5,6 +5,7 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart' show OrdinalSortKey;
 import 'package:flutter/services.dart';
 
 import '../../app/media/monetta_image.dart';
@@ -244,7 +245,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     }
   }
 
-  /// The two page buttons, under the stock line. «AGREGAR A BOLSA» keeps its
+  /// The two page buttons, under the stock line. «Agregar al carrito» keeps its
   /// key and every state of the old bar (choose, restock, pending).
   Widget _buildActions(BoutiquePalette palette, {required bool inStock}) {
     final chosen = _variantIndex;
@@ -257,7 +258,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
       label = 'Agotado';
       onPressed = null;
     } else {
-      label = _adding ? 'AGREGANDO…' : 'AGREGAR A BOLSA';
+      label = _adding ? 'Agregando…' : 'Agregar al carrito';
       onPressed = _currentProduct == null ? null : _addToBag;
     }
     return Column(
@@ -315,7 +316,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
         if (_currentProduct != null)
           PurchaseOutlineButton(
             key: const Key('quick-view-view-product'),
-            label: 'VER PRODUCTO',
+            label: 'Ver producto',
             textColor: palette.action,
             onPressed: _viewFullProduct,
           ),
@@ -370,20 +371,30 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            PageView.builder(
-              controller: _gallery,
-              itemCount: images.length,
-              onPageChanged: (i) => setState(() => _page = i),
-              itemBuilder: (_, i) => InkWell(
-                onTap: _viewFullProduct,
-                child: PackshotBlend(
-                  ground: palette.surfaceDeep,
-                  child: MonettaImage(
-                    url: images[i],
-                    fit: BoxFit.contain,
-                    cacheWidth: MediaUrl.cardWidth,
-                    fallbackLabel:
-                        '${shopperProductName(product.title)} · Monetta',
+            // Read after the close button (UI v4.1 order).
+            Semantics(
+              container: true,
+              sortKey: const OrdinalSortKey(1),
+              child: PageView.builder(
+                controller: _gallery,
+                itemCount: images.length,
+                onPageChanged: (i) => setState(() => _page = i),
+                itemBuilder: (_, i) => Semantics(
+                  // Read in place of the photograph; tapping it opens the PDP.
+                  label: 'Foto ${i + 1} de ${images.length}',
+                  hint: 'Abre el producto',
+                  child: InkWell(
+                    onTap: _viewFullProduct,
+                    child: PackshotBlend(
+                      ground: palette.surfaceDeep,
+                      child: MonettaImage(
+                        url: images[i],
+                        fit: BoxFit.contain,
+                        cacheWidth: MediaUrl.cardWidth,
+                        fallbackLabel:
+                            '${shopperProductName(product.title)} · Monetta',
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -397,15 +408,20 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
             Positioned(
               top: BoutiqueSpace.xs,
               right: BoutiqueSpace.xs,
-              child: _photoControl(
-                key: const Key('quick-view-close'),
-                tooltip: 'Cerrar vista previa',
-                icon: Icons.close,
-                size: 24,
-                palette: palette,
-                onPressed: widget.embedded
-                    ? () => DuoWorkspace.showBag(context)
-                    : null,
+              child: Semantics(
+                // The close button is read first (UI v4.1 order).
+                container: true,
+                sortKey: const OrdinalSortKey(0),
+                child: _photoControl(
+                  key: const Key('quick-view-close'),
+                  tooltip: 'Cerrar vista previa',
+                  icon: Icons.close,
+                  size: 24,
+                  palette: palette,
+                  onPressed: widget.embedded
+                      ? () => DuoWorkspace.showBag(context)
+                      : null,
+                ),
               ),
             ),
           ],
