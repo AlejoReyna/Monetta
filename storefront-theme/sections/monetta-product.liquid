@@ -1,7 +1,7 @@
 {%- comment -%}
   Product page (product_screen.dart), laid out as the client's 29 Oct reference: gallery with previous / next arrows, the heart
   and a zoom button, thumbnails, brand and name in Playfair, price with the real compare-at and -X%, colour swatches, the trust
-  row, «Agregar a bolsa» and «Comprar ahora» (adds the exact variant, then goes to the checkout), availability, the WhatsApp
+  row, «Agregar al carrito» and «Comprar ahora» (adds the exact variant, then goes to the checkout), availability, the WhatsApp
   apartado, collapsed accordions and app blocks (Loox and the like). The nav bar stays on screen (layout/monetta.liquid).
 
   Everything commercial is rendered by Shopify at request time: price, compare-at, availability, options, the selected variant.
@@ -194,7 +194,7 @@
             {%- if current.available -%}
               <input type="hidden" name="quantity" value="1">
               <div class="buy-stack">
-                <button type="submit" name="add" class="btn btn--primary btn--block" data-add><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agregar a bolsa</span></button>
+                <button type="submit" name="add" class="btn btn--primary btn--block" data-add><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agregar al carrito</span></button>
                 {%- if show_pay -%}
                   {%- comment -%}Without JavaScript Shopify adds the piece and follows return_to; with it monetta-product.js adds through the same
                   exact-variant path and then opens the checkout instead of the bag.{%- endcomment -%}
@@ -308,7 +308,7 @@
 
   <div class="purchase-dock" data-purchase-dock>
     {%- if current.available -%}
-      <button type="submit" form="{{ form_id }}" name="add" class="btn btn--primary" data-add><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agregar a bolsa</span></button>
+      <button type="submit" form="{{ form_id }}" name="add" class="btn btn--primary" data-add><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agregar al carrito</span></button>
     {%- else -%}
       <button type="submit" form="{{ form_id }}" name="add" class="btn btn--primary" data-add disabled><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agotado</span></button>
     {%- endif -%}

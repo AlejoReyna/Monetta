@@ -172,8 +172,10 @@
     const price = root.querySelector('[data-quick-view-price]');
     const photo = root.querySelector('[data-quick-view-photo]');
     const stock = root.querySelector('[data-quick-view-stock]');
+    const added = root.querySelector('[data-quick-view-added]');
     let chosen = null;
     const update = () => {
+      if (added) added.hidden = true;
       const picked = groups.map((group) => group.querySelector('input:checked')?.value ?? null);
       const complete = picked.every((value) => value !== null);
       chosen = groups.length === 0 ? variants[0] : complete ? variants.find((v) => v.options.every((o, i) => o === picked[i])) || null : null;
@@ -197,7 +199,7 @@
         stock.dataset.tone = !chosen ? 'idle' : low || !ready ? 'alert' : 'ok';
       }
       add.disabled = !ready;
-      hint.textContent = ready ? '' : !complete ? 'Elige una opción para agregarla a tu bolsa.' : !chosen ? 'Esa combinación no está disponible.' : 'Esta opción está agotada.';
+      hint.textContent = ready ? '' : !complete ? 'Elige una opción para agregarla al carrito.' : !chosen ? 'Esa combinación no está disponible.' : 'Esta opción está agotada.';
       hint.hidden = ready;
     };
     root.addEventListener('change', update);
@@ -208,12 +210,14 @@
         thumb.setAttribute('aria-current', 'true');
       });
     });
+    // UI v4.1: the preview stays open and confirms in place; the bag is not opened.
     add.addEventListener('click', async () => {
       if (!chosen?.available || add.dataset.pending) return;
       add.dataset.pending = 'true';
-      window.Monetta.closeDialog(dialog, { restoreFocus: false });
+      if (added) added.hidden = true;
       const option = groups.length ? ` (${chosen.options.join(' / ')})` : '';
-      await window.Monetta.cart.add({ id: chosen.id, quantity: 1, name: `${root.dataset.productTitle || ''}${option}`, trigger });
+      const result = await window.Monetta.cart.add({ id: chosen.id, quantity: 1, name: `${root.dataset.productTitle || ''}${option}`, trigger: add, open: false });
+      if (result?.ok && added) added.hidden = false;
       delete add.dataset.pending;
     });
     update();

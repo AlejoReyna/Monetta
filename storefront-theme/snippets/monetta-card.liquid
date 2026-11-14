@@ -1,8 +1,8 @@
 {%- doc -%}
   The shared product card (MonettaProductTile), as the client's 29 Oct reference: one warm card with a 6px radius holding a square
-  photo multiplied onto the card ground, the heart, brand, name and price in Playfair, then the brown «VER PRODUCTO» pill.
-  Tapping the card opens the preview (#quick-view, assets/monetta-guia.js); the pill and a modified click (new tab) open the
-  product page, and without JavaScript the whole card is a plain link to it. Everything shown is read from the product at render
+  photo multiplied onto the card ground, the heart, brand, name and price. UI v4.1 draws no «VER PRODUCTO» pill: tapping the
+  card opens the preview (#quick-view, assets/monetta-guia.js), whose «Ver producto» opens the product page; a modified click
+  (new tab) opens it directly, and without JavaScript the whole card is a plain link to it. Everything shown is read from the product at render
   time (price, compare-at, availability); nothing is cached.
 
   @param {object} product - Shopify product.
@@ -12,7 +12,7 @@
   @param {string} [sizes] - The sizes attribute of the photo's slot.
   @param {string} [xl_widths] - Additional image candidates from 1280px only; mobile cards and compact rails keep 600px.
   @param {boolean} [listing_card] - Reserve empty metadata slots for XL collection row alignment.
-  @param {boolean} [view_button] - Pass false to hide the «VER PRODUCTO» pill; every grid and rail card shows it.
+  @param {boolean} [view_button] - Pass true to add a «Ver producto» pill under the price; off by default (UI v4.1).
 {%- enddoc -%}
 {%- liquid
   assign density = density | default: 'grid'
@@ -20,9 +20,9 @@
   assign variant = product.selected_or_first_available_variant
   assign in_stock = product.available
   assign currency = cart.currency.iso_code
-  assign show_view = true
-  if view_button == false or density == 'mini'
-    assign show_view = false
+  assign show_view = false
+  if view_button == true and density != 'mini'
+    assign show_view = true
   endif
   assign pct = 0
   if in_stock and variant.compare_at_price > variant.price

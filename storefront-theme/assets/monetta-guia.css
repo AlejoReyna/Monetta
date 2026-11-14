@@ -1718,6 +1718,12 @@ img.guia-menu__icon {
   color: var(--color-ink-muted);
 }
 
+.quick-view__added {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-success);
+}
+
 @media (min-width: 1024px) {
   #quick-view .overlay__panel {
     width: min(880px, 92vw);

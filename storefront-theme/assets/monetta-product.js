@@ -414,11 +414,13 @@
     // The pressed button gets the focus back when the bag closes. On phones that is the purchase dock's, outside the form.
     const pressed = event.submitter?.matches?.('[data-add]') ? event.submitter : buttons.find((button) => button.offsetParent !== null);
     const buyNow = event.submitter?.matches?.('[data-buy-now]') ? event.submitter : null;
-    const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: pressed || $('[data-add]', form), open: !buyNow });
+    // UI v4.1: «Agregar conserva PDP» — the bag is not opened; the page confirms in place.
+    const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: pressed || $('[data-add]', form), open: false });
     if (result.ok && buyNow) {
       window.location.assign(buyNow.value);
       return;
     }
+    if (result.ok) Monetta.toast?.('Agregado al carrito');
     buttons.forEach((button) => Monetta.setPending(button, false));
     adding = false;
     if (root.dataset.selection === 'valid') lockPurchase(root, false);
