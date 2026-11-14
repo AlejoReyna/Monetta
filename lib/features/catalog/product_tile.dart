@@ -150,6 +150,27 @@ const BorderRadius kProductCardRadius = BorderRadius.all(Radius.circular(6));
 /// Height a grid reserves under a tile that carries a footer control.
 const double kTileFooterExtent = _footerGap + 48;
 
+/// Lines a card's brand and name may take at enlarged text sizes: the same
+/// reserve [productTileExtent] makes, so a rail cell always holds the caption.
+const int _enlargedBrandLines = 3;
+const int _enlargedNameLines = 6;
+
+/// Height of the option selector under the photograph («Elegir opción»), as
+/// laid out in the card and reserved by [productTileExtent].
+double _optionExtent(TextScaler scaler, double contentWidth) {
+  final painter = TextPainter(
+    text: TextSpan(
+      text: 'Elegir opción',
+      style: boutiqueText(size: 12, height: 1.3),
+    ),
+    textDirection: TextDirection.ltr,
+    textScaler: scaler,
+  )..layout(maxWidth: math.max(1, contentWidth - 22));
+  final extent = math.max(48.0, painter.height + 16);
+  painter.dispose();
+  return extent;
+}
+
 double _tileFooterExtent(TextScaler scaler, double width) {
   final painter = TextPainter(
     text: TextSpan(text: 'VER PRODUCTO', style: boutiqueText(size: 13)),
@@ -174,10 +195,10 @@ double _cardCaptionExtent(
   priceLines = priceLines < 2 ? 2 : priceLines;
   final text = textScaler.scale(density.cardBrandSize) *
           _brandLineHeight *
-          (enlarged ? 3 : 1) +
+          (enlarged ? _enlargedBrandLines : 1) +
       textScaler.scale(density.cardNameSize) *
           _nameLineHeight *
-          (enlarged ? 6 : density.nameMaxLines) +
+          (enlarged ? _enlargedNameLines : density.nameMaxLines) +
       textScaler.scale(density.cardPriceSize) * _priceLineHeight * priceLines;
   // The engine rounds each line box, which can add a fraction of a pixel per
   // line (up to about 1% at large sizes). A small proportional allowance plus
@@ -276,7 +297,7 @@ double productTileExtent({
   return padding +
       (tileWidth - 2 * padding) +
       variant.captionExtent(density, textScaler, priceLines: priceLines) +
-      48 +
+      _optionExtent(textScaler, tileWidth - 2 * padding) +
       footer +
       padding;
 }
@@ -576,9 +597,9 @@ class MonettaProductTile extends StatelessWidget {
             brand,
             maxLines:
                 StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
-                    ? null
+                    ? _enlargedBrandLines
                     : 1,
-            overflow: TextOverflow.clip,
+            overflow: TextOverflow.ellipsis,
             style: variant == ProductTileVariant.edgeToEdge
                 ? boutiqueText(
                     size: density.brandSize,
@@ -599,12 +620,9 @@ class MonettaProductTile extends StatelessWidget {
           data.title,
           maxLines:
               StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
-                  ? null
+                  ? _enlargedNameLines
                   : density.nameMaxLines,
-          overflow:
-              StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
-                  ? TextOverflow.visible
-                  : TextOverflow.ellipsis,
+          overflow: TextOverflow.ellipsis,
           style: variant == ProductTileVariant.edgeToEdge
               ? boutiqueText(
                   size: density.nameSize,
@@ -686,7 +704,7 @@ class MonettaProductTile extends StatelessWidget {
           density.cardNameSize,
           _nameLineHeight,
           FontWeight.w400,
-          lines: enlarged ? null : density.nameMaxLines,
+          lines: enlarged ? _enlargedNameLines : density.nameMaxLines,
         ).height +
         (data.brand == null
             ? 0
@@ -696,7 +714,7 @@ class MonettaProductTile extends StatelessWidget {
                   density.cardBrandSize,
                   _brandLineHeight,
                   FontWeight.w700,
-                  lines: enlarged ? null : 1,
+                  lines: enlarged ? _enlargedBrandLines : 1,
                 ).height) +
         (eyebrow == null
             ? 0
@@ -734,16 +752,10 @@ class MonettaProductTile extends StatelessWidget {
                 // is pinned to the foot so every card of a row lines up. On
                 // its own the card is as tall as its content.
                 final fill = constraints.hasTightHeight;
-                final optionText = TextPainter(
-                  text: TextSpan(
-                    text: data.variantLabel ?? 'Elegir opción',
-                    style: boutiqueText(size: 12, height: 1.3),
-                  ),
-                  textDirection: Directionality.of(context),
-                  textScaler: MediaQuery.textScalerOf(context),
-                )..layout(maxWidth: math.max(1, constraints.maxWidth - 22));
-                final optionHeight = math.max(48.0, optionText.height + 16);
-                optionText.dispose();
+                final optionHeight = _optionExtent(
+                  MediaQuery.textScalerOf(context),
+                  constraints.maxWidth,
+                );
                 final caption =
                     _measuredCaptionExtent(context, constraints.maxWidth);
                 final footerHeight = footer == null

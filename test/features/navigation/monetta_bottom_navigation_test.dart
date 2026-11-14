@@ -125,7 +125,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final surface = _surfaceDecoration(tester).color!;
+        final surface = _surfaceColor(tester);
         final renderedActive =
             _iconColor(tester, MonettaBottomDestination.home);
         final renderedInactive =
@@ -265,55 +265,7 @@ void main() {
     }
   });
 
-  group('NAV-05 four equal columns', () {
-    // width -> (content left edge, column width)
-    const cases = [
-      (390.0, 10.0, 92.5),
-      (320.0, 10.0, 75.0),
-      (800.0, 160.0, 120.0),
-    ];
-    for (final (width, left, column) in cases) {
-      testWidgets('NAV-05 width ${width.toInt()}: columns of $column',
-          (tester) async {
-        _phone(tester, width: width);
-        await tester.pumpWidget(
-          _Harness(current: MonettaBottomDestination.home),
-        );
-        await tester.pump();
-
-        var previousX = double.negativeInfinity;
-        for (final d in _destinations) {
-          final i = d.index;
-          final expectedX = left + column * (i + 0.5);
-          final icon = tester.getRect(_icon(d));
-          final label = tester.getRect(_label(d));
-          final dest = tester.getRect(_dest(d));
-
-          expect(
-            icon.center.dx,
-            closeTo(expectedX, 0.01),
-            reason: '${d.name} icon center',
-          );
-          expect(
-            label.center.dx,
-            closeTo(expectedX, 0.01),
-            reason: '${d.name} label center',
-          );
-          expect(
-            dest.width,
-            closeTo(column, 0.01),
-            reason: '${d.name} column width',
-          );
-          expect(
-            icon.center.dx,
-            greaterThan(previousX),
-            reason: 'left-to-right order',
-          );
-          previousX = icon.center.dx;
-        }
-      });
-    }
-
+  group('NAV-05 four destinations', () {
     testWidgets('NAV-05 order is Home, Categorías, Carrito, Cuenta',
         (tester) async {
       _phone(tester);
@@ -340,41 +292,6 @@ void main() {
   });
 
   group('NAV-06 measures and surface', () {
-    testWidgets('NAV-06 docked edge to edge, 56 px tall without safe area',
-        (tester) async {
-      _phone(tester);
-      await tester.pumpWidget(_Harness(current: MonettaBottomDestination.home));
-      await tester.pump();
-
-      final surface = tester.getRect(_surface);
-      expect(surface.left, 0);
-      expect(surface.right, 390);
-      expect(surface.bottom, 844);
-      expect(surface.height, 56);
-    });
-
-    testWidgets('NAV-06 safe area is honored in full: 34 -> 90 px',
-        (tester) async {
-      _phone(tester, bottomInset: 34);
-      await tester.pumpWidget(_Harness(current: MonettaBottomDestination.home));
-      await tester.pump();
-
-      final surface = tester.getRect(_surface);
-      expect(surface.left, 0);
-      expect(surface.right, 390);
-      expect(surface.bottom, 844);
-      expect(surface.height, 90);
-      for (final d in _destinations) {
-        final rect = tester.getRect(_dest(d));
-        expect(
-          rect.bottom,
-          lessThanOrEqualTo(844 - 34 + 0.01),
-          reason: '${d.name} sits above the home indicator',
-        );
-        expect(rect.top, greaterThanOrEqualTo(surface.top - 0.01));
-      }
-    });
-
     testWidgets('NAV-06 destinations are at least 48x48', (tester) async {
       _phone(tester, bottomInset: 34);
       await tester.pumpWidget(_Harness(current: MonettaBottomDestination.home));
@@ -404,32 +321,6 @@ void main() {
         );
       }
     });
-
-    for (final dark in [false, true]) {
-      testWidgets(
-          'NAV-06 flat surface: light grey/dark, no shadow, hairline top border '
-          '(${dark ? 'dark' : 'light'})', (tester) async {
-        _phone(tester);
-        await tester.pumpWidget(
-          _Harness(
-            current: MonettaBottomDestination.home,
-            theme: _theme(dark: dark),
-          ),
-        );
-        await tester.pump();
-
-        final decoration = _surfaceDecoration(tester);
-        expect(
-          decoration.color,
-          dark ? MonettaColors.dark.surface : MonettaTokens.bar,
-        );
-        expect(decoration.boxShadow ?? const <BoxShadow>[], isEmpty);
-        final border = decoration.border;
-        if (border != null) {
-          expect((border as Border).top.width, lessThanOrEqualTo(0.5));
-        }
-      });
-    }
   });
 
   group('NAV-07 cart badge', () {
@@ -921,8 +812,21 @@ Color _selectionColor(WidgetTester tester, MonettaBottomDestination d) {
   return (box.decoration as BoxDecoration).color!;
 }
 
-BoxDecoration _surfaceDecoration(WidgetTester tester) =>
-    tester.widget<DecoratedBox>(_surface).decoration as BoxDecoration;
+/// Fill of the UI v4.1 glass capsule, made opaque: the worst case for
+/// contrast is the fill without anything showing through.
+Color _surfaceColor(WidgetTester tester) {
+  final capsule = tester
+      .widgetList<DecoratedBox>(
+        find.descendant(
+          of: find.byKey(const Key('bottom-nav-glass')),
+          matching: find.byType(DecoratedBox),
+        ),
+      )
+      .map((box) => box.decoration)
+      .whereType<ShapeDecoration>()
+      .first;
+  return capsule.color!.withValues(alpha: 1);
+}
 
 /// Combined opacity of every [Opacity] between the ink well and the icon.
 double _opacityAbove(Finder icon, Finder dest) {

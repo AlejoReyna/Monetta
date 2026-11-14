@@ -39,6 +39,12 @@ const double _kPressedOpacity = 0.55;
 // iOS-only floating glass capsule. The fill is the theme's navigation surface,
 // so dark mode and high contrast need no special colors.
 const double _kGlassHorizontalMargin = 16;
+
+/// Below this width the capsule hugs the screen edges so four destinations
+/// (with «Categorías», the widest label) still share one row.
+const double _kGlassNarrowWidth = 360;
+const double _kGlassNarrowMargin = 6;
+const double _kBarNarrowSidePadding = 2;
 const double _kGlassTopMargin = 6;
 const double _kGlassMinBottomMargin = 12;
 const double _kGlassRadius = 28;
@@ -210,6 +216,10 @@ class MonettaBottomNavigation extends StatelessWidget {
       BuildContext context, MonettaColors colors, int unread) {
     final highContrast = MediaQuery.highContrastOf(context);
     final radius = BorderRadius.circular(_kGlassRadius);
+    final narrow = (MediaQuery.maybeSizeOf(context)?.width ?? double.infinity) <
+        _kGlassNarrowWidth;
+    final margin = narrow ? _kGlassNarrowMargin : _kGlassHorizontalMargin;
+    final sidePadding = narrow ? _kBarNarrowSidePadding : _kBarSidePadding;
     // Space the capsule adds around the destinations, so the overflow
     // decision keeps at least the task height the flat bar leaves.
     final bottomInset = MediaQuery.maybeViewPaddingOf(context)?.bottom ?? 0;
@@ -230,6 +240,7 @@ class MonettaBottomNavigation extends StatelessWidget {
         type: MaterialType.transparency,
         child: _buildHorizontalContent(
           context,
+          sidePadding: sidePadding,
           reservedHeight: reservedHeight,
           unread: unread,
         ),
@@ -245,21 +256,18 @@ class MonettaBottomNavigation extends StatelessWidget {
       );
     }
     return SafeArea(
+      // The whole band the bar takes at the foot of the screen.
+      key: const Key('bottom-nav-surface'),
       top: false,
       maintainBottomViewPadding: true,
       minimum: const EdgeInsets.only(bottom: _kGlassMinBottomMargin),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          _kGlassHorizontalMargin,
-          _kGlassTopMargin,
-          _kGlassHorizontalMargin,
-          0,
-        ),
+        padding: EdgeInsets.fromLTRB(margin, _kGlassTopMargin, margin, 0),
         child: Center(
           heightFactor: 1,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: _kBarMaxContentWidth + 2 * _kBarSidePadding,
+            constraints: BoxConstraints(
+              maxWidth: _kBarMaxContentWidth + 2 * sidePadding,
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -290,19 +298,19 @@ class MonettaBottomNavigation extends StatelessWidget {
     );
   }
 
-  /// Destinations of the horizontal bar, shared by the flat bar and the iOS
-  /// capsule. [reservedHeight] is extra vertical space the surrounding chrome
-  /// takes besides the bar itself.
+  /// Destinations inside the capsule. [reservedHeight] is extra vertical
+  /// space the surrounding chrome takes besides the bar itself.
   Widget _buildHorizontalContent(
     BuildContext context, {
     double reservedHeight = 0,
+    double sidePadding = _kBarSidePadding,
     int unread = 0,
   }) {
     final media = MediaQuery.maybeOf(context);
     final animationsDisabled =
         media?.disableAnimations == true || media?.accessibleNavigation == true;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: _kBarSidePadding),
+      padding: EdgeInsets.symmetric(horizontal: sidePadding),
       child: Center(
         heightFactor: 1,
         child: ConstrainedBox(

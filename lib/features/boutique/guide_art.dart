@@ -6,6 +6,8 @@
 /// this catalog are opaque packshots, not cutouts.
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'client_guide_components.dart';
@@ -133,6 +135,14 @@ class GuideBanner extends StatelessWidget {
                                           excludeFromSemantics: true),
                                     ])))),
             ]));
+      } else if (constraints.hasBoundedHeight && !enlarged && action == null) {
+        // A fixed slot (the home carousel) may be shorter than the 2.4:1
+        // artwork on wide screens: fit the whole banner inside it.
+        art = SizedBox(
+            width: width,
+            height: math.min(width / 2.4, constraints.maxHeight),
+            child: Image.asset(spec.path,
+                fit: BoxFit.contain, excludeFromSemantics: true));
       } else {
         art = AspectRatio(
             aspectRatio: 2.4,
@@ -150,7 +160,7 @@ class GuideBanner extends StatelessWidget {
       // One semantic reading, including when native text replaces the artwork.
       final editorial =
           Semantics(label: spec.copy, excludeSemantics: true, child: art);
-      return Column(mainAxisSize: MainAxisSize.min, children: [
+      final column = Column(mainAxisSize: MainAxisSize.min, children: [
         if (onTap != null)
           InkWell(onTap: onTap, child: editorial)
         else
@@ -158,6 +168,11 @@ class GuideBanner extends StatelessWidget {
         if (action != null)
           Padding(padding: const EdgeInsets.all(16), child: action),
       ]);
+      // In a fixed slot, enlarged text scrolls inside the banner instead of
+      // overflowing it.
+      if (!constraints.hasBoundedHeight) return column;
+      return ClipRect(
+          child: SingleChildScrollView(primary: false, child: column));
     });
   }
 }

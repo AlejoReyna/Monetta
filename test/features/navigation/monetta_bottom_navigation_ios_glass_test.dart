@@ -29,7 +29,6 @@ const _labels = {
 };
 
 final _glass = find.byKey(const Key('bottom-nav-glass'));
-final _surface = find.byKey(const Key('bottom-nav-surface'));
 final _backdrop = find.byType(BackdropFilter);
 
 Finder _dest(MonettaBottomDestination d) =>
@@ -285,37 +284,5 @@ void main() {
       },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
-  });
-
-  group('Android keeps the flat bar', () {
-    testWidgets(
-      'NAV-GLASS-09 Android has no capsule and a full-width surface',
-      (tester) async {
-        _phone(tester);
-        await tester.pumpWidget(_app(bagCount: 2));
-        await tester.pump();
-
-        expect(_glass, findsNothing);
-        expect(_backdrop, findsNothing);
-        expect(_surface, findsOneWidget);
-        final rect = tester.getRect(_surface);
-        expect(rect.left, 0);
-        expect(rect.right, _viewWidth);
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.android),
-    );
-
-    testWidgets('NAV-GLASS-09 the default platform has no capsule either',
-        (tester) async {
-      _phone(tester);
-      await tester.pumpWidget(_app(bagCount: 2));
-      await tester.pump();
-
-      expect(_glass, findsNothing);
-      expect(_backdrop, findsNothing);
-      final rect = tester.getRect(_surface);
-      expect(rect.left, 0);
-      expect(rect.right, _viewWidth);
-    });
   });
 }
