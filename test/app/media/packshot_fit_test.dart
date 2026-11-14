@@ -205,8 +205,9 @@ void main() {
   });
 
   group('UI-CAT-06 the tile variant', () {
-    testWidgets('UI-CAT-06 both variants trim-cover the photograph',
-        (tester) async {
+    testWidgets(
+        'UI-CAT-06 both tile variants contain the photo whole so handles and '
+        'straps are never cut (A02)', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -226,7 +227,7 @@ void main() {
       );
       expect(
         tester.widget<MonettaImage>(find.byType(MonettaImage)).maxCoverTrim,
-        kPackshotMaxCoverTrim,
+        0,
       );
 
       await tester.pumpWidget(
@@ -243,7 +244,7 @@ void main() {
         ),
       );
       final card = tester.widget<MonettaImage>(find.byType(MonettaImage));
-      expect(card.maxCoverTrim, kPackshotMaxCoverTrim);
+      expect(card.maxCoverTrim, 0);
       expect(card.fit, BoxFit.contain);
     });
 
@@ -275,13 +276,14 @@ void main() {
         ),
         closeTo(115.85, 0.001),
       );
-      // The card's serif caption: 14.5 + 1.015 * (15*1.25 + 14*1.3*2 + 15*1.2).
+      // The card's caption reserves two price lines:
+      // 16.5 + 1.015 * (15*1.25 + 14*1.3*2 + 15*1.2*2).
       expect(
         ProductTileVariant.card.captionExtent(
           ProductTileDensity.grid,
           TextScaler.noScaling,
         ),
-        closeTo(88.747, 0.001),
+        closeTo(109.017, 0.001),
       );
     });
 
@@ -324,7 +326,8 @@ void main() {
       final delegate = await _delegate(tester, availableWidth: 350);
       expect(delegate.crossAxisSpacing, 8);
       expect(delegate.mainAxisSpacing, 8);
-      expect(delegate.mainAxisExtent, closeTo(307.747, 0.001));
+      // 12 + 147 photo + 48 option slot + 109.017 caption + 12.
+      expect(delegate.mainAxisExtent, closeTo(328.017, 0.001));
     });
   });
 }

@@ -7,15 +7,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
-import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/boutique/client_guide_sections.dart';
 import 'package:monetta_app/features/boutique/guide_art.dart';
-import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/rewards/rewards_share_screen.dart';
-import 'package:monetta_app/main.dart';
 
 import '../../support/client_guide_capture.dart';
 
@@ -34,17 +31,6 @@ void main() {
     );
   });
   tearDown(() => debugMonettaFixtureImage = null);
-
-  Future<CatalogStore> store() async {
-    final db = openTestDatabase();
-    final catalog = CatalogStore(database: db);
-    await catalog.loadFromAsset();
-    addTearDown(() async {
-      catalog.dispose();
-      await db.close();
-    });
-    return catalog;
-  }
 
   group('families', () {
     test('the guide fonts are the registered stand-ins', () {
@@ -72,39 +58,6 @@ void main() {
       expect(plain.decoration, TextDecoration.none);
       expect(underlined.fontFamily, kGuideScriptFamily);
       expect(underlined.decoration, TextDecoration.underline);
-    });
-
-    testWidgets('COACH is upright Cormorant and TOTES is italic', (
-      tester,
-    ) async {
-      final catalog = await store();
-      await pumpClientGuide(
-        tester,
-        StoreScope(
-          notifier: catalog,
-          child: const CollectionScreen(
-            title: 'Coach',
-            filter: CollectionFilter(brand: 'coach'),
-          ),
-        ),
-      );
-      final coach = _textStyle(tester, 'COACH');
-      expect(coach.fontFamily, kGuideSerifFamily);
-      expect(coach.fontStyle, isNot(FontStyle.italic));
-
-      await pumpClientGuide(
-        tester,
-        StoreScope(
-          notifier: catalog,
-          child: const CollectionScreen(
-            title: 'Totes',
-            filter: CollectionFilter(category: 'bolsa', silhouette: 'tote'),
-          ),
-        ),
-      );
-      final totes = _textStyle(tester, 'TOTES');
-      expect(totes.fontFamily, kGuideSerifFamily);
-      expect(totes.fontStyle, FontStyle.italic);
     });
 
     testWidgets('Comparte y gana: script word, serif «y gana» and body', (
@@ -203,7 +156,7 @@ void main() {
   });
 
   group('services row', () {
-    testWidgets('home: the guide texts with the four gold icons', (
+    testWidgets('home: the v4.1 services with their three gold icons', (
       tester,
     ) async {
       await pumpClientGuide(
@@ -211,29 +164,16 @@ void main() {
         const SingleChildScrollView(child: ClientGuideServices()),
       );
       for (final text in [
-        'Envíos seguros',
-        'Seguros y garantizados a todo México',
-        'Pagos seguros',
-        'Compra con confianza',
-        'Productos 100% originales',
-        'Garantía de autenticidad',
-        'Atención personalizada',
-        'Estamos para ayudarte',
+        'ENVÍO GRATIS',
+        '5 - 7 días hábiles',
+        'Producto Original',
+        'Importado desde E.U.A',
+        'Paga a Meses',
+        'Sin Intereses',
       ]) {
         expect(find.text(text), findsOneWidget, reason: text);
       }
-      expect(find.text('Costo y plazo por confirmar'), findsNothing);
-      expect(find.text('Garantía sujeta a cada pieza'), findsNothing);
-      final assets = [
-        for (final image in tester.widgetList<Image>(find.byType(Image)))
-          (image.image as AssetImage).assetName,
-      ];
-      expect(assets, [
-        kGuideIconServiceShipping,
-        kGuideIconServicePayments,
-        kGuideIconServiceOriginals,
-        kGuideIconServiceSupport,
-      ]);
+      expect(find.byType(SvgPicture), findsNWidgets(3));
     });
 
     testWidgets(

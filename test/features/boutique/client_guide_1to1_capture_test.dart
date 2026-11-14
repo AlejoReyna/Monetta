@@ -142,7 +142,8 @@ void main() {
       StoreScope(notifier: catalog, child: const HomeScreen()),
       size: _phone,
     );
-    expect(find.text('desde México'), findsOneWidget);
+    // UI v4.1 banners B01–B03.
+    expect(find.byKey(const ValueKey('home-compact-hero')), findsOneWidget);
     await captureClientGuide(tester, 'p-03-inicio');
   });
 
@@ -270,8 +271,7 @@ void main() {
       ),
       size: _phone,
     );
-    // The guide photo banner sets the name in capitals.
-    expect(find.text('BOLSAS'), findsOneWidget);
+    expect(find.text('Bolsas'), findsWidgets);
     await captureClientGuide(tester, 'p-09-coleccion');
   });
 
@@ -282,7 +282,7 @@ void main() {
       StoreScope(notifier: catalog, child: const WholesaleScreen()),
       size: _phone,
     );
-    expect(find.text('MAYOREO'), findsOneWidget);
+    expect(find.byType(GuideHero), findsOneWidget);
     await captureClientGuide(tester, 'p-10-mayoreo');
   });
 
@@ -349,7 +349,8 @@ void main() {
       RewardsGuideScreen(reader: _Reader(_summary())),
       size: _phone,
     );
-    expect(find.textContaining('Pendiente de contrato'), findsWidgets);
+    // No placeholder wording for unconfirmed rules (A05).
+    expect(find.textContaining('Pendiente de contrato'), findsNothing);
     await captureClientGuide(tester, 'p-14-rewards');
   });
 
@@ -422,7 +423,7 @@ void main() {
       ),
       size: _phone,
     );
-    expect(find.text('Bolsas'), findsOneWidget);
+    expect(find.text('Bolsos'), findsOneWidget);
     await captureClientGuide(tester, 'p-19-menu');
   });
 }

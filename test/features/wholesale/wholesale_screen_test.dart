@@ -56,7 +56,15 @@ void main() {
           'wholesale-${size.width.toInt()}-${brightness.name}',
         );
       }
-      final scroll = find.byType(Scrollable).first;
+      // The page's own vertical list (the steps row scrolls sideways).
+      final scroll = find
+          .descendant(
+            of: find.byKey(const ValueKey('wholesale-scroll')),
+            matching: find.byWidgetPredicate(
+              (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+            ),
+          )
+          .first;
       await tester.scrollUntilVisible(
         find.text(WholesalePresentation.minimum),
         300,
@@ -73,14 +81,16 @@ void main() {
       await tester.pumpAndSettle();
       // Inspect the existing collection route even with an empty local catalog.
       await tester.tap(catalog);
-      await tester.pumpAndSettle();
-      final collection =
-          tester.widget<CollectionScreen>(find.byType(CollectionScreen));
+      // An unloaded catalog keeps its animated placeholders: no settle.
+      await tester.pump(const Duration(seconds: 1));
+      final collection = tester.widget<CollectionScreen>(
+        find.byType(CollectionScreen, skipOffstage: false),
+      );
       expect(collection.filter.category, 'perfume');
       Navigator.of(
-        tester.element(find.byType(CollectionScreen)),
+        tester.element(find.byType(CollectionScreen, skipOffstage: false)),
       ).pop();
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
       final quote = find.byKey(const ValueKey('wholesale-quote-bottom'));
       await tester.scrollUntilVisible(quote, 300, scrollable: scroll);
       await tester.ensureVisible(quote);
