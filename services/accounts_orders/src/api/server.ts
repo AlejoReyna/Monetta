@@ -124,9 +124,13 @@ const appSessionLifetimeMs = 180 * 24 * 60 * 60 * 1000;
 const scryptAsync = promisify(scrypt);
 
 function clientKey(req: Request): string {
-  const forwarded = req.header('x-forwarded-for');
-  if (typeof forwarded === 'string' && forwarded.trim() !== '') {
-    return forwarded.split(',')[0]!.trim().slice(0, 128);
+  // Fly sets Fly-Client-IP from the connecting client. X-Forwarded-For is
+  // appended by the proxy, so its first value is client-controlled and is
+  // never used. Without Fly-Client-IP (local or tests), use the socket.
+  const flyClientIp = req.header('fly-client-ip');
+  if (typeof flyClientIp === 'string') {
+    const trimmed = flyClientIp.trim();
+    if (trimmed !== '') return trimmed.slice(0, 128);
   }
   return (req.socket.remoteAddress ?? 'unknown').slice(0, 128);
 }
@@ -320,9 +324,13 @@ async function bridgePaidIfApplicable(
         tags: payload.tags,
         customer: payload.customer,
         currency: payload.currency,
+        discount_codes: payload.discount_codes
+          ? [...payload.discount_codes]
+          : undefined,
         note_attributes: payload.note_attributes
           ? [...payload.note_attributes]
           : undefined,
+        line_items: payload.line_items ? [...payload.line_items] : undefined,
       },
     });
   } catch (error) {

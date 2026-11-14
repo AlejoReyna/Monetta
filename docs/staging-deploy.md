@@ -41,7 +41,7 @@ en `[env]`; el resto se lee de `fly secrets` (`services/accounts_orders/src/conf
 | `OWNER_ADMIN_EMAILS`, `OWNER_SHOPIFY_CUSTOMER_IDS` | Opcional | Candidatos y IDs del dueño para el panel admin. |
 | `ADMIN_ENVIRONMENT`, `ADMIN_MUTATIONS_ENABLED`, `ADMIN_SHOPIFY_WRITES_ENABLED`, `ADMIN_EXTERNAL_WRITES_ENABLED` | Opcional | Banderas del panel admin (apagadas por defecto). |
 | `REWARDS_ENABLED`, `REWARDS_REDEMPTION_ENABLED`, `REWARDS_RESERVATION_TTL_MINUTES`, `REWARDS_QUOTE_TTL_MINUTES` | Opcional | Rewards (canje apagado por defecto). |
-| `LEGACY_ACCOUNT_REGISTRATION_ENABLED` | Opcional | Registro de cuentas propias (encendido por defecto). |
+| `LEGACY_ACCOUNT_REGISTRATION_ENABLED` | Opcional | Registro de cuentas propias (apagado por defecto). |
 | `INTERNAL_CATALOG_EVENT_SECRET` | Opcional | Eventos internos de catálogo. |
 | `NOTIFICATIONS_ENABLED`, `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `PUSH_TOKEN_ENCRYPTION_SECRET` | Solo si se encienden notificaciones | Con `NODE_ENV=production` y notificaciones encendidas, el arranque falla si falta alguno. En staging siguen apagadas. |
 

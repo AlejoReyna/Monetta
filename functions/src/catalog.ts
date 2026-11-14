@@ -30,9 +30,6 @@ export function toCatalogProduct(product: AdminProduct): CatalogProductDocument 
     ),
     imageUrls: variant.image?.url ? [variant.image.url] : [],
     available: variant.availableForSale,
-    inventoryQuantity: variant.inventoryQuantity,
-    inventoryPolicy: variant.inventoryPolicy,
-    inventoryItemId: variant.inventoryItem.id,
   }));
   const availablePrices = variants
     .map((variant) => variant.price)

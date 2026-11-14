@@ -56,4 +56,29 @@ describe("catalog mapping", () => {
     expect(isPublicProduct({ ...product, status: "DRAFT" })).toBe(false);
     expect(isPublicProduct({ ...product, publishedAt: null })).toBe(false);
   });
+
+  it("keeps sku and omits inventory fields from a mapped variant", () => {
+    const variant = toCatalogProduct({
+      ...product,
+      variants: {
+        nodes: [{
+          ...product.variants.nodes[0]!,
+          sku: "MN-123",
+        }],
+      },
+    }).variants[0];
+
+    expect(variant).toEqual({
+      id: "gid://shopify/ProductVariant/456",
+      title: "Default Title",
+      price: 1299,
+      compareAtPrice: 1499,
+      sku: "MN-123",
+      available: true,
+    });
+    expect(variant).toHaveProperty("sku", "MN-123");
+    expect(variant).not.toHaveProperty("inventoryQuantity");
+    expect(variant).not.toHaveProperty("inventoryItemId");
+    expect(variant).not.toHaveProperty("inventoryPolicy");
+  });
 });

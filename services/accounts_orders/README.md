@@ -67,8 +67,9 @@ npm test                # in-memory repositories, no network, no database
 npm start                # API on :8082
 ```
 
-Without `SHOPIFY_APP_CLIENT_SECRET` set, every Shopify webhook 401s while account
-registration remains available.
+Without `SHOPIFY_APP_CLIENT_SECRET` set, every Shopify webhook 401s. New account
+registration stays closed unless `LEGACY_ACCOUNT_REGISTRATION_ENABLED=true`;
+existing accounts can still log in.
 
 ## 5. Registering the webhooks in Shopify
 

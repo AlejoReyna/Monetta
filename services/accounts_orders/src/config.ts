@@ -155,11 +155,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
     ownerShopifyCustomerIds: csv(env.OWNER_SHOPIFY_CUSTOMER_IDS),
     ownerShopifyStaffIds: csv(env.OWNER_SHOPIFY_STAFF_IDS),
     adminEnvironment,
-    // Default on so existing local/staging clients keep working; production
-    // should set LEGACY_ACCOUNT_REGISTRATION_ENABLED=false once Shopify-only.
+    // Closed unless explicitly enabled. Login for existing legacy accounts
+    // stays available either way.
     legacyAccountRegistrationEnabled: bool(
       env.LEGACY_ACCOUNT_REGISTRATION_ENABLED,
-      true,
+      false,
     ),
     rewardsEnabled: bool(env.REWARDS_ENABLED, true),
     rewardsRedemptionEnabled: bool(env.REWARDS_REDEMPTION_ENABLED, false),

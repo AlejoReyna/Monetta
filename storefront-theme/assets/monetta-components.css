@@ -196,14 +196,12 @@
     display: none;
   }
 
-  /* Tablet: the row scrolls; a soft edge says there is more. A focused link stops short of it
-     (scroll-padding), and the last one can: scroll-padding makes no scrollable room at the end, so the
-     row has real end padding as wide as the fade (plus the ring), enough to take the final link out of it. */
+  /* Tablet: the six links fit from 768px, so the row is as wide as its links and centred, as on desktop. If a
+     narrow window or larger text makes them overflow, the row takes the full width and scrolls from its start. */
   .site-nav__list {
-    -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent);
-    mask-image: linear-gradient(90deg, #000 88%, transparent);
-    scroll-padding-inline: 12px 12%;
-    padding-right: max(calc(var(--gutter) - 12px), var(--safe-right), calc(12% + 8px));
+    width: fit-content;
+    max-width: 100%;
+    scroll-padding-inline: 12px;
   }
 
   /* The row clips whatever falls outside its 44px box (it scrolls), which took the top and bottom edges of
@@ -218,10 +216,11 @@
     align-items: center;
     gap: 4px;
     height: 44px;
-    padding: 0 12px;
+    padding: 0 14px;
     border: 0;
     background: transparent;
-    font-size: 14px;
+    /* Cormorant (editorial serif) needs a larger size than the UI sans to read clearly. */
+    font-size: 17px;
     font-weight: 500;
     color: var(--color-ink);
     text-decoration: none;
@@ -586,8 +585,8 @@ body.has-checkout-bar {
 .site-footer {
   margin-top: calc(var(--section-gap) * 1.5);
   padding: 48px 0 calc(28px + var(--bottom-ui));
-  border-top: 1px solid var(--color-hairline);
-  background: var(--color-bar);
+  /* UI v4.1 (C5-05): pie gris muy tenue, local exception to the white canvas. */
+  background: var(--color-surface-tile);
 }
 
 .footer-grid {

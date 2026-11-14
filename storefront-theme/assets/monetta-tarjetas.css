@@ -227,24 +227,48 @@
 }
 
 /* ============================================================ Bottom bar */
-/* Flat, full width, a hairline on top; the active destination is the brand's brown-gold on icon and label, the others ink.
-   No underline: colour and weight carry the state, as in the app (NAV-03). */
+/* UI v4.1: a floating glass capsule; the whole bar carries the faint gold halo C and the active destination is a neutral
+   pill with ink text and weight (gold is not used for the small labels). The reserve below grows by the float gap. */
 .mw .dock {
-  border-top: 1px solid var(--color-divider);
-  background: var(--color-bar);
+  left: max(12px, var(--safe-left));
+  right: max(12px, var(--safe-right));
+  bottom: calc(8px + var(--safe-bottom));
+  padding: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.88);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--halo), inset 0 0 10px 2px rgb(165 130 72 / 0.18), var(--shadow-float);
 }
 
 .mw .dock__item {
   gap: 5px;
-  min-height: 62px;
-  padding: 9px 3px 9px;
+  min-height: 56px;
+  padding: 7px 3px;
+  border-radius: 999px;
   color: var(--color-navigation-inactive);
   font-weight: 400;
 }
 
 .mw .dock__item[aria-current='page'] {
-  color: var(--color-navigation-active);
+  color: var(--color-ink);
   font-weight: 600;
+  background: rgb(36 38 34 / 0.06);
+}
+
+@media (max-width: 767.98px) {
+  body.mw.has-dock {
+    --bottom-ui: calc(84px + var(--safe-bottom));
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .mw .dock {
+    background: #ffffff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 .mw .dock__item[aria-current='page']::after {

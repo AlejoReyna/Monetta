@@ -78,9 +78,6 @@ export interface CatalogProductDocument {
     readonly selectedOptions: Readonly<Record<string, string>>;
     readonly imageUrls: readonly string[];
     readonly available: boolean;
-    readonly inventoryQuantity: number | null;
-    readonly inventoryPolicy: string;
-    readonly inventoryItemId: string;
   }>;
   readonly createdAt: string;
   readonly updatedAt: string;

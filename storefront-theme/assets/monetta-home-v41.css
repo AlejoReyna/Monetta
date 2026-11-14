@@ -1,0 +1,608 @@
+/* Home v4.1. Tokens live in monetta-tokens.css. This file is only the home sequence. */
+
+.v41-block {
+  padding-inline: var(--gutter);
+}
+
+.v41-block .display a,
+.v41-block .product-section-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.v41-scroll {
+  display: flex;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0 0 var(--space-2);
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.v41-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.v41-scroll > * {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.v41-note {
+  margin: var(--space-4) var(--gutter);
+  color: var(--color-ink-muted);
+  font-family: var(--font-sans);
+}
+
+/* Banners B01–B03. Manual only; the existing carousel script does not autoplay. */
+.v41-banners .guia-carousel__slide {
+  height: auto;
+}
+
+.v41-banner {
+  display: block;
+  color: inherit;
+}
+
+.v41-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1920 / 800;
+  object-fit: cover;
+}
+
+.v41-banners .guia-carousel__arrow {
+  display: inline-grid;
+  place-items: center;
+  position: absolute;
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  translate: 0 -50%;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.82);
+  box-shadow: var(--halo);
+}
+
+.v41-banners .guia-carousel__arrow--prev {
+  left: var(--space-2);
+}
+
+.v41-banners .guia-carousel__arrow--next {
+  right: var(--space-2);
+}
+
+/* Categories and brands */
+.v41-cat__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: 148px;
+  color: var(--color-ink);
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.v41-cat__link img {
+  width: 148px;
+  height: 148px;
+  object-fit: contain;
+  background: var(--color-surface-tile);
+  border-radius: var(--radius-card);
+}
+
+.v41-brands__track .guia-brand {
+  width: 156px;
+  height: 92px;
+  aspect-ratio: auto;
+}
+
+/* Closing «Ver …»: the last item of its own row, centred on the row's height (UI v4.1 carousel.closing). */
+.v41-close-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-width: 112px;
+  padding-inline: var(--space-3);
+}
+
+.v41-close {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: fit-content;
+  margin: 0;
+  text-align: center;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.v41-close__glass {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.72);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--halo);
+}
+
+/* Nueva colección */
+.v41-feature__hero {
+  position: relative;
+}
+
+.v41-feature__card {
+  position: relative;
+  max-width: 720px;
+  margin-inline: auto;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.v41-feature__media {
+  display: block;
+  position: relative;
+  color: inherit;
+}
+
+.v41-feature__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+
+.v41-feature__new {
+  position: absolute;
+  left: var(--space-4);
+  bottom: 52px;
+  width: 120px;
+  height: auto;
+  aspect-ratio: auto;
+  object-fit: contain;
+  border-radius: 0;
+}
+
+.v41-feature__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.v41-feature__brand {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.v41-feature__name {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.v41-feature__price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 700;
+}
+
+.v41-feature__price s {
+  font-weight: 400;
+  color: var(--color-ink-muted);
+  text-decoration: line-through;
+}
+
+.v41-feature__pct {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.v41-feature__nav {
+  position: absolute;
+  left: var(--space-2);
+  right: var(--space-2);
+  top: 34%;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.v41-icon-btn {
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.9);
+  box-shadow: var(--shadow-card);
+  color: var(--color-ink);
+}
+
+.v41-feature__thumbs {
+  margin-top: var(--space-4);
+}
+
+.v41-thumb {
+  width: 96px;
+  height: 96px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-card);
+  background: var(--color-surface-tile);
+  overflow: hidden;
+}
+
+.v41-thumb.is-selected {
+  border-color: var(--color-gold);
+}
+
+.v41-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.v41-fav {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+}
+
+.v41-fav[aria-pressed='true'] {
+  color: var(--color-gold);
+}
+
+.v41-fav .save-icon--on {
+  display: none;
+}
+
+.v41-fav[aria-pressed='true'] .save-icon--off {
+  display: none;
+}
+
+.v41-fav[aria-pressed='true'] .save-icon--on {
+  display: block;
+}
+
+.v41-sold {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  height: 18px;
+  padding: 0 8px;
+  background: #111111;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Para ti */
+.v41-feed__item {
+  width: min(78vw, 360px);
+}
+
+.v41-feed__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  padding-bottom: var(--space-4);
+}
+
+.v41-feed__media {
+  position: relative;
+  width: 100%;
+}
+
+.v41-feed__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+
+.v41-feed__brand {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.v41-feed__name,
+.v41-feed__price {
+  margin: var(--space-1) var(--space-3) 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.v41-feed__price s {
+  margin-left: var(--space-2);
+  color: var(--color-ink-muted);
+}
+
+.v41-feed__pct {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.v41-feed__add {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  z-index: 2;
+}
+
+.v41-feed__add button,
+.v41-buy {
+  border: 0;
+  background: rgb(255 255 255 / 0.78);
+  color: var(--color-ink);
+  box-shadow: var(--halo);
+  backdrop-filter: blur(8px);
+}
+
+.v41-feed__add button {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-card);
+}
+
+.v41-buy {
+  margin-top: var(--space-4);
+  min-height: 48px;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-control);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Mayoreo on the home */
+.v41-mayoreo {
+  margin-block: var(--space-6);
+}
+
+.v41-mayoreo__frame {
+  position: relative;
+}
+
+.v41-mayoreo__frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1920 / 800;
+  object-fit: cover;
+}
+
+/* B04 without the painted button (B04_inicio_mayoreo_editorial_sin_control): the real control sits under «A partir de 3 piezas». */
+.v41-mayoreo__cta {
+  position: absolute;
+  left: 74%;
+  bottom: 8%;
+  translate: -50% 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 clamp(16px, 4vw, 32px);
+  white-space: nowrap;
+  border-radius: var(--radius-control);
+  background: #ffffff;
+  color: var(--color-ink);
+  box-shadow: var(--halo);
+  font-family: var(--font-sans);
+  font-size: clamp(14px, 3.8vw, 18px);
+  font-weight: 400;
+  text-decoration: none;
+}
+
+/* Narrow phones: the banner is ~130–160px tall, so the control shrinks and sits on the bottom edge, clear of «A partir de 3 piezas». */
+@media (max-width: 479.98px) {
+  .v41-mayoreo__cta {
+    bottom: 3%;
+    min-height: 40px;
+    padding-inline: 14px;
+    font-size: 13px;
+  }
+}
+
+/* Services: three gold icons, two lines each and a short rule underneath (UI:G01). */
+.guide-services--inicio {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-block: var(--space-6);
+}
+
+.guide-services--inicio .guide-services__item {
+  gap: var(--space-3);
+}
+
+.guide-services--inicio .guide-services__icon {
+  width: 32px;
+  height: 32px;
+}
+
+.guide-services--inicio .guide-services__item::after {
+  content: '';
+  width: 54px;
+  height: 1px;
+  margin-top: var(--space-3);
+  background: var(--color-divider);
+}
+
+.guide-services__line {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-ink);
+}
+
+@media (min-width: 768px) {
+  .guide-services__line {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 359.98px) {
+  .guide-services--inicio {
+    grid-template-columns: repeat(3, minmax(88px, 1fr));
+    overflow-x: auto;
+  }
+}
+
+/* Registro. Hidden from the template until enabled. Lines may wrap at 320px and 200% zoom. */
+.v41-register {
+  padding: var(--space-6) var(--gutter);
+}
+
+.v41-register__panel {
+  max-width: 640px;
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.v41-register__title,
+.v41-register__line {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  line-height: 1.35;
+}
+
+.v41-register__title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.v41-register__line {
+  margin-top: var(--space-2);
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.v41-register__gold {
+  color: var(--color-gold);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.v41-register__green {
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.v41-register__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.v41-register__row input {
+  flex: 1 1 180px;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-surface-tile);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+}
+
+.v41-register__row button {
+  min-height: 48px;
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: #ffffff;
+  color: var(--color-ink);
+  box-shadow: var(--halo);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.v41-register__error {
+  margin: var(--space-3) 0 0;
+  color: var(--color-error);
+  font-family: var(--font-sans);
+}
+
+.v41-register__ok {
+  margin: var(--space-3) 0 0;
+  color: var(--color-success);
+  font-family: var(--font-sans);
+}
+
+@media (min-width: 1024px) {
+  .v41-feed__item {
+    width: 320px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v41-scroll,
+  .v41-banners .guia-carousel__track {
+    scroll-behavior: auto;
+  }
+}

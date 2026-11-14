@@ -1,17 +1,17 @@
 {
   "layout": "monetta",
   "sections": {
-    "carrusel": {
+    "banners": {
       "type": "monetta-guia-home",
-      "settings": { "mode": "carousel" }
+      "settings": {
+        "mode": "carousel",
+        "show_banner_categorias": true,
+        "enabled": false
+      }
     },
-    "estilos": {
+    "categorias": {
       "type": "monetta-guia-home",
-      "settings": { "mode": "styles" }
-    },
-    "colecciones": {
-      "type": "monetta-guia-home",
-      "settings": { "mode": "collections" }
+      "settings": { "mode": "categories" }
     },
     "marcas": {
       "type": "monetta-guia-home",
@@ -20,23 +20,39 @@
     "nueva": {
       "type": "monetta-product-rail",
       "settings": {
+        "presentation": "feature",
         "heading": "Nueva colección",
         "collection": "all",
-        "products_to_show": 8,
+        "products_to_show": 40,
         "link_label": "Ver todo",
-        "link_url": "/collections/all?sort_by=created-descending",
-        "newest_first": true
+        "newest_first": true,
+        "show_new_label": false,
+        "hide_without_collection": false
       }
     },
     "buscado": {
       "type": "monetta-product-rail",
       "settings": {
+        "presentation": "rail",
         "heading": "Lo más buscado",
-        "collection": "all",
-        "products_to_show": 8,
+        "products_to_show": 40,
         "link_label": "Ver todo",
-        "link_url": "/collections/all?sort_by=best-selling",
-        "newest_first": false
+        "newest_first": false,
+        "show_new_label": false,
+        "hide_without_collection": true
+      }
+    },
+    "para_ti": {
+      "type": "monetta-product-rail",
+      "settings": {
+        "presentation": "feed",
+        "heading": "Para ti",
+        "collection": "all",
+        "products_to_show": 40,
+        "link_label": "Ver todo",
+        "newest_first": false,
+        "show_new_label": false,
+        "hide_without_collection": false
       }
     },
     "mayoreo": {
@@ -49,8 +65,21 @@
     },
     "registro": {
       "type": "monetta-guia-home",
-      "settings": { "mode": "register" }
+      "settings": {
+        "mode": "register",
+        "enabled": false
+      }
     }
   },
-  "order": ["carrusel", "estilos", "colecciones", "marcas", "nueva", "buscado", "mayoreo", "servicios", "registro"]
+  "order": [
+    "banners",
+    "categorias",
+    "marcas",
+    "nueva",
+    "buscado",
+    "para_ti",
+    "mayoreo",
+    "servicios",
+    "registro"
+  ]
 }

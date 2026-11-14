@@ -64,6 +64,12 @@
 
 {% render 'monetta-fonts' %}
 {{ 'monetta-tokens.css' | asset_url | stylesheet_tag }}
+<style>
+  :root {
+    --font-serif: {{ settings.type_heading_font.family | json }}, {{ settings.type_heading_font.fallback_families }};
+    --font-sans: {{ settings.type_body_font.family | json }}, {{ settings.type_body_font.fallback_families }};
+  }
+</style>
 {{ 'monetta-base.css' | asset_url | stylesheet_tag }}
 {{ 'monetta-components.css' | asset_url | stylesheet_tag }}
 {{ 'monetta-pages.css' | asset_url | stylesheet_tag }}
@@ -73,6 +79,7 @@
 {{ 'monetta-guia.css' | asset_url | stylesheet_tag }}
 {{ 'monetta-predictive-search.css' | asset_url | stylesheet_tag }}
 {{ 'monetta-tarjetas.css' | asset_url | stylesheet_tag }}
+{{ 'monetta-home-v41.css' | asset_url | stylesheet_tag }}
 
 <script>
   document.documentElement.classList.add('js');
