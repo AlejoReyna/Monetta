@@ -345,19 +345,26 @@ OrderDisplayStatus? _fulfillmentStatus(OrderSummary order) {
 
 bool _isDelivered(OrderSummary order) =>
     order.source != 'whatsapp_apartado' &&
-    !_fulfillmentBlockedByTerminalPayment(order) &&
+    !orderFulfillmentBlocked(order) &&
     order.fulfillmentStatus?.toLowerCase().trim() == 'delivered';
 
-bool _fulfillmentBlockedByTerminalPayment(OrderSummary order) {
+/// Whether shipping progress must not be shown for [order]: the order is
+/// cancelled in Shopify, or its money is going back (refunded, refund in
+/// progress, voided). Shipping stays independent of an open payment, but
+/// never contradicts a closed or reversing one (UI:G23 — «cancelado no
+/// equivale a entregado»).
+bool orderFulfillmentBlocked(OrderSummary order) {
+  if (_isShopifyCancelled(order)) return true;
   final payment = orderPaymentStatus(order);
   return payment.key == 'refunded' ||
       payment.key == 'cancelled' ||
-      payment.key == 'voided';
+      payment.key == 'voided' ||
+      payment.key == 'refund_in_progress';
 }
 
 /// Short fulfillment line for list cards while payment is still open.
 String? _fulfillmentHeadlineLabel(OrderSummary order) {
-  if (_fulfillmentBlockedByTerminalPayment(order)) return null;
+  if (orderFulfillmentBlocked(order)) return null;
   if (order.source == 'whatsapp_apartado') return null;
   return switch (order.fulfillmentStatus?.toLowerCase().trim()) {
     'delivered' => 'Entregado',
@@ -376,7 +383,7 @@ String? _fulfillmentHeadlineLabel(OrderSummary order) {
 
 bool _isInTransit(OrderSummary order) {
   if (order.source == 'whatsapp_apartado') return false;
-  if (_fulfillmentBlockedByTerminalPayment(order)) return false;
+  if (orderFulfillmentBlocked(order)) return false;
   return switch (order.fulfillmentStatus?.toLowerCase().trim()) {
     'fulfilled' ||
     'shipped' ||

@@ -408,9 +408,7 @@ class OrderDetailScreen extends StatelessWidget {
       ),
     ];
     final payment = orderPaymentStatus(order);
-    final terminalPayment = payment.key == 'refunded' ||
-        payment.key == 'cancelled' ||
-        payment.key == 'voided';
+    final terminalPayment = orderFulfillmentBlocked(order);
     if (order.source != 'whatsapp_apartado') {
       if (payment.key == 'confirmed') {
         events.add(('Pago confirmado', 'Shopify registró el pago.'));

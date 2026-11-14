@@ -24,7 +24,7 @@ OrderFulfillmentPhase orderFulfillmentPhase(OrderSummary order) {
   if (order.source == 'whatsapp_apartado') {
     return OrderFulfillmentPhase.unavailable;
   }
-  if (_fulfillmentBlockedByTerminalPayment(order)) {
+  if (orderFulfillmentBlocked(order)) {
     return OrderFulfillmentPhase.unavailable;
   }
   final raw = order.fulfillmentStatus?.toLowerCase().trim();
@@ -47,13 +47,6 @@ OrderFulfillmentPhase orderFulfillmentPhase(OrderSummary order) {
     default:
       return OrderFulfillmentPhase.preparing;
   }
-}
-
-bool _fulfillmentBlockedByTerminalPayment(OrderSummary order) {
-  final payment = orderPaymentStatus(order);
-  return payment.key == 'refunded' ||
-      payment.key == 'cancelled' ||
-      payment.key == 'voided';
 }
 
 /// Labels for the three progress circles (Correction 5 copy).
