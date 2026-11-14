@@ -126,10 +126,20 @@ class _AutoRewardsSectionState extends State<AutoRewardsSection> {
 
   @override
   Widget build(BuildContext context) {
-    return RewardsSection(
-      controller: widget.controller,
-      reader: _effective,
-      showMovements: widget.showMovements,
+    return ListenableBuilder(
+      listenable: widget.controller,
+      builder: (context, _) {
+        final owner = widget.controller.account?.localAccountId;
+        if (!widget.controller.isSignedIn || owner == null) {
+          return const Text('Inicia sesión para consultar tu saldo.');
+        }
+        return RewardsSection(
+          key: ValueKey(owner),
+          controller: widget.controller,
+          reader: _effective,
+          showMovements: widget.showMovements,
+        );
+      },
     );
   }
 }
@@ -544,6 +554,7 @@ class _RewardsLoaded extends StatelessWidget {
         children: [
           RewardsBalanceCard(
             summary: summary,
+            showPending: false,
             movements: const [],
             expanded: false,
           ),
@@ -714,7 +725,7 @@ class _MovementRow extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            '${amount < 0 ? '-' : '+'}\$${(amount.abs() / 100).toStringAsFixed(0)}',
+            '${amount < 0 ? '-' : '+'}\$${(amount.abs() / 100).toStringAsFixed(2)}',
             style: boutiqueText(
               size: 13,
               weight: FontWeight.w600,

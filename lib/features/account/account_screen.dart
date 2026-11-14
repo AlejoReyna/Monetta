@@ -29,7 +29,6 @@ import '../../main.dart';
 import '../../data/accounts_orders/account_deletion_client.dart';
 import '../../data/accounts_orders/accounts_orders_config.dart';
 import '../rewards/rewards_api.dart';
-import '../wholesale/wholesale_screen.dart';
 import '../../data/customer_auth/customer_auth_error.dart';
 import '../../data/local/database.dart' show OrderSummary;
 import '../catalog/categories_screen.dart';
@@ -42,13 +41,11 @@ import '../notifications/notifications_screen.dart';
 import '../orders/order_detail_screen.dart';
 import '../orders/orders_screen.dart';
 import '../personalization/personalization_screen.dart';
-import '../boutique/guide_art.dart';
 import '../navigation/guide_chrome.dart';
 import '../navigation/guide_drawer.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../rewards/rewards_guide_screen.dart';
 import '../rewards/rewards_section.dart';
-import '../rewards/rewards_share_screen.dart';
 import 'account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
 import 'delete_account_screen.dart';
@@ -199,6 +196,7 @@ class AccountScreen extends StatelessWidget {
             listenable: controller,
             builder: (context, _) => controller.isSignedIn
                 ? _SignedIn(
+                    key: ValueKey(controller.account!.localAccountId),
                     controller: controller,
                     showAdmin: canOpenAdmin?.call() == true,
                     onOpenAdmin: onOpenAdmin,
@@ -217,6 +215,8 @@ class AccountScreen extends StatelessWidget {
       ),
       bottomNavigationBar: MonettaBottomNavigation(
         current: MonettaBottomDestination.account,
+        accountController: controller,
+        notificationInbox: notificationInbox ?? sharedAccountNotificationInbox,
         bagCount: store?.bagQuantity ?? 0,
         onSelected: (destination) {
           switch (destination) {
@@ -249,6 +249,7 @@ class _SignedIn extends StatelessWidget {
     required this.privacyPolicy,
     required this.openExternalUri,
     required this.profilePhotoPicker,
+    super.key,
   });
 
   final AccountController controller;
@@ -264,7 +265,11 @@ class _SignedIn extends StatelessWidget {
   final ProfilePhotoPicker? profilePhotoPicker;
 
   Future<void> _logout(BuildContext context) async {
+    final owner = controller.account?.localAccountId;
     await controller.logout();
+    if (!controller.isSignedIn && owner != null) {
+      (notificationInbox ?? sharedAccountNotificationInbox).clearOwner(owner);
+    }
     if (context.mounted && Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
     }
@@ -323,46 +328,15 @@ class _SignedIn extends StatelessWidget {
                 ),
               ),
               EAccessRow(
-                key: const ValueKey('account-open-addresses'),
-                icon: Icons.location_on_outlined,
-                title: 'Direcciones',
-                onTap: () => _showInfoSheet(
-                  context,
-                  title: 'Direcciones',
-                  message: kAccountAddressesInfo,
-                ),
-              ),
-              EAccessRow(
-                key: const ValueKey('account-open-payments'),
-                icon: Icons.credit_card_outlined,
-                title: 'Métodos de pago',
-                onTap: () => _showInfoSheet(
-                  context,
-                  title: 'Métodos de pago',
-                  message: kAccountPaymentsInfo,
-                ),
-              ),
-              EAccessRow(
                 key: const ValueKey('account-open-personalization'),
                 icon: Icons.settings_outlined,
                 title: 'Preferencias',
                 onTap: () => openPersonalization(context),
               ),
               EAccessRow(
-                key: const ValueKey('account-open-wholesale'),
-                icon: Icons.shopping_bag_outlined,
-                title: 'Modo Mayoreo',
-                subtitle: 'Desde 3 piezas',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const WholesaleScreen(),
-                  ),
-                ),
-              ),
-              EAccessRow(
                 key: const ValueKey('account-open-contact'),
                 icon: Icons.help_outline_rounded,
-                title: 'Ayuda y contacto',
+                title: 'Contacto',
                 onTap: () => openContact(context),
               ),
               if (onOpenInvite != null)
@@ -376,22 +350,6 @@ class _SignedIn extends StatelessWidget {
             ],
           ),
           const SizedBox(height: BoutiqueSpace.lg),
-          GuideShareEarnBanner(
-            asset: kGuideShareCatalog,
-            action: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 190),
-              child: GuidePillButton(
-                key: const ValueKey('account-share-catalog'),
-                label: 'VER CATÁLOGO',
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) =>
-                        RewardsShareScreen(accountController: controller),
-                  ),
-                ),
-              ),
-            ),
-          ),
           if (showAdmin && onOpenAdmin != null) ...[
             const SizedBox(height: BoutiqueSpace.sectionGapTight),
             InkWell(
@@ -592,51 +550,6 @@ const String kAccountAddressesInfo =
 const String kAccountPaymentsInfo =
     'Aceptamos tarjeta de crédito o débito y transferencia bancaria.';
 
-void _showInfoSheet(
-  BuildContext context, {
-  required String title,
-  required String message,
-}) {
-  final palette = context.boutique;
-  unawaited(
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: palette.canvas,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          key: const ValueKey('account-info-sheet'),
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: boutiqueScreenTitle(
-                  context: sheetContext,
-                  color: palette.ink,
-                ),
-              ),
-              const SizedBox(height: BoutiqueSpace.sm),
-              Text(
-                message,
-                style: boutiqueText(size: 15, color: palette.inkMuted),
-              ),
-              const SizedBox(height: BoutiqueSpace.lg),
-              BoutiqueButton(
-                key: const ValueKey('account-info-sheet-close'),
-                label: 'Entendido',
-                onPressed: () => Navigator.of(sheetContext).pop(),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
 /// Bandeja compartida de respaldo hasta que la integración global alimente
 /// una por sesión. Aislada por cuenta igual que cualquier otra.
 final NotificationInbox sharedAccountNotificationInbox = NotificationInbox();
@@ -787,19 +700,17 @@ class _IdentityCardState extends State<_IdentityCard> {
             children: [
               Text(
                 name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
                 style: boutiqueScreenTitle(
                   context: context,
                   color: palette.ink,
                 ),
               ),
+              Text('Miembro · Nivel no disponible',
+                  style: boutiqueText(size: 13, color: palette.inkMuted)),
               if (account.displayName != null && account.email != null) ...[
                 const SizedBox(height: 2),
                 Text(
                   account.email!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: boutiqueText(size: 13, color: palette.inkMuted),
                 ),
               ],
@@ -1186,6 +1097,8 @@ class _RewardsRowState extends State<_RewardsRow> {
   RewardsApi? _api;
   RewardsReader? _effective;
   String? _balance;
+  bool _loading = false;
+  bool _failed = false;
   var _generation = 0;
 
   /// Account the shown balance (or the request in flight) belongs to.
@@ -1245,9 +1158,12 @@ class _RewardsRowState extends State<_RewardsRow> {
     // Any answer still in flight belongs to the previous account or reader.
     final generation = ++_generation;
     _balance = null;
+    _failed = false;
+    _loading = false;
     final reader = _effective;
     final accountId = _trackedAccount;
     if (reader == null || accountId == null) return;
+    _loading = true;
     unawaited(
       reader.summary().then<void>(
         (summary) {
@@ -1256,9 +1172,18 @@ class _RewardsRowState extends State<_RewardsRow> {
               accountId != widget.controller.account?.localAccountId) {
             return;
           }
-          setState(() => _balance = summary.availableLabel);
+          setState(() {
+            _balance = summary.availableLabel;
+            _loading = false;
+          });
         },
-        onError: (Object _) {},
+        onError: (Object _) {
+          if (!mounted || generation != _generation) return;
+          setState(() {
+            _failed = true;
+            _loading = false;
+          });
+        },
       ),
     );
   }
@@ -1297,42 +1222,34 @@ class _RewardsRowState extends State<_RewardsRow> {
               horizontal: BoutiqueSpace.md,
               vertical: BoutiqueSpace.md,
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.card_giftcard_outlined, color: palette.goldText),
-                const SizedBox(width: BoutiqueSpace.md),
-                Expanded(
-                  child: Text(
-                    'Monetta Rewards',
-                    style:
-                        boutiqueRowLabel(context: context, color: palette.ink),
-                  ),
-                ),
-                const SizedBox(width: BoutiqueSpace.sm),
-                Icon(
-                  Icons.workspace_premium_outlined,
-                  size: 20,
-                  color: palette.goldText,
-                ),
-                const SizedBox(width: BoutiqueSpace.xs),
-                Flexible(
-                  child: Text(
-                    _balance ?? 'Ver saldo',
-                    key: const ValueKey('account-rewards-balance'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: boutiqueText(
-                      size: 14,
+                Text('Saldo',
+                    style: boutiqueText(size: 13, color: palette.inkMuted)),
+                Text(
+                  _balance ??
+                      (_loading
+                          ? 'Consultando tu saldo…'
+                          : _failed
+                              ? 'No pudimos consultar tu saldo'
+                              : 'Saldo no disponible'),
+                  key: const ValueKey('account-rewards-balance'),
+                  style: boutiqueText(
+                      size: 22,
                       weight: FontWeight.w600,
-                      color: palette.ink,
-                    ),
-                  ),
+                      color: _balance == null
+                          ? palette.inkMuted
+                          : const Color(0xFF3B7030)),
                 ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 22,
-                  color: palette.inkMuted,
-                ),
+                if (_failed)
+                  TextButton(
+                      onPressed: () => setState(_request),
+                      child: const Text('Reintentar')),
+                const SizedBox(height: BoutiqueSpace.sm),
+                Text('MONETTA REWARDS',
+                    style:
+                        boutiqueRowLabel(context: context, color: palette.ink)),
               ],
             ),
           ),

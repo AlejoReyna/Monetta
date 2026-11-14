@@ -1,0 +1,219 @@
+lib/features/catalog/brand_screen.dart
+Computing fixes in brand_screen.dart...
+Applying fixes...
+
+brand_screen.dart
+  curly_braces_in_flow_control_structures - 1 fix
+  require_trailing_commas - 3 fixes
+
+4 fixes made in 1 file.
+
+lib/features/catalog/brands_screen.dart
+Computing fixes in brands_screen.dart...
+Applying fixes...
+
+brands_screen.dart
+  curly_braces_in_flow_control_structures - 2 fixes
+  require_trailing_commas - 22 fixes
+  unused_import - 1 fix
+
+25 fixes made in 1 file.
+
+lib/features/catalog/catalog_browse_screen.dart
+Computing fixes in catalog_browse_screen.dart...
+Applying fixes...
+
+catalog_browse_screen.dart
+  curly_braces_in_flow_control_structures - 7 fixes
+  require_trailing_commas - 63 fixes
+
+70 fixes made in 1 file.
+
+lib/features/catalog/catalog_controls.dart
+Computing fixes in catalog_controls.dart...
+Applying fixes...
+
+catalog_controls.dart
+  require_trailing_commas - 9 fixes
+
+9 fixes made in 1 file.
+
+lib/features/catalog/catalog_query.dart
+Computing fixes in catalog_query.dart...
+Applying fixes...
+
+catalog_query.dart
+  curly_braces_in_flow_control_structures - 3 fixes
+  require_trailing_commas - 5 fixes
+
+8 fixes made in 1 file.
+
+lib/features/catalog/categories_screen.dart
+Computing fixes in categories_screen.dart...
+Applying fixes...
+
+categories_screen.dart
+  require_trailing_commas - 12 fixes
+
+12 fixes made in 1 file.
+
+lib/features/catalog/category_tree.dart
+Computing fixes in category_tree.dart...
+Applying fixes...
+
+category_tree.dart
+  curly_braces_in_flow_control_structures - 3 fixes
+  require_trailing_commas - 18 fixes
+
+21 fixes made in 1 file.
+
+lib/features/catalog/collection_screen.dart
+Computing fixes in collection_screen.dart...
+Applying fixes...
+
+collection_screen.dart
+  curly_braces_in_flow_control_structures - 11 fixes
+  require_trailing_commas - 149 fixes
+
+160 fixes made in 1 file.
+
+lib/features/catalog/search_screen.dart
+Computing fixes in search_screen.dart...
+Applying fixes...
+
+search_screen.dart
+  curly_braces_in_flow_control_structures - 1 fix
+  require_trailing_commas - 9 fixes
+
+10 fixes made in 1 file.
+
+lib/features/navigation/guide_drawer.dart
+Computing fixes in guide_drawer.dart...
+Applying fixes...
+
+guide_drawer.dart
+  curly_braces_in_flow_control_structures - 1 fix
+  require_trailing_commas - 2 fixes
+
+3 fixes made in 1 file.
+
+lib/features/navigation/monetta_side_menu.dart
+Computing fixes in monetta_side_menu.dart...
+Applying fixes...
+
+monetta_side_menu.dart
+  curly_braces_in_flow_control_structures - 3 fixes
+  require_trailing_commas - 51 fixes
+
+54 fixes made in 1 file.
+
+test/features/catalog/brand_screen_test.dart
+Computing fixes in brand_screen_test.dart...
+Applying fixes...
+
+brand_screen_test.dart
+  require_trailing_commas - 13 fixes
+
+13 fixes made in 1 file.
+
+test/features/catalog/brand_search_titles_typography_test.dart
+Computing fixes in brand_search_titles_typography_test.dart...
+Nothing to fix!
+
+test/features/catalog/catalog_browse_screen_test.dart
+Computing fixes in catalog_browse_screen_test.dart...
+Nothing to fix!
+
+test/features/catalog/catalog_edge_grid_test.dart
+Computing fixes in catalog_edge_grid_test.dart...
+Nothing to fix!
+
+test/features/catalog/catalog_filter_panel_test.dart
+Computing fixes in catalog_filter_panel_test.dart...
+Applying fixes...
+
+catalog_filter_panel_test.dart
+  require_trailing_commas - 1 fix
+
+1 fix made in 1 file.
+
+test/features/catalog/catalog_titles_typography_test.dart
+Computing fixes in catalog_titles_typography_test.dart...
+Applying fixes...
+
+catalog_titles_typography_test.dart
+  require_trailing_commas - 1 fix
+
+1 fix made in 1 file.
+
+test/features/catalog/categories_screen_test.dart
+Computing fixes in categories_screen_test.dart...
+Applying fixes...
+
+categories_screen_test.dart
+  curly_braces_in_flow_control_structures - 3 fixes
+  require_trailing_commas - 11 fixes
+
+14 fixes made in 1 file.
+
+test/features/catalog/collection_guide_photo_test.dart
+Computing fixes in collection_guide_photo_test.dart...
+Applying fixes...
+
+collection_guide_photo_test.dart
+  require_trailing_commas - 4 fixes
+
+4 fixes made in 1 file.
+
+test/features/catalog/collection_screen_test.dart
+Computing fixes in collection_screen_test.dart...
+Nothing to fix!
+
+test/features/catalog/collection_search_guide_v2_test.dart
+Computing fixes in collection_search_guide_v2_test.dart...
+Applying fixes...
+
+collection_search_guide_v2_test.dart
+  require_trailing_commas - 4 fixes
+
+4 fixes made in 1 file.
+
+test/features/catalog/v41_discovery_fixture.dart
+Computing fixes in v41_discovery_fixture.dart...
+Applying fixes...
+
+v41_discovery_fixture.dart
+  require_trailing_commas - 5 fixes
+
+5 fixes made in 1 file.
+
+test/features/catalog/v41_discovery_test.dart
+Computing fixes in v41_discovery_test.dart...
+Applying fixes...
+
+v41_discovery_test.dart
+  curly_braces_in_flow_control_structures - 1 fix
+  require_trailing_commas - 43 fixes
+
+44 fixes made in 1 file.
+
+test/features/catalog/v41_discovery_capture_test.dart
+Computing fixes in v41_discovery_capture_test.dart...
+Applying fixes...
+
+v41_discovery_capture_test.dart
+  curly_braces_in_flow_control_structures - 4 fixes
+  prefer_final_locals - 1 fix
+  require_trailing_commas - 16 fixes
+
+21 fixes made in 1 file.
+
+test/features/navigation/monetta_side_menu_test.dart
+Computing fixes in monetta_side_menu_test.dart...
+Applying fixes...
+
+monetta_side_menu_test.dart
+  require_trailing_commas - 16 fixes
+
+16 fixes made in 1 file.
+

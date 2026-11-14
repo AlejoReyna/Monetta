@@ -1,0 +1,79 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart
+00:00 +0: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_layout_responsive_test.dart: RESP-01 catalog, width 320 at x1.0
+00:01 +1: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_layout_responsive_test.dart: RESP-01 catalog, width 320 at x1.0
+00:01 +2: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_layout_responsive_test.dart: RESP-01 catalog, width 320 at x1.0
+00:01 +3: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:01 +4: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:01 +5: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:01 +6: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:02 +7: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:02 +8: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:02 +9: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:02 +10: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:02 +11: /Users/alexis/theCode/Monetta/test/features/navigation/monetta_side_menu_test.dart: sidebar all-brands opens real directory, explicit close preserves origin
+00:02 +12: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: category options show no article counts
+00:02 +13: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: category options show no article counts
+00:02 +14: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:02 +15: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +16: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +17: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +18: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +19: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +20: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +21: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +22: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +23: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +24: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +25: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +26: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +27: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +28: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +29: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +30: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +31: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +32: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +33: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:04 +34: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog context title is secondary DM Sans 15
+00:04 +35: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog context title is secondary DM Sans 15
+00:04 +36: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog context title is secondary DM Sans 15
+00:04 +37: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog context title is secondary DM Sans 15
+00:04 +38: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog context title is secondary DM Sans 15
+00:04 +39: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog context title is secondary DM Sans 15
+00:04 +40: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog context title is secondary DM Sans 15
+00:05 +41: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog context title is secondary DM Sans 15
+00:05 +42: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: local search plus oldest retains scope and later query wins synchronously
+00:05 +43: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: local search plus oldest retains scope and later query wins synchronously
+00:05 +44: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: local search plus oldest retains scope and later query wins synchronously
+00:05 +45: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: local search plus oldest retains scope and later query wins synchronously
+00:05 +46: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_layout_responsive_test.dart: RESP-01 collection, width 768 at x1.0
+00:05 +47: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog panel title uses editorial type
+00:05 +48: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 catalog panel title uses editorial type
+00:05 +49: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: resetting from the empty state also removes the categories
+00:05 +50: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_browse_screen_test.dart: resetting from the empty state also removes the categories
+00:05 +51: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: unknown collection membership is not a broader product fallback
+00:05 +52: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: unknown collection membership is not a broader product fallback
+00:05 +53: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:05 +54: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:05 +55: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:05 +56: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:05 +57: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:05 +58: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:06 +59: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:06 +60: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:06 +61: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:06 +62: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:06 +63: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01 catalog titles follow the client guide v4.1 collection panel title uses editorial type
+00:06 +64: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: color plus offer selects an actual variant through quick view, PDP and return
+00:06 +65: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01c collection titles follow the client guide TYPE-01c typographic banner title is serif w400, 26
+00:06 +66: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: error retains query and pieces; unavailable retry does not report success
+00:07 +67: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: error retains query and pieces; unavailable retry does not report success
+00:07 +68: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_titles_typography_test.dart: TYPE-01c collection titles follow the client guide TYPE-01c the bar keeps the wordmark and the banner title stays serif
+00:07 +69: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: progressive pages expose unique IDs and counts use the complete scope
+00:07 +70: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: progressive pages expose unique IDs and counts use the complete scope
+00:07 +71: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: progressive pages expose unique IDs and counts use the complete scope
+00:07 +72: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: progressive pages expose unique IDs and counts use the complete scope
+00:07 +73: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: progressive pages expose unique IDs and counts use the complete scope
+00:09 +74: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: 320/200% draft footer stays above the keyboard and cancellation retains query
+00:09 +75: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: global search filter entry preserves query and count scope
+00:09 +76: /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart: (tearDownAll)
+00:10 +76: All tests passed!

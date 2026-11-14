@@ -1,0 +1,17 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: same actual variant must satisfy color, discount, price and availability
+00:00 +1: newness requires explicit authority and ANDs with offers
+00:00 +2: stable order and full-scope unique matches agree with global search
+00:01 +3: exact owner tree and configured bindings never manufacture gender destinations
+00:01 +4: filter query and offer draft cancel via Escape and system back; apply retains brand
+00:03 +5: local search plus oldest retains scope and later query wins synchronously
+00:03 +6: unknown collection membership is not a broader product fallback
+00:03 +7: all brands routes to the actual canonical set and returns to directory
+00:04 +8: color plus offer selects an actual variant through quick view, PDP and return
+00:05 +9: error retains query and pieces; unavailable retry does not report success
+00:05 +10: progressive pages expose unique IDs and counts use the complete scope
+00:07 +11: 320/200% draft footer stays above the keyboard and cancellation retains query
+00:07 +12: global search filter entry preserves query and count scope
+00:07 +13: (tearDownAll)
+00:07 +13: All tests passed!

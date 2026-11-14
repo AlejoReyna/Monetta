@@ -1,242 +1,100 @@
+// v4.1 G03 replaces the obsolete seven-tile grid with the exact owner tree.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:monetta_app/app/catalog_store.dart';
-import 'package:monetta_app/data/local/database.dart';
-import 'package:monetta_app/data/normalize/normalizer.dart';
-import 'package:monetta_app/domain/product.dart';
-import 'package:monetta_app/features/boutique/guide_brand_tile.dart';
-import 'package:monetta_app/features/catalog/brand_screen.dart';
 import 'package:monetta_app/features/catalog/categories_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
-import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
-import 'package:monetta_app/main.dart';
-import 'package:monetta_app/features/home/home_screen.dart';
-import '../../support/client_guide_capture.dart';
-
-Future<void> _pop(WidgetTester tester) async {
-  tester.state<NavigatorState>(find.byType(Navigator)).pop();
-  await tester.pumpAndSettle();
-}
+import 'package:monetta_app/features/catalog/product_card.dart';
+import 'package:monetta_app/features/catalog/category_tree.dart';
+import 'v41_discovery_fixture.dart';
+import 'v41_discovery_test.dart' show mountDiscovery, tapVisible;
 
 void main() {
-  for (final (size, scale, brightness) in [
-    (const Size(390, 1100), 1.0, Brightness.light),
-    (const Size(320, 568), 2.0, Brightness.light),
-    (const Size(834, 1194), 1.0, Brightness.light),
-    (const Size(390, 1100), 1.0, Brightness.dark),
-  ]) {
-    testWidgets('category directory routes at $size / $scale / $brightness',
+  for (final scale in [1.0, 2.0]) {
+    testWidgets(
+        'owner taxonomy expands in-flow and retains state on return at text $scale',
         (tester) async {
-      final db = openTestDatabase();
-      final store = CatalogStore(database: db);
-      addTearDown(() async {
-        store.dispose();
-        await db.close();
-      });
-      await pumpClientGuide(
+      final store = await discoveryStore();
+      await mountDiscovery(
         tester,
-        StoreScope(notifier: store, child: const CategoriesScreen()),
-        size: size,
-        textScale: scale,
-        brightness: brightness,
+        const CategoriesScreen(),
+        store,
+        scale: scale,
       );
-      if (scale == 1) {
-        await captureClientGuide(
-          tester,
-          'categories-${size.width.toInt()}-${brightness.name}',
-        );
+      final first = find.byKey(const PageStorageKey('category-bags'));
+      final second = find.byKey(const PageStorageKey('category-wallets'));
+      final before = tester.getTopLeft(second).dy;
+      await tapVisible(tester, first);
+      expect(tester.getTopLeft(second).dy, greaterThan(before));
+      await tapVisible(
+        tester,
+        find.byKey(const PageStorageKey('category-bags-women')),
+      );
+      for (final text in ['Crossbody', 'Tote', 'De mano', 'De hombro']) {
+        expect(find.text(text), findsOneWidget);
       }
-      expect(find.text('Colecciones'), findsOneWidget);
-      // Guide v2: seven collections, in the guide's order. Relojes is not in
-      // the grid (it lives in the menu), and Accesorios carries the watch.
+      await tapVisible(tester, find.byKey(const Key('category-open-bags')));
+      final collection =
+          tester.widget<CollectionScreen>(find.byType(CollectionScreen));
+      expect(collection.filter.category, 'bolsa');
       expect(
-        [for (final category in guideDirectoryCategories) category.title],
-        [
-          'Crossbody',
-          'Tote',
-          'Shoulder',
-          'Handbags',
-          'Carteras',
-          'Perfumes',
-          'Accesorios',
-        ],
-      );
-      expect(
-        find.byKey(const ValueKey('categories-category-watches')),
-        findsNothing,
-      );
-      for (final category in guideDirectoryCategories) {
-        final tile = find.byKey(ValueKey('categories-category-${category.id}'));
-        // Every tile carries its gold line icon.
-        expect(
-          find.descendant(
-            of: tile,
-            matching: find.byWidgetPredicate(
-              (w) =>
-                  w is Image &&
-                  (w.image as AssetImage).assetName ==
-                      kGuideCategoryIcons[category.id],
+        tester.widgetList<ProductCard>(find.byType(ProductCard)).every(
+              (card) =>
+                  store.facetsFor(card.product.id)?.category?.value == 'bolsa',
             ),
-          ),
-          findsOneWidget,
-          reason: category.id,
-        );
-        await tester.scrollUntilVisible(
-          tile,
-          250,
-          scrollable: find.byType(Scrollable).first,
-        );
-        await tester.ensureVisible(tile);
-        await tester.pumpAndSettle();
-        await tester.tap(tile);
-        await tester.pumpAndSettle();
-        final screen =
-            tester.widget<CollectionScreen>(find.byType(CollectionScreen));
-        expect(screen.title, category.title);
-        expect(screen.filter, same(category.filter));
-        await _pop(tester);
-        expect(tester.takeException(), isNull);
-      }
-      // Three columns: tiles 1-3 share a row, the 4th starts the next one.
-      if (size.width < 800 && scale == 1) {
-        Offset at(String id) => tester.getTopLeft(
-              find.byKey(ValueKey('categories-category-$id')),
-            );
-        expect(at('crossbody').dy, at('tote').dy);
-        expect(at('tote').dy, at('shoulder').dy);
-        expect(at('handbags').dy, greaterThan(at('crossbody').dy));
-        expect(at('handbags').dx, at('crossbody').dx);
-      }
-      final all = find.byKey(const ValueKey('categories-all-brands'));
-      await tester.scrollUntilVisible(
-        all,
-        250,
-        scrollable: find.byType(Scrollable).first,
+        isTrue,
       );
-      await tester.ensureVisible(all);
+      await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
-      await tester.tap(all);
-      await tester.pumpAndSettle();
-      expect(find.text('Ver menos'), findsOneWidget);
-      final brand = find.byKey(const ValueKey('categories-brand-rhode'));
-      expect(tester.widget(brand), isA<GuideBrandTile>());
-      await tester.scrollUntilVisible(
-        brand,
-        250,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.ensureVisible(brand);
-      await tester.pumpAndSettle();
-      await tester.tap(brand);
-      await tester.pumpAndSettle();
-      expect(
-        tester.widget<BrandScreen>(find.byType(BrandScreen)).brandSlug,
-        'rhode',
-      );
+      expect(find.text('Crossbody'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }
-
-  testWidgets('home menu and bottom categories open dedicated destinations',
+  testWidgets(
+      'an explicit gender binding keeps its configured collection membership',
       (tester) async {
-    final db = openTestDatabase();
-    final store = CatalogStore(database: db);
-    await store.loadFromAsset();
-    store.products = [
-      Product(
-        id: 'demo',
-        handle: 'demo',
-        title: 'Bolsa DEMO',
-        vendor: 'Demo',
-        productType: 'bolsa',
-        tags: const [],
-        variants: const [
-          ProductVariant(
-            id: 'demo-v',
-            title: 'Default Title',
-            price: 100,
-            available: true,
-          ),
-        ],
-        images: const [],
-        createdAt: DateTime.utc(2026),
-        updatedAt: DateTime.utc(2026),
-      ),
-    ];
-    store.facetsById = {
-      for (final p in store.products)
-        p.id: Normalizer(store.rules).normalize(p, now: DateTime.utc(2026)),
-    };
-    addTearDown(() async {
-      store.dispose();
-      await db.close();
-    });
-    await pumpClientGuide(
+    final store = await discoveryStore();
+    await mountDiscovery(
       tester,
-      StoreScope(notifier: store, child: const HomeScreen()),
-      size: const Size(390, 1100),
+      const CategoriesScreen(
+        bindings: {
+          'bags-men': CollectionFilter(collectionHandle: 'configured-bags'),
+        },
+      ),
+      store,
     );
-    await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
-    await tester.pumpAndSettle();
-    expect(find.byType(CategoriesScreen), findsOneWidget);
-    await _pop(tester);
-    // Guide v2: the menu no longer links Categorías, Mayoreo or Contacto
-    // (Mayoreo and Contacto are reached from Cuenta).
-    await tester.tap(find.byKey(const Key('home-menu-button')));
-    await tester.pumpAndSettle();
-    final menu = find.byKey(const Key('monetta-side-menu'));
-    for (final label in ['Categorías', 'Mayoreo', 'Contacto']) {
-      expect(
-        find.descendant(of: menu, matching: find.text(label)),
-        findsNothing,
-        reason: label,
-      );
-    }
+    await tapVisible(tester, find.byKey(const PageStorageKey('category-bags')));
+    await tapVisible(tester, find.byKey(const Key('category-bags-men')));
     expect(
-      find.descendant(of: menu, matching: find.text('Todas las marcas')),
-      findsOneWidget,
+      tester
+          .widget<CollectionScreen>(find.byType(CollectionScreen))
+          .filter
+          .collectionHandle,
+      'configured-bags',
+    );
+    expect(
+      tester.widgetList<ProductCard>(find.byType(ProductCard)).every(
+            (card) =>
+                card.product.collectionHandles.contains('configured-bags'),
+          ),
+      isTrue,
     );
   });
+  test('all node IDs are unique and hierarchy order is unchanged', () {
+    final ids = <String>[];
+    void visit(CategoryNode n) {
+      ids.add(n.id);
+      for (final c in n.children) {
+        visit(c);
+      }
+    }
 
-  testWidgets('directory, full catalog and service menu preserve return routes',
-      (tester) async {
-    final db = openTestDatabase();
-    final store = CatalogStore(database: db);
-    addTearDown(() async {
-      store.dispose();
-      await db.close();
-    });
-    await pumpClientGuide(
-      tester,
-      StoreScope(
-        notifier: store,
-        child: Builder(
-          builder: (context) => Scaffold(
-            body: TextButton(
-              child: const Text('Catalog route'),
-              onPressed: () => openCatalogBrowse(context, items: const []),
-            ),
-          ),
-        ),
-      ),
+    for (final node in categoryTree) {
+      visit(node);
+    }
+    expect(ids.toSet().length, ids.length);
+    expect(
+      categoryTree[1].children[0].children.map((n) => n.label),
+      ['Muñequeras', 'Carteras', 'Tarjeteros'],
     );
-    await tester.tap(find.text('Catalog route'));
-    await tester.pumpAndSettle();
-    expect(find.byType(CatalogBrowseScreen), findsOneWidget);
-    await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
-    await tester.pumpAndSettle();
-    expect(find.byType(CategoriesScreen), findsOneWidget);
-    await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
-    await tester.pumpAndSettle();
-    await _pop(tester);
-    expect(find.byType(CatalogBrowseScreen), findsOneWidget);
-    // The guide's menu on this screen has no Mayoreo or Contacto links.
-    await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('home-menu-button')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('guide-menu-contact')), findsNothing);
-    expect(find.byKey(const ValueKey('guide-menu-wholesale')), findsNothing);
-    expect(find.text('Bolsas'), findsWidgets);
   });
 }

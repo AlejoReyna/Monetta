@@ -5,10 +5,9 @@
 /// de WhatsApp como enriquecimiento. No inventa líneas, importes ni
 /// seguimiento: lo que no está en el resumen no se presenta.
 ///
-/// Regla central: **el pago gana al envío**. "En camino" y "Entregado" solo
-/// aplican cuando `financial_status` es `paid`. Un pedido reembolsado,
-/// cancelado o sin pagar no se muestra como enviado ni entregado, aunque
-/// Shopify ya tenga `fulfillmentStatus`.
+/// Corrección 5: el **progreso de envío** es independiente del pago en detalle
+/// y filtros, salvo estados terminales (reembolsado/cancelado/anulado) donde
+/// el envío no debe contradecir el cierre financiero.
 ///
 /// Enviado no es entregado: con el pago cubierto, solo `delivered` es
 /// "Entregado". Un `fulfilled` sin entrega es "En camino". Un `paid` sin
@@ -126,7 +125,18 @@ OrderDisplayStatus orderDisplayStatus(OrderSummary order) {
     }
     return _withSecondaryFulfillment(order, payment);
   }
-  if (payment.key != 'confirmed') return payment;
+  if (payment.key == 'refunded' ||
+      payment.key == 'cancelled' ||
+      payment.key == 'voided') {
+    return payment;
+  }
+  if (payment.key != 'confirmed') {
+    final fulfillment = _fulfillmentHeadlineLabel(order);
+    if (fulfillment != null) {
+      return _withSecondary(payment, fulfillment);
+    }
+    return payment;
+  }
   return _fulfillmentStatus(order) ?? payment;
 }
 
@@ -338,11 +348,38 @@ bool _isPaid(OrderSummary order) =>
 
 bool _isDelivered(OrderSummary order) =>
     order.source != 'whatsapp_apartado' &&
-    _isPaid(order) &&
+    !_fulfillmentBlockedByTerminalPayment(order) &&
     order.fulfillmentStatus?.toLowerCase().trim() == 'delivered';
 
+bool _fulfillmentBlockedByTerminalPayment(OrderSummary order) {
+  final payment = orderPaymentStatus(order);
+  return payment.key == 'refunded' ||
+      payment.key == 'cancelled' ||
+      payment.key == 'voided';
+}
+
+/// Short fulfillment line for list cards while payment is still open.
+String? _fulfillmentHeadlineLabel(OrderSummary order) {
+  if (_fulfillmentBlockedByTerminalPayment(order)) return null;
+  if (order.source == 'whatsapp_apartado') return null;
+  return switch (order.fulfillmentStatus?.toLowerCase().trim()) {
+    'delivered' => 'Entregado',
+    'fulfilled' ||
+    'shipped' ||
+    'in_transit' ||
+    'in transit' ||
+    'out_for_delivery' ||
+    'partial' ||
+    'partially_fulfilled' ||
+    'partially fulfilled' =>
+      'En camino',
+    _ => null,
+  };
+}
+
 bool _isInTransit(OrderSummary order) {
-  if (order.source == 'whatsapp_apartado' || !_isPaid(order)) return false;
+  if (order.source == 'whatsapp_apartado') return false;
+  if (_fulfillmentBlockedByTerminalPayment(order)) return false;
   return switch (order.fulfillmentStatus?.toLowerCase().trim()) {
     'fulfilled' ||
     'shipped' ||

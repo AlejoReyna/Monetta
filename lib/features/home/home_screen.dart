@@ -35,6 +35,7 @@ import '../account/account_screen.dart';
 import '../about/about_monetta_screen.dart';
 import '../admin/admin_screen.dart';
 import '../catalog/catalog_browse_screen.dart';
+import '../catalog/brands_screen.dart';
 import '../catalog/categories_screen.dart';
 import '../catalog/collection_screen.dart';
 import '../catalog/product_card.dart';
@@ -50,8 +51,12 @@ import 'customer_experiences_section.dart';
 import 'customer_experiences_screen.dart';
 import 'home_account_invitation.dart';
 import 'home_boutique_sections.dart';
-
-const int _kNewestCount = 8;
+import 'home_category_photo_rail.dart';
+import 'home_for_you_section.dart';
+import 'home_most_wanted_section.dart';
+import 'home_new_collection_section.dart';
+import 'home_v41_catalog.dart';
+import 'home_wholesale_banner.dart';
 
 /// The redesign's opening rhythm: what is new, then how to shop it, then the
 /// editorial tail. Applied only when the storefront still carries the bundled
@@ -359,9 +364,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       );
     }
 
-    final newest = [...store.products]
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    final fresh = newest.take(_kNewestCount).toList();
+    final nuevaColeccion = uniqueNewestProducts(store);
+    final nuevaIds = nuevaColeccion.map((p) => p.id).toSet();
+    final loMasBuscado = uniqueFeedProducts(
+      store,
+      excludeIds: nuevaIds,
+    );
     final drawer = _buildSideMenu(store);
     final bottomNavigation = MonettaBottomNavigation(
       current: MonettaBottomDestination.home,
@@ -373,18 +381,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       homeContent.sectionOrder,
       HomeContent.fallback.sectionOrder,
     );
-    final opening = bundled
-        ? <HomeSectionId>[
-            for (final section in sections)
-              if (_kGuideOpeningSections.contains(section)) section,
-          ]
-        : sections;
+    final opening = bundled ? const <HomeSectionId>[] : sections;
     final tail = bundled
-        ? <HomeSectionId>[
+        ? const <HomeSectionId>[]
+        : <HomeSectionId>[
             for (final section in sections)
               if (!_kGuideOpeningSections.contains(section)) section,
-          ]
-        : const <HomeSectionId>[];
+          ];
     final body = LayoutBuilder(
       builder: (context, constraints) {
         _heroHeight = homeBannerHeight(context);
@@ -401,49 +404,75 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     valueListenable: _heroPlaying,
                     builder: (context, playing, _) => HomeEditorialBanner(
                       playing: playing,
-                      onOpenNew: _openFullCatalog,
-                      onOpenCatalog: _openFullCatalog,
-                      onOpenPerfumes: () => _openCatalogSection(
-                        title: 'Perfumes',
-                        category: 'perfume',
-                      ),
+                      onOpenProducts: _openFullCatalog,
+                      onOpenBrands: () => unawaited(openBrands(context)),
+                      onOpenCategories: () => unawaited(openCategories(context)),
                     ),
                   )
                 else
                   const SizedBox(height: 1),
               ],
             ),
-            for (var index = 0; index < opening.length; index++)
-              _buildHomeSection(
-                opening[index],
-                index: index,
-                store: store,
-                content: homeContent,
-                editorial: editorial,
-                fresh: fresh,
-                featuredProducts: featured?.products ?? const [],
-                reviewsStatus: reviewsStatus,
-              ),
             if (bundled) ...[
-              if (fresh.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
+                child: HomeCategoryPhotoRail(
+                  onOpen: (entry) => openCollection(
+                    context,
+                    CollectionScreen(
+                      title: entry.label,
+                      filter: entry.filter,
+                    ),
+                  ),
+                  onSeeAll: () => unawaited(openCategories(context)),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
+                child: _BrandsSection(
+                  brands: guideBrandsFor(homeContent.brands),
+                  onSeeAll: () => unawaited(openBrands(context)),
+                ),
+              ),
+              if (nuevaColeccion.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
-                  child: HomeNewArrivalsRail(
-                    products: fresh,
-                    title: 'Lo más buscado',
-                    sectionKey: const ValueKey('home-section-most-wanted'),
-                    railKey: const ValueKey('home-most-wanted-rail'),
+                  child: HomeNewCollectionSection(
+                    products: nuevaColeccion,
                     onOpenAll: _openFullCatalog,
                   ),
                 ),
-            ],
+              if (loMasBuscado.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
+                  child: HomeMostWantedSection(
+                    products: loMasBuscado,
+                    onOpenAll: _openFullCatalog,
+                  ),
+                ),
+              const Padding(
+                padding: EdgeInsets.only(top: BoutiqueSpace.xxl),
+                child: HomeForYouSection(),
+              ),
+            ] else
+              for (var index = 0; index < opening.length; index++)
+                _buildHomeSection(
+                  opening[index],
+                  index: index,
+                  store: store,
+                  content: homeContent,
+                  editorial: editorial,
+                  fresh: nuevaColeccion,
+                  featuredProducts: featured?.products ?? const [],
+                  reviewsStatus: reviewsStatus,
+                ),
             Padding(
               padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
               child: RevealOnScroll(
                 key: const ValueKey('home-reveal-offers'),
                 scrollController: _scroll,
                 offset: 0,
-                child: _HomeOffersSection(onOpenPartner: _openWholesale),
+                child: HomeWholesaleBanner(onOpenWholesale: _openWholesale),
               ),
             ),
             const ClientGuideServices(),
@@ -474,7 +503,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 store: store,
                 content: homeContent,
                 editorial: editorial,
-                fresh: fresh,
+                fresh: nuevaColeccion,
                 featuredProducts: featured?.products ?? const [],
                 reviewsStatus: reviewsStatus,
               ),

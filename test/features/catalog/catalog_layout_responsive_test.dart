@@ -115,6 +115,11 @@ void main() {
         await tester.pump();
 
         _expectContained(tester);
+        await tester.scrollUntilVisible(
+          find.byKey(const Key('collection-filter-button')),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
         expect(
           find.byKey(const Key('collection-filter-button')),
           findsOneWidget,

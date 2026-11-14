@@ -1,0 +1,1558 @@
+diff --git a/lib/features/catalog/brand_screen.dart b/lib/features/catalog/brand_screen.dart
+index a01bc87..32385f3 100644
+--- a/lib/features/catalog/brand_screen.dart
++++ b/lib/features/catalog/brand_screen.dart
+@@ -54,11 +54,10 @@ Future<void> openBrand(
+       StoreScope(
+         notifier: store,
+         child: BrowseDetailLayout(
+-          child: BrandScreen(
+-            brandSlug: brandSlug,
+-            title: title,
+-            tagline: tagline,
+-            story: story,
++          child: CollectionScreen(
++            title: title ?? brandLabel(brandSlug),
++            filter: CollectionFilter(brand: brandSlug),
++            description: tagline,
+             heroImageUrl: heroImageUrl,
+             heroImageAsset: heroImageAsset,
+           ),
+diff --git a/lib/features/catalog/catalog_query.dart b/lib/features/catalog/catalog_query.dart
+index 599855f..3e3c6d3 100644
+--- a/lib/features/catalog/catalog_query.dart
++++ b/lib/features/catalog/catalog_query.dart
+@@ -87,3 +87,60 @@ bool productMatchesAnyTerm(
+     (query) => terms.any((term) => term.contains(query)),
+   );
+ }
++
++/// Shared applied/draft criteria. Commercial newness is disabled unless the
++/// caller supplies an approved predicate; Shopify creation time is not approval.
++enum CatalogOrder { newest, oldest, priceAsc, priceDesc }
++
++List<Product> selectCatalogProducts(
++  CatalogStore store,
++  Iterable<Product> scope, {
++  String query = '',
++  String? color,
++  bool offersOnly = false,
++  bool availableOnly = false,
++  bool newOnly = false,
++  bool Function(Product)? approvedNewArrival,
++  CatalogOrder order = CatalogOrder.newest,
++}) {
++  final seen = <String>{};
++  final normalized = normalizeSearchText(query);
++  final result = scope.where((product) {
++    if (!seen.add(product.id)) return false;
++    if (!productMatchesNormalizedQuery(store, product, normalized))
++      return false;
++    if (newOnly && !(approvedNewArrival?.call(product) ?? false)) return false;
++    // Color, availability and offer must describe the same sellable variant.
++    return product.variants.any((variant) {
++      if (availableOnly && !variant.available) return false;
++      if (offersOnly &&
++          !(variant.compareAtPrice != null &&
++              variant.compareAtPrice! > variant.price)) return false;
++      if (color != null) {
++        if (variant.isDefault) {
++          if (!(store
++                  .facetsFor(product.id)
++                  ?.colors
++                  .any((c) => c.value == color) ??
++              false)) return false;
++        } else {
++          final terms = store.rules.colors[color] ?? const <String>[];
++          final title = normalizeSearchText(variant.title);
++          if (!terms.any((term) => title.contains(normalizeSearchText(term))))
++            return false;
++        }
++      }
++      return true;
++    });
++  }).toList();
++  result.sort((a, b) {
++    final comparison = switch (order) {
++      CatalogOrder.newest => b.createdAt.compareTo(a.createdAt),
++      CatalogOrder.oldest => a.createdAt.compareTo(b.createdAt),
++      CatalogOrder.priceAsc => a.price.compareTo(b.price),
++      CatalogOrder.priceDesc => b.price.compareTo(a.price),
++    };
++    return comparison == 0 ? a.id.compareTo(b.id) : comparison;
++  });
++  return result;
++}
+diff --git a/lib/features/catalog/categories_screen.dart b/lib/features/catalog/categories_screen.dart
+index 35250fc..e2c3ea9 100644
+--- a/lib/features/catalog/categories_screen.dart
++++ b/lib/features/catalog/categories_screen.dart
+@@ -1,20 +1,18 @@
+ /// Dedicated category directory (client guide page 18), reusing catalog routes.
+ library;
+ 
+-import 'dart:async';
+ import 'package:flutter/material.dart';
+ import '../../app/monetta_tokens.g.dart';
+ import '../../app/catalog_store.dart';
+ import '../../data/normalize/text.dart';
+ import '../../domain/home_content.dart';
+ import '../../main.dart';
+-import '../boutique/boutique_tokens.dart';
+ import '../boutique/client_guide_components.dart';
+ import '../boutique/client_guide_scaffold.dart';
+-import '../boutique/guide_art.dart';
+-import '../boutique/guide_brand_tile.dart';
+ import '../navigation/duo_workspace.dart';
+-import 'brand_screen.dart';
++import '../boutique/guide_art.dart';
++import 'category_tree.dart';
++import 'brands_screen.dart';
+ import 'collection_screen.dart';
+ 
+ Future<void> openCategories(BuildContext context) async {
+@@ -141,251 +139,31 @@ String guideBrandSlug(HomeBrandCard brand, CatalogStore? store) {
+       if (entry.key == value || entry.value.contains(value)) return entry.key;
+     }
+   }
+-  return value.replaceAll(RegExp(r'[\s-]+'), '_');
++  return ''; // No configured canonical binding: do not manufacture a slug.
+ }
+ 
+-class CategoriesScreen extends StatefulWidget {
+-  const CategoriesScreen({this.content, super.key});
++class CategoriesScreen extends StatelessWidget {
++  const CategoriesScreen({this.content, this.bindings = const {}, super.key});
+   final HomeContent? content;
++  final Map<String, CollectionFilter> bindings;
+   @override
+-  State<CategoriesScreen> createState() => _CategoriesScreenState();
+-}
+-
+-class _CategoriesScreenState extends State<CategoriesScreen> {
+-  bool _allBrands = false;
+-
+-  @override
+-  Widget build(BuildContext context) {
+-    final palette = context.boutique;
+-    final store = StoreScope.maybeOf(context);
+-    final content = widget.content ??
+-        HomeContentScope.maybeOf(context)?.content ??
+-        HomeContent.fallback;
+-    final brands = content.brands;
+-    // Three rows on compact layouts, with a working disclosure for the rest.
+-    final shownBrands = _allBrands
+-        ? brands
+-        : brands.take(MonettaTokens.categoryColumnsCompact * 3);
+-    return ClientGuideScaffold(
+-      current: ClientGuideDestination.categories,
+-      body: ListView(
+-        key: const ValueKey('categories-scroll'),
+-        padding: EdgeInsets.all(
+-          MonettaTokens.gutterFor(MediaQuery.sizeOf(context).width),
+-        ),
+-        children: [
+-          Text(
+-            'Categorías',
+-            style: clientGuideStyle(context, MonettaTokens.screenTitle),
+-          ),
+-          SizedBox(height: MonettaTokens.space[1]),
+-          Text(
+-            'Descubre todas nuestras colecciones de tus marcas favoritas.',
+-            style: clientGuideStyle(
+-              context,
+-              MonettaTokens.body,
+-              color: palette.inkMuted,
+-            ),
+-          ),
+-          SizedBox(height: MonettaTokens.space[3]),
+-          Text(
+-            'Colecciones',
+-            style: clientGuideStyle(context, MonettaTokens.sectionTitle),
+-          ),
+-          SizedBox(height: MonettaTokens.space[2]),
+-          _DirectoryGrid(
+-            columns: MonettaTokens.categoryColumnsCompact,
+-            children: [
+-              for (final category in guideDirectoryCategories)
+-                _CollectionTile(
+-                  key: ValueKey('categories-category-${category.id}'),
+-                  label: category.title,
+-                  iconAsset: kGuideCategoryIcons[category.id]!,
+-                  onTap: store == null
+-                      ? null
+-                      : () => openCollection(
+-                            context,
+-                            CollectionScreen(
+-                              title: category.title,
+-                              filter: category.filter,
+-                            ),
+-                          ),
+-                ),
+-            ],
+-          ),
+-          SizedBox(height: MonettaTokens.space[3]),
+-          Divider(color: palette.hairline),
+-          Row(
+-            children: [
+-              Expanded(
+-                child: Text(
+-                  'Marcas',
+-                  style: clientGuideStyle(
+-                    context,
+-                    MonettaTokens.sectionTitle,
+-                  ),
+-                ),
+-              ),
+-              if (brands.length > MonettaTokens.categoryColumnsCompact * 3)
+-                TextButton(
+-                  key: const ValueKey('categories-all-brands'),
+-                  onPressed: () => setState(() => _allBrands = !_allBrands),
+-                  child: Row(
+-                    mainAxisSize: MainAxisSize.min,
+-                    children: [
+-                      Text(
+-                        _allBrands ? 'Ver menos' : 'Ver todo',
+-                        style: clientGuideStyle(
+-                          context,
+-                          MonettaTokens.cardLabel,
+-                        ),
+-                      ),
+-                      Icon(
+-                        _allBrands ? Icons.expand_less : Icons.chevron_right,
+-                        size: 18,
+-                        color: palette.ink,
+-                      ),
+-                    ],
+-                  ),
+-                ),
+-            ],
+-          ),
+-          SizedBox(height: MonettaTokens.space[2]),
+-          if (brands.isEmpty)
+-            Text(
+-              'Marcas: contenido pendiente.',
+-              style: clientGuideStyle(context, MonettaTokens.body),
+-            ),
+-          _DirectoryGrid(
+-            columns: MonettaTokens.categoryColumnsCompact,
+-            children: [
+-              for (final brand in shownBrands)
+-                GuideBrandTile(
+-                  key: ValueKey(
+-                    'categories-brand-${guideBrandSlug(brand, store)}',
+-                  ),
+-                  asset: brand.fallbackAsset,
+-                  label: brand.title,
+-                  onTap: store == null
+-                      ? null
+-                      : () => unawaited(
+-                            openBrand(
+-                              context,
+-                              brandSlug: guideBrandSlug(brand, store),
+-                              title: brand.title,
+-                            ),
+-                          ),
+-                ),
+-            ],
+-          ),
+-          SizedBox(height: MonettaTokens.space[4]),
+-        ],
+-      ),
+-    );
+-  }
+-}
+-
+-class _DirectoryGrid extends StatelessWidget {
+-  const _DirectoryGrid({required this.children, this.columns});
+-  final List<Widget> children;
+-
+-  /// Fixed column count; null follows the breakpoints.
+-  final int? columns;
+-  @override
+-  Widget build(BuildContext context) => LayoutBuilder(
+-        builder: (context, constraints) {
+-          final width = MediaQuery.sizeOf(context).width;
+-          final columns = this.columns ??
+-              (MediaQuery.textScalerOf(context).scale(1) > 1.3
+-                  ? MonettaTokens.productColumnsNarrow
+-                  : width >= MonettaTokens.breakpointExpanded
+-                      ? MonettaTokens.categoryColumnsExpanded
+-                      : width >= MonettaTokens.breakpointMedium
+-                          ? MonettaTokens.categoryColumnsMedium
+-                          : MonettaTokens.categoryColumnsCompact);
+-          final gap = MonettaTokens.space[1];
+-          return Wrap(
+-            spacing: gap,
+-            runSpacing: gap,
++  Widget build(BuildContext context) => ClientGuideScaffold(
++        current: ClientGuideDestination.categories,
++        body: ListView(
++            key: const ValueKey('categories-scroll'),
++            padding: const EdgeInsets.all(16),
+             children: [
+-              for (final child in children)
+-                SizedBox(
+-                  width: (constraints.maxWidth - gap * (columns - 1)) / columns,
+-                  child: child,
+-                ),
+-            ],
+-          );
+-        },
++              Text('Categorías',
++                  style: clientGuideStyle(context, MonettaTokens.screenTitle)),
++              const SizedBox(height: 16),
++              CategoryTree(
++                  bindings: bindings,
++                  onOpen: (node, filter) => openCollection(context,
++                      CollectionScreen(title: node.label, filter: filter))),
++              const SizedBox(height: 24),
++              Text('Marcas',
++                  style: clientGuideStyle(context, MonettaTokens.sectionTitle)),
++              BrandDirectory(content: content),
++            ]),
+       );
+ }
+-
+-/// Tile of a collection: gold line icon on the tinted tile, label below.
+-class _CollectionTile extends StatelessWidget {
+-  const _CollectionTile({
+-    required this.label,
+-    required this.iconAsset,
+-    required this.onTap,
+-    super.key,
+-  });
+-
+-  final String label;
+-  final String iconAsset;
+-  final VoidCallback? onTap;
+-
+-  @override
+-  Widget build(BuildContext context) {
+-    final palette = context.boutique;
+-    return Semantics(
+-      button: true,
+-      label: label,
+-      excludeSemantics: true,
+-      onTap: onTap,
+-      child: Material(
+-        color: palette.surfaceDeep,
+-        clipBehavior: Clip.antiAlias,
+-        borderRadius: BorderRadius.circular(MonettaTokens.radiusTile),
+-        child: InkWell(
+-          onTap: onTap,
+-          child: AspectRatio(
+-            aspectRatio: 1.12,
+-            child: Padding(
+-              padding: EdgeInsets.all(MonettaTokens.space[1]),
+-              child: Column(
+-                children: [
+-                  Expanded(
+-                    child: Padding(
+-                      padding: EdgeInsets.only(top: MonettaTokens.space[1]),
+-                      child: Image.asset(
+-                        iconAsset,
+-                        fit: BoxFit.contain,
+-                        excludeFromSemantics: true,
+-                        errorBuilder: (_, __, ___) => Icon(
+-                          Icons.shopping_bag_outlined,
+-                          size: MonettaTokens.space[5],
+-                          color: palette.goldText,
+-                        ),
+-                      ),
+-                    ),
+-                  ),
+-                  SizedBox(height: MonettaTokens.space[0]),
+-                  Text(
+-                    label,
+-                    maxLines: 1,
+-                    overflow: TextOverflow.ellipsis,
+-                    textAlign: TextAlign.center,
+-                    style: guideSerifStyle(
+-                      context,
+-                      size: 14,
+-                      color: palette.ink,
+-                      weight: FontWeight.w500,
+-                    ),
+-                  ),
+-                ],
+-              ),
+-            ),
+-          ),
+-        ),
+-      ),
+-    );
+-  }
+-}
+diff --git a/lib/features/catalog/collection_screen.dart b/lib/features/catalog/collection_screen.dart
+index 820c8ba..f07d644 100644
+--- a/lib/features/catalog/collection_screen.dart
++++ b/lib/features/catalog/collection_screen.dart
+@@ -13,7 +13,6 @@ import '../../platform/system_layout_context.dart';
+ import '../navigation/storefront_pane_scope.dart';
+ import 'dart:async';
+ 
+-import 'package:flutter/foundation.dart' show ValueListenable;
+ import 'package:flutter/material.dart';
+ 
+ import '../../app/catalog_store.dart';
+@@ -39,11 +38,12 @@ import 'catalog_query.dart';
+ import 'product_card.dart';
+ import 'search_history.dart';
+ 
+-enum _Sort { newest, priceAsc, priceDesc }
++enum _Sort { newest, oldest, priceAsc, priceDesc }
+ 
+ extension on _Sort {
+   String get label => switch (this) {
+         _Sort.newest => 'Más nuevas',
++        _Sort.oldest => 'Más antiguas',
+         _Sort.priceAsc => 'Menor precio',
+         _Sort.priceDesc => 'Mayor precio',
+       };
+@@ -73,6 +73,8 @@ class _CollectionFilters {
+   const _CollectionFilters({
+     this.sort = _Sort.newest,
+     this.inStockOnly = false,
++    this.offersOnly = false,
++    this.color,
+     this.brand,
+     this.silhouette,
+     this.category,
+@@ -80,6 +82,8 @@ class _CollectionFilters {
+ 
+   final _Sort sort;
+   final bool inStockOnly;
++  final bool offersOnly;
++  final String? color;
+   final String? brand;
+   final String? silhouette;
+ 
+@@ -89,6 +93,8 @@ class _CollectionFilters {
+   _CollectionFilters copyWith({
+     _Sort? sort,
+     bool? inStockOnly,
++    bool? offersOnly,
++    Object? color = _unchanged,
+     Object? brand = _unchanged,
+     Object? silhouette = _unchanged,
+     Object? category = _unchanged,
+@@ -96,6 +102,8 @@ class _CollectionFilters {
+     return _CollectionFilters(
+       sort: sort ?? this.sort,
+       inStockOnly: inStockOnly ?? this.inStockOnly,
++      offersOnly: offersOnly ?? this.offersOnly,
++      color: identical(color, _unchanged) ? this.color : color as String?,
+       brand: identical(brand, _unchanged) ? this.brand : brand as String?,
+       silhouette: identical(silhouette, _unchanged)
+           ? this.silhouette
+@@ -109,6 +117,8 @@ class _CollectionFilters {
+   /// availability, brand, and bag type are.
+   int activeCountComparedTo(_CollectionFilters baseline) =>
+       (inStockOnly ? 1 : 0) +
++      (offersOnly ? 1 : 0) +
++      (color != null ? 1 : 0) +
+       (brand != baseline.brand ? 1 : 0) +
+       (silhouette != baseline.silhouette ? 1 : 0) +
+       (category != baseline.category ? 1 : 0);
+@@ -166,6 +176,7 @@ class CollectionScreen extends StatefulWidget {
+ 
+ class _CollectionScreenState extends State<CollectionScreen> {
+   late _CollectionFilters _filters;
++  String _localQuery = '';
+   final ScrollController _scroll = ScrollController();
+ 
+   /// The applied filters, followed by the filter page on a two-sided window's
+@@ -193,6 +204,38 @@ class _CollectionScreenState extends State<CollectionScreen> {
+           category: widget.filter.category,
+         );
+ 
++  String? get _bannerId {
++    if (_hasHero) return null;
++    final brand = widget.filter.brand;
++    if (brand != null)
++      return const {
++        'guess': 'B24',
++        'tory_burch': 'B25',
++        'marc_jacobs': 'B26',
++        'kate_spade': 'B27',
++        'coach': 'B28',
++        'michael_kors': 'B29',
++        'steve_madden': 'B30'
++      }[brand];
++    final silhouette = widget.filter.silhouette;
++    if (silhouette != null)
++      return const {
++        'crossbody': 'B18',
++        'tote': 'B19',
++        'shoulder': 'B20',
++        'satchel': 'B22',
++        'wristlet': 'B10'
++      }[silhouette];
++    return const {
++      'bolsa': 'B08',
++      'cartera': 'B21',
++      'perfume': 'B16',
++      'reloj': 'B11',
++      'accesorio': 'B17',
++      'tarjetero': 'B15'
++    }[widget.filter.category];
++  }
++
+   _CollectionFilters get _initialFilters => _CollectionFilters(
+         brand: widget.filter.brand,
+         silhouette: widget.filter.silhouette,
+@@ -248,11 +291,16 @@ class _CollectionScreenState extends State<CollectionScreen> {
+     ];
+     return store.products.where((product) {
+       final facets = store.facetsFor(product.id);
++      if (widget.filter.category != null &&
++          facets?.category?.value != widget.filter.category) return false;
++      if (widget.filter.brand != null &&
++          facets?.brand?.value != widget.filter.brand) return false;
++      if (widget.filter.silhouette != null &&
++          facets?.silhouette?.value != widget.filter.silhouette) return false;
+       if (category != null && facets?.category?.value != category) {
+         return false;
+       }
+       if (widget.filter.collectionHandle != null &&
+-          product.collectionHandles.isNotEmpty &&
+           !product.collectionHandles.contains(
+             widget.filter.collectionHandle,
+           )) {
+@@ -287,17 +335,32 @@ class _CollectionScreenState extends State<CollectionScreen> {
+       return !selection.inStockOnly || product.isInStock;
+     }).toList();
+ 
+-    items.sort((a, b) {
+-      switch (selection.sort) {
+-        case _Sort.priceAsc:
+-          return a.price.compareTo(b.price);
+-        case _Sort.priceDesc:
+-          return b.price.compareTo(a.price);
+-        case _Sort.newest:
+-          return b.createdAt.compareTo(a.createdAt);
+-      }
+-    });
+-    return items;
++    return selectCatalogProducts(store, items,
++        query: _localQuery,
++        color: selection.color,
++        offersOnly: selection.offersOnly,
++        availableOnly: selection.inStockOnly,
++        order: CatalogOrder.values.byName(selection.sort.name));
++  }
++
++  Future<void> _openSort() async {
++    final selected = await showModalBottomSheet<_Sort>(
++        context: context,
++        useSafeArea: true,
++        isScrollControlled: true,
++        builder: (context) => SingleChildScrollView(
++                child: Column(mainAxisSize: MainAxisSize.min, children: [
++              const ListTile(title: Text('Ordenar por')),
++              for (final sort in _Sort.values)
++                ListTile(
++                    title: Text(sort.label),
++                    selected: _filters.sort == sort,
++                    onTap: () => Navigator.pop(context, sort)),
++              TextButton(
++                  onPressed: () => Navigator.pop(context),
++                  child: const Text('Cancelar')),
++            ])));
++    if (selected != null && mounted) _apply(_filters.copyWith(sort: selected));
+   }
+ 
+   void _openFullCatalog() {
+@@ -357,30 +420,6 @@ class _CollectionScreenState extends State<CollectionScreen> {
+   Future<void> _openFilterSheet() async {
+     final store = StoreScope.of(context);
+     final scopedItems = _scopedItems(_filters.category);
+-    // A two-sided window edits the filters on its right side and applies
+-    // every change at once to the pieces on the left.
+-    final beside = DuoWorkspace.showPane(
+-      context,
+-      DuoPanePage(
+-        kind: DuoPaneKind.filters,
+-        owner: this,
+-        builder: (_) => StoreScope(
+-          notifier: store,
+-          child: _CollectionFilterSheet(
+-            initial: _filters,
+-            reset: _initialFilters,
+-            brands: _brandsFor(scopedItems, store),
+-            silhouettes: _silhouettesFor(scopedItems, store),
+-            resultCount: (selection) => _items(selection).length,
+-            applied: _applied,
+-            onChanged: (filters) {
+-              if (mounted) _apply(filters);
+-            },
+-          ),
+-        ),
+-      ),
+-    );
+-    if (beside) return;
+     final result = await showModalBottomSheet<_CollectionFilters>(
+       context: context,
+       anchorPoint: presentationAnchor(context),
+@@ -396,6 +435,11 @@ class _CollectionScreenState extends State<CollectionScreen> {
+           brands: _brandsFor(scopedItems, store),
+           silhouettes: _silhouettesFor(scopedItems, store),
+           resultCount: (selection) => _items(selection).length,
++          colors: {
++            for (final p in scopedItems)
++              ...?store.facetsFor(p.id)?.colors.map((c) => c.value)
++          }.toList()
++            ..sort(),
+         ),
+       ),
+     );
+@@ -421,19 +465,75 @@ class _CollectionScreenState extends State<CollectionScreen> {
+           if (SystemLayoutScope.of(context).barEdge == SystemBarEdge.none ||
+               !StorefrontPaneScope.ownsNavigationOf(context))
+             _CollectionAppBar(onSearch: () => unawaited(openSearch(context))),
+-          SliverToBoxAdapter(
+-            child: CatalogEditorialBanner(
+-              title: widget.title,
+-              description: widget.description,
+-              imageUrl: widget.heroImageUrl,
+-              guidePhoto: _guidePhoto,
+-              imageAsset: _hasHero
+-                  ? widget.heroImageAsset
+-                  : (widget.heroImageAsset ?? kGuideStudioBanner),
+-              actionLabel: widget.ctaLabel ?? 'Ver la colección',
+-              onAction: _scrollToGrid,
++          if (_bannerId case final id?)
++            SliverToBoxAdapter(
++                child: Padding(
++                    padding: const EdgeInsets.symmetric(vertical: 8),
++                    child: DecoratedBox(
++                      decoration: const BoxDecoration(boxShadow: [
++                        BoxShadow(
++                            color: Color(0x0D242622),
++                            blurRadius: 8,
++                            offset: Offset(0, 2))
++                      ]),
++                      child: GuideBanner(id: id),
++                    )))
++          else
++            SliverToBoxAdapter(
++              child: CatalogEditorialBanner(
++                title: widget.title,
++                description: widget.description,
++                imageUrl: widget.heroImageUrl,
++                guidePhoto: _guidePhoto,
++                imageAsset: _hasHero
++                    ? widget.heroImageAsset
++                    : (widget.heroImageAsset ?? kGuideStudioBanner),
++                actionLabel: widget.ctaLabel ?? 'Ver la colección',
++                onAction: _scrollToGrid,
++              ),
+             ),
+-          ),
++          SliverToBoxAdapter(
++              child: Padding(
++                  padding: const EdgeInsets.all(16),
++                  child: Column(children: [
++                    Text(widget.title, style: boutiqueText(size: 15)),
++                    TextField(
++                        key: const Key('collection-local-search'),
++                        decoration: InputDecoration(
++                            labelText: 'Buscar en ${widget.title}',
++                            prefixIcon: const Icon(Icons.search)),
++                        onChanged: (value) =>
++                            setState(() => _localQuery = value)),
++                    Wrap(spacing: 8, children: [
++                      if (_filters.offersOnly)
++                        InputChip(
++                            label: const Text('Ofertas'),
++                            onDeleted: () =>
++                                _apply(_filters.copyWith(offersOnly: false))),
++                      if (_filters.color != null)
++                        InputChip(
++                            label: Text(colorLabel(_filters.color!)),
++                            onDeleted: () =>
++                                _apply(_filters.copyWith(color: null))),
++                      if (_filters.inStockOnly)
++                        InputChip(
++                            label: const Text('Disponibles'),
++                            onDeleted: () =>
++                                _apply(_filters.copyWith(inStockOnly: false))),
++                      if (_filters.brand != _initialFilters.brand &&
++                          _filters.brand != null)
++                        InputChip(
++                            label: Text(brandLabel(_filters.brand!)),
++                            onDeleted: () => _apply(_filters.copyWith(
++                                brand: _initialFilters.brand))),
++                      if (_filters.silhouette != _initialFilters.silhouette &&
++                          _filters.silhouette != null)
++                        InputChip(
++                            label: Text(silhouetteLabel(_filters.silhouette!)),
++                            onDeleted: () => _apply(_filters.copyWith(
++                                silhouette: _initialFilters.silhouette))),
++                    ]),
++                  ]))),
+           SliverToBoxAdapter(
+             child: _CollectionToolbar(
+               count: items.length,
+@@ -441,6 +541,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
+               category: _filters.category,
+               onClear: activeCount == 0 ? null : _clearFilters,
+               onFilters: _openFilterSheet,
++              onSort: _openSort,
+               onCategory: (value) => _apply(
+                 _filters.copyWith(
+                   category: _filters.category == value ? null : value,
+@@ -557,6 +658,7 @@ class _CollectionToolbar extends StatelessWidget {
+     required this.category,
+     required this.onClear,
+     required this.onFilters,
++    required this.onSort,
+     required this.onCategory,
+   });
+ 
+@@ -565,6 +667,7 @@ class _CollectionToolbar extends StatelessWidget {
+   final String? category;
+   final VoidCallback? onClear;
+   final VoidCallback onFilters;
++  final VoidCallback onSort;
+   final ValueChanged<String> onCategory;
+ 
+   @override
+@@ -582,7 +685,8 @@ class _CollectionToolbar extends StatelessWidget {
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+           SizedBox(
+-            height: BoutiqueSpace.tapTarget,
++            height:
++                MediaQuery.textScalerOf(context).scale(BoutiqueSpace.tapTarget),
+             child: SingleChildScrollView(
+               scrollDirection: Axis.horizontal,
+               child: Row(
+@@ -654,7 +758,7 @@ class _CollectionToolbar extends StatelessWidget {
+               ),
+               TextButton(
+                 key: const Key('collection-sort-button'),
+-                onPressed: onFilters,
++                onPressed: onSort,
+                 style: TextButton.styleFrom(
+                   minimumSize: const Size(0, BoutiqueSpace.tapTarget),
+                   foregroundColor: palette.ink,
+@@ -788,7 +892,7 @@ class _CollectionFilterIconButton extends StatelessWidget {
+         children: [
+           Semantics(
+             button: true,
+-            label: 'Filtrar y ordenar',
++            label: 'Filtros',
+             excludeSemantics: true,
+             onTap: onPressed,
+             child: Material(
+@@ -799,7 +903,7 @@ class _CollectionFilterIconButton extends StatelessWidget {
+                 customBorder: const CircleBorder(),
+                 onTap: onPressed,
+                 child: Tooltip(
+-                  message: 'Filtrar y ordenar',
++                  message: 'Filtros',
+                   child: SizedBox(
+                     width: 44,
+                     height: 44,
+@@ -847,15 +951,15 @@ class _CollectionFilterIconButton extends StatelessWidget {
+ 
+ class _CollectionFilterSheet extends StatefulWidget {
+   const _CollectionFilterSheet({
++    this.colors = const [],
+     required this.initial,
+     required this.reset,
+     required this.brands,
+     required this.silhouettes,
+     required this.resultCount,
+-    this.applied,
+-    this.onChanged,
+   });
+ 
++  final List<String> colors;
+   final _CollectionFilters initial;
+ 
+   /// The destination's own filters. "Limpiar" returns here, never to the
+@@ -865,14 +969,6 @@ class _CollectionFilterSheet extends StatefulWidget {
+   final List<String> silhouettes;
+   final int Function(_CollectionFilters filters) resultCount;
+ 
+-  /// On a two-sided window's right side: the filters the pieces show, which
+-  /// this page follows, and the callback that applies each change at once.
+-  /// Without them it is the ordinary sheet that applies on «Ver».
+-  final ValueListenable<_CollectionFilters>? applied;
+-  final ValueChanged<_CollectionFilters>? onChanged;
+-
+-  bool get live => onChanged != null;
+-
+   @override
+   State<_CollectionFilterSheet> createState() => _CollectionFilterSheetState();
+ }
+@@ -883,36 +979,9 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
+     _CollectionFilterSection.sort,
+   };
+ 
+-  @override
+-  void initState() {
+-    super.initState();
+-    widget.applied?.addListener(_followApplied);
+-  }
+-
+-  @override
+-  void dispose() {
+-    widget.applied?.removeListener(_followApplied);
+-    super.dispose();
+-  }
+-
+-  /// The pieces changed by other means (a pill, say): show what they apply.
+-  void _followApplied() {
+-    final applied = widget.applied!.value;
+-    if (identical(applied, _selection)) return;
+-    setState(() => _selection = applied);
+-  }
+-
+-  /// A change of selection; a live page applies it at once.
+-  void _select(_CollectionFilters selection) {
+-    setState(() => _selection = selection);
+-    widget.onChanged?.call(selection);
+-  }
+-
+-  /// «Cancelar» on a live page puts back what the pieces showed on opening.
+-  void _cancel() {
+-    if (widget.live) _select(widget.initial);
+-    Navigator.of(context).pop();
+-  }
++  void _select(_CollectionFilters selection) =>
++      setState(() => _selection = selection);
++  void _cancel() => Navigator.of(context).pop();
+ 
+   void _toggleExpanded(_CollectionFilterSection section) {
+     setState(() {
+@@ -930,61 +999,33 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
+     final resultCount = widget.resultCount(_selection);
+     // On the right side the page fills it; as a sheet it rises from below.
+     return FractionallySizedBox(
+-      heightFactor: widget.live ? 1 : 0.94,
++      heightFactor: 0.94,
+       child: Material(
+         color: palette.canvas,
+         clipBehavior: Clip.antiAlias,
+-        borderRadius: widget.live
+-            ? null
+-            : const BorderRadius.vertical(top: Radius.circular(20)),
++        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+         child: SafeArea(
+-          top: widget.live,
++          top: false,
+           child: Column(
+             children: [
+-              SizedBox(
+-                width: double.infinity,
+-                height: 68,
+-                child: Stack(
+-                  alignment: Alignment.center,
+-                  children: [
+-                    Text(
+-                      'Filtrar y ordenar',
+-                      style: boutiqueTitle(size: 20, color: palette.ink),
+-                    ),
+-                    Positioned(
+-                      left: BoutiqueSpace.sm,
+-                      child: TextButton(
+-                        key: const Key('collection-filter-cancel'),
+-                        onPressed: _cancel,
+-                        style: TextButton.styleFrom(
+-                          minimumSize: const Size(0, BoutiqueSpace.tapTarget),
+-                          foregroundColor: palette.inkMuted,
+-                        ),
+-                        child: Text(
+-                          'Cancelar',
+-                          style: boutiqueText(
+-                            size: 14,
+-                            color: palette.inkMuted,
+-                          ),
+-                        ),
+-                      ),
+-                    ),
+-                    Positioned(
+-                      right: BoutiqueSpace.sm,
+-                      child: IconButton(
+-                        key: const Key('collection-filter-close'),
+-                        tooltip: 'Cerrar filtros',
+-                        onPressed: () => Navigator.of(context).pop(),
+-                        icon: Icon(
+-                          Icons.close_rounded,
+-                          size: 24,
+-                          color: palette.ink,
+-                        ),
+-                      ),
+-                    ),
+-                  ],
+-                ),
+-              ),
++              Padding(
++                  padding: const EdgeInsets.all(8),
++                  child: Wrap(
++                      crossAxisAlignment: WrapCrossAlignment.center,
++                      spacing: 12,
++                      children: [
++                        Text('Filtros',
++                            style: boutiqueTitle(size: 20, color: palette.ink)),
++                        TextButton(
++                            key: const Key('collection-filter-cancel'),
++                            onPressed: _cancel,
++                            child: const Text('Cancelar')),
++                        IconButton(
++                            key: const Key('collection-filter-close'),
++                            tooltip: 'Cerrar filtros',
++                            onPressed: _cancel,
++                            icon: const Icon(Icons.close)),
++                      ])),
+               Divider(height: 0.5, color: palette.hairline),
+               Expanded(
+                 child: SingleChildScrollView(
+@@ -993,32 +1034,6 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
+                   ),
+                   child: Column(
+                     children: [
+-                      _CollectionFilterAccordion(
+-                        section: _CollectionFilterSection.sort,
+-                        expanded: _expanded.contains(
+-                          _CollectionFilterSection.sort,
+-                        ),
+-                        onTap: () =>
+-                            _toggleExpanded(_CollectionFilterSection.sort),
+-                        child: Column(
+-                          children: [
+-                            for (final option in _Sort.values)
+-                              _CollectionFilterChoiceRow(
+-                                key: Key(
+-                                  'collection-filter-sort-${option.name}',
+-                                ),
+-                                label: option.label,
+-                                selected: _selection.sort == option,
+-                                radio: true,
+-                                onTap: () => _select(
+-                                  _selection.copyWith(
+-                                    sort: option,
+-                                  ),
+-                                ),
+-                              ),
+-                          ],
+-                        ),
+-                      ),
+                       if (widget.silhouettes.isNotEmpty)
+                         _CollectionFilterAccordion(
+                           section: _CollectionFilterSection.type,
+@@ -1075,6 +1090,19 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
+                             ],
+                           ),
+                         ),
++                      for (final color in widget.colors)
++                        CheckboxListTile(
++                            title: Text(colorLabel(color)),
++                            value: _selection.color == color,
++                            onChanged: (_) => _select(_selection.copyWith(
++                                color:
++                                    _selection.color == color ? null : color))),
++                      CheckboxListTile(
++                          key: const Key('collection-filter-offers'),
++                          title: const Text('Ofertas'),
++                          value: _selection.offersOnly,
++                          onChanged: (value) =>
++                              _select(_selection.copyWith(offersOnly: value))),
+                       _CollectionFilterAccordion(
+                         section: _CollectionFilterSection.availability,
+                         expanded: _expanded.contains(
+@@ -1138,9 +1166,8 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
+                               ? 'Ver 1 pieza'
+                               : 'Ver $resultCount piezas',
+                           // Live filters are already applied: «Ver» closes.
+-                          onPressed: () => widget.live
+-                              ? Navigator.of(context).pop()
+-                              : Navigator.of(context).pop(_selection),
++                          onPressed: () =>
++                              Navigator.of(context).pop(_selection),
+                         ),
+                       ),
+                     ],
+diff --git a/lib/features/navigation/guide_drawer.dart b/lib/features/navigation/guide_drawer.dart
+index c1d2711..1b1f6f8 100644
+--- a/lib/features/navigation/guide_drawer.dart
++++ b/lib/features/navigation/guide_drawer.dart
+@@ -7,7 +7,6 @@ library;
+ import 'dart:async';
+ 
+ import 'package:flutter/material.dart';
+-import 'package:share_plus/share_plus.dart';
+ import 'package:url_launcher/url_launcher.dart';
+ 
+ import '../../app/shopper_copy.dart';
+@@ -18,6 +17,7 @@ import '../../main.dart';
+ import '../account/account_screen.dart';
+ import '../about/about_monetta_screen.dart';
+ import '../catalog/categories_screen.dart';
++import '../catalog/brands_screen.dart';
+ import '../catalog/collection_screen.dart';
+ import '../catalog/search_screen.dart';
+ import '../contact/contact_screen.dart';
+@@ -41,7 +41,11 @@ Widget guideDrawer(BuildContext context) {
+         accountController: accountScope,
+       ),
+     ),
+-    onShare: () => unawaited(Share.share('Únete al mundo de Monetta')),
++    identityName: accountScope?.account?.displayName,
++    onAccount: accountScope == null
++        ? null
++        : () => unawaited(openAccount(context, controller: accountScope)),
++    onAllBrands: () => unawaited(openBrands(context)),
+     onWhatsApp: () => unawaited(openExternal(conciergeWhatsAppUri())),
+     socialLinks: content?.socialLinks ?? HomeContent.fallback.socialLinks,
+     onOpenSocial: (uri) => unawaited(openExternal(uri)),
+diff --git a/lib/features/navigation/monetta_side_menu.dart b/lib/features/navigation/monetta_side_menu.dart
+index 9493633..8047f1b 100644
+--- a/lib/features/navigation/monetta_side_menu.dart
++++ b/lib/features/navigation/monetta_side_menu.dart
+@@ -4,7 +4,11 @@ library;
+ import 'package:flutter/material.dart';
+ 
+ import '../../app/monetta_tokens.g.dart';
++import '../../main.dart';
+ import '../../app/theme.dart';
++import '../catalog/brands_screen.dart';
++import '../catalog/category_tree.dart';
++import '../catalog/collection_screen.dart';
+ import '../../domain/home_content.dart';
+ import '../boutique/boutique_tokens.dart';
+ import '../boutique/client_guide_components.dart';
+@@ -24,6 +28,11 @@ class MonettaSideMenu extends StatelessWidget {
+     required this.onAbout,
+     required this.onPartner,
+     required this.onSupport,
++    this.onAllBrands,
++    this.onAccount,
++    this.tierLabel,
++    this.balanceLabel,
++    this.categoryBindings = const {},
+     this.identityName,
+     this.identityDetail,
+     this.onNotifications,
+@@ -55,6 +64,11 @@ class MonettaSideMenu extends StatelessWidget {
+   final VoidCallback onAbout;
+   final VoidCallback onPartner;
+   final VoidCallback onSupport;
++  final VoidCallback? onAllBrands;
++  final VoidCallback? onAccount;
++  final String? tierLabel;
++  final String? balanceLabel;
++  final Map<String, CollectionFilter> categoryBindings;
+   final String? identityName;
+   final String? identityDetail;
+   final VoidCallback? onNotifications;
+@@ -72,12 +86,24 @@ class MonettaSideMenu extends StatelessWidget {
+   Widget build(BuildContext context) {
+     final width = MediaQuery.sizeOf(context).width.clamp(300.0, 366.0);
+     final palette = context.boutique;
+-    final name = identityName?.trim();
+-    final detail = identityDetail?.trim();
++    final controller = AccountScope.maybeOf(context);
++    final name = controller == null
++        ? identityName?.trim()
++        : controller.account?.displayName?.trim();
++    final navigator = Navigator.of(context);
++    final store = StoreScope.maybeOf(context);
++    final content = HomeContentScope.maybeOf(context)?.content;
++    void brands() {
++      navigator.push(MaterialPageRoute<void>(
++          builder: (_) => store == null
++              ? BrandsScreen(content: content)
++              : StoreScope(
++                  notifier: store, child: BrandsScreen(content: content))));
++    }
++
+     final shownName = (name == null || name.isEmpty) ? 'Invitado' : name;
+     final initial = shownName.substring(0, 1).toUpperCase();
+     final gutter = MonettaTokens.space[3];
+-    final dark = Theme.of(context).brightness == Brightness.dark;
+ 
+     return Drawer(
+       key: const Key('monetta-side-menu'),
+@@ -105,21 +131,11 @@ class MonettaSideMenu extends StatelessWidget {
+                 children: [
+                   const MonettaWordmark(height: MonettaTokens.logoHeight),
+                   const Spacer(),
+-                  // Appearance stays reachable: this menu is the only place
+-                  // that switches the light and dark storefront themes.
+                   IconButton(
+-                    key: const Key('side-menu-appearance'),
+-                    tooltip:
+-                        dark ? 'Activar modo claro' : 'Activar modo oscuro',
+-                    onPressed: onToggleTheme,
+-                    icon: Icon(
+-                      dark
+-                          ? Icons.dark_mode_outlined
+-                          : Icons.light_mode_outlined,
+-                      size: 21,
+-                      color: palette.goldText,
+-                    ),
+-                  ),
++                      key: const Key('side-menu-close'),
++                      tooltip: 'Cerrar menú',
++                      onPressed: () => Navigator.of(context).pop(),
++                      icon: const Icon(Icons.close)),
+                   if (onNotifications != null)
+                     IconButton(
+                       key: const Key('side-menu-notifications'),
+@@ -138,19 +154,23 @@ class MonettaSideMenu extends StatelessWidget {
+               padding: EdgeInsets.fromLTRB(gutter, gutter, gutter, gutter),
+               child: Row(
+                 children: [
+-                  CircleAvatar(
+-                    radius: 28,
+-                    backgroundColor: palette.action,
+-                    foregroundColor: palette.onAction,
+-                    child: Text(
+-                      initial,
+-                      style: clientGuideStyle(
+-                        context,
+-                        MonettaTokens.screenTitle,
+-                        color: palette.onAction,
+-                      ),
+-                    ),
+-                  ),
++                  GestureDetector(
++                      onTap: onAccount == null
++                          ? null
++                          : () => _select(context, onAccount!),
++                      child: CircleAvatar(
++                        radius: 28,
++                        backgroundColor: palette.action,
++                        foregroundColor: palette.onAction,
++                        child: Text(
++                          name == null || name.isEmpty ? '?' : initial,
++                          style: clientGuideStyle(
++                            context,
++                            MonettaTokens.screenTitle,
++                            color: palette.onAction,
++                          ),
++                        ),
++                      )),
+                   SizedBox(width: MonettaTokens.space[2]),
+                   Expanded(
+                     child: Column(
+@@ -158,24 +178,26 @@ class MonettaSideMenu extends StatelessWidget {
+                       children: [
+                         Text(
+                           shownName,
+-                          maxLines: 1,
+-                          overflow: TextOverflow.ellipsis,
+                           style: clientGuideStyle(
+                             context,
+                             MonettaTokens.accountRow,
+                           ),
+                         ),
+-                        if (detail != null && detail.isNotEmpty)
+-                          Text(
+-                            detail,
+-                            maxLines: 1,
+-                            overflow: TextOverflow.ellipsis,
+-                            style: clientGuideStyle(
+-                              context,
+-                              MonettaTokens.navLabel,
+-                              color: palette.inkMuted,
+-                            ),
+-                          ),
++                        if (name != null && name.isNotEmpty)
++                          Text(tierLabel == null
++                              ? 'Miembro'
++                              : 'Miembro · $tierLabel'),
++                        if (onAccount != null && (name == null || name.isEmpty))
++                          TextButton(
++                              onPressed: () => _select(context, onAccount!),
++                              child: const Text('Iniciar sesión')),
++                        if (balanceLabel != null &&
++                            name != null &&
++                            name.isNotEmpty) ...[
++                          const Text('Saldo'),
++                          Text(balanceLabel!,
++                              style: const TextStyle(color: Color(0xFF3B7030))),
++                        ],
+                       ],
+                     ),
+                   ),
+@@ -192,42 +214,28 @@ class MonettaSideMenu extends StatelessWidget {
+                 ),
+                 children: [
+                   Divider(height: 1, thickness: .5, color: palette.hairline),
++                  CategoryTree(
++                      bindings: categoryBindings,
++                      onOpen: (node, filter) {
++                        _select(
++                            context,
++                            () => navigator.push(MaterialPageRoute<void>(
++                                builder: (_) => StoreScope(
++                                    notifier: store!,
++                                    child: CollectionScreen(
++                                        title: node.label, filter: filter)))));
++                      }),
+                   _MenuLink(
+-                    key: const Key('side-menu-bags'),
+-                    icon: Icons.shopping_bag_outlined,
+-                    label: 'Bolsas',
+-                    onTap: () => _select(context, onBags),
+-                  ),
+-                  _MenuLink(
+-                    key: const Key('side-menu-wallets'),
+-                    icon: Icons.account_balance_wallet_outlined,
+-                    label: 'Carteras',
+-                    onTap: () => _select(context, onWallets),
+-                  ),
+-                  _MenuLink(
+-                    key: const Key('side-menu-watches'),
+-                    icon: Icons.watch_outlined,
+-                    label: 'Relojes',
+-                    onTap: () => _select(context, onWatches),
+-                  ),
++                      key: const Key('side-menu-brands'),
++                      icon: Icons.storefront_outlined,
++                      label: 'Todas las marcas',
++                      onTap: () => _select(context, onAllBrands ?? brands)),
+                   _MenuLink(
+-                    key: const Key('side-menu-perfumes'),
+-                    icon: Icons.spa_outlined,
+-                    label: 'Perfumes',
+-                    onTap: () => _select(context, onPerfumes),
+-                  ),
+-                  _MenuLink(
+-                    key: const Key('side-menu-brands'),
+-                    icon: Icons.storefront_outlined,
+-                    label: 'Todas las marcas',
+-                    onTap: () => _select(context, onCatalog),
+-                  ),
+-                  SizedBox(height: MonettaTokens.space[3]),
+-                  _ShareCard(
+-                    onShare: onShare == null
+-                        ? null
+-                        : () => _select(context, onShare!),
+-                  ),
++                      key: const Key('side-menu-wholesale'),
++                      icon: Icons.business_center_outlined,
++                      label: 'Mayoreo',
++                      chevron: false,
++                      onTap: () => _select(context, onPartner)),
+                   if (onWhatsApp != null)
+                     _MenuLink(
+                       key: const Key('side-menu-whatsapp'),
+@@ -242,17 +250,20 @@ class MonettaSideMenu extends StatelessWidget {
+                       children: [
+                         for (final link in _orderedSocial())
+                           Expanded(
+-                            child: IconButton(
+-                              key: Key('side-menu-social-${link.id}'),
+-                              tooltip: link.label,
+-                              onPressed: onOpenSocial == null
+-                                  ? null
+-                                  : () => _select(
+-                                        context,
+-                                        () => onOpenSocial!(link.uri!),
+-                                      ),
+-                              icon: _socialIcon(link.id, palette.goldText),
+-                            ),
++                            child: Column(children: [
++                              IconButton(
++                                key: Key('side-menu-social-${link.id}'),
++                                tooltip: link.label,
++                                onPressed: onOpenSocial == null
++                                    ? null
++                                    : () => _select(
++                                          context,
++                                          () => onOpenSocial!(link.uri!),
++                                        ),
++                                icon: _socialIcon(link.id, palette.goldText),
++                              ),
++                              Text(link.label, textAlign: TextAlign.center)
++                            ]),
+                           ),
+                       ],
+                     ),
+@@ -269,7 +280,7 @@ class MonettaSideMenu extends StatelessWidget {
+   /// The guide's order (TikTok, Instagram, Facebook), then any other network
+   /// the owner configured. Links without a URL are not shown.
+   List<HomeSocialLink> _orderedSocial() {
+-    const order = <String>['tiktok', 'instagram', 'facebook'];
++    const order = <String>['instagram', 'tiktok', 'facebook'];
+     int rank(HomeSocialLink link) {
+       final index = order.indexOf(link.id);
+       return index < 0 ? order.length : index;
+@@ -314,39 +325,11 @@ Widget _socialIcon(String id, Color fallbackColor) {
+   );
+ }
+ 
+-class _ShareCard extends StatelessWidget {
+-  const _ShareCard({required this.onShare});
+-
+-  final VoidCallback? onShare;
+-
+-  @override
+-  Widget build(BuildContext context) {
+-    return Padding(
+-      padding: EdgeInsets.only(bottom: MonettaTokens.space[3]),
+-      child: KeyedSubtree(
+-        key: const Key('side-menu-share'),
+-        // The callback opens the system share sheet directly with the same
+-        // action as before; only the button is the guide's small pill.
+-        child: GuideShareEarnBanner(
+-          asset: kGuideShareCatalog,
+-          action: Align(
+-            alignment: Alignment.centerLeft,
+-            child: GuidePillButton(
+-              key: const Key('side-menu-share-button'),
+-              label: 'VER CATÁLOGO',
+-              onPressed: onShare,
+-            ),
+-          ),
+-        ),
+-      ),
+-    );
+-  }
+-}
+-
+ class _MenuLink extends StatelessWidget {
+   const _MenuLink({
+     required this.label,
+     required this.onTap,
++    this.chevron = true,
+     this.icon,
+     this.assetIcon,
+     super.key,
+@@ -358,6 +341,7 @@ class _MenuLink extends StatelessWidget {
+ 
+   /// Gold line icon drawn for the guide; wins over [icon].
+   final String? assetIcon;
++  final bool chevron;
+ 
+   @override
+   Widget build(BuildContext context) {
+@@ -405,7 +389,9 @@ class _MenuLink extends StatelessWidget {
+                       ),
+                     ),
+                   ),
+-                  Icon(Icons.chevron_right, size: 20, color: palette.goldText),
++                  if (chevron)
++                    Icon(Icons.chevron_right,
++                        size: 20, color: palette.goldText),
+                 ],
+               ),
+             ),
+--- /dev/null
++++ b/lib/features/catalog/category_tree.dart
+@@ -0,0 +1,132 @@
++/// Owner taxonomy. Destinations are supplied explicitly; labels never become IDs.
++library;
++
++import 'package:flutter/material.dart';
++import '../boutique/boutique_tokens.dart';
++import '../boutique/guide_art.dart';
++import 'collection_screen.dart';
++
++class CategoryNode {
++  const CategoryNode(this.id, this.label, this.icon,
++      [this.children = const []]);
++  final String id, label;
++  final IconData icon;
++  final List<CategoryNode> children;
++}
++
++const categoryTree = [
++  CategoryNode('bags', 'Bolsos', Icons.shopping_bag_outlined, [
++    CategoryNode('bags-women', 'Bolsos de Mujer', Icons.shopping_bag_outlined, [
++      CategoryNode('crossbody', 'Crossbody', Icons.shopping_bag_outlined),
++      CategoryNode('tote', 'Tote', Icons.shopping_bag_outlined),
++      CategoryNode('hand', 'De mano', Icons.shopping_bag_outlined),
++      CategoryNode('shoulder', 'De hombro', Icons.shopping_bag_outlined),
++    ]),
++    CategoryNode('bags-men', 'Bolsos de Hombre', Icons.work_outline),
++  ]),
++  CategoryNode('wallets', 'Carteras', Icons.account_balance_wallet_outlined, [
++    CategoryNode('wallets-women', 'Carteras de Mujer',
++        Icons.account_balance_wallet_outlined, [
++      CategoryNode(
++          'wristlets', 'Muñequeras', Icons.account_balance_wallet_outlined),
++      CategoryNode(
++          'classic-wallets', 'Carteras', Icons.account_balance_wallet_outlined),
++      CategoryNode('cardholders', 'Tarjeteros', Icons.credit_card),
++    ]),
++    CategoryNode('wallets-men', 'Carteras de Hombre',
++        Icons.account_balance_wallet_outlined),
++  ]),
++  CategoryNode('perfumes', 'Perfumes', Icons.water_drop_outlined, [
++    CategoryNode(
++        'perfumes-women', 'Perfumes de Mujer', Icons.water_drop_outlined),
++    CategoryNode(
++        'perfumes-men', 'Perfumes de Hombre', Icons.water_drop_outlined),
++  ]),
++  CategoryNode('shoes', 'Calzado', Icons.hiking_outlined, [
++    CategoryNode('shoes-women', 'Calzado de Mujer', Icons.hiking_outlined, [
++      CategoryNode('sport', 'Deportivo', Icons.hiking_outlined),
++      CategoryNode('casual', 'Casual', Icons.hiking_outlined),
++    ]),
++    CategoryNode('shoes-men', 'Calzado de Hombre', Icons.hiking_outlined),
++  ]),
++  CategoryNode('accessories', 'Accesorios', Icons.watch_outlined, [
++    CategoryNode('glasses', 'Lentes', Icons.visibility_outlined),
++    CategoryNode('watches', 'Relojes', Icons.watch_outlined),
++    CategoryNode('charms', 'Charms', Icons.diamond_outlined),
++    CategoryNode('other-accessories', 'Otros accesorios', Icons.watch_outlined),
++  ]),
++];
++
++class CategoryTree extends StatelessWidget {
++  const CategoryTree({this.bindings = const {}, this.onOpen, super.key});
++  final Map<String, CollectionFilter> bindings;
++  final void Function(CategoryNode, CollectionFilter)? onOpen;
++  @override
++  Widget build(BuildContext context) => Column(children: [
++        for (final node in categoryTree) _node(context, node),
++      ]);
++  Widget _node(BuildContext context, CategoryNode node) {
++    final binding = bindings[node.id];
++    final iconName = const {
++          'bags': 'bolsos',
++          'bags-women': 'bolsos-mujer',
++          'bags-men': 'bolsos-hombre',
++          'wallets': 'carteras',
++          'wallets-women': 'carteras-mujer',
++          'wallets-men': 'carteras-hombre',
++          'classic-wallets': 'carteras-clasicas',
++          'cardholders': 'tarjeteros',
++          'wristlets': 'munequeras',
++          'shoes': 'calzado',
++          'shoes-women': 'calzado-mujer',
++          'shoes-men': 'calzado-hombre',
++          'sport': 'deportivo',
++          'casual': 'casual',
++          'accessories': 'accesorios',
++          'glasses': 'lentes',
++          'watches': 'relojes',
++          'other-accessories': 'otros-accesorios',
++          'hand': 'de-mano',
++          'shoulder': 'de-hombro',
++          'perfumes-women': 'perfumes-mujer',
++          'perfumes-men': 'perfumes-hombre',
++        }[node.id] ??
++        node.id;
++    final icon = SizedBox(
++        width: 28, height: 28, child: GuideSemanticImage(id: 'icon:$iconName'));
++    final title = Text(node.label);
++    if (node.children.isEmpty) {
++      // Missing gender/subtype bindings must not silently broaden the set.
++      if (binding == null || onOpen == null) {
++        return Padding(
++            padding: const EdgeInsets.all(16),
++            child: Row(children: [
++              icon,
++              const SizedBox(width: 16),
++              Expanded(child: title)
++            ]));
++      }
++      return ListTile(
++          key: ValueKey('category-${node.id}'),
++          leading: icon,
++          title: title,
++          onTap: () => onOpen!(node, binding));
++    }
++    return Padding(
++      padding: const EdgeInsets.symmetric(vertical: 6),
++      child: Material(
++        color: context.boutique.canvas,
++        shape: RoundedRectangleBorder(
++            borderRadius: BorderRadius.circular(24),
++            side: BorderSide(color: context.boutique.hairline)),
++        child: ExpansionTile(
++          key: PageStorageKey('category-${node.id}'),
++          leading: icon,
++          title: title,
++          childrenPadding: const EdgeInsets.only(left: 12),
++          children: [for (final child in node.children) _node(context, child)],
++        ),
++      ),
++    );
++  }
++}
+--- /dev/null
++++ b/lib/features/catalog/brands_screen.dart
+@@ -0,0 +1,73 @@
++/// All configured, resolvable brands, independent of category navigation.
++library;
++
++import 'package:flutter/material.dart';
++import '../../domain/home_content.dart';
++import '../../main.dart';
++import '../boutique/client_guide_components.dart';
++import '../boutique/client_guide_scaffold.dart';
++import '../boutique/guide_brand_tile.dart';
++import '../../app/monetta_tokens.g.dart';
++import '../navigation/duo_workspace.dart';
++import 'brand_screen.dart';
++import 'categories_screen.dart';
++
++Future<void> openBrands(BuildContext context) async {
++  final store = StoreScope.maybeOf(context);
++  final content = HomeContentScope.maybeOf(context)?.content;
++  await DuoWorkspace.navigatorFor(context).push<void>(MaterialPageRoute<void>(
++    settings: const RouteSettings(name: '/brands'),
++    builder: (_) => store == null
++        ? BrandsScreen(content: content)
++        : StoreScope(notifier: store, child: BrandsScreen(content: content)),
++  ));
++}
++
++class BrandsScreen extends StatelessWidget {
++  const BrandsScreen({this.content, super.key});
++  final HomeContent? content;
++  @override
++  Widget build(BuildContext context) => ClientGuideScaffold(
++        current: ClientGuideDestination.categories,
++        body: ListView(padding: const EdgeInsets.all(16), children: [
++          Text('Todas las marcas',
++              style: clientGuideStyle(context, MonettaTokens.screenTitle)),
++          BrandDirectory(content: content),
++        ]),
++      );
++}
++
++class BrandDirectory extends StatelessWidget {
++  const BrandDirectory({this.content, super.key});
++  final HomeContent? content;
++  @override
++  Widget build(BuildContext context) {
++    final store = StoreScope.maybeOf(context);
++    final source = content ??
++        HomeContentScope.maybeOf(context)?.content ??
++        HomeContent.fallback;
++    final seen = <String>{};
++    final brands = source.brands.where((brand) {
++      final slug = guideBrandSlug(brand, store);
++      return slug.isNotEmpty && seen.add(slug);
++    }).toList();
++    return Column(children: [
++      if (brands.isEmpty)
++        const Padding(
++            padding: EdgeInsets.all(24),
++            child: Text('No hay marcas disponibles.')),
++      for (final brand in brands)
++        Padding(
++          padding: const EdgeInsets.symmetric(vertical: 10),
++          child: GuideBrandTile(
++              key: ValueKey('directory-brand-${guideBrandSlug(brand, store)}'),
++              aspectRatio: 3.2,
++              label: brand.title,
++              asset: brand.fallbackAsset,
++              imageUrl: brand.imageUrl,
++              onTap: () => openBrand(context,
++                  brandSlug: guideBrandSlug(brand, store), title: brand.title)),
++        ),
++    ]);
++  }
++}

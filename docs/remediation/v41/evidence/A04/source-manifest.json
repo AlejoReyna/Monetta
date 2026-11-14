@@ -1,0 +1,138 @@
+{
+  "head": "014cca4e6cd873262653eab8b4bb7cb0346dd5a9",
+  "initial_base": "80735faaa35192c4939445962c9972885b45009e",
+  "basis": "Shared-root scoped diff; pre-existing dirty workspace preserved. No A04 commit or index mutation. A00 brandLabel import repair retained.",
+  "frozen_at_utc": "2026-11-12T18:05:50.688862+00:00",
+  "files": [
+    {
+      "path": "lib/features/catalog/brand_screen.dart",
+      "bytes": 2572,
+      "sha256": "d35c2c662c49ec5b28184127782ca4fc6db2791da9bffe5ba4db27126feebc3a"
+    },
+    {
+      "path": "lib/features/catalog/brands_screen.dart",
+      "bytes": 4872,
+      "sha256": "33966350e14afd1409cd0f21b43c728c1b832d71b87fd8ab24573b7ac996d0e0"
+    },
+    {
+      "path": "lib/features/catalog/catalog_browse_screen.dart",
+      "bytes": 55927,
+      "sha256": "595e099982f8070b0f4cb7afaf1de65f8a6ec9bb78fa6b3f07e4fd0ddf11e337"
+    },
+    {
+      "path": "lib/features/catalog/catalog_controls.dart",
+      "bytes": 22768,
+      "sha256": "8a58817f17907ffb912fc501c27e5ea4be22374da20e60ef388a5c11c85a5cde"
+    },
+    {
+      "path": "lib/features/catalog/catalog_query.dart",
+      "bytes": 7619,
+      "sha256": "031134f5f08a0c59a1c745b71956f5ec38ce27fee022544db111c77a76162ed7"
+    },
+    {
+      "path": "lib/features/catalog/categories_screen.dart",
+      "bytes": 6183,
+      "sha256": "46986edd8ff9b4d48364861037bdf9d1586ffdd8c06e6a6e218812231f8d52a6"
+    },
+    {
+      "path": "lib/features/catalog/category_tree.dart",
+      "bytes": 8028,
+      "sha256": "aad028490bdcd7b50d36774b2cef6d252297275fbe041d4703534fa8cf82fbd4"
+    },
+    {
+      "path": "lib/features/catalog/collection_screen.dart",
+      "bytes": 52546,
+      "sha256": "41b4c7978db6cf1c9182cc132493a2ab99c9b663ffd4be7af49f11b0e19b6ff0"
+    },
+    {
+      "path": "lib/features/catalog/search_screen.dart",
+      "bytes": 38190,
+      "sha256": "7dc6f773062a788306751e96f323bfb81d276fced1e717064e1e6c9a5d98c9e8"
+    },
+    {
+      "path": "lib/features/navigation/guide_drawer.dart",
+      "bytes": 4429,
+      "sha256": "06f9a08feea4cc3377d1d42fac2e0e763dfed12a5dd9156d2a5f8ad441d6ca8f"
+    },
+    {
+      "path": "lib/features/navigation/monetta_side_menu.dart",
+      "bytes": 15901,
+      "sha256": "8d5cf2c0cdc376e2fa9d4addd8661cd92ccdb244a3f041eeade708e17ad25462"
+    },
+    {
+      "path": "test/features/catalog/brand_screen_test.dart",
+      "bytes": 3132,
+      "sha256": "91ab27c04913ea4b0713d4671faacfed2f837011897c2fa6ea6dcf21ac7c361e"
+    },
+    {
+      "path": "test/features/catalog/brand_search_titles_typography_test.dart",
+      "bytes": 3803,
+      "sha256": "c9c7bf8285eb73b0d0791872ebd8784bd78aa09609bb950b5f13e63e7e52a628"
+    },
+    {
+      "path": "test/features/catalog/catalog_browse_screen_test.dart",
+      "bytes": 31287,
+      "sha256": "2d1218535c45174b84bdb8987df65e8e30fe1ed49e7964355b8d7b8f8aecb049"
+    },
+    {
+      "path": "test/features/catalog/catalog_edge_grid_test.dart",
+      "bytes": 20332,
+      "sha256": "ab7c18cf5e1ec7f8968a64d3d0a1223eb020660264c40f982daa1caf8946377f"
+    },
+    {
+      "path": "test/features/catalog/catalog_filter_panel_test.dart",
+      "bytes": 21613,
+      "sha256": "66dc98c9a520783303d62f5c9f9598e64087907e976bdb2c12607d00cf0edd21"
+    },
+    {
+      "path": "test/features/catalog/catalog_titles_typography_test.dart",
+      "bytes": 11287,
+      "sha256": "16d82658b5a6ebd3c914cbca2db990f529dda515c142a505545a771a97e5df17"
+    },
+    {
+      "path": "test/features/catalog/categories_screen_test.dart",
+      "bytes": 3465,
+      "sha256": "1884e273136c8afb6438ec3092725c13633839f81087644e65efc98bb6ef77d3"
+    },
+    {
+      "path": "test/features/catalog/collection_guide_photo_test.dart",
+      "bytes": 1999,
+      "sha256": "81f4061a606929b1c94299bd186d6e1cb8946f7545c937ebf2c8e64696085312"
+    },
+    {
+      "path": "test/features/catalog/collection_screen_test.dart",
+      "bytes": 8781,
+      "sha256": "47fd6e13b0b2a364df0576cd1b2efd644c28d69fc9ac5d796145b1bf7d78834a"
+    },
+    {
+      "path": "test/features/catalog/collection_search_guide_v2_test.dart",
+      "bytes": 6985,
+      "sha256": "e39fd6a97c3a8ffa05562fc115f73a6ecabc89ceab714f3d8c63d79e0e1ee956"
+    },
+    {
+      "path": "test/features/catalog/v41_discovery_fixture.dart",
+      "bytes": 2110,
+      "sha256": "9eaec66b1b48f4f3970eb131aea39dcae1d2b7085bcaccf831b6f8801cd3792b"
+    },
+    {
+      "path": "test/features/catalog/v41_discovery_test.dart",
+      "bytes": 16679,
+      "sha256": "f47d2dc90208f68dadf9cb738bdcdcf2e9591d524bb8eba034832d407533387e"
+    },
+    {
+      "path": "test/features/catalog/v41_discovery_capture_test.dart",
+      "bytes": 7786,
+      "sha256": "82ed6375874fa10eccf9839a1e525766d4fd89c8100533cf5dd942f11a031188"
+    },
+    {
+      "path": "test/features/navigation/monetta_side_menu_test.dart",
+      "bytes": 5875,
+      "sha256": "78a5c78d3c0d4a626a2eddf7b0cf35f129f28e5e1121cb2adca6c830e1bb22f0"
+    },
+    {
+      "path": "test/features/catalog/catalog_layout_responsive_test.dart",
+      "bytes": 4982,
+      "sha256": "e808c7f5ce8f718fe70e6422d7b369db7a10342fcf412a256571db247455858d"
+    }
+  ]
+}

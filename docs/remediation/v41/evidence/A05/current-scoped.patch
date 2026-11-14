@@ -1,0 +1,1464 @@
+diff --git a/lib/features/account/account_screen.dart b/lib/features/account/account_screen.dart
+index b1e9fdf..216e930 100644
+--- a/lib/features/account/account_screen.dart
++++ b/lib/features/account/account_screen.dart
+@@ -29,7 +29,6 @@ import '../../main.dart';
+ import '../../data/accounts_orders/account_deletion_client.dart';
+ import '../../data/accounts_orders/accounts_orders_config.dart';
+ import '../rewards/rewards_api.dart';
+-import '../wholesale/wholesale_screen.dart';
+ import '../../data/customer_auth/customer_auth_error.dart';
+ import '../../data/local/database.dart' show OrderSummary;
+ import '../catalog/categories_screen.dart';
+@@ -42,13 +41,11 @@ import '../notifications/notifications_screen.dart';
+ import '../orders/order_detail_screen.dart';
+ import '../orders/orders_screen.dart';
+ import '../personalization/personalization_screen.dart';
+-import '../boutique/guide_art.dart';
+ import '../navigation/guide_chrome.dart';
+ import '../navigation/guide_drawer.dart';
+ import '../navigation/monetta_bottom_navigation.dart';
+ import '../rewards/rewards_guide_screen.dart';
+ import '../rewards/rewards_section.dart';
+-import '../rewards/rewards_share_screen.dart';
+ import 'account_boutique.dart';
+ import '../boutique/boutique_tokens.dart';
+ import 'delete_account_screen.dart';
+@@ -199,6 +196,7 @@ class AccountScreen extends StatelessWidget {
+             listenable: controller,
+             builder: (context, _) => controller.isSignedIn
+                 ? _SignedIn(
++                    key: ValueKey(controller.account!.localAccountId),
+                     controller: controller,
+                     showAdmin: canOpenAdmin?.call() == true,
+                     onOpenAdmin: onOpenAdmin,
+@@ -217,6 +215,8 @@ class AccountScreen extends StatelessWidget {
+       ),
+       bottomNavigationBar: MonettaBottomNavigation(
+         current: MonettaBottomDestination.account,
++        accountController: controller,
++        notificationInbox: notificationInbox ?? sharedAccountNotificationInbox,
+         bagCount: store?.bagQuantity ?? 0,
+         onSelected: (destination) {
+           switch (destination) {
+@@ -249,6 +249,7 @@ class _SignedIn extends StatelessWidget {
+     required this.privacyPolicy,
+     required this.openExternalUri,
+     required this.profilePhotoPicker,
++    super.key,
+   });
+ 
+   final AccountController controller;
+@@ -264,7 +265,11 @@ class _SignedIn extends StatelessWidget {
+   final ProfilePhotoPicker? profilePhotoPicker;
+ 
+   Future<void> _logout(BuildContext context) async {
++    final owner = controller.account?.localAccountId;
+     await controller.logout();
++    if (!controller.isSignedIn && owner != null) {
++      (notificationInbox ?? sharedAccountNotificationInbox).clearOwner(owner);
++    }
+     if (context.mounted && Navigator.of(context).canPop()) {
+       Navigator.of(context).pop();
+     }
+@@ -322,47 +327,16 @@ class _SignedIn extends StatelessWidget {
+                   rewardsReader: rewardsReader,
+                 ),
+               ),
+-              EAccessRow(
+-                key: const ValueKey('account-open-addresses'),
+-                icon: Icons.location_on_outlined,
+-                title: 'Direcciones',
+-                onTap: () => _showInfoSheet(
+-                  context,
+-                  title: 'Direcciones',
+-                  message: kAccountAddressesInfo,
+-                ),
+-              ),
+-              EAccessRow(
+-                key: const ValueKey('account-open-payments'),
+-                icon: Icons.credit_card_outlined,
+-                title: 'Métodos de pago',
+-                onTap: () => _showInfoSheet(
+-                  context,
+-                  title: 'Métodos de pago',
+-                  message: kAccountPaymentsInfo,
+-                ),
+-              ),
+               EAccessRow(
+                 key: const ValueKey('account-open-personalization'),
+                 icon: Icons.settings_outlined,
+                 title: 'Preferencias',
+                 onTap: () => openPersonalization(context),
+               ),
+-              EAccessRow(
+-                key: const ValueKey('account-open-wholesale'),
+-                icon: Icons.shopping_bag_outlined,
+-                title: 'Modo Mayoreo',
+-                subtitle: 'Desde 3 piezas',
+-                onTap: () => Navigator.of(context).push(
+-                  MaterialPageRoute<void>(
+-                    builder: (_) => const WholesaleScreen(),
+-                  ),
+-                ),
+-              ),
+               EAccessRow(
+                 key: const ValueKey('account-open-contact'),
+                 icon: Icons.help_outline_rounded,
+-                title: 'Ayuda y contacto',
++                title: 'Contacto',
+                 onTap: () => openContact(context),
+               ),
+               if (onOpenInvite != null)
+@@ -376,22 +350,6 @@ class _SignedIn extends StatelessWidget {
+             ],
+           ),
+           const SizedBox(height: BoutiqueSpace.lg),
+-          GuideShareEarnBanner(
+-            asset: kGuideShareCatalog,
+-            action: ConstrainedBox(
+-              constraints: const BoxConstraints(maxWidth: 190),
+-              child: GuidePillButton(
+-                key: const ValueKey('account-share-catalog'),
+-                label: 'VER CATÁLOGO',
+-                onPressed: () => Navigator.of(context).push(
+-                  MaterialPageRoute<void>(
+-                    builder: (_) =>
+-                        RewardsShareScreen(accountController: controller),
+-                  ),
+-                ),
+-              ),
+-            ),
+-          ),
+           if (showAdmin && onOpenAdmin != null) ...[
+             const SizedBox(height: BoutiqueSpace.sectionGapTight),
+             InkWell(
+@@ -592,51 +550,6 @@ const String kAccountAddressesInfo =
+ const String kAccountPaymentsInfo =
+     'Aceptamos tarjeta de crédito o débito y transferencia bancaria.';
+ 
+-void _showInfoSheet(
+-  BuildContext context, {
+-  required String title,
+-  required String message,
+-}) {
+-  final palette = context.boutique;
+-  unawaited(
+-    showModalBottomSheet<void>(
+-      context: context,
+-      backgroundColor: palette.canvas,
+-      showDragHandle: true,
+-      builder: (sheetContext) => SafeArea(
+-        child: Padding(
+-          key: const ValueKey('account-info-sheet'),
+-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+-          child: Column(
+-            mainAxisSize: MainAxisSize.min,
+-            crossAxisAlignment: CrossAxisAlignment.start,
+-            children: [
+-              Text(
+-                title,
+-                style: boutiqueScreenTitle(
+-                  context: sheetContext,
+-                  color: palette.ink,
+-                ),
+-              ),
+-              const SizedBox(height: BoutiqueSpace.sm),
+-              Text(
+-                message,
+-                style: boutiqueText(size: 15, color: palette.inkMuted),
+-              ),
+-              const SizedBox(height: BoutiqueSpace.lg),
+-              BoutiqueButton(
+-                key: const ValueKey('account-info-sheet-close'),
+-                label: 'Entendido',
+-                onPressed: () => Navigator.of(sheetContext).pop(),
+-              ),
+-            ],
+-          ),
+-        ),
+-      ),
+-    ),
+-  );
+-}
+-
+ /// Bandeja compartida de respaldo hasta que la integración global alimente
+ /// una por sesión. Aislada por cuenta igual que cualquier otra.
+ final NotificationInbox sharedAccountNotificationInbox = NotificationInbox();
+@@ -787,19 +700,17 @@ class _IdentityCardState extends State<_IdentityCard> {
+             children: [
+               Text(
+                 name,
+-                maxLines: 2,
+-                overflow: TextOverflow.ellipsis,
+                 style: boutiqueScreenTitle(
+                   context: context,
+                   color: palette.ink,
+                 ),
+               ),
++              Text('Miembro · Nivel no disponible',
++                  style: boutiqueText(size: 13, color: palette.inkMuted)),
+               if (account.displayName != null && account.email != null) ...[
+                 const SizedBox(height: 2),
+                 Text(
+                   account.email!,
+-                  maxLines: 1,
+-                  overflow: TextOverflow.ellipsis,
+                   style: boutiqueText(size: 13, color: palette.inkMuted),
+                 ),
+               ],
+@@ -1186,6 +1097,8 @@ class _RewardsRowState extends State<_RewardsRow> {
+   RewardsApi? _api;
+   RewardsReader? _effective;
+   String? _balance;
++  bool _loading = false;
++  bool _failed = false;
+   var _generation = 0;
+ 
+   /// Account the shown balance (or the request in flight) belongs to.
+@@ -1245,9 +1158,12 @@ class _RewardsRowState extends State<_RewardsRow> {
+     // Any answer still in flight belongs to the previous account or reader.
+     final generation = ++_generation;
+     _balance = null;
++    _failed = false;
++    _loading = false;
+     final reader = _effective;
+     final accountId = _trackedAccount;
+     if (reader == null || accountId == null) return;
++    _loading = true;
+     unawaited(
+       reader.summary().then<void>(
+         (summary) {
+@@ -1256,9 +1172,18 @@ class _RewardsRowState extends State<_RewardsRow> {
+               accountId != widget.controller.account?.localAccountId) {
+             return;
+           }
+-          setState(() => _balance = summary.availableLabel);
++          setState(() {
++            _balance = summary.availableLabel;
++            _loading = false;
++          });
++        },
++        onError: (Object _) {
++          if (!mounted || generation != _generation) return;
++          setState(() {
++            _failed = true;
++            _loading = false;
++          });
+         },
+-        onError: (Object _) {},
+       ),
+     );
+   }
+@@ -1297,42 +1222,34 @@ class _RewardsRowState extends State<_RewardsRow> {
+               horizontal: BoutiqueSpace.md,
+               vertical: BoutiqueSpace.md,
+             ),
+-            child: Row(
++            child: Column(
++              crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+-                Icon(Icons.card_giftcard_outlined, color: palette.goldText),
+-                const SizedBox(width: BoutiqueSpace.md),
+-                Expanded(
+-                  child: Text(
+-                    'Monetta Rewards',
+-                    style:
+-                        boutiqueRowLabel(context: context, color: palette.ink),
+-                  ),
+-                ),
+-                const SizedBox(width: BoutiqueSpace.sm),
+-                Icon(
+-                  Icons.workspace_premium_outlined,
+-                  size: 20,
+-                  color: palette.goldText,
+-                ),
+-                const SizedBox(width: BoutiqueSpace.xs),
+-                Flexible(
+-                  child: Text(
+-                    _balance ?? 'Ver saldo',
+-                    key: const ValueKey('account-rewards-balance'),
+-                    maxLines: 1,
+-                    overflow: TextOverflow.ellipsis,
+-                    style: boutiqueText(
+-                      size: 14,
++                Text('Saldo',
++                    style: boutiqueText(size: 13, color: palette.inkMuted)),
++                Text(
++                  _balance ??
++                      (_loading
++                          ? 'Consultando tu saldo…'
++                          : _failed
++                              ? 'No pudimos consultar tu saldo'
++                              : 'Saldo no disponible'),
++                  key: const ValueKey('account-rewards-balance'),
++                  style: boutiqueText(
++                      size: 22,
+                       weight: FontWeight.w600,
+-                      color: palette.ink,
+-                    ),
+-                  ),
+-                ),
+-                Icon(
+-                  Icons.chevron_right_rounded,
+-                  size: 22,
+-                  color: palette.inkMuted,
++                      color: _balance == null
++                          ? palette.inkMuted
++                          : const Color(0xFF3B7030)),
+                 ),
++                if (_failed)
++                  TextButton(
++                      onPressed: () => setState(_request),
++                      child: const Text('Reintentar')),
++                const SizedBox(height: BoutiqueSpace.sm),
++                Text('MONETTA REWARDS',
++                    style:
++                        boutiqueRowLabel(context: context, color: palette.ink)),
+               ],
+             ),
+           ),
+diff --git a/lib/features/navigation/monetta_bottom_navigation.dart b/lib/features/navigation/monetta_bottom_navigation.dart
+index eaea0b2..77974ba 100644
+--- a/lib/features/navigation/monetta_bottom_navigation.dart
++++ b/lib/features/navigation/monetta_bottom_navigation.dart
+@@ -2,12 +2,13 @@
+ library;
+ 
+ import 'dart:math' as math;
+-import 'dart:typed_data' show Uint8List;
+ import 'dart:ui' show ImageFilter;
+ 
+ import 'package:flutter/material.dart';
+ 
+ import '../../app/motion.dart';
++import '../../app/account_controller.dart';
++import '../notifications/notification_inbox.dart';
+ import '../../app/monetta_tokens.g.dart';
+ import '../../app/storefront_layout.dart';
+ import '../../app/theme.dart';
+@@ -30,7 +31,6 @@ const double _kItemVerticalPadding = 6;
+ const double _kIconBox = 24;
+ const double _kIconStroke = 1.7;
+ // Ring around the profile photo that stands in for the «Cuenta» glyph.
+-const double _kPhotoRingWidth = 1.5;
+ const double _kIconLabelGap = 3;
+ const double _kLabelSize = 13;
+ const double _kLabelHeight = 1.25;
+@@ -74,11 +74,19 @@ class MonettaBottomNavigation extends StatelessWidget {
+     required this.current,
+     required this.bagCount,
+     required this.onSelected,
++    this.notificationInbox,
++    this.accountController,
++    this.wholesaleEligible = false,
+     this.secondary,
+     this.vertical = false,
+     super.key,
+   });
+ 
++  final NotificationInbox? notificationInbox;
++  final AccountController? accountController;
++
++  /// Set only from the checkout's authoritative eligibility response.
++  final bool wholesaleEligible;
+   final bool vertical;
+ 
+   MonettaBottomNavigation asRail() => MonettaBottomNavigation(
+@@ -87,6 +95,9 @@ class MonettaBottomNavigation extends StatelessWidget {
+         bagCount: bagCount,
+         onSelected: onSelected,
+         vertical: true,
++        notificationInbox: notificationInbox,
++        accountController: accountController,
++        wholesaleEligible: wholesaleEligible,
+       );
+ 
+   final MonettaBottomDestination? current;
+@@ -99,6 +110,20 @@ class MonettaBottomNavigation extends StatelessWidget {
+ 
+   @override
+   Widget build(BuildContext context) {
++    final account = accountController ?? AccountScope.maybeOf(context);
++    return ListenableBuilder(
++      listenable: Listenable.merge([account, notificationInbox]),
++      builder: (context, _) {
++        final owner = account?.account?.localAccountId;
++        final unread = account?.isSignedIn == true && owner != null
++            ? notificationInbox?.unreadCountFor(owner) ?? 0
++            : 0;
++        return _build(context, unread);
++      },
++    );
++  }
++
++  Widget _build(BuildContext context, int unread) {
+     if (!StorefrontPaneScope.ownsNavigationOf(context)) {
+       return const SizedBox.shrink();
+     }
+@@ -117,7 +142,10 @@ class MonettaBottomNavigation extends StatelessWidget {
+                   tooltip: destination == MonettaBottomDestination.bag &&
+                           bagCount > 0
+                       ? '${_labelOf(destination)}, $bagCount ${bagCount == 1 ? 'artículo' : 'artículos'}'
+-                      : _labelOf(destination),
++                      : destination == MonettaBottomDestination.account &&
++                              unread > 0
++                          ? 'Cuenta, $unread avisos sin leer'
++                          : _labelOf(destination),
+                   style: IconButton.styleFrom(
+                     minimumSize: const Size(48, 48),
+                     side: destination == current || destination == secondary
+@@ -146,10 +174,23 @@ class MonettaBottomNavigation extends StatelessWidget {
+                           ],
+                         )
+                       : Badge(
+-                          isLabelVisible:
+-                              destination == MonettaBottomDestination.bag &&
+-                                  bagCount > 0,
+-                          label: Text('$bagCount'),
++                          isLabelVisible: destination ==
++                                      MonettaBottomDestination.bag &&
++                                  bagCount > 0 ||
++                              destination == MonettaBottomDestination.account &&
++                                  unread > 0,
++                          backgroundColor:
++                              destination == MonettaBottomDestination.account
++                                  ? const Color(0xFFA58248)
++                                  : null,
++                          textColor:
++                              destination == MonettaBottomDestination.account
++                                  ? Colors.black
++                                  : null,
++                          label: Text(
++                              destination == MonettaBottomDestination.account
++                                  ? (unread > 99 ? '99+' : '$unread')
++                                  : '$bagCount'),
+                           child: _NavGlyph(destination: destination),
+                         ),
+                 ),
+@@ -159,7 +200,7 @@ class MonettaBottomNavigation extends StatelessWidget {
+       );
+     }
+     if (Theme.of(context).platform == TargetPlatform.iOS) {
+-      return _buildGlassCapsule(context, colors);
++      return _buildGlassCapsule(context, colors, unread);
+     }
+     return DecoratedBox(
+       key: const Key('bottom-nav-surface'),
+@@ -173,7 +214,7 @@ class MonettaBottomNavigation extends StatelessWidget {
+         child: SafeArea(
+           top: false,
+           maintainBottomViewPadding: true,
+-          child: _buildHorizontalContent(context),
++          child: _buildHorizontalContent(context, unread: unread),
+         ),
+       ),
+     );
+@@ -181,7 +222,8 @@ class MonettaBottomNavigation extends StatelessWidget {
+ 
+   /// Floating translucent capsule used on iOS. The blur is dropped under high
+   /// contrast and the fill becomes opaque.
+-  Widget _buildGlassCapsule(BuildContext context, MonettaColors colors) {
++  Widget _buildGlassCapsule(
++      BuildContext context, MonettaColors colors, int unread) {
+     final highContrast = MediaQuery.highContrastOf(context);
+     final radius = BorderRadius.circular(_kGlassRadius);
+     // Space the capsule adds around the destinations, so the overflow
+@@ -205,6 +247,7 @@ class MonettaBottomNavigation extends StatelessWidget {
+         child: _buildHorizontalContent(
+           context,
+           reservedHeight: reservedHeight,
++          unread: unread,
+         ),
+       ),
+     );
+@@ -264,6 +307,7 @@ class MonettaBottomNavigation extends StatelessWidget {
+   Widget _buildHorizontalContent(
+     BuildContext context, {
+     double reservedHeight = 0,
++    int unread = 0,
+   }) {
+     final media = MediaQuery.maybeOf(context);
+     final animationsDisabled =
+@@ -335,7 +379,7 @@ class MonettaBottomNavigation extends StatelessWidget {
+                           value: destination,
+                           checked: current == destination,
+                           child: Text(
+-                            '${_labelOf(destination)}${destination == MonettaBottomDestination.bag && bagCount > 0 ? ' ($bagCount)' : ''}',
++                            '${_labelOf(destination)}${destination == MonettaBottomDestination.bag && bagCount > 0 ? ' ($bagCount)' : destination == MonettaBottomDestination.account && unread > 0 ? ', $unread avisos sin leer' : ''}',
+                           ),
+                         ),
+                     ],
+@@ -351,6 +395,8 @@ class MonettaBottomNavigation extends StatelessWidget {
+                       destination: destination,
+                       selected: destination == current,
+                       bagCount: bagCount,
++                      unreadCount: unread,
++                      wholesaleEligible: wholesaleEligible,
+                       labelScaler: scaler,
+                       wrapLabel: wrapLabel,
+                       animationsDisabled: animationsDisabled,
+@@ -372,6 +418,8 @@ class _NavItem extends StatefulWidget {
+     required this.destination,
+     required this.selected,
+     required this.bagCount,
++    required this.unreadCount,
++    required this.wholesaleEligible,
+     required this.labelScaler,
+     this.wrapLabel = false,
+     required this.animationsDisabled,
+@@ -381,6 +429,8 @@ class _NavItem extends StatefulWidget {
+   final MonettaBottomDestination destination;
+   final bool selected;
+   final int bagCount;
++  final int unreadCount;
++  final bool wholesaleEligible;
+   final TextScaler labelScaler;
+   final bool wrapLabel;
+   final bool animationsDisabled;
+@@ -399,10 +449,15 @@ class _NavItemState extends State<_NavItem> {
+     final selected = widget.selected;
+     final colors = context.monettaColors;
+     final label = _labelOf(destination);
+-    final badge =
+-        destination == MonettaBottomDestination.bag ? widget.bagCount : 0;
++    final badge = destination == MonettaBottomDestination.bag
++        ? widget.bagCount
++        : destination == MonettaBottomDestination.account
++            ? widget.unreadCount
++            : 0;
+     final semanticLabel = badge > 0
+-        ? '$label, $badge ${badge == 1 ? 'artículo' : 'artículos'}'
++        ? destination == MonettaBottomDestination.account
++            ? '$label, $badge avisos sin leer'
++            : '$label, $badge ${badge == 1 ? 'artículo' : 'artículos'}'
+         : label;
+ 
+     return Semantics(
+@@ -451,7 +506,12 @@ class _NavItemState extends State<_NavItem> {
+                         mainAxisAlignment: MainAxisAlignment.center,
+                         children: [
+                           IconTheme.merge(
+-                            data: IconThemeData(color: color),
++                            data: IconThemeData(
++                                color: destination ==
++                                            MonettaBottomDestination.bag &&
++                                        widget.wholesaleEligible
++                                    ? const Color(0xFFA58248)
++                                    : color),
+                             child: Stack(
+                               clipBehavior: Clip.none,
+                               children: [
+@@ -465,7 +525,10 @@ class _NavItemState extends State<_NavItem> {
+                                   Positioned(
+                                     left: 16,
+                                     top: -6,
+-                                    child: _BagBadge(count: badge),
++                                    child: _BagBadge(
++                                        count: badge,
++                                        account: destination ==
++                                            MonettaBottomDestination.account),
+                                   ),
+                               ],
+                             ),
+@@ -511,61 +574,13 @@ class _NavGlyph extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     final color = IconTheme.of(context).color ?? const Color(0xFF000000);
+-    final glyph = CustomPaint(
++    return CustomPaint(
+       size: const Size.square(_kIconBox),
+       painter: _NavGlyphPainter(destination: destination, color: color),
+     );
+-    if (destination != MonettaBottomDestination.account) return glyph;
+-    // The bar reads the photo itself so every screen shows it. Without an
+-    // account scope (tests, previews) or a photo it is the plain glyph.
+-    final controller = AccountScope.maybeOf(context);
+-    final photo = controller != null && controller.isSignedIn
+-        ? controller.profilePhotoBytes
+-        : null;
+-    if (photo == null) return glyph;
+-    return _ProfilePhotoGlyph(photo: photo, color: color, fallback: glyph);
+   }
+ }
+ 
+-/// The signed-in shopper's photo as a circle in the glyph's box. The ring uses
+-/// the item's current colour so the selected and unselected cue survives. The
+-/// photo is decorative: the item's semantics stay «Cuenta».
+-class _ProfilePhotoGlyph extends StatelessWidget {
+-  const _ProfilePhotoGlyph({
+-    required this.photo,
+-    required this.color,
+-    required this.fallback,
+-  });
+-
+-  final Uint8List photo;
+-  final Color color;
+-  final Widget fallback;
+-
+-  @override
+-  Widget build(BuildContext context) => ExcludeSemantics(
+-        child: Container(
+-          key: const Key('bottom-nav-account-photo'),
+-          width: _kIconBox,
+-          height: _kIconBox,
+-          foregroundDecoration: BoxDecoration(
+-            shape: BoxShape.circle,
+-            border: Border.all(color: color, width: _kPhotoRingWidth),
+-          ),
+-          child: ClipOval(
+-            child: Image.memory(
+-              photo,
+-              width: _kIconBox,
+-              height: _kIconBox,
+-              fit: BoxFit.cover,
+-              gaplessPlayback: true,
+-              excludeFromSemantics: true,
+-              errorBuilder: (_, __, ___) => fallback,
+-            ),
+-          ),
+-        ),
+-      );
+-}
+-
+ class _NavGlyphPainter extends CustomPainter {
+   _NavGlyphPainter({required this.destination, required this.color});
+ 
+@@ -667,20 +682,21 @@ class _NavGlyphPainter extends CustomPainter {
+ }
+ 
+ class _BagBadge extends StatelessWidget {
+-  const _BagBadge({required this.count});
++  const _BagBadge({required this.count, this.account = false});
+ 
+   final int count;
++  final bool account;
+ 
+   @override
+   Widget build(BuildContext context) {
+     final colors = context.monettaColors;
+     return Container(
+-      key: const Key('bottom-nav-bag-badge'),
++      key: Key(account ? 'bottom-nav-account-badge' : 'bottom-nav-bag-badge'),
+       constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+       padding: const EdgeInsets.symmetric(horizontal: 4),
+       alignment: Alignment.center,
+       decoration: ShapeDecoration(
+-        color: colors.navigationForeground,
++        color: account ? const Color(0xFFA58248) : colors.navigationForeground,
+         shape: StadiumBorder(
+           side: BorderSide(
+             color: colors.navigationSurface,
+@@ -690,13 +706,15 @@ class _BagBadge extends StatelessWidget {
+         ),
+       ),
+       child: Text(
+-        count > 9 ? '9+' : '$count',
++        account
++            ? (count > 99 ? '99+' : '$count')
++            : (count > 9 ? '9+' : '$count'),
+         textScaler: TextScaler.noScaling,
+         style: sans(
+           size: 10,
+           weight: FontWeight.w600,
+           height: 1,
+-          color: colors.navigationSurface,
++          color: account ? Colors.black : colors.navigationSurface,
+         ),
+       ),
+     );
+diff --git a/lib/features/notifications/notifications_screen.dart b/lib/features/notifications/notifications_screen.dart
+index 1cc31a1..5cd92fd 100644
+--- a/lib/features/notifications/notifications_screen.dart
++++ b/lib/features/notifications/notifications_screen.dart
+@@ -68,6 +68,24 @@ class NotificationsScreen extends StatelessWidget {
+ 
+   @override
+   Widget build(BuildContext context) {
++    final account = accountController;
++    if (account == null) return _build(context);
++    return ListenableBuilder(
++        listenable: account,
++        builder: (context, _) {
++          if (!account.isSignedIn ||
++              account.account?.localAccountId != ownerId) {
++            return Scaffold(
++                appBar: AppBar(title: const Text('Notificaciones')),
++                body: const SafeArea(
++                    child: Center(
++                        child: Text('Inicia sesión para ver tus avisos.'))));
++          }
++          return _build(context);
++        });
++  }
++
++  Widget _build(BuildContext context) {
+     final palette = context.boutique;
+     return Scaffold(
+       backgroundColor: palette.canvas,
+@@ -168,15 +186,7 @@ class _PermissionSection extends StatelessWidget {
+         }
+         switch (controller.permission) {
+           case NotificationPermissionState.notDetermined:
+-            return ENotice(
+-              message: 'Activa los avisos para enterarte de pedidos, '
+-                  'reposiciones y tu saldo Monetta.',
+-              actionLabel: 'Activar avisos',
+-              onAction: controller.saving
+-                  ? null
+-                  : () => controller.requestSystemPermission(),
+-              icon: Icons.notifications_outlined,
+-            );
++            return _PermissionInvitation(controller: controller);
+           case NotificationPermissionState.denied:
+             return ENotice(
+               message: 'Las notificaciones están desactivadas en los ajustes '
+@@ -375,3 +385,40 @@ class _NotificationRow extends StatelessWidget {
+     return 'Hace ${diff.inDays} d';
+   }
+ }
++
++/// Declining this invitation never requests OS permission or changes consent.
++class _PermissionInvitation extends StatefulWidget {
++  const _PermissionInvitation({required this.controller});
++  final NotificationController controller;
++  @override
++  State<_PermissionInvitation> createState() => _PermissionInvitationState();
++}
++
++class _PermissionInvitationState extends State<_PermissionInvitation> {
++  bool _dismissed = false;
++  @override
++  Widget build(BuildContext context) {
++    if (_dismissed) return const SizedBox.shrink();
++    return Column(children: [
++      const ExcludeSemantics(
++          child: Icon(Icons.notifications_outlined, size: 36)),
++      Text('Tus avisos',
++          style: boutiqueTitle(size: 24, color: context.boutique.ink)),
++      const SizedBox(height: 12),
++      const Text(
++          'Activa los avisos para enterarte de pedidos, reposiciones y tu saldo Monetta.',
++          textAlign: TextAlign.center),
++      const SizedBox(height: 12),
++      FilledButton(
++          onPressed: widget.controller.saving
++              ? null
++              : () => widget.controller.requestSystemPermission(),
++          child: const Text('Activar avisos')),
++      TextButton(
++          onPressed: () => setState(() => _dismissed = true),
++          child: const Text('Ahora no')),
++      if (widget.controller.lastError != null)
++        Text(widget.controller.lastError!),
++    ]);
++  }
++}
+diff --git a/lib/features/rewards/rewards_components.dart b/lib/features/rewards/rewards_components.dart
+index 14ec86d..8666431 100644
+--- a/lib/features/rewards/rewards_components.dart
++++ b/lib/features/rewards/rewards_components.dart
+@@ -23,9 +23,11 @@ class RewardsBalanceCard extends StatelessWidget {
+     this.movements = const [],
+     this.expanded = false,
+     this.onToggleExpanded,
++    this.showPending = true,
+     super.key,
+   });
+ 
++  final bool showPending;
+   final RewardsSummary summary;
+   final List<RewardsMovement> movements;
+   final bool expanded;
+@@ -64,12 +66,12 @@ class RewardsBalanceCard extends StatelessWidget {
+                     ),
+                     const SizedBox(height: 2),
+                     Text(
+-                      'Tienes ${summary.availableLabel} disponibles',
++                      'Saldo disponible\n${summary.availableLabel}',
+                       key: const ValueKey('rewards-balance-available'),
+                       style: boutiqueText(
+                         size: 16,
+                         weight: FontWeight.w600,
+-                        color: colors.contentPrimary,
++                        color: const Color(0xFF3B7030),
+                       ),
+                     ),
+                   ],
+@@ -77,11 +79,13 @@ class RewardsBalanceCard extends StatelessWidget {
+               ),
+             ],
+           ),
+-          const SizedBox(height: 6),
+-          Text(
+-            '\$${(summary.pendingCents / 100).toStringAsFixed(0)} pendientes de entrega',
+-            style: sans(size: 12.5, color: colors.contentMuted),
+-          ),
++          if (showPending) ...[
++            const SizedBox(height: 6),
++            Text(
++              '\$${(summary.pendingCents / 100).toStringAsFixed(0)} pendientes de entrega',
++              style: sans(size: 12.5, color: colors.contentMuted),
++            ),
++          ],
+           if (summary.nextExpiry != null) ...[
+             const SizedBox(height: 6),
+             Text(
+diff --git a/lib/features/rewards/rewards_guide_screen.dart b/lib/features/rewards/rewards_guide_screen.dart
+index 2ad3664..339892d 100644
+--- a/lib/features/rewards/rewards_guide_screen.dart
++++ b/lib/features/rewards/rewards_guide_screen.dart
+@@ -1,520 +1,52 @@
+-/// Client-guide Rewards summary (page 14).
+-///
+-/// Reads the existing balance. Points, levels and earning rules from the guide
+-/// have no contract in this build, so those spots stay marked as placeholders.
+-/// This file does not calculate a balance or call a new backend.
++/// Account-scoped Rewards entry. Tier and benefit capabilities remain gated
++/// until the service provides authoritative rules and eligible-purchase data.
+ library;
+ 
+-import 'dart:async';
+-
+ import 'package:flutter/material.dart';
+ 
+ import '../../app/account_controller.dart';
+ import '../../app/monetta_tokens.g.dart';
+-import '../../data/accounts_orders/accounts_orders_config.dart';
+-import '../boutique/boutique_tokens.dart';
+ import '../boutique/client_guide_components.dart';
+ import '../boutique/client_guide_scaffold.dart';
+-import 'rewards_api.dart';
+-import 'rewards_models.dart';
+ import 'rewards_section.dart';
+-import 'rewards_share_screen.dart';
+ 
+ Future<void> openRewardsGuide(
+   BuildContext context, {
+   AccountController? controller,
+   RewardsReader? reader,
+-}) {
+-  return Navigator.of(context).push<void>(
+-    MaterialPageRoute<void>(
+-      settings: const RouteSettings(name: '/rewards'),
+-      builder: (_) =>
+-          RewardsGuideScreen(controller: controller, reader: reader),
+-    ),
+-  );
+-}
++}) =>
++    Navigator.of(context).push<void>(
++      MaterialPageRoute<void>(
++        settings: const RouteSettings(name: '/rewards'),
++        builder: (_) =>
++            RewardsGuideScreen(controller: controller, reader: reader),
++      ),
++    );
+ 
+-class RewardsGuideScreen extends StatefulWidget {
++class RewardsGuideScreen extends StatelessWidget {
+   const RewardsGuideScreen({this.controller, this.reader, super.key});
+ 
+   final AccountController? controller;
+   final RewardsReader? reader;
+ 
+   @override
+-  State<RewardsGuideScreen> createState() => _RewardsGuideScreenState();
+-}
+-
+-class _RewardsGuideScreenState extends State<RewardsGuideScreen> {
+-  RewardsApi? _api;
+-  RewardsReader? _reader;
+-  RewardsSummary? _summary;
+-  var _loading = true;
+-  var _failed = false;
+-
+-  @override
+-  void initState() {
+-    super.initState();
+-    _resolve();
+-    unawaited(_load());
+-  }
+-
+-  @override
+-  void didUpdateWidget(covariant RewardsGuideScreen oldWidget) {
+-    super.didUpdateWidget(oldWidget);
+-    if (oldWidget.reader != widget.reader ||
+-        oldWidget.controller != widget.controller) {
+-      _resolve();
+-      unawaited(_load());
+-    }
+-  }
+-
+-  void _resolve() {
+-    _api?.close();
+-    _api = null;
+-    final fixed = widget.reader;
+-    if (fixed != null) {
+-      _reader = fixed;
+-      return;
+-    }
+-    final controller = widget.controller;
+-    if (controller == null) {
+-      _reader = null;
+-      return;
+-    }
+-    _api = resolveRewardsApi(
+-      config: AccountsOrdersConfig.fromEnvironment(),
+-      tokenProvider: controller.accessTokenForBackend,
+-    );
+-    final api = _api;
+-    _reader = api == null ? null : ApiRewardsReader(api);
+-  }
+-
+-  Future<void> _load() async {
+-    final reader = _reader;
+-    if (reader == null) {
+-      if (!mounted) return;
+-      setState(() {
+-        _summary = null;
+-        _loading = false;
+-        _failed = false;
+-      });
+-      return;
+-    }
+-    setState(() {
+-      _loading = true;
+-      _failed = false;
+-    });
+-    try {
+-      final summary = await reader.summary();
+-      if (!mounted) return;
+-      setState(() {
+-        _summary = summary;
+-        _loading = false;
+-      });
+-    } on Object {
+-      if (!mounted) return;
+-      setState(() {
+-        _summary = null;
+-        _loading = false;
+-        _failed = true;
+-      });
+-    }
+-  }
+-
+-  @override
+-  void dispose() {
+-    _api?.close();
+-    super.dispose();
+-  }
+-
+-  @override
+-  Widget build(BuildContext context) {
+-    final palette = context.boutique;
+-    final width = MediaQuery.sizeOf(context).width;
+-    final summary = _summary;
+-    return ClientGuideScaffold(
+-      current: ClientGuideDestination.account,
+-      accountController: widget.controller,
+-      body: ListView(
+-        key: const ValueKey('rewards-guide-scroll'),
+-        padding: EdgeInsets.fromLTRB(
+-          MonettaTokens.gutterFor(width),
+-          MonettaTokens.space[4],
+-          MonettaTokens.gutterFor(width),
+-          MonettaTokens.space[6],
++  Widget build(BuildContext context) => ClientGuideScaffold(
++        current: ClientGuideDestination.account,
++        accountController: controller,
++        body: ListView(
++          key: const ValueKey('rewards-guide-scroll'),
++          padding: const EdgeInsets.all(24),
++          children: [
++            Text('MONETTA REWARDS',
++                style: clientGuideStyle(context, MonettaTokens.screenTitle)),
++            const SizedBox(height: 24),
++            if (controller != null)
++              AutoRewardsSection(controller: controller!, reader: reader)
++            else
++              RewardsSection(controller: null, reader: reader),
++            const SizedBox(height: 24),
++            const Text('Tu nivel y sus beneficios aún no están disponibles.'),
++          ],
+         ),
+-        children: [
+-          Text(
+-            'Monetta Rewards',
+-            style: clientGuideStyle(context, MonettaTokens.screenTitle),
+-          ),
+-          SizedBox(height: MonettaTokens.space[1]),
+-          Text(
+-            'Tus compras, acumulas puntos.',
+-            style: clientGuideStyle(
+-              context,
+-              MonettaTokens.body,
+-              color: palette.inkMuted,
+-            ),
+-          ),
+-          SizedBox(height: MonettaTokens.space[2]),
+-          const _PlaceholderLine(
+-            text:
+-                'La guía ilustra puntos y niveles. El saldo mostrado es el contrato en MXN.',
+-          ),
+-          SizedBox(height: MonettaTokens.space[4]),
+-          if (_loading)
+-            const Center(
+-              child: Padding(
+-                padding: EdgeInsets.all(24),
+-                child:
+-                    CircularProgressIndicator(key: ValueKey('rewards-loading')),
+-              ),
+-            )
+-          else if (_failed)
+-            _StatusBlock(
+-              title: 'No se pudo leer el saldo',
+-              action: 'Reintentar',
+-              onAction: () => unawaited(_load()),
+-            )
+-          else if (summary == null)
+-            const _StatusBlock(
+-              title: 'Monetta Rewards aún no está disponible',
+-              body:
+-                  'No hay un saldo que mostrar. No se inventa un puntaje ni un nivel.',
+-            )
+-          else
+-            _BalanceRing(
+-              amount: summary.availableLabel,
+-              caption: 'Saldo disponible',
+-            ),
+-          SizedBox(height: MonettaTokens.space[2]),
+-          Text(
+-            'Nivel: $kRewardsContractPlaceholder',
+-            key: const ValueKey('rewards-level-placeholder'),
+-            textAlign: TextAlign.center,
+-            style: clientGuideStyle(
+-              context,
+-              MonettaTokens.navLabel,
+-              color: palette.goldText,
+-            ),
+-          ),
+-          SizedBox(height: MonettaTokens.space[5]),
+-          Text(
+-            'Cómo ganar puntos',
+-            style: clientGuideStyle(context, MonettaTokens.sectionTitle),
+-          ),
+-          SizedBox(height: MonettaTokens.space[2]),
+-          const _GuideRow(
+-            id: 'rewards-earn-purchase',
+-            icon: Icons.shopping_bag_outlined,
+-            title: 'Por cada compra',
+-          ),
+-          const _GuideRow(
+-            id: 'rewards-earn-share',
+-            icon: Icons.share_outlined,
+-            title: 'Compartir catálogo en redes',
+-          ),
+-          const _GuideRow(
+-            id: 'rewards-earn-wholesale',
+-            icon: Icons.storefront_outlined,
+-            title: 'Comprar a mayoreo',
+-          ),
+-          SizedBox(height: MonettaTokens.space[5]),
+-          Text(
+-            'Canjear puntos',
+-            style: clientGuideStyle(context, MonettaTokens.sectionTitle),
+-          ),
+-          SizedBox(height: MonettaTokens.space[2]),
+-          const _RedeemCard(
+-            id: 'rewards-redeem-discounts',
+-            icon: Icons.percent_outlined,
+-            title: 'Descuentos',
+-            body: 'Usa tus puntos en tus compras',
+-          ),
+-          const _RedeemCard(
+-            id: 'rewards-redeem-shipping',
+-            icon: Icons.local_shipping_outlined,
+-            title: 'Envío gratis',
+-            body: 'Canjea puntos por envíos',
+-          ),
+-          const _RedeemCard(
+-            id: 'rewards-redeem-early',
+-            icon: Icons.workspace_premium_outlined,
+-            title: 'Acceso anticipado',
+-            body: 'Sé la primera en nuevas colecciones',
+-          ),
+-          SizedBox(height: MonettaTokens.space[4]),
+-          FilledButton(
+-            key: const ValueKey('rewards-open-share'),
+-            onPressed: () {
+-              Navigator.of(context).push(
+-                MaterialPageRoute<void>(
+-                  builder: (_) => RewardsShareScreen(
+-                    accountController: widget.controller,
+-                  ),
+-                ),
+-              );
+-            },
+-            style: FilledButton.styleFrom(
+-              backgroundColor: palette.actionDark,
+-              foregroundColor: palette.onActionDark,
+-              minimumSize: const Size.fromHeight(MonettaTokens.controlHeight),
+-              shape: const StadiumBorder(),
+-            ),
+-            child: Text(
+-              'Comparte y gana',
+-              style: clientGuideStyle(
+-                context,
+-                MonettaTokens.control,
+-                color: palette.onActionDark,
+-              ),
+-            ),
+-          ),
+-        ],
+-      ),
+-    );
+-  }
+-}
+-
+-class _BalanceRing extends StatelessWidget {
+-  const _BalanceRing({required this.amount, required this.caption});
+-
+-  final String amount;
+-  final String caption;
+-
+-  @override
+-  Widget build(BuildContext context) {
+-    final palette = context.boutique;
+-    return Center(
+-      child: SizedBox(
+-        key: const ValueKey('rewards-balance'),
+-        width: 220,
+-        height: 220,
+-        child: CustomPaint(
+-          painter: _RingPainter(
+-            color: palette.gold,
+-            track: palette.hairline,
+-          ),
+-          child: Padding(
+-            padding: EdgeInsets.all(MonettaTokens.space[4]),
+-            child: Column(
+-              mainAxisAlignment: MainAxisAlignment.center,
+-              children: [
+-                Text(
+-                  amount,
+-                  textAlign: TextAlign.center,
+-                  style: clientGuideStyle(context, MonettaTokens.sectionTitle),
+-                ),
+-                SizedBox(height: MonettaTokens.space[1]),
+-                Text(
+-                  caption,
+-                  textAlign: TextAlign.center,
+-                  style: clientGuideStyle(
+-                    context,
+-                    MonettaTokens.navLabel,
+-                    color: palette.inkMuted,
+-                  ),
+-                ),
+-              ],
+-            ),
+-          ),
+-        ),
+-      ),
+-    );
+-  }
+-}
+-
+-class _RingPainter extends CustomPainter {
+-  const _RingPainter({required this.color, required this.track});
+-
+-  final Color color;
+-  final Color track;
+-
+-  @override
+-  void paint(Canvas canvas, Size size) {
+-    final center = size.center(Offset.zero);
+-    final radius = size.shortestSide / 2 - 8;
+-    final stroke = Paint()
+-      ..style = PaintingStyle.stroke
+-      ..strokeWidth = 10
+-      ..strokeCap = StrokeCap.round;
+-    canvas.drawCircle(center, radius, stroke..color = track);
+-    canvas.drawCircle(
+-      center,
+-      radius - 8,
+-      stroke..color = color,
+-    );
+-  }
+-
+-  @override
+-  bool shouldRepaint(covariant _RingPainter oldDelegate) =>
+-      oldDelegate.color != color || oldDelegate.track != track;
+-}
+-
+-class _GuideRow extends StatelessWidget {
+-  const _GuideRow({
+-    required this.id,
+-    required this.icon,
+-    required this.title,
+-  });
+-
+-  final String id;
+-  final IconData icon;
+-  final String title;
+-
+-  @override
+-  Widget build(BuildContext context) {
+-    final palette = context.boutique;
+-    return Padding(
+-      padding: EdgeInsets.only(bottom: MonettaTokens.space[2]),
+-      child: DecoratedBox(
+-        key: ValueKey(id),
+-        decoration: BoxDecoration(
+-          color: palette.surface,
+-          borderRadius: BoutiqueRadius.card,
+-          border: Border.all(color: palette.hairline),
+-        ),
+-        child: Padding(
+-          padding: EdgeInsets.all(MonettaTokens.space[3]),
+-          child: Row(
+-            children: [
+-              Icon(icon, color: palette.goldText),
+-              SizedBox(width: MonettaTokens.space[2]),
+-              Expanded(
+-                child: Text(
+-                  title,
+-                  style: clientGuideStyle(context, MonettaTokens.cardLabel),
+-                ),
+-              ),
+-              const Text(kRewardsContractPlaceholder),
+-            ],
+-          ),
+-        ),
+-      ),
+-    );
+-  }
+-}
+-
+-class _RedeemCard extends StatelessWidget {
+-  const _RedeemCard({
+-    required this.id,
+-    required this.icon,
+-    required this.title,
+-    required this.body,
+-  });
+-
+-  final String id;
+-  final IconData icon;
+-  final String title;
+-  final String body;
+-
+-  @override
+-  Widget build(BuildContext context) {
+-    final palette = context.boutique;
+-    return Padding(
+-      padding: EdgeInsets.only(bottom: MonettaTokens.space[2]),
+-      child: DecoratedBox(
+-        key: ValueKey(id),
+-        decoration: BoxDecoration(
+-          color: palette.surface,
+-          borderRadius: BoutiqueRadius.card,
+-          border: Border.all(color: palette.hairline),
+-        ),
+-        child: Padding(
+-          padding: EdgeInsets.all(MonettaTokens.space[3]),
+-          child: Row(
+-            crossAxisAlignment: CrossAxisAlignment.start,
+-            children: [
+-              Icon(icon, color: palette.goldText),
+-              SizedBox(width: MonettaTokens.space[2]),
+-              Expanded(
+-                child: Column(
+-                  crossAxisAlignment: CrossAxisAlignment.start,
+-                  children: [
+-                    Text(
+-                      title,
+-                      style: clientGuideStyle(context, MonettaTokens.cardLabel),
+-                    ),
+-                    Text(
+-                      body,
+-                      style: clientGuideStyle(
+-                        context,
+-                        MonettaTokens.navLabel,
+-                        color: palette.inkMuted,
+-                      ),
+-                    ),
+-                    const Text(kRewardsContractPlaceholder),
+-                  ],
+-                ),
+-              ),
+-            ],
+-          ),
+-        ),
+-      ),
+-    );
+-  }
+-}
+-
+-class _PlaceholderLine extends StatelessWidget {
+-  const _PlaceholderLine({required this.text});
+-
+-  final String text;
+-
+-  @override
+-  Widget build(BuildContext context) {
+-    return Text(
+-      text,
+-      key: const ValueKey('rewards-contract-note'),
+-      style: clientGuideStyle(
+-        context,
+-        MonettaTokens.navLabel,
+-        color: context.boutique.goldText,
+-      ),
+-    );
+-  }
+-}
+-
+-class _StatusBlock extends StatelessWidget {
+-  const _StatusBlock({
+-    required this.title,
+-    this.body,
+-    this.action,
+-    this.onAction,
+-  });
+-
+-  final String title;
+-  final String? body;
+-  final String? action;
+-  final VoidCallback? onAction;
+-
+-  @override
+-  Widget build(BuildContext context) {
+-    final palette = context.boutique;
+-    return Column(
+-      children: [
+-        Text(
+-          title,
+-          textAlign: TextAlign.center,
+-          style: clientGuideStyle(context, MonettaTokens.cardLabel),
+-        ),
+-        if (body != null) ...[
+-          SizedBox(height: MonettaTokens.space[1]),
+-          Text(
+-            body!,
+-            textAlign: TextAlign.center,
+-            style: clientGuideStyle(
+-              context,
+-              MonettaTokens.body,
+-              color: palette.inkMuted,
+-            ),
+-          ),
+-        ],
+-        if (action != null && onAction != null) ...[
+-          SizedBox(height: MonettaTokens.space[2]),
+-          TextButton(onPressed: onAction, child: Text(action!)),
+-        ],
+-      ],
+-    );
+-  }
++      );
+ }
+diff --git a/lib/features/rewards/rewards_section.dart b/lib/features/rewards/rewards_section.dart
+index b9ee506..a22f596 100644
+--- a/lib/features/rewards/rewards_section.dart
++++ b/lib/features/rewards/rewards_section.dart
+@@ -126,10 +126,20 @@ class _AutoRewardsSectionState extends State<AutoRewardsSection> {
+ 
+   @override
+   Widget build(BuildContext context) {
+-    return RewardsSection(
+-      controller: widget.controller,
+-      reader: _effective,
+-      showMovements: widget.showMovements,
++    return ListenableBuilder(
++      listenable: widget.controller,
++      builder: (context, _) {
++        final owner = widget.controller.account?.localAccountId;
++        if (!widget.controller.isSignedIn || owner == null) {
++          return const Text('Inicia sesión para consultar tu saldo.');
++        }
++        return RewardsSection(
++          key: ValueKey(owner),
++          controller: widget.controller,
++          reader: _effective,
++          showMovements: widget.showMovements,
++        );
++      },
+     );
+   }
+ }
+@@ -544,6 +554,7 @@ class _RewardsLoaded extends StatelessWidget {
+         children: [
+           RewardsBalanceCard(
+             summary: summary,
++            showPending: false,
+             movements: const [],
+             expanded: false,
+           ),
+@@ -714,7 +725,7 @@ class _MovementRow extends StatelessWidget {
+           ),
+           const SizedBox(width: 10),
+           Text(
+-            '${amount < 0 ? '-' : '+'}\$${(amount.abs() / 100).toStringAsFixed(0)}',
++            '${amount < 0 ? '-' : '+'}\$${(amount.abs() / 100).toStringAsFixed(2)}',
+             style: boutiqueText(
+               size: 13,
+               weight: FontWeight.w600,
+diff --git a/test/features/rewards/rewards_guide_screen_test.dart b/test/features/rewards/rewards_guide_screen_test.dart
+index 5a25215..166a163 100644
+--- a/test/features/rewards/rewards_guide_screen_test.dart
++++ b/test/features/rewards/rewards_guide_screen_test.dart
+@@ -1,7 +1,6 @@
+ import 'package:flutter/material.dart';
+ import 'package:flutter/services.dart' show SystemChannels;
+ import 'package:flutter_test/flutter_test.dart';
+-import 'package:monetta_app/features/boutique/guide_art.dart';
+ import 'package:monetta_app/features/rewards/rewards_guide_screen.dart';
+ import 'package:monetta_app/features/rewards/rewards_models.dart';
+ import 'package:monetta_app/features/rewards/rewards_section.dart';
+@@ -41,32 +40,21 @@ class _Reader implements RewardsReader {
+ }
+ 
+ void main() {
+-  testWidgets('shows the contract balance and keeps points as placeholders', (
+-    tester,
+-  ) async {
++  testWidgets(
++      'shows real balance and history while unsupported rules stay gated',
++      (tester) async {
+     await pumpClientGuide(
+-      tester,
+-      RewardsGuideScreen(reader: _Reader(_summary())),
+-      size: const Size(390, 1400),
+-    );
+-    expect(find.text('\$184 Monetta'), findsOneWidget);
+-    expect(find.text('Nivel: Pendiente de contrato'), findsOneWidget);
+-    expect(find.text('Por cada compra'), findsOneWidget);
+-    expect(find.text('Compartir catálogo en redes'), findsOneWidget);
+-    expect(find.text('Comprar a mayoreo'), findsOneWidget);
+-    expect(find.text('Descuentos'), findsOneWidget);
+-    expect(find.text('Envío gratis'), findsOneWidget);
+-    expect(find.text('Acceso anticipado'), findsOneWidget);
+-    expect(find.textContaining('320'), findsNothing);
+-    expect(find.textContaining('Nivel Plata'), findsNothing);
+-    expect(find.textContaining('1 pt'), findsNothing);
+-
+-    await tester.tap(find.byKey(const ValueKey('rewards-open-share')));
++        tester, RewardsGuideScreen(reader: _Reader(_summary())),
++        size: const Size(390, 1400));
++    expect(find.textContaining('184 Monetta'), findsOneWidget);
++    expect(find.text('Tu nivel y sus beneficios aún no están disponibles.'),
++        findsOneWidget);
++    expect(find.text('Compartir catálogo en redes'), findsNothing);
++    expect(find.text('Canjear puntos'), findsNothing);
++    expect(find.textContaining('pendientes de entrega'), findsNothing);
++    await tester.tap(find.byKey(const ValueKey('rewards-movements-toggle')));
+     await tester.pumpAndSettle();
+-    // The share banner carries the title; the screen no longer repeats it.
+-    expect(find.byType(GuideShareEarnBanner), findsOneWidget);
+-    expect(find.text('https://monetta.com/catalogo/bolsos'), findsNothing);
+-    expect(find.textContaining('Pendiente de contrato'), findsWidgets);
++    expect(find.text('Aún no hay movimientos en tu cuenta.'), findsOneWidget);
+   });
+ 
+   testWidgets('a missing reader does not invent a balance', (tester) async {

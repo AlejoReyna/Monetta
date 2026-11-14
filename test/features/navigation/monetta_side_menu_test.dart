@@ -1,282 +1,171 @@
+// v4.1 G02: no retired sharing/visual settings; real routes and private balance.
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:monetta_app/domain/home_content.dart';
+import 'package:monetta_app/app/account_controller.dart';
+import 'package:monetta_app/app/theme.dart';
+import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
+import 'package:monetta_app/data/local/account_store.dart';
+import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/data/local/order_summary_store.dart';
+import 'package:monetta_app/data/repositories/order_history_repository.dart';
+import 'package:monetta_app/features/catalog/brands_screen.dart';
 import 'package:monetta_app/features/navigation/monetta_side_menu.dart';
+import 'package:monetta_app/features/rewards/rewards_models.dart';
+import 'package:monetta_app/features/rewards/rewards_section.dart';
+import '../catalog/v41_discovery_fixture.dart';
+import '../catalog/v41_discovery_test.dart' show mountDiscovery, tapVisible;
+import '../catalog/v41_discovery_capture_test.dart' show fixtureMenu;
 
-import '../../support/client_guide_capture.dart';
-
-void main() {
-  testWidgets('shows only navigation links and a direct theme toggle', (
-    tester,
-  ) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1;
-
-    void doNothing() {}
-    var themeToggleCalls = 0;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: MonettaSideMenu(
-            onSearch: doNothing,
-            onCatalog: doNothing,
-            onBags: doNothing,
-            onWallets: doNothing,
-            onWatches: doNothing,
-            onPerfumes: doNothing,
-            onBeauty: doNothing,
-            onToggleTheme: () => themeToggleCalls++,
-            onAbout: doNothing,
-            onPartner: doNothing,
-            onSupport: doNothing,
+class _Identity extends AccountController {
+  _Identity(AppDatabase db)
+      : super(
+          accountStore: AccountStore(db),
+          deviceStore: DeviceStore(db),
+          orderHistoryRepository: OrderHistoryRepository(
+            store: OrderSummaryStore(db),
+            config: AccountsOrdersConfig.disabled,
           ),
-        ),
-      ),
-    );
-
-    expect(find.text('Bolsas'), findsOneWidget);
-    expect(find.text('Nuestra historia'), findsNothing);
-    expect(find.text('TIENDA'), findsNothing);
-    expect(find.text('MÁS DE MONETTA'), findsNothing);
-    expect(find.text('Mis notificaciones'), findsNothing);
-    expect(find.text('Apariencia'), findsNothing);
-    expect(find.byKey(const Key('side-menu-appearance')), findsOneWidget);
-    expect(find.byTooltip('Activar modo oscuro'), findsOneWidget);
-    expect(find.byIcon(Icons.light_mode_outlined), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('side-menu-appearance')));
-    expect(themeToggleCalls, 1);
-  });
-
-  testWidgets('shows identity, categories, sharing, WhatsApp and social links',
-      (
-    tester,
-  ) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1;
-
-    final opened = <String>[];
-    final social = <Uri>[];
-    Widget menu() => MonettaSideMenu(
-          onSearch: () {},
-          onCatalog: () {},
-          onCategories: () => opened.add('categories'),
-          onBags: () {},
-          onWallets: () {},
-          onWatches: () {},
-          onPerfumes: () {},
-          onBeauty: () {},
-          onToggleTheme: () {},
-          onAbout: () {},
-          onPartner: () {},
-          onSupport: () {},
-          identityName: 'Ana',
-          identityDetail: 'ana@example.com',
-          onNotifications: () => opened.add('notifications'),
-          onShare: () => opened.add('share'),
-          onWhatsApp: () => opened.add('whatsapp'),
-          socialLinks: HomeContent.fallback.socialLinks,
-          onOpenSocial: social.add,
+          deviceId: 'fixture-device',
         );
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: TextButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => Scaffold(body: menu()),
-                  ),
-                );
-              },
-              child: const Text('Abrir'),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    Future<void> open() async {
-      await tester.tap(find.text('Abrir'));
-      await tester.pumpAndSettle();
-    }
-
-    await open();
-    expect(find.text('Ana'), findsOneWidget);
-    expect(find.text('ana@example.com'), findsOneWidget);
-    expect(find.byIcon(Icons.shopping_bag_outlined), findsWidgets);
-    expect(find.text('Categorías'), findsNothing);
-    expect(find.text('Comparte'), findsOneWidget);
-    expect(find.text('y gana'), findsOneWidget);
-    expect(find.text('Contacto por WhatsApp'), findsOneWidget);
-    expect(find.byKey(const Key('side-menu-social-instagram')), findsOneWidget);
-
-    expect(find.byKey(const Key('side-menu-categories')), findsNothing);
-    await tester.tap(find.byKey(const Key('side-menu-notifications')));
-    await tester.pumpAndSettle();
-    expect(opened, ['notifications']);
-
-    await open();
-    await tester.tap(find.byKey(const Key('side-menu-share-button')));
-    await tester.pumpAndSettle();
-    expect(opened, ['notifications', 'share']);
-
-    await open();
-    await tester.ensureVisible(find.byKey(const Key('side-menu-whatsapp')));
-    await tester.tap(find.byKey(const Key('side-menu-whatsapp')));
-    await tester.pumpAndSettle();
-    expect(opened, ['notifications', 'share', 'whatsapp']);
-
-    await open();
-    await tester
-        .ensureVisible(find.byKey(const Key('side-menu-social-instagram')));
-    await tester.tap(find.byKey(const Key('side-menu-social-instagram')));
-    await tester.pumpAndSettle();
-    expect(social.single.toString(), contains('instagram.com'));
-  });
-
-  testWidgets('MENU-GUIDE the menu holds exactly the guide items, in order', (
-    tester,
-  ) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1;
-
-    final calls = <String>[];
-    final social = <Uri>[];
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: MonettaSideMenu(
-            onSearch: () => calls.add('search'),
-            onCatalog: () => calls.add('brands'),
-            onCategories: () => calls.add('categories'),
-            onBags: () => calls.add('bags'),
-            onWallets: () => calls.add('wallets'),
-            onWatches: () => calls.add('watches'),
-            onPerfumes: () => calls.add('perfumes'),
-            onBeauty: () => calls.add('beauty'),
-            onToggleTheme: () {},
-            onAbout: () => calls.add('about'),
-            onPartner: () => calls.add('partner'),
-            onSupport: () => calls.add('support'),
-            identityName: 'Ana',
-            identityDetail: 'ana@example.com',
-            onNotifications: () => calls.add('notifications'),
-            onShare: () => calls.add('share'),
-            onWhatsApp: () => calls.add('whatsapp'),
-            socialLinks: HomeContent.fallback.socialLinks,
-            onOpenSocial: social.add,
-          ),
-        ),
-      ),
-    );
-
-    // Top: wordmark and the bell; the user row shows initial, name, email.
-    expect(find.byKey(const Key('side-menu-notifications')), findsOneWidget);
-    expect(find.text('A'), findsOneWidget);
-    expect(find.text('Ana'), findsOneWidget);
-    expect(find.text('ana@example.com'), findsOneWidget);
-
-    // The five links, top to bottom.
-    final labels = [
-      'Bolsas',
-      'Carteras',
-      'Relojes',
-      'Perfumes',
-      'Todas las marcas',
-    ];
-    var previous = -1.0;
-    for (final label in labels) {
-      final top = tester.getTopLeft(find.text(label)).dy;
-      expect(top, greaterThan(previous), reason: label);
-      previous = top;
-    }
-    // Then the share banner, WhatsApp and the three networks, in guide order.
-    final share =
-        tester.getTopLeft(find.byKey(const Key('side-menu-share'))).dy;
-    final whatsapp = tester.getTopLeft(find.text('Contacto por WhatsApp')).dy;
-    expect(share, greaterThan(previous));
-    expect(whatsapp, greaterThan(share));
-    final xs = [
-      for (final id in ['tiktok', 'instagram', 'facebook'])
-        tester.getCenter(find.byKey(Key('side-menu-social-$id'))).dx,
-    ];
-    expect(xs[0], lessThan(xs[1]));
-    expect(xs[1], lessThan(xs[2]));
-    expect(
-      tester.getCenter(find.byKey(const Key('side-menu-social-tiktok'))).dy,
-      greaterThan(whatsapp),
-    );
-
-    // What the guide dropped.
-    for (final gone in [
-      'Buscar una pieza',
-      'Categorías',
-      'Maquillaje y skincare',
-      'Mayoreo',
-      'Contacto',
-      'Nuestra historia',
-    ]) {
-      expect(find.text(gone), findsNothing, reason: gone);
-    }
-    expect(find.byKey(const Key('side-menu-search')), findsNothing);
-
-    // The share pill keeps the share action.
-    final pill = find.byKey(const Key('side-menu-share-button'));
-    expect(
-      find.descendant(of: pill, matching: find.text('VER CATÁLOGO')),
-      findsOneWidget,
-    );
-    await tester.tap(pill);
-    await tester.pump();
-    await tester.pump();
-    expect(calls, ['share']);
-  });
-
-  for (final (size, brightness) in [
-    (const Size(390, 1400), Brightness.light),
-    (const Size(390, 1400), Brightness.dark),
-    (const Size(834, 1400), Brightness.light),
-  ]) {
-    testWidgets('menu capture ${size.width} ${brightness.name}',
-        (tester) async {
-      await pumpClientGuide(
-        tester,
-        MonettaSideMenu(
-          onSearch: () {},
-          onCatalog: () {},
-          onCategories: () {},
-          onBags: () {},
-          onWallets: () {},
-          onWatches: () {},
-          onPerfumes: () {},
-          onBeauty: () {},
-          onToggleTheme: () {},
-          onAbout: () {},
-          onPartner: () {},
-          onSupport: () {},
-          identityName: 'Ana',
-          identityDetail: 'ana@example.com',
-          onNotifications: () {},
-          onShare: () {},
-          onWhatsApp: () {},
-          socialLinks: HomeContent.fallback.socialLinks,
-          onOpenSocial: (_) {},
-        ),
-        size: size,
-        brightness: brightness,
-      );
-      await captureClientGuide(
-        tester,
-        'menu-${size.width.toInt()}-${brightness.name}',
-      );
-      expect(find.text('Bolsas'), findsOneWidget);
-    });
+  void change(String? id) {
+    account = id == null
+        ? null
+        : Account(
+            localAccountId: id,
+            email: '$id@fixture.invalid',
+            displayName: id,
+            authProvider: 'monetta',
+            createdAt: DateTime.utc(2026),
+            lastSeenAt: DateTime.utc(2026),
+          );
+    notifyListeners();
   }
+}
+
+class _Reader implements RewardsReader {
+  final pending = <Completer<RewardsSummary>>[];
+  @override
+  Future<RewardsSummary> summary() {
+    final next = Completer<RewardsSummary>();
+    pending.add(next);
+    return next.future;
+  }
+
+  @override
+  Future<({List<RewardsMovement> movements, String? nextCursor})> activity() =>
+      throw UnimplementedError();
+  @override
+  Future<OrderRewardsState> orderRewards(String _) =>
+      throw UnimplementedError();
+}
+
+RewardsSummary _summary(int amount) => RewardsSummary.fromJson({
+      'balance': {
+        'availableCents': amount,
+        'pendingCents': 0,
+        'reservedCents': 0,
+        'asOf': '2026-11-11T00:00:00Z',
+      },
+    });
+void main() {
+  testWidgets(
+      'sidebar all-brands opens real directory, explicit close preserves origin',
+      (tester) async {
+    final store = await discoveryStore();
+    final key = GlobalKey<ScaffoldState>();
+    await mountDiscovery(
+      tester,
+      Scaffold(key: key, drawer: fixtureMenu(), body: const Text('Origin')),
+      store,
+    );
+    key.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('side-menu-share')), findsNothing);
+    expect(find.byKey(const Key('side-menu-appearance')), findsNothing);
+    expect(find.text('VIP'), findsNothing);
+    await tapVisible(tester, find.byKey(const Key('side-menu-brands')));
+    expect(find.byType(BrandsScreen), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Origin'), findsOneWidget);
+    key.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('side-menu-close')));
+    expect(key.currentState!.isDrawerOpen, isFalse);
+  });
+  testWidgets(
+      'sidebar scroll reaches Mayoreo after brands and labeled social controls at 200%',
+      (tester) async {
+    final store = await discoveryStore();
+    await mountDiscovery(
+      tester,
+      Scaffold(body: fixtureMenu()),
+      store,
+      scale: 2,
+    );
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('side-menu-wholesale')),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+    final brands = find.byKey(const Key('side-menu-brands'));
+    expect(
+      tester.getTopLeft(brands).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('side-menu-wholesale'))).dy,
+      ),
+    );
+    for (final id in ['instagram', 'tiktok', 'facebook']) {
+      await tester.scrollUntilVisible(
+        find.byKey(Key('side-menu-social-$id')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pump();
+      expect(
+        find.byKey(Key('side-menu-social-$id')).hitTestable(),
+        findsOneWidget,
+      );
+    }
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('side-menu-whatsapp')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets(
+      'late A response cannot replace B balance; logout immediately removes private state',
+      (tester) async {
+    final db = openTestDatabase();
+    final identity = _Identity(db);
+    final reader = _Reader();
+    addTearDown(() async {
+      identity.dispose();
+      await db.close();
+    });
+    identity.change('A');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildLightTheme(),
+        home: Scaffold(
+          body: SidebarBalance(controller: identity, reader: reader),
+        ),
+      ),
+    );
+    identity.change('B');
+    await tester.pump();
+    reader.pending[1].complete(_summary(45600));
+    await tester.pumpAndSettle();
+    expect(find.text(r'$456 Monetta'), findsOneWidget);
+    reader.pending[0].complete(_summary(12300));
+    await tester.pumpAndSettle();
+    expect(find.text(r'$123 Monetta'), findsNothing);
+    identity.change(null);
+    await tester.pumpAndSettle();
+    expect(find.text(r'$456 Monetta'), findsNothing);
+  });
 }

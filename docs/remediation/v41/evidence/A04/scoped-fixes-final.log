@@ -1,0 +1,38 @@
+Computing fixes in catalog_browse_screen.dart...
+Applying fixes...
+
+catalog_browse_screen.dart
+  require_trailing_commas - 1 fix
+
+1 fix made in 1 file.
+Computing fixes in collection_screen.dart...
+Applying fixes...
+
+collection_screen.dart
+  require_trailing_commas - 2 fixes
+
+2 fixes made in 1 file.
+Computing fixes in monetta_side_menu.dart...
+Applying fixes...
+
+monetta_side_menu.dart
+  require_trailing_commas - 2 fixes
+
+2 fixes made in 1 file.
+Computing fixes in catalog_titles_typography_test.dart...
+Nothing to fix!
+Computing fixes in v41_discovery_capture_test.dart...
+Applying fixes...
+
+v41_discovery_capture_test.dart
+  curly_braces_in_flow_control_structures - 1 fix
+  require_trailing_commas - 7 fixes
+
+8 fixes made in 1 file.
+Computing fixes in v41_discovery_test.dart...
+Applying fixes...
+
+v41_discovery_test.dart
+  require_trailing_commas - 13 fixes
+
+13 fixes made in 1 file.

@@ -36,7 +36,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('BOLSAS'), findsOneWidget);
+    expect(find.text('Bolsas'), findsOneWidget);
     expect(find.textContaining('piezas ordenadas por'), findsNothing);
     expect(find.text('Más nuevas'), findsNothing);
     expect(find.text('extracted'), findsNothing);
@@ -54,8 +54,6 @@ void main() {
     // collection page itself carries no silhouette pills.
     Future<void> openTypeSection() async {
       await tester.tap(find.byKey(const Key('collection-filter-button')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('collection-filter-type')));
       await tester.pumpAndSettle();
     }
 
@@ -124,16 +122,17 @@ void main() {
 
     await tester.tap(find.byKey(const Key('collection-filter-button')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('collection-filter-sort')), findsOneWidget);
+    expect(find.byKey(const Key('collection-filter-query')), findsOneWidget);
     expect(
-      find.byKey(const Key('collection-filter-availability')),
+      find.byKey(const Key('collection-filter-stock')),
       findsOneWidget,
     );
 
-    await tester.tap(find.byKey(const Key('collection-filter-availability')));
-    await tester.pump();
-    expect(find.text('En existencia'), findsOneWidget);
+    expect(find.text('Disponibles'), findsOneWidget);
 
+    await tester
+        .ensureVisible(find.byKey(const Key('collection-filter-stock')));
+    await tester.pump();
     await tester.tap(find.byKey(const Key('collection-filter-stock')));
     await tester.pump();
     expect(find.text('En stock  ×'), findsNothing);
@@ -178,24 +177,13 @@ void main() {
 
     await tester.tap(find.byKey(const Key('collection-filter-button')));
     await tester.pumpAndSettle();
-    expect(find.text('Filtrar y ordenar'), findsOneWidget);
-    // «Ordenar por» also labels the toolbar link under the banner; the sheet's
-    // own section is the one inside `collection-filter-sort`.
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('collection-filter-sort')),
-        matching: find.text('Ordenar por'),
-      ),
-      findsOneWidget,
-    );
-    expect(find.text('Disponibilidad'), findsOneWidget);
-    expect(find.byKey(const Key('collection-filter-sort')), findsOneWidget);
-    expect(
-      find.byKey(const Key('collection-filter-availability')),
-      findsOneWidget,
-    );
+    expect(find.text('Filtros'), findsOneWidget);
+    expect(find.text('Disponibles'), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('collection-filter-availability')));
+    await tester
+        .ensureVisible(find.byKey(const Key('collection-filter-stock')));
+    await tester
+        .ensureVisible(find.byKey(const Key('collection-filter-stock')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('collection-filter-stock')));
     await tester.pump();
@@ -208,7 +196,10 @@ void main() {
 
     await tester.tap(find.byKey(const Key('collection-filter-button')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('collection-filter-availability')));
+    await tester
+        .ensureVisible(find.byKey(const Key('collection-filter-stock')));
+    await tester
+        .ensureVisible(find.byKey(const Key('collection-filter-stock')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('collection-filter-stock')));
     await tester.tap(find.byKey(const Key('collection-filter-apply')));
@@ -255,7 +246,7 @@ void main() {
       await tester.pump();
 
       expect(find.byKey(const Key('collection-filter-button')), findsOneWidget);
-      expect(find.byTooltip('Filtrar y ordenar'), findsOneWidget);
+      expect(find.byTooltip('Filtros'), findsOneWidget);
     }
   });
 }

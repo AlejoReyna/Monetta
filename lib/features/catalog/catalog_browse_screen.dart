@@ -11,10 +11,10 @@ import '../navigation/duo_workspace.dart';
 import 'browse_detail_layout.dart';
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 
 import '../../app/motion.dart';
+import '../../app/catalog_store.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
@@ -26,29 +26,30 @@ import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../product/external_product_screen.dart';
-import '../product/quick_view.dart';
 import 'product_card.dart';
 import 'catalog_controls.dart';
+import 'catalog_query.dart';
+import 'search_history.dart' show normalizeSearchText;
 import 'categories_screen.dart';
 import 'extracted_badge.dart';
 import 'search_screen.dart';
 
-enum _CatalogSort { featured, newest, priceAsc, priceDesc }
+enum _CatalogSort { featured, newest, oldest, priceAsc, priceDesc }
 
 extension on _CatalogSort {
   String get label => switch (this) {
-        _CatalogSort.featured => 'Destacados',
-        _CatalogSort.newest => 'Más recientes',
-        _CatalogSort.priceAsc => 'Precio: de menor a mayor',
-        _CatalogSort.priceDesc => 'Precio: de mayor a menor',
+        _CatalogSort.featured => 'Orden original',
+        _CatalogSort.newest => 'Más nuevos',
+        _CatalogSort.oldest => 'Más antiguos',
+        _CatalogSort.priceAsc => 'Precio: menor a mayor',
+        _CatalogSort.priceDesc => 'Precio: mayor a menor',
       };
 }
 
-enum _FilterSection { sort, category, type, brand, price, color, availability }
+enum _FilterSection { category, type, brand, price, color, availability }
 
 extension on _FilterSection {
   String get label => switch (this) {
-        _FilterSection.sort => 'Ordenar por',
         _FilterSection.category => 'Categoría',
         _FilterSection.type => 'Tipo de bolsa',
         _FilterSection.brand => 'Marca',
@@ -67,6 +68,7 @@ class _CatalogFilters {
     this.priceBands = const <String>{},
     this.colors = const <String>{},
     this.inStockOnly = false,
+    this.offersOnly = false,
   });
 
   final _CatalogSort sort;
@@ -78,6 +80,28 @@ class _CatalogFilters {
   final Set<String> priceBands;
   final Set<String> colors;
   final bool inStockOnly;
+  final bool offersOnly;
+
+  _CatalogFilters copyWith({
+    _CatalogSort? sort,
+    Set<String>? categories,
+    Set<String>? types,
+    Set<String>? brands,
+    Set<String>? priceBands,
+    Set<String>? colors,
+    bool? inStockOnly,
+    bool? offersOnly,
+  }) =>
+      _CatalogFilters(
+        sort: sort ?? this.sort,
+        categories: categories ?? this.categories,
+        types: types ?? this.types,
+        brands: brands ?? this.brands,
+        priceBands: priceBands ?? this.priceBands,
+        colors: colors ?? this.colors,
+        inStockOnly: inStockOnly ?? this.inStockOnly,
+        offersOnly: offersOnly ?? this.offersOnly,
+      );
 
   int get activeCount =>
       categories.length +
@@ -85,7 +109,8 @@ class _CatalogFilters {
       brands.length +
       priceBands.length +
       colors.length +
-      (inStockOnly ? 1 : 0);
+      (inStockOnly ? 1 : 0) +
+      (offersOnly ? 1 : 0);
 }
 
 /// Gap at each end of the header, outside the 48pt button slots.
@@ -239,62 +264,36 @@ class CatalogBrowseScreen extends StatefulWidget {
 class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
   _CatalogFilters _filters = const _CatalogFilters();
 
-  /// The applied filters, followed by the filter page on a two-sided window's
-  /// right side so it stays in step with changes made here.
-  final _applied = ValueNotifier<_CatalogFilters>(const _CatalogFilters());
-  DuoWorkspaceState? _workspace;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _workspace = DuoWorkspace.stateOf(context);
-  }
-
+  String _query = '';
+  int _visibleLimit = 40;
+  final _queryController = TextEditingController();
   @override
   void dispose() {
-    // Filters for a page that is gone have nothing left to filter.
-    _workspace?.dismissOwnedBy(this);
-    _applied.dispose();
+    _queryController.dispose();
     super.dispose();
   }
 
-  void _apply(_CatalogFilters filters) {
-    setState(() => _filters = filters);
-    _applied.value = filters;
-  }
+  void _apply(_CatalogFilters filters) => setState(() {
+        _filters = filters;
+        _visibleLimit = 40;
+      });
 
   List<CatalogItem> _visibleItems([_CatalogFilters? filters]) => _filterCatalog(
         widget.items,
-        query: '',
+        query: _query,
+        store: StoreScope.maybeOf(context),
         filters: filters ?? _filters,
       );
 
   void _resetAll() {
     FocusManager.instance.primaryFocus?.unfocus();
-    _apply(const _CatalogFilters());
+    _apply(_CatalogFilters(sort: _filters.sort));
   }
 
   Future<void> _openFilters() async {
     FocusManager.instance.primaryFocus?.unfocus();
-    // A two-sided window edits the filters on its right side and applies
-    // every change at once to the grid on the left.
-    final beside = DuoWorkspace.showPane(
-      context,
-      DuoPanePage(
-        kind: DuoPaneKind.filters,
-        owner: this,
-        builder: (_) => _CatalogFilterSheet(
-          items: widget.items,
-          initial: _filters,
-          visibleCount: (draft) => _visibleItems(draft).length,
-          applied: _applied,
-          onChanged: (filters) {
-            if (mounted) _apply(filters);
-          },
-        ),
-      ),
-    );
-    if (beside) return;
+    FocusManager.instance.primaryFocus?.unfocus();
+    final store = StoreScope.maybeOf(context);
     final result = await showModalBottomSheet<_CatalogFilters>(
       context: context,
       anchorPoint: presentationAnchor(context),
@@ -305,12 +304,163 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       builder: (sheetContext) => _CatalogFilterSheet(
         items: widget.items,
         initial: _filters,
-        visibleCount: (draft) => _visibleItems(draft).length,
+        visibleCount: (draft) => _filterCatalog(
+          widget.items,
+          query: _query,
+          filters: draft,
+          store: store,
+        ).length,
+        store: store,
+        offersSupported: widget.items.any(
+          (item) => _productFor(StoreScope.maybeOf(context), item) != null,
+        ),
       ),
     );
     // Dismissing the sheet keeps the filters that were already applied.
     if (result != null && mounted) _apply(result);
   }
+
+  Future<void> _openSort() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final store = StoreScope.maybeOf(context);
+    final byId = {for (final p in store?.products ?? <Product>[]) p.id: p};
+    final datesSupported = widget.items.every(
+      (item) => !item.isExternal && byId.containsKey(item.shopifyProductId),
+    );
+    final sort = await showCatalogOrder<_CatalogSort>(
+      context,
+      selected: _filters.sort,
+      options: [
+        for (final option in _CatalogSort.values)
+          if (datesSupported ||
+              (option != _CatalogSort.newest && option != _CatalogSort.oldest))
+            option,
+      ],
+      label: (sort) => sort.label,
+      keyPrefix: 'catalog',
+    );
+    if (sort != null && mounted) _apply(_filters.copyWith(sort: sort));
+  }
+
+  String? _variantFor(CatalogItem item) {
+    final store = StoreScope.maybeOf(context);
+    final product = _productFor(store, item);
+    if (product == null || store == null) return null;
+    return _eligibleVariants(store, product, _filters).firstOrNull?.id;
+  }
+
+  Widget _controls() => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Productos',
+              style: boutiqueText(
+                size: 15,
+                weight: FontWeight.w600,
+                color: context.boutique.ink,
+              ),
+            ),
+            CatalogResultCount(count: _visibleItems().length),
+            const SizedBox(height: 12),
+            TextField(
+              key: const Key('catalog-local-search'),
+              controller: _queryController,
+              decoration: const InputDecoration(
+                labelText: 'Buscar producto',
+                prefixIcon: Icon(Icons.search),
+              ),
+              onChanged: (value) => setState(() {
+                _query = value;
+                _visibleLimit = 40;
+              }),
+            ),
+            TextButton(
+              style: catalogTextButtonStyle(context),
+              key: const Key('catalog-sort-button'),
+              onPressed: _openSort,
+              child: Text('Ordenar por: ${_filters.sort.label}'),
+            ),
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final value in _filters.categories)
+                  InputChip(
+                    labelStyle:
+                        boutiqueText(size: 14, color: context.boutique.ink),
+                    label: Text(_categoryLabel(value)),
+                    onDeleted: () => _apply(
+                      _filters.copyWith(
+                        categories: {..._filters.categories}..remove(value),
+                      ),
+                    ),
+                  ),
+                for (final value in _filters.types)
+                  InputChip(
+                    labelStyle:
+                        boutiqueText(size: 14, color: context.boutique.ink),
+                    label: Text(value),
+                    onDeleted: () => _apply(
+                      _filters.copyWith(
+                        types: {..._filters.types}..remove(value),
+                      ),
+                    ),
+                  ),
+                for (final value in _filters.brands)
+                  InputChip(
+                    labelStyle:
+                        boutiqueText(size: 14, color: context.boutique.ink),
+                    label: Text(value),
+                    onDeleted: () => _apply(
+                      _filters.copyWith(
+                        brands: {..._filters.brands}..remove(value),
+                      ),
+                    ),
+                  ),
+                for (final value in _filters.colors)
+                  InputChip(
+                    labelStyle:
+                        boutiqueText(size: 14, color: context.boutique.ink),
+                    label: Text(value),
+                    onDeleted: () => _apply(
+                      _filters.copyWith(
+                        colors: {..._filters.colors}..remove(value),
+                      ),
+                    ),
+                  ),
+                for (final value in _filters.priceBands)
+                  InputChip(
+                    labelStyle:
+                        boutiqueText(size: 14, color: context.boutique.ink),
+                    label: Text(_priceBandLabel(value)),
+                    onDeleted: () => _apply(
+                      _filters.copyWith(
+                        priceBands: {..._filters.priceBands}..remove(value),
+                      ),
+                    ),
+                  ),
+                if (_filters.inStockOnly)
+                  InputChip(
+                    labelStyle:
+                        boutiqueText(size: 14, color: context.boutique.ink),
+                    label: const Text('Disponibles'),
+                    onDeleted: () =>
+                        _apply(_filters.copyWith(inStockOnly: false)),
+                  ),
+                if (_filters.offersOnly)
+                  InputChip(
+                    labelStyle:
+                        boutiqueText(size: 14, color: context.boutique.ink),
+                    label: const Text('Ofertas'),
+                    onDeleted: () =>
+                        _apply(_filters.copyWith(offersOnly: false)),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -336,28 +486,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
         titleSpacing: BoutiqueSpace.sm,
         leadingWidth: _kHeaderSlotWidth,
         leading: const _HeaderBackSlot(),
-        // The FittedBox only shrinks the block when it does not fit between
-        // the slots; it never truncates it or runs it under a button.
-        title: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Productos',
-                textAlign: TextAlign.center,
-                style: boutiqueScreenTitle(color: context.boutique.ink),
-              ),
-              const SizedBox(height: 2),
-              // Counted from the very list the grid renders below.
-              CatalogResultCount(
-                count: visibleItems.length,
-                noun: 'pieza',
-                pluralNoun: 'piezas',
-              ),
-            ],
-          ),
-        ),
+        title: const MonettaWordmark(height: 32),
         actions: [
           SizedBox.square(
             dimension: BoutiqueSpace.tapTarget,
@@ -409,12 +538,25 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             primary: false,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
+              SliverToBoxAdapter(child: _controls()),
               if (visibleItems.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
                   child: _EmptyCatalogState(
-                    hasActiveFilter: _filters.activeCount > 0,
-                    onReset: _resetAll,
+                    hasActiveFilter:
+                        _filters.activeCount > 0 || _query.isNotEmpty,
+                    resetLabel: _query.isNotEmpty
+                        ? 'Limpiar búsqueda'
+                        : 'Limpiar filtros',
+                    onReset: _query.isNotEmpty
+                        ? () {
+                            _queryController.clear();
+                            setState(() {
+                              _query = '';
+                              _visibleLimit = 40;
+                            });
+                          }
+                        : _resetAll,
                   ),
                 )
               else
@@ -440,12 +582,24 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                           (context, index) => _BrowseTile(
                             key: ValueKey(visibleItems[index].sourceScopedId),
                             item: visibleItems[index],
+                            initialVariantId: _variantFor(visibleItems[index]),
                             openExternalLink: widget.openExternalLink,
                           ),
-                          childCount: visibleItems.length,
+                          childCount: visibleItems.length < _visibleLimit
+                              ? visibleItems.length
+                              : _visibleLimit,
                         ),
                       ),
                     ),
+                  ),
+                ),
+              if (visibleItems.length > _visibleLimit)
+                SliverToBoxAdapter(
+                  child: TextButton(
+                    style: catalogTextButtonStyle(context),
+                    key: const Key('catalog-load-more'),
+                    onPressed: () => setState(() => _visibleLimit += 40),
+                    child: const Text('Cargar más'),
                   ),
                 ),
             ],
@@ -483,20 +637,19 @@ void openCatalogBrowse(
   required List<CatalogItem> items,
 }) {
   final store = StoreScope.of(context);
-  // The catalog always opens on the browsing side.
-  DuoWorkspace.navigatorFor(context).push(
-    monettaFadeRoute(
-      StoreScope(
-        notifier: store,
-        child: BrowseDetailLayout(
-          child: CatalogBrowseScreen(
-            items: items,
-            bagCount: store.bagQuantity,
-          ),
-        ),
-      ),
+  final account = AccountScope.maybeOf(context);
+  final content = HomeContentScope.maybeOf(context);
+  Widget screen = StoreScope(
+    notifier: store,
+    child: BrowseDetailLayout(
+      child: CatalogBrowseScreen(items: items, bagCount: store.bagQuantity),
     ),
   );
+  if (account != null) screen = AccountScope(notifier: account, child: screen);
+  if (content != null) {
+    screen = HomeContentScope(notifier: content, child: screen);
+  }
+  DuoWorkspace.navigatorFor(context).push(monettaFadeRoute(screen));
 }
 
 class _HeaderBackSlot extends StatelessWidget {
@@ -533,7 +686,7 @@ class _FilterIconButton extends StatelessWidget {
       children: [
         IconButton(
           key: const Key('catalog-filter-button'),
-          tooltip: 'Filtrar y ordenar',
+          tooltip: 'Filtros',
           onPressed: onPressed,
           icon: const AdjustmentsIcon(size: 25),
         ),
@@ -573,8 +726,8 @@ class _CatalogFilterSheet extends StatefulWidget {
     required this.items,
     required this.initial,
     required this.visibleCount,
-    this.applied,
-    this.onChanged,
+    this.offersSupported = false,
+    this.store,
   });
 
   final List<CatalogItem> items;
@@ -582,13 +735,8 @@ class _CatalogFilterSheet extends StatefulWidget {
 
   final int Function(_CatalogFilters filters) visibleCount;
 
-  /// On a two-sided window's right side: the filters the grid shows, which
-  /// this page follows, and the callback that applies each change at once.
-  /// Without them it is the ordinary sheet that applies on «Ver».
-  final ValueListenable<_CatalogFilters>? applied;
-  final ValueChanged<_CatalogFilters>? onChanged;
-
-  bool get live => onChanged != null;
+  final CatalogStore? store;
+  final bool offersSupported;
 
   @override
   State<_CatalogFilterSheet> createState() => _CatalogFilterSheetState();
@@ -602,39 +750,17 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
   late Set<String> _priceBands;
   late Set<String> _colors;
   late bool _inStockOnly;
+  late bool _offersOnly;
 
-  late final Set<_FilterSection> _expanded = {_FilterSection.sort};
-
-  /// The last selection this page applied, to tell its own changes apart.
-  _CatalogFilters? _sent;
+  late final Set<_FilterSection> _expanded = {};
 
   @override
   void initState() {
     super.initState();
     _load(widget.initial);
-    widget.applied?.addListener(_followApplied);
   }
 
-  @override
-  void dispose() {
-    widget.applied?.removeListener(_followApplied);
-    super.dispose();
-  }
-
-  /// The grid changed by other means (its reset, say): show what it applies.
-  void _followApplied() {
-    final applied = widget.applied!.value;
-    if (identical(applied, _sent)) return;
-    setState(() => _load(applied));
-  }
-
-  /// A change of selection; a live page applies it at once.
-  void _change(VoidCallback change) {
-    setState(change);
-    if (!widget.live) return;
-    final selection = _sent = _selection;
-    widget.onChanged!(selection);
-  }
+  void _change(VoidCallback change) => setState(change);
 
   void _load(_CatalogFilters filters) {
     _sort = filters.sort;
@@ -644,6 +770,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
     _priceBands = {...filters.priceBands};
     _colors = {...filters.colors};
     _inStockOnly = filters.inStockOnly;
+    _offersOnly = filters.offersOnly;
   }
 
   _CatalogFilters get _selection => _CatalogFilters(
@@ -654,6 +781,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
         priceBands: _priceBands,
         colors: _colors,
         inStockOnly: _inStockOnly,
+        offersOnly: _offersOnly,
       );
 
   List<String> get _typeOptions => _optionsWithMatches(
@@ -681,13 +809,37 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
           'usd-250-499',
           'usd-500-plus',
         ],
-        (item, value) => _priceBandFor(item) == value,
+        (item, value) {
+          final product = _productFor(widget.store, item);
+          return product == null
+              ? _priceBandFor(item) == value
+              : product.variants.any(
+                  (v) =>
+                      _priceBandForMoney(
+                        Money(amount: v.price, currency: Currency.mxn),
+                      ) ==
+                      value,
+                );
+        },
       );
 
-  List<String> get _colorOptions => _optionsWithMatches(
-        _colorTerms.keys,
-        (item, value) => _colorsFor(item).contains(value),
-      );
+  List<String> get _colorOptions {
+    final colors = <String>{};
+    for (final item in widget.items) {
+      final product = _productFor(widget.store, item);
+      if (product != null && widget.store != null) {
+        for (final variant in product.variants) {
+          colors.addAll(
+            catalogVariantColors(widget.store!, product, variant)
+                .map(colorLabel),
+          );
+        }
+      } else {
+        colors.addAll(_colorsFor(item));
+      }
+    }
+    return colors.toList()..sort();
+  }
 
   List<String> _optionsWithMatches(
     Iterable<String> candidates,
@@ -712,7 +864,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
   }
 
   void _clear() {
-    _change(() => _load(const _CatalogFilters()));
+    _change(() => _load(_CatalogFilters(sort: _sort)));
   }
 
   @override
@@ -727,36 +879,33 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
 
     // On the right side the page fills it; as a sheet it rises from below.
     return FractionallySizedBox(
-      heightFactor: widget.live ? 1 : 0.94,
+      heightFactor: 0.94,
       child: Material(
         color: context.boutique.canvas,
         clipBehavior: Clip.antiAlias,
-        borderRadius: widget.live
-            ? null
-            : const BorderRadius.vertical(top: Radius.circular(22)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
         child: SafeArea(
-          top: widget.live,
+          top: false,
           child: Column(
             children: [
-              SizedBox(
-                width: double.infinity,
-                height: 74,
-                child: Stack(
-                  alignment: Alignment.center,
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
                   children: [
-                    Text(
-                      'Filtrar y ordenar',
-                      style:
-                          boutiqueTitle(size: 20, color: context.boutique.ink),
-                    ),
-                    Positioned(
-                      right: 12,
-                      child: IconButton(
-                        key: const Key('catalog-filter-close'),
-                        tooltip: 'Cerrar filtros',
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close_rounded, size: 28),
+                    Expanded(
+                      child: Text(
+                        'Filtros',
+                        style: boutiqueScreenTitle(
+                          context: context,
+                          size: 28,
+                        ),
                       ),
+                    ),
+                    IconButton(
+                      key: const Key('catalog-filter-close'),
+                      tooltip: 'Cerrar filtros',
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
                     ),
                   ],
                 ),
@@ -767,22 +916,6 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                   child: Column(
                     children: [
-                      _FilterAccordion(
-                        section: _FilterSection.sort,
-                        expanded: _expanded.contains(_FilterSection.sort),
-                        onTap: () => _toggleExpanded(_FilterSection.sort),
-                        child: Column(
-                          children: [
-                            for (final option in _CatalogSort.values)
-                              _FilterChoiceRow(
-                                label: option.label,
-                                selected: _sort == option,
-                                radio: true,
-                                onTap: () => _change(() => _sort = option),
-                              ),
-                          ],
-                        ),
-                      ),
                       if (categoryOptions.isNotEmpty)
                         _FilterAccordion(
                           section: _FilterSection.category,
@@ -865,6 +998,14 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                             ],
                           ),
                         ),
+                      if (widget.offersSupported)
+                        CheckboxListTile(
+                          key: const Key('catalog-filter-offers'),
+                          title: const Text('Ofertas'),
+                          value: _offersOnly,
+                          onChanged: (value) =>
+                              _change(() => _offersOnly = value ?? false),
+                        ),
                       _FilterAccordion(
                         section: _FilterSection.availability,
                         expanded:
@@ -872,7 +1013,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                         onTap: () =>
                             _toggleExpanded(_FilterSection.availability),
                         child: _FilterChoiceRow(
-                          label: 'En existencia',
+                          label: 'Disponibles',
                           selected: _inStockOnly,
                           onTap: () =>
                               _change(() => _inStockOnly = !_inStockOnly),
@@ -916,9 +1057,8 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                         child: FilledButton(
                           key: const Key('catalog-filter-apply'),
                           // Live filters are already applied: «Ver» closes.
-                          onPressed: () => widget.live
-                              ? Navigator.of(context).pop()
-                              : Navigator.of(context).pop(_selection),
+                          onPressed: () =>
+                              Navigator.of(context).pop(_selection),
                           style: FilledButton.styleFrom(
                             backgroundColor: colors.navigationSelection,
                             foregroundColor: colors.accentContent,
@@ -983,8 +1123,8 @@ class _FilterAccordion extends StatelessWidget {
                   ? const Key('catalog-filter-section-category')
                   : Key('catalog-filter-${section.name}'),
               onTap: onTap,
-              child: SizedBox(
-                height: 78,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 78),
                 child: Row(
                   children: [
                     Expanded(
@@ -1022,7 +1162,6 @@ class _FilterChoiceRow extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
-    this.radio = false,
     this.swatch,
     super.key,
   });
@@ -1030,44 +1169,47 @@ class _FilterChoiceRow extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  final bool radio;
   final Color? swatch;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 52),
-        child: Row(
-          children: [
-            _SelectionMark(selected: selected, radio: radio),
-            if (swatch != null) ...[
-              const SizedBox(width: 12),
-              Container(
-                width: 18,
-                height: 18,
-                decoration: BoxDecoration(
-                  color: swatch,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: context.monettaColors.divider),
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 52),
+          child: Row(
+            children: [
+              _SelectionMark(selected: selected, radio: false),
+              if (swatch != null) ...[
+                const SizedBox(width: 12),
+                Container(
+                  width: 18,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: swatch,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: context.monettaColors.divider),
+                  ),
+                ),
+              ],
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  label,
+                  style: boutiqueText(
+                    size: 15,
+                    color: selected
+                        ? context.monettaColors.contentPrimary
+                        : context.monettaColors.contentMuted,
+                    weight: selected ? FontWeight.w600 : FontWeight.w400,
+                  ),
                 ),
               ),
             ],
-            const SizedBox(width: 14),
-            Expanded(
-              child: Text(
-                label,
-                style: boutiqueText(
-                  size: 15,
-                  color: selected
-                      ? context.monettaColors.contentPrimary
-                      : context.monettaColors.contentMuted,
-                  weight: selected ? FontWeight.w600 : FontWeight.w400,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -1123,9 +1265,11 @@ class _EmptyCatalogState extends StatelessWidget {
   const _EmptyCatalogState({
     required this.hasActiveFilter,
     required this.onReset,
+    this.resetLabel = 'Limpiar filtros',
   });
 
   final bool hasActiveFilter;
+  final String resetLabel;
   final VoidCallback onReset;
 
   @override
@@ -1163,9 +1307,10 @@ class _EmptyCatalogState extends StatelessWidget {
           if (hasActiveFilter) ...[
             const SizedBox(height: 22),
             TextButton(
+              style: catalogTextButtonStyle(context),
               onPressed: onReset,
               child: Text(
-                'Limpiar filtros',
+                resetLabel,
                 style: boutiqueText(
                   size: 13,
                   weight: FontWeight.w600,
@@ -1184,9 +1329,11 @@ class _BrowseTile extends StatelessWidget {
   const _BrowseTile({
     required this.item,
     required this.openExternalLink,
+    this.initialVariantId,
     super.key,
   });
 
+  final String? initialVariantId;
   final CatalogItem item;
   final ExternalLinkOpener openExternalLink;
 
@@ -1228,60 +1375,76 @@ class _BrowseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The same presentation the product grids use. A [CatalogItem] is not
-    // turned into a [Product] — currency, origin and purchase destination
-    // would be lost — only its view data is adapted.
-    final data = ProductTileData.fromCatalogItem(item);
     final product = _monettaProduct(context);
-
-    // A Monetta piece opens the quick view (or is selected in a tablet detail
-    // pane); «VER PRODUCTO» opens its page. Anything else keeps its own tap.
-    void onTap() {
-      if (product == null) {
-        _tap(context);
-      } else if (BrowseDetailScope.maybeOf(context) != null) {
-        openProduct(context, product);
-      } else {
-        unawaited(showProductQuickView(context, product));
-      }
+    if (product != null) {
+      return ProductCard(product: product, initialVariantId: initialVariantId);
     }
-
-    // Beside the bag a long press lifts a Monetta piece instead.
-    final lifts = DuoWorkspace.isDual(context, listen: true) &&
-        DuoWorkspace.regionOf(context) == DuoRegion.browse;
-    final tile = ProductResultAnchor(
+    return ProductResultAnchor(
       productId: item.shopifyProductId ?? item.sourceScopedId,
       child: MonettaProductTile(
-        data: data,
-        onTap: onTap,
-        onQuickView: product == null || lifts
-            ? null
-            : () => unawaited(showProductQuickView(context, product)),
-        footer: product == null
-            ? null
-            : TileViewProductButton(
-                key: Key('view-product-${product.id}'),
-                onPressed: () => openProduct(context, product),
-              ),
-        semanticHint: product == null ? null : 'Abre la vista previa',
-        // No favourite here: an external listing has no Monetta product id to
-        // save, and this screen renders without a wishlist-bearing store.
+        data: ProductTileData.fromCatalogItem(item),
+        onTap: () => _tap(context),
         imageOverlay: item.isExternal ? const ExtractedBadge() : null,
       ),
     );
-    return product == null
-        ? tile
-        : DuoBagDragSource(drag: productBagDrag(product), child: tile);
   }
+}
+
+List<ProductVariant> _eligibleVariants(
+  CatalogStore store,
+  Product product,
+  _CatalogFilters filters,
+) =>
+    matchingCatalogVariants(
+      store,
+      product,
+      offersOnly: filters.offersOnly,
+      availableOnly: filters.inStockOnly,
+    )
+        .where(
+          (variant) =>
+              (filters.colors.isEmpty ||
+                  catalogVariantColors(store, product, variant)
+                      .any((c) => filters.colors.contains(colorLabel(c)))) &&
+              (filters.priceBands.isEmpty ||
+                  filters.priceBands.contains(
+                    _priceBandForMoney(
+                      Money(amount: variant.price, currency: Currency.mxn),
+                    ),
+                  )),
+        )
+        .toList();
+
+Product? _productFor(CatalogStore? store, CatalogItem item) {
+  if (store == null || item.isExternal) return null;
+  for (final p in store.products) {
+    if (p.id == item.shopifyProductId) return p;
+  }
+  return null;
 }
 
 List<CatalogItem> _filterCatalog(
   List<CatalogItem> items, {
   required String query,
   required _CatalogFilters filters,
+  CatalogStore? store,
 }) {
-  final normalizedQuery = query.trim().toLowerCase();
+  final normalizedQuery = normalizeSearchText(query);
+  final seen = <String>{};
+  final byId = {for (final p in store?.products ?? <Product>[]) p.id: p};
   final result = items.where((item) {
+    if (!seen.add(item.sourceScopedId)) return false;
+    final product = byId[item.shopifyProductId];
+    if (product != null &&
+        store != null &&
+        (filters.offersOnly ||
+            filters.inStockOnly ||
+            filters.colors.isNotEmpty ||
+            filters.priceBands.isNotEmpty) &&
+        _eligibleVariants(store, product, filters).isEmpty) {
+      return false;
+    }
+    if (filters.offersOnly && product == null) return false;
     if (normalizedQuery.isNotEmpty) {
       final searchable = [
         item.title,
@@ -1290,7 +1453,15 @@ List<CatalogItem> _filterCatalog(
         item.category ?? '',
         ...item.variants.map((variant) => variant.displayName),
       ].join(' ').toLowerCase();
-      if (!searchable.contains(normalizedQuery)) return false;
+      if (product != null && store != null) {
+        if (!productMatchesNormalizedQuery(store, product, normalizedQuery)) {
+          return false;
+        }
+      } else if (!normalizedQuery
+          .split(' ')
+          .every((term) => normalizeSearchText(searchable).contains(term))) {
+        return false;
+      }
     }
 
     if (filters.categories.isNotEmpty &&
@@ -1305,43 +1476,79 @@ List<CatalogItem> _filterCatalog(
         !filters.brands.contains(_brandFor(item))) {
       return false;
     }
-    if (filters.priceBands.isNotEmpty &&
+    if (product == null &&
+        filters.priceBands.isNotEmpty &&
         !filters.priceBands.contains(_priceBandFor(item))) {
       return false;
     }
-    if (filters.colors.isNotEmpty &&
+    if (product == null &&
+        filters.colors.isNotEmpty &&
         filters.colors.intersection(_colorsFor(item)).isEmpty) {
       return false;
     }
     if (filters.inStockOnly &&
-        item.availability != CatalogAvailability.inStock) {
+        (product != null
+            ? !product.isInStock
+            : item.availability != CatalogAvailability.inStock)) {
       return false;
     }
     return true;
   }).toList(growable: false);
 
+  Money? matchingPrice(CatalogItem item) {
+    final product = byId[item.shopifyProductId];
+    if (product == null || store == null) return item.price;
+    final variants = _eligibleVariants(store, product, filters);
+    if (variants.isEmpty) return item.price;
+    return Money(
+      amount: variants.map((v) => v.price).reduce((a, b) => a < b ? a : b),
+      currency: Currency.mxn,
+    );
+  }
+
+  int comparePrice(CatalogItem a, CatalogItem b, {bool descending = false}) {
+    final first = matchingPrice(a), second = matchingPrice(b);
+    if (first == null) {
+      return second == null ? a.sourceScopedId.compareTo(b.sourceScopedId) : 1;
+    }
+    if (second == null) return -1;
+    final currency = first.currency.index.compareTo(second.currency.index);
+    if (currency != 0) return currency;
+    final price = descending
+        ? second.amount.compareTo(first.amount)
+        : first.amount.compareTo(second.amount);
+    return price == 0 ? a.sourceScopedId.compareTo(b.sourceScopedId) : price;
+  }
+
   switch (filters.sort) {
     case _CatalogSort.featured:
       break;
     case _CatalogSort.newest:
-      result.sort((a, b) => b.lastObservedAt.compareTo(a.lastObservedAt));
+      result.sort((a, b) {
+        final first = byId[a.shopifyProductId]?.createdAt;
+        final second = byId[b.shopifyProductId]?.createdAt;
+        final order =
+            first == null || second == null ? 0 : second.compareTo(first);
+        return order == 0
+            ? a.sourceScopedId.compareTo(b.sourceScopedId)
+            : order;
+      });
+    case _CatalogSort.oldest:
+      result.sort((a, b) {
+        final first = byId[a.shopifyProductId]?.createdAt;
+        final second = byId[b.shopifyProductId]?.createdAt;
+        final order =
+            first == null || second == null ? 0 : first.compareTo(second);
+        return order == 0
+            ? a.sourceScopedId.compareTo(b.sourceScopedId)
+            : order;
+      });
     case _CatalogSort.priceAsc:
-      result.sort(_comparePriceAsc);
+      result.sort((a, b) => comparePrice(a, b));
     case _CatalogSort.priceDesc:
-      result.sort((a, b) => _comparePriceAsc(b, a));
+      result.sort((a, b) => comparePrice(a, b, descending: true));
   }
   return result;
-}
-
-int _comparePriceAsc(CatalogItem a, CatalogItem b) {
-  final aPrice = a.price;
-  final bPrice = b.price;
-  if (aPrice == null && bPrice == null) return 0;
-  if (aPrice == null) return 1;
-  if (bPrice == null) return -1;
-  final currencyOrder = aPrice.currency.index.compareTo(bPrice.currency.index);
-  if (currencyOrder != 0) return currencyOrder;
-  return aPrice.amount.compareTo(bPrice.amount);
 }
 
 String _brandFor(CatalogItem item) {
@@ -1382,8 +1589,8 @@ Set<String> _colorsFor(CatalogItem item) {
   };
 }
 
-String? _priceBandFor(CatalogItem item) {
-  final price = item.price;
+String? _priceBandFor(CatalogItem item) => _priceBandForMoney(item.price);
+String? _priceBandForMoney(Money? price) {
   if (price == null) return null;
   if (price.currency == Currency.mxn) {
     if (price.amount < 1000) return 'mxn-under-1000';

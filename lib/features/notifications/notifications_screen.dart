@@ -68,6 +68,24 @@ class NotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final account = accountController;
+    if (account == null) return _build(context);
+    return ListenableBuilder(
+        listenable: account,
+        builder: (context, _) {
+          if (!account.isSignedIn ||
+              account.account?.localAccountId != ownerId) {
+            return Scaffold(
+                appBar: AppBar(title: const Text('Notificaciones')),
+                body: const SafeArea(
+                    child: Center(
+                        child: Text('Inicia sesión para ver tus avisos.'))));
+          }
+          return _build(context);
+        });
+  }
+
+  Widget _build(BuildContext context) {
     final palette = context.boutique;
     return Scaffold(
       backgroundColor: palette.canvas,
@@ -168,15 +186,7 @@ class _PermissionSection extends StatelessWidget {
         }
         switch (controller.permission) {
           case NotificationPermissionState.notDetermined:
-            return ENotice(
-              message: 'Activa los avisos para enterarte de pedidos, '
-                  'reposiciones y tu saldo Monetta.',
-              actionLabel: 'Activar avisos',
-              onAction: controller.saving
-                  ? null
-                  : () => controller.requestSystemPermission(),
-              icon: Icons.notifications_outlined,
-            );
+            return _PermissionInvitation(controller: controller);
           case NotificationPermissionState.denied:
             return ENotice(
               message: 'Las notificaciones están desactivadas en los ajustes '
@@ -373,5 +383,42 @@ class _NotificationRow extends StatelessWidget {
     if (diff.inMinutes < 60) return 'Hace ${diff.inMinutes} min';
     if (diff.inHours < 24) return 'Hace ${diff.inHours} h';
     return 'Hace ${diff.inDays} d';
+  }
+}
+
+/// Declining this invitation never requests OS permission or changes consent.
+class _PermissionInvitation extends StatefulWidget {
+  const _PermissionInvitation({required this.controller});
+  final NotificationController controller;
+  @override
+  State<_PermissionInvitation> createState() => _PermissionInvitationState();
+}
+
+class _PermissionInvitationState extends State<_PermissionInvitation> {
+  bool _dismissed = false;
+  @override
+  Widget build(BuildContext context) {
+    if (_dismissed) return const SizedBox.shrink();
+    return Column(children: [
+      const ExcludeSemantics(
+          child: Icon(Icons.notifications_outlined, size: 36)),
+      Text('Tus avisos',
+          style: boutiqueTitle(size: 24, color: context.boutique.ink)),
+      const SizedBox(height: 12),
+      const Text(
+          'Activa los avisos para enterarte de pedidos, reposiciones y tu saldo Monetta.',
+          textAlign: TextAlign.center),
+      const SizedBox(height: 12),
+      FilledButton(
+          onPressed: widget.controller.saving
+              ? null
+              : () => widget.controller.requestSystemPermission(),
+          child: const Text('Activar avisos')),
+      TextButton(
+          onPressed: () => setState(() => _dismissed = true),
+          child: const Text('Ahora no')),
+      if (widget.controller.lastError != null)
+        Text(widget.controller.lastError!),
+    ]);
   }
 }

@@ -1,0 +1,32 @@
+[
+  [
+    "flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "test/features/catalog/v41_discovery_test.dart",
+    "test/features/navigation/monetta_side_menu_test.dart",
+    "test/features/catalog/categories_screen_test.dart",
+    "test/features/catalog/brand_screen_test.dart",
+    "test/features/catalog/catalog_filter_panel_test.dart",
+    "test/features/catalog/collection_screen_test.dart",
+    "test/features/catalog/collection_screen_handle_test.dart",
+    "test/features/catalog/catalog_browse_screen_test.dart",
+    "test/features/catalog/catalog_titles_typography_test.dart",
+    "test/features/catalog/brand_search_titles_typography_test.dart",
+    "test/features/catalog/collection_guide_photo_test.dart",
+    "test/features/catalog/collection_search_guide_v2_test.dart",
+    "test/features/catalog/search_screen_test.dart",
+    "test/features/catalog/catalog_result_count_test.dart",
+    "test/features/catalog/catalog_layout_responsive_test.dart"
+  ],
+  [
+    "flutter",
+    "test",
+    "--no-pub",
+    "--reporter",
+    "expanded",
+    "test/features/catalog/v41_discovery_capture_test.dart"
+  ]
+]

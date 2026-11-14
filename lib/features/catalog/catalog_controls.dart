@@ -10,6 +10,7 @@ import '../../app/motion.dart';
 import '../../main.dart';
 import '../boutique/boutique_tokens.dart';
 import '../boutique/guide_art.dart';
+import '../boutique/client_guide_components.dart';
 
 /// Capsule control from the reference's component strip.
 ///
@@ -324,51 +325,36 @@ class CatalogEditorialBanner extends StatelessWidget {
     final resolved =
         height ?? catalogBannerHeight(context, factor: heightFactor);
 
-    return SizedBox(
-      height: resolved,
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: resolved),
       child: Stack(
-        fit: StackFit.expand,
         children: [
-          ColoredBox(
-            color: context.boutique.surfaceDeep,
-            child: imageAsset != null
-                ? Image.asset(
-                    imageAsset!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                  )
-                : MonettaImage(url: imageUrl, fallbackLabel: title),
-          ),
-          const _BannerScrim(),
           Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                BoutiqueSpace.gutter,
-                BoutiqueSpace.gutter,
-                BoutiqueSpace.gutter,
-                BoutiqueSpace.xl,
+            child: ColoredBox(
+              color: context.boutique.surfaceDeep,
+              child: imageAsset != null
+                  ? Image.asset(
+                      imageAsset!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    )
+                  : MonettaImage(url: imageUrl, fallbackLabel: title),
+            ),
+          ),
+          const Positioned.fill(child: _BannerScrim()),
+          Padding(
+            padding: const EdgeInsets.all(BoutiqueSpace.gutter),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: resolved - BoutiqueSpace.gutter * 2,
               ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: centerTitle
-                        ? Alignment.bottomCenter
-                        : Alignment.bottomLeft,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: constraints.maxWidth,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: centerTitle
-                            ? CrossAxisAlignment.center
-                            : CrossAxisAlignment.start,
-                        children: _content(context, onPhoto: true),
-                      ),
-                    ),
-                  );
-                },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: centerTitle
+                    ? CrossAxisAlignment.center
+                    : CrossAxisAlignment.start,
+                children: _content(context, onPhoto: true),
               ),
             ),
           ),
@@ -411,8 +397,6 @@ class CatalogEditorialBanner extends StatelessWidget {
         Text(
           text,
           textAlign: align,
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
           style: boutiqueText(size: 14, color: muted, height: 1.45),
         ),
       ],
@@ -471,7 +455,9 @@ class _GuidePhotoBanner extends StatelessWidget {
           );
     return SizedBox(
       key: const ValueKey('catalog-guide-banner'),
-      height: height ?? (width / 2.15).clamp(150.0, 340.0),
+      height: height ??
+          (width / 2.15).clamp(150.0, 340.0) *
+              MediaQuery.textScalerOf(context).scale(1),
       width: double.infinity,
       child: Stack(
         fit: StackFit.expand,
@@ -487,14 +473,10 @@ class _GuidePhotoBanner extends StatelessWidget {
               alignment: onRight ? Alignment.centerRight : Alignment.centerLeft,
               child: FractionallySizedBox(
                 widthFactor: 0.46,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.center,
-                  child: Text(
-                    title.toUpperCase(),
-                    maxLines: 1,
-                    style: titleStyle,
-                  ),
+                child: Text(
+                  title.toUpperCase(),
+                  textAlign: TextAlign.center,
+                  style: titleStyle,
                 ),
               ),
             ),
@@ -629,4 +611,119 @@ class CatalogEmptyState extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Named swatches used alongside native checkbox state and visible labels.
+Color catalogColorSwatch(String color) => switch (color) {
+      'negro' => const Color(0xFF161616),
+      'blanco' => const Color(0xFFF8F8F8),
+      'cafe' => const Color(0xFF76513B),
+      'beige' => const Color(0xFFD7C4A3),
+      'gris' => const Color(0xFF999999),
+      'rosa' => const Color(0xFFD99AAA),
+      'azul' => const Color(0xFF355C86),
+      'rojo' => const Color(0xFFA83232),
+      'dorado' => const Color(0xFFA58248),
+      'verde' => const Color(0xFF3B7030),
+      'morado' => const Color(0xFF725A82),
+      'amarillo' => const Color(0xFFE2C452),
+      _ => const Color(0xFFB8B8B8),
+    };
+
+ButtonStyle catalogTextButtonStyle(BuildContext context) =>
+    TextButton.styleFrom(
+      foregroundColor: context.boutique.ink,
+      textStyle: boutiqueText(size: 14, weight: FontWeight.w600),
+      minimumSize: const Size(48, 48),
+    );
+
+/// An order choice is a draft until the shopper explicitly confirms it.
+Future<T?> showCatalogOrder<T extends Enum>(
+  BuildContext context, {
+  required T selected,
+  required List<T> options,
+  required String Function(T) label,
+  required String keyPrefix,
+}) {
+  var draft = selected;
+  return showModalBottomSheet<T>(
+    context: context,
+    useSafeArea: true,
+    isScrollControlled: true,
+    backgroundColor: context.boutique.canvas,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (sheetContext) => StatefulBuilder(
+      builder: (context, updateDraft) => SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Ordenar',
+                        style: boutiqueScreenTitle(
+                          context: context,
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      key: Key('$keyPrefix-sort-close'),
+                      tooltip: 'Cerrar orden',
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                for (final option in options)
+                  Semantics(
+                    selected: draft == option,
+                    child: ListTile(
+                      key: Key('$keyPrefix-sort-${option.name}'),
+                      title: Text(
+                        label(option),
+                        style: boutiqueText(
+                          size: 16,
+                          color: context.boutique.ink,
+                        ),
+                      ),
+                      trailing: draft == option
+                          ? Icon(
+                              Icons.check,
+                              color: context.boutique.goldText,
+                            )
+                          : null,
+                      onTap: () => updateDraft(() => draft = option),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                GuideGlassSurface(
+                  halo: true,
+                  child: BoutiqueButton(
+                    key: Key('$keyPrefix-sort-apply'),
+                    label: 'Aplicar orden',
+                    onPressed: () => Navigator.pop(context, draft),
+                  ),
+                ),
+                TextButton(
+                  key: Key('$keyPrefix-sort-cancel'),
+                  style: catalogTextButtonStyle(context),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancelar'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }

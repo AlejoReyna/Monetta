@@ -583,7 +583,7 @@ void main() {
         final size = tester.getSize(button);
         expect(size.width, greaterThanOrEqualTo(48));
         expect(size.height, greaterThanOrEqualTo(48));
-        expect(find.byTooltip('Filtrar y ordenar'), findsOneWidget);
+        expect(find.byTooltip('Filtros'), findsOneWidget);
         expect(find.byKey(const Key('catalog-filter-count')), findsNothing);
 
         await tester.tap(button);

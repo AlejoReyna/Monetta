@@ -1,0 +1,22 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart
+00:00 +0: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_result_count_test.dart: a shopper without a session does not see the piece count
+00:00 +1: /Users/alexis/theCode/Monetta/test/features/catalog/catalog_result_count_test.dart: a shopper without a session does not see the piece count
+00:00 +2: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: typing offers catalog suggestions and submitting shows results
+00:00 +3: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: typing offers catalog suggestions and submitting shows results
+00:00 +4: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: typing offers catalog suggestions and submitting shows results
+00:00 +5: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: typing offers catalog suggestions and submitting shows results
+00:02 +6: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: an empty query offers categories and a product selection
+00:03 +7: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a category opens a real collection, not a dead end
+00:04 +8: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a submitted query is remembered, reusable and removable
+00:06 +9: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the whole history can be cleared
+00:08 +10: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: no results names the term and offers real categories
+00:09 +11: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: the query survives coming back from another route
+00:10 +12: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: for an owner, the result count matches the grid it labels
+00:11 +13: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: a shopper sees results without a piece count
+00:11 +14: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: multi-word queries match every word in the catalog
+00:11 +15: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: live results follow a multi-word query into Ver todo
+00:12 +16: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: an unknown query shows the empty state while typing
+00:12 +17: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: search capture 390.0 light
+00:19 +18: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: search capture 390.0 dark
+00:26 +19: /Users/alexis/theCode/Monetta/test/features/catalog/search_screen_test.dart: search capture 834.0 light
+00:36 +20: All tests passed!

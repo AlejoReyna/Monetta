@@ -1,0 +1,36 @@
+00:00 +0: loading /Users/alexis/theCode/Monetta/test/features/catalog/v41_discovery_capture_test.dart
+00:00 +0: A04 categories 390.0 text 1.0
+00:01 +1: A04 categories-open 390.0 text 1.0
+00:01 +2: A04 brands 390.0 text 1.0
+00:01 +3: A04 collection 390.0 text 1.0
+00:02 +4: A04 brand 390.0 text 1.0
+00:02 +5: A04 catalog 390.0 text 1.0
+00:02 +6: A04 search 390.0 text 1.0
+00:03 +7: A04 filters 390.0 text 1.0
+00:03 +8: A04 sort 390.0 text 1.0
+00:03 +9: A04 filtered 390.0 text 1.0
+00:04 +10: A04 empty 390.0 text 1.0
+00:04 +11: A04 error 390.0 text 1.0
+00:05 +12: A04 sidebar 390.0 text 1.0
+00:05 +13: A04 categories 320.0 text 2.0
+00:05 +14: A04 categories-open 320.0 text 2.0
+00:05 +15: A04 brands 320.0 text 2.0
+00:06 +16: A04 collection 320.0 text 2.0
+00:06 +17: A04 brand 320.0 text 2.0
+00:06 +18: A04 catalog 320.0 text 2.0
+00:06 +19: A04 search 320.0 text 2.0
+00:07 +20: A04 filters 320.0 text 2.0
+00:07 +21: A04 sort 320.0 text 2.0
+00:07 +22: A04 filtered 320.0 text 2.0
+00:07 +23: A04 empty 320.0 text 2.0
+00:08 +24: A04 error 320.0 text 2.0
+00:08 +25: A04 sidebar 320.0 text 2.0
+00:08 +26: A04 categories-open 768.0 text 1.0
+00:09 +27: A04 brands 768.0 text 1.0
+00:09 +28: A04 filters 768.0 text 1.0
+00:09 +29: A04 sidebar 768.0 text 1.0
+00:10 +30: A04 categories-open 1440.0 text 1.0
+00:10 +31: A04 brands 1440.0 text 1.0
+00:10 +32: A04 filters 1440.0 text 1.0
+00:11 +33: A04 sidebar 1440.0 text 1.0
+00:11 +34: All tests passed!
