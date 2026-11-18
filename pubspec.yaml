@@ -83,8 +83,8 @@ dev_dependencies:
   json_serializable: ^6.9.0
   drift_dev: ^2.22.0
   riverpod_generator: ^4.0.0+1
-  custom_lint: ^0.8.1
-  riverpod_lint: ^3.1.0
+  # 3.1.9+ needs Dart 3.13 (Flutter ≥3.38); CI pins 3.44.8 on Dart 3.12 today.
+  riverpod_lint: ">=3.1.0 <3.1.9"
 
   flutter_lints: ^5.0.0
   mocktail: ^1.0.4

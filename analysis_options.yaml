@@ -1,6 +1,8 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  plugins:
+    - riverpod_lint
   exclude:
     # Snippets consumed as text by the client-guide content auditor.
     - "tools/style-guideline-content/test/fixtures/**"
@@ -30,3 +32,7 @@ linter:
     - unawaited_futures
     - use_super_parameters
     - sort_pub_dependencies: false
+
+# riverpod_lint 3.1+ uses Dart's analyzer plugin API (not custom_lint).
+plugins:
+  riverpod_lint: ">=3.1.0 <3.1.9"
