@@ -77,7 +77,11 @@ Future<void> pumpClientGuide(
 }
 
 /// Optional review evidence, never updates or approves reference goldens.
-Future<void> captureClientGuide(WidgetTester tester, String name) async {
+Future<void> captureClientGuide(
+  WidgetTester tester,
+  String name, {
+  bool fullContent = true,
+}) async {
   final directory = Platform.environment['MONETTA_1TO1_CAPTURE_DIR'] ??
       Platform.environment['MONETTA_M4_CAPTURE_DIR'] ??
       Platform.environment['MONETTA_M3_CAPTURE_DIR'] ??
@@ -85,7 +89,7 @@ Future<void> captureClientGuide(WidgetTester tester, String name) async {
   if (directory == null) return;
   await _precacheImages(tester);
   await tester.pump();
-  await _expandToFullContent(tester);
+  if (fullContent) await _expandToFullContent(tester);
   // Expanding builds the rows that were below the fold; their stills have
   // not been decoded yet and would be captured blank.
   await _precacheImages(tester);

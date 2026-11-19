@@ -3,13 +3,23 @@
   lib/features/home in PR #33). Each icon sits in a 48px target and names the network.
 
   @param {string} [class] - Extra class of the list.
+  @param {boolean} [labels] - Glass circles with the network's name under each (the app's side menu, v4.1).
   @param {string} [whatsapp] - Number with country code, digits only: adds the WhatsApp icon as the last item (the footer).
   @param {string} [whatsapp_label] - Accessible name of that icon.
 {%- enddoc -%}
-<ul class="guia-social {{ class }}" role="list">
-  <li><a class="guia-social__link" href="https://www.tiktok.com/@monetta.oficial" target="_blank" rel="noopener" aria-label="Monetta en TikTok (se abre en otra pestaña)">{% render 'monetta-guia-icon', name: 'red-tiktok', size: 30 %}</a></li>
-  <li><a class="guia-social__link" href="https://www.instagram.com/_monetta.mx" target="_blank" rel="noopener" aria-label="Monetta en Instagram (se abre en otra pestaña)">{% render 'monetta-guia-icon', name: 'red-instagram', size: 30 %}</a></li>
-  <li><a class="guia-social__link" href="https://www.facebook.com/profile.php?id=100091065527635" target="_blank" rel="noopener" aria-label="Monetta en Facebook (se abre en otra pestaña)">{% render 'monetta-guia-icon', name: 'red-facebook', size: 30 %}</a></li>
+{%- assign networks = 'tiktok|TikTok|https://www.tiktok.com/@monetta.oficial,instagram|Instagram|https://www.instagram.com/_monetta.mx,facebook|Facebook|https://www.facebook.com/profile.php?id=100091065527635' | split: ',' -%}
+<ul class="guia-social{% if labels %} guia-social--labeled{% endif %} {{ class }}" role="list">
+  {%- for network in networks -%}
+    {%- assign parts = network | split: '|' -%}
+    {%- assign icon = 'red-' | append: parts[0] -%}
+    <li>
+      {%- if labels -%}
+        <a class="guia-social__item" href="{{ parts[2] }}" target="_blank" rel="noopener"><span class="guia-social__link">{% render 'monetta-guia-icon', name: icon, size: 26 %}</span><span class="guia-social__label">{{ parts[1] }}</span><span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+      {%- else -%}
+        <a class="guia-social__link" href="{{ parts[2] }}" target="_blank" rel="noopener" aria-label="Monetta en {{ parts[1] }} (se abre en otra pestaña)">{% render 'monetta-guia-icon', name: icon, size: 30 %}</a>
+      {%- endif -%}
+    </li>
+  {%- endfor -%}
   {%- if whatsapp != blank -%}
     <li><a class="guia-social__link" href="https://wa.me/{{ whatsapp | strip | escape }}" target="_blank" rel="noopener" aria-label="{{ whatsapp_label | default: 'WhatsApp' | escape }} (se abre en otra pestaña)">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 30 %}</a></li>
   {%- endif -%}

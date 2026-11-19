@@ -70,7 +70,15 @@ class GuideSemanticImage extends StatelessWidget {
 /// At enlarged text sizes, native exact copy reflows over the photo. Normal
 /// narrow layouts use the original transparent lettering layers, not fonts.
 class GuideBanner extends StatelessWidget {
-  const GuideBanner({required this.id, this.action, this.onTap, super.key});
+  const GuideBanner({
+    required this.id,
+    this.action,
+    this.onTap,
+    this.overlayAction = false,
+    super.key,
+  });
+
+  final bool overlayAction;
   final String id;
   final Widget? action;
   final VoidCallback? onTap;
@@ -81,61 +89,8 @@ class GuideBanner extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraints) {
       final width = constraints.maxWidth;
       final enlarged = MediaQuery.textScalerOf(context).scale(16) > 16;
-      final layered = id == 'B31' || id == 'B32';
       Widget art;
-      if (layered && (width < 768 || enlarged)) {
-        final lines = spec.copy.split('\n');
-        final title = id == 'B31' ? lines.take(3).join(' ') : lines.first;
-        final body = lines.skip(id == 'B31' ? 3 : 1).join(' ');
-        art = ColoredBox(
-            color: const Color(0xFFF4F1EE),
-            child: Stack(children: [
-              Positioned.fill(
-                  child: Image.asset(
-                      'assets/images/v41/banners/${id}_photo.png',
-                      fit: BoxFit.cover,
-                      alignment: Alignment.centerRight,
-                      excludeFromSemantics: true)),
-              const Positioned.fill(
-                  child: GuideScrim(textSide: GuideTextSide.left)),
-              Padding(
-                  padding: EdgeInsets.all(MonettaTokens.gutterFor(width)),
-                  child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                          width: (width - 32) * (enlarged ? 1 : .67),
-                          child: enlarged
-                              ? DecoratedBox(
-                                  decoration: BoxDecoration(
-                                      color: const Color(0xFFF4F1EE)
-                                          .withValues(alpha: .94)),
-                                  child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(title,
-                                                style: guideSerifStyle(context,
-                                                    size: 28)),
-                                            const SizedBox(height: 16),
-                                            Text(body,
-                                                style: boutiqueText(size: 16)),
-                                          ])))
-                              : Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                      Image.asset(
-                                          'assets/images/v41/lettering/${id}_titulo.png',
-                                          excludeFromSemantics: true),
-                                      const SizedBox(height: 16),
-                                      Image.asset(
-                                          'assets/images/v41/lettering/${id}_descripcion.png',
-                                          excludeFromSemantics: true),
-                                    ])))),
-            ]));
-      } else if (constraints.hasBoundedHeight && !enlarged && action == null) {
+      if (constraints.hasBoundedHeight && !enlarged && action == null) {
         // A fixed slot (the home carousel) may be shorter than the 2.4:1
         // artwork on wide screens: fit the whole banner inside it.
         art = SizedBox(
@@ -149,17 +104,45 @@ class GuideBanner extends StatelessWidget {
             child: Image.asset(spec.path,
                 fit: BoxFit.contain, excludeFromSemantics: true));
       }
-      if (enlarged && !layered) {
+      if (enlarged) {
+        final lines = spec.copy.split('\n');
+        final headingLines = switch (id) {
+          'B31' => 3,
+          'B32' => 1,
+          _ => 0,
+        };
         art = Column(mainAxisSize: MainAxisSize.min, children: [
           art,
           Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(spec.copy, style: boutiqueText(size: 16))),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (headingLines > 0)
+                  Text(lines.take(headingLines).join(' '),
+                      style: guideSerifStyle(context, size: 24)),
+                Text(lines.skip(headingLines).join(' '),
+                    style: boutiqueText(size: 16)),
+              ],
+            ),
+          ),
         ]);
       }
       // One semantic reading, including when native text replaces the artwork.
       final editorial =
           Semantics(label: spec.copy, excludeSemantics: true, child: art);
+      if (overlayAction && action != null && !enlarged) {
+        return Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            editorial,
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: action!,
+            ),
+          ],
+        );
+      }
       final column = Column(mainAxisSize: MainAxisSize.min, children: [
         if (onTap != null)
           InkWell(onTap: onTap, child: editorial)

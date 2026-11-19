@@ -6,7 +6,6 @@ import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/data/shopify/cart/checkout_launcher.dart';
 import 'package:monetta_app/features/checkout/checkout_screen.dart';
-import 'package:monetta_app/features/checkout/mini_cart.dart';
 import 'package:monetta_app/main.dart';
 
 Future<CatalogStore> _loadedStore() async {
@@ -174,13 +173,14 @@ void main() {
     final product = store.products.firstWhere((item) => item.isInStock);
     await store.addToBag(product);
 
-    await tester.pumpWidget(_app(store, const MiniCartSheet()));
+    await tester.pumpWidget(
+        _app(store, const BagScreen(drawerTitle: 'Agregado al carrito')));
     await tester.pump();
 
-    expect(find.text('En tu bolsa'), findsOneWidget);
+    expect(find.text('Agregado al carrito'), findsOneWidget);
     expect(find.text(product.title), findsOneWidget);
-    expect(find.text('VER BOLSA'), findsOneWidget);
-    expect(find.text('Seguir viendo'), findsOneWidget);
+    expect(find.byTooltip('Cerrar carrito'), findsOneWidget);
+    expect(find.text('Seguir comprando'), findsOneWidget);
   });
 
   testWidgets('bag survives small/large surfaces, big text and dark',

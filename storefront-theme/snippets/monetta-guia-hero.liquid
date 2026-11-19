@@ -5,6 +5,8 @@
 
   @param {string} photo - Base name for monetta-guia-photo, e.g. 'coleccion-coach'.
   @param {string} title - Heading text.
+  @param {string} [banner] - Asset base name from the delivery manifest.
+  @param {boolean} [caption] - Put the contextual title before the banner.
   @param {string} [side] - 'left' (default) or 'right': where the copy sits.
   @param {string} [tag] - Heading element (default 'h1').
   @param {boolean} [caps] - Title in capitals (collection banners).
@@ -37,8 +39,18 @@
     assign body_size = mobile_body_size | split: 'x'
   endif
 -%}
+{%- if caption -%}
+  <{{ tag }} class="v43-banner-caption">{{ title | escape }}</{{ tag }}>
+{%- endif -%}
 <div class="guide-hero guide-hero--text-{{ side }}{% if lettered %} guide-hero--lettered{% endif %}{% if has_mobile %} guide-hero--has-mobile{% endif %}" style="{% if focus != blank %}--hero-focus: {{ focus }};{% endif %}{% if tone != blank %} --hero-tone: {{ tone }};{% endif %}">
-  {% render 'monetta-guia-photo', name: photo, class: 'guide-hero__photo', eager: eager %}
+  {%- if banner != blank -%}
+    {%- assign base = 'monetta-v41-' | append: banner -%}
+    <img class="guide-hero__photo" src="{{ base | append: '-1280.jpg' | asset_url }}"
+      srcset="{{ base | append: '-768.jpg' | asset_url }} 768w, {{ base | append: '-1280.jpg' | asset_url }} 1280w, {{ base | append: '-1920.jpg' | asset_url }} 1920w"
+      sizes="(min-width: 1480px) 1440px, 100vw" width="1920" height="800" alt="" decoding="async"{% if eager %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>
+  {%- else -%}
+    {% render 'monetta-guia-photo', name: photo, class: 'guide-hero__photo', eager: eager %}
+  {%- endif -%}
   {%- if has_mobile -%}
     <div class="guide-hero__mobile" aria-hidden="true">
       <img class="guide-hero__m-title" src="{{ mobile_title | asset_url }}" width="{{ title_size[0] }}" height="{{ title_size[1] }}" alt="" decoding="async">
@@ -52,6 +64,7 @@
   {%- if url != blank and pill_label == blank -%}
     <a class="guide-hero__link" href="{{ url }}" aria-label="{{ title | escape }}"></a>
   {%- endif -%}
+  {%- unless caption -%}
   <div class="guide-hero__copy{% if lettered %} visually-hidden{% endif %}">
     {%- if eyebrow != blank -%}<p class="guide-hero__eyebrow">{{ eyebrow | escape }}</p>{%- endif -%}
     <{{ tag }} class="guide-hero__title{% if caps %} guide-hero__title--caps{% endif %}{% if italic %} guide-hero__title--italic{% endif %}"{% if id != blank %} id="{{ id }}"{% endif %}>{{ title | escape }}{% if accent != blank %}<span class="visually-hidden"> {{ accent | escape }}</span>{% endif %}</{{ tag }}>
@@ -63,4 +76,5 @@
       <a class="guide-pill" href="{{ url }}"><span class="guide-pill__label">{{ pill_label | escape }}</span></a>
     {%- endif -%}
   </div>
+  {%- endunless -%}
 </div>

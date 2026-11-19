@@ -7,6 +7,10 @@
   Merchants only choose how many products per page and which menu feeds the shortcut chips.
 {%- endcomment -%}
 {%- liquid
+  assign offers = false
+  if collection.handle == 'ofertas'
+    assign offers = true
+  endif
   assign active_count = 0
   for filter in collection.filters
     if filter.type == 'price_range'
@@ -29,6 +33,9 @@
   # Shopify's automatic all-products collection keeps the title it was seeded with in the store language ("Products"); the
   # theme calls it what the app calls it. A collection the merchant created and titled is shown as titled.
   assign collection_title = collection.title
+  if offers
+    assign collection_title = 'Ofertas'
+  endif
   if collection.handle == 'all'
     assign seeded_title = collection.title | strip | downcase
     if seeded_title == 'products' or seeded_title == 'all products' or seeded_title == 'all' or seeded_title == 'productos' or seeded_title == 'todos los productos'
@@ -52,58 +59,76 @@
   endif
   assign guide_photo = ''
   assign guide_title = collection_title
-  assign guide_side = 'left'
   assign guide_brand = false
   assign guide_pill = ''
   case guide_key
-    when 'coach', 'michael-kors', 'steve-madden', 'tory-burch', 'kate-spade'
+    when 'coach', 'michael-kors', 'steve-madden', 'tory-burch', 'kate-spade', 'guess'
       assign guide_photo = 'coleccion-' | append: guide_key
-      assign guide_side = 'right'
       assign guide_brand = true
+      case guide_key
+        when 'coach'
+          assign guide_banner = 'B28_coach'
+        when 'michael-kors'
+          assign guide_banner = 'B29_michael_kors'
+        when 'steve-madden'
+          assign guide_banner = 'B30_steve_madden'
+        when 'tory-burch'
+          assign guide_banner = 'B25_tory_burch'
+        when 'kate-spade'
+          assign guide_banner = 'B27_kate_spade'
+        when 'guess'
+          assign guide_banner = 'B24_guess'
+      endcase
     when 'marc-jacobs'
+      assign guide_banner = 'B26_marc_jacobs'
       assign guide_photo = 'coleccion-marc-jacobs'
       assign guide_brand = true
     when 'tote', 'totes', 'bolsa-tote'
+      assign guide_banner = 'B19_tote'
       assign guide_photo = 'coleccion-totes'
       assign guide_title = 'Totes'
       assign guide_pill = 'bolsas'
     when 'shoulder', 'bolsa-shoulder', 'shoulder-bag'
+      assign guide_banner = 'B20_bolsos_hombro'
       assign guide_photo = 'coleccion-shoulder'
       assign guide_title = 'Shoulder'
       assign guide_pill = 'bolsas'
     when 'crossbody', 'bolsa-crossbody'
+      assign guide_banner = 'B18_crossbody'
       assign guide_photo = 'coleccion-crossbody'
       assign guide_title = 'Crossbody'
       assign guide_pill = 'bolsas'
     when 'satchel', 'bolsa-satchel', 'bolsos-de-mano', 'bolso-de-mano', 'handbag', 'handbags'
+      assign guide_banner = 'B22_bolsos_mano'
       assign guide_photo = 'coleccion-bolsos-de-mano'
       assign guide_title = 'Bolsos de mano'
       assign guide_pill = 'bolsas'
     when 'cartera', 'carteras'
+      assign guide_banner = 'B21_carteras'
       assign guide_photo = 'coleccion-carteras'
       assign guide_title = 'Carteras'
       assign guide_pill = 'carteras'
     when 'perfume', 'perfumes'
+      assign guide_banner = 'B16_perfumes_todos'
       assign guide_photo = 'coleccion-perfumes'
       assign guide_title = 'Perfumes'
       assign guide_pill = 'perfumes'
     when 'accesorio', 'accesorios', 'accessory', 'accessories'
+      assign guide_banner = 'B17_accesorios'
       assign guide_photo = 'coleccion-accesorios'
       assign guide_title = 'Accesorios'
       assign guide_pill = 'accesorios'
     when 'reloj', 'relojes'
+      assign guide_banner = 'B11_relojes'
       assign guide_photo = 'coleccion-accesorios'
       assign guide_title = 'Relojes'
       assign guide_pill = 'relojes'
     when 'bolsa', 'bolsas'
+      assign guide_banner = 'B08_bolsos'
       assign guide_photo = 'mayoreo-bolsos-carteras'
       assign guide_title = 'Bolsas'
       assign guide_pill = 'bolsas'
   endcase
-  assign guide_italic = true
-  if guide_brand
-    assign guide_italic = false
-  endif
   # A brand, with or without the guide's photograph, sits under «Marcas».
   if guide_brand or collection.handle == 'vendors'
     assign guide_pill = 'categorias'
@@ -121,10 +146,10 @@
 {% paginate collection.products by section.settings.products_per_page %}
   {%- if guide_photo != blank and paginate.current_page == 1 -%}
     <div class="guia-collection-hero">
-      {% render 'monetta-guia-hero', photo: guide_photo, title: guide_title, side: guide_side, caps: true, italic: guide_italic, eager: true %}
+      {% render 'monetta-guia-hero', photo: guide_photo, banner: guide_banner, caption: true, lettered: true, title: guide_title, eager: true %}
     </div>
   {%- endif -%}
-  <div class="container listing listing--collection listing--guia" data-listing data-collection-key="{{ guide_key | escape }}" {{ section.shopify_attributes }}>
+  <div class="container listing listing--collection listing--guia" data-listing{% if offers %} data-offers{% endif %} data-collection-key="{{ guide_key | escape }}" {{ section.shopify_attributes }}>
     <div class="page-head guia-page-head">
       {%- unless guide_photo != blank and paginate.current_page == 1 -%}
         <h1 class="display display--page">{{ guide_title | escape }}</h1>
@@ -140,9 +165,21 @@
     {%- endif -%}
     {% render 'monetta-guia-pills', active: guide_pill, filters_button: has_controls, active_count: active_count %}
 
+    {%- if offers -%}
+      <form class="search-field v43-offers-search" data-offers-search hidden role="search" aria-label="Buscar en Ofertas">
+        <label class="visually-hidden" for="offers-query">Buscar en Ofertas</label>
+        <input id="offers-query" name="oferta" type="search" placeholder="Buscar en Ofertas" enterkeyhint="search">
+        <button type="submit" class="btn btn--quiet">Buscar</button>
+      </form>
+      <p role="status" data-offers-status></p>
+      <button type="button" class="btn btn--outline" data-offers-retry hidden>Reintentar</button>
+      <div data-offers-empty class="empty" hidden><p>Sin ofertas vigentes para esta selección.</p><a class="btn btn--outline" href="{{ routes.all_products_collection_url }}">Ver catálogo</a></div>
+    {%- endif -%}
+
     {%- capture results_html -%}
-      {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', listing_card: true, sizes: card_sizes, xl_widths: '240,360,480,600,720,900' %}
+      {% render 'monetta-results', products: collection.products, offers: offers, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', listing_card: true, sizes: card_sizes, xl_widths: '240,360,480,600,720,900' %}
     {%- endcapture -%}
+    {%- if offers -%}{%- assign count_text = '' -%}{%- endif -%}
     {% render 'monetta-listing-layout',
       filters: collection.filters,
       sort_options: collection.sort_options,

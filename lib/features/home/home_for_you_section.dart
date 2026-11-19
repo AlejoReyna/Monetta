@@ -7,16 +7,15 @@ import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/shopper_copy.dart';
-import '../../app/theme.dart' show formatShopperPrice;
 import '../../reco/explainer.dart' show brandLabel;
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../../app/motion.dart';
 import '../boutique/boutique_tokens.dart';
+import '../catalog/quick_add_button.dart';
 import '../boutique/client_guide_components.dart';
 import '../checkout/checkout_screen.dart' show openBag;
 import '../product/product_selection.dart';
-import '../product/quick_view.dart' show showProductQuickView;
 import 'home_v41_catalog.dart';
 
 class HomeForYouSection extends StatefulWidget {
@@ -83,7 +82,6 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
               final wishlisted = store.wishlist.contains(product.id);
               final price = selectionPrice(product, variantIndex);
               final inStock = selectionInStock(product, variantIndex);
-              final adding = ValueNotifier<bool>(false);
 
               return SizedBox(
                 width: expanded ? panelWidth * 1.05 : panelWidth,
@@ -135,44 +133,21 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
                                   ),
                                 ),
                               ),
-                              Positioned(
-                                right: 4,
-                                bottom: 4,
-                                child: _FeedAddControl(
-                                  enabled: inStock,
-                                  adding: adding,
-                                  onAdd: () async {
-                                    if (selectableVariants(product).length >
-                                            1 &&
-                                        !hasReliableColorOptions(product)) {
-                                      if (!context.mounted) return;
-                                      await showProductQuickView(
-                                        context,
-                                        product,
-                                        requireChoice: true,
-                                        initialVariantIndex: variantIndex,
-                                      );
-                                      return;
-                                    }
-                                    adding.value = true;
-                                    final result = await tryAddSelectionToBag(
-                                      context,
-                                      product,
-                                      variantIndex,
-                                    );
-                                    adding.value = false;
-                                    if (!context.mounted) return;
-                                    if (result.status == BagAddStatus.added) {
-                                      ScaffoldMessenger.maybeOf(context)
-                                          ?.showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Agregado a la bolsa'),
-                                        ),
-                                      );
-                                    }
-                                  },
+                              if (inStock)
+                                Positioned(
+                                  right: 4,
+                                  bottom: 4,
+                                  child: ProductQuickAddButton(
+                                    key: ValueKey('for-you-add-${product.id}'),
+                                    product: product,
+                                    productName: product.title,
+                                    selectedVariantId: _variantIndexByProduct
+                                            .containsKey(product.id)
+                                        ? selectedVariant(product, variantIndex)
+                                            ?.id
+                                        : null,
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),
@@ -201,13 +176,13 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
                                 ),
                               ),
                               const SizedBox(height: BoutiqueSpace.xs),
-                              Text(
-                                formatShopperPrice(price),
-                                style: boutiqueText(
-                                  size: 15,
-                                  weight: FontWeight.w600,
-                                  color: palette.ink,
-                                ),
+                              SelectionPriceView(
+                                price: price,
+                                compare: selectedVariant(product, variantIndex)
+                                    ?.compareAtPrice,
+                                size: 15,
+                                centered: true,
+                                inStock: inStock,
                               ),
                               if (expanded &&
                                   selectableVariants(product).isNotEmpty) ...[
@@ -282,38 +257,6 @@ class _FeedWishlistControl extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _FeedAddControl extends StatelessWidget {
-  const _FeedAddControl({
-    required this.enabled,
-    required this.adding,
-    required this.onAdd,
-  });
-
-  final bool enabled;
-  final ValueNotifier<bool> adding;
-  final Future<void> Function() onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: adding,
-      builder: (context, busy, _) {
-        return GuideGlassIconButton(
-          tooltip: 'Agregar a la bolsa',
-          onPressed: !enabled || busy ? null : () => unawaited(onAdd()),
-          icon: busy
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.add_rounded, size: 20),
-        );
-      },
     );
   }
 }

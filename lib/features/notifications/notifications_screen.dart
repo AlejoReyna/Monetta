@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 import '../../app/account_controller.dart';
 import '../../app/notification_controller.dart';
 import '../../data/notifications/notification_models.dart';
+import '../../main.dart' show NotificationScope;
+import 'notification_settings_sheet.dart';
 import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
 import '../rewards/rewards_section.dart';
@@ -31,16 +33,23 @@ Future<void> openNotifications(
   void Function(NotificationRouteData route)? onOpenRoute,
   VoidCallback? onManagePreferences,
 }) {
+  final effectiveController = controller ?? NotificationScope.maybeOf(context);
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder: (_) => NotificationsScreen(
         inbox: inbox,
         ownerId: ownerId,
-        controller: controller,
+        controller: effectiveController,
         accountController: accountController,
         rewardsReader: rewardsReader,
-        onOpenRoute: onOpenRoute,
-        onManagePreferences: onManagePreferences,
+        onOpenRoute: onOpenRoute ?? effectiveController?.onOpenRoute,
+        onManagePreferences: onManagePreferences ??
+            (effectiveController == null
+                ? null
+                : () => openNotificationSettings(
+                      context,
+                      controller: effectiveController,
+                    )),
       ),
     ),
   );

@@ -3,6 +3,7 @@
   next page (and remains a normal link to ?page=n without JavaScript), and a page after the first offers the previous one.
   Must be rendered inside the {% paginate %} block, whose object is passed in.
 
+  @param {boolean} [offers] - Pick the first available variant with a live catalog comparison.
   @param {object} products - The current page's products.
   @param {object} paginate - The paginate object.
   @param {number} total - Total products matching the filters.
@@ -44,7 +45,17 @@
       {%- if product.object_type != blank and product.object_type != 'product' -%}{%- continue -%}{%- endif -%}
       {%- assign eager = false -%}
       {%- if forloop.index <= 4 %}{% assign eager = true %}{% endif -%}
-      <li>{% render 'monetta-card', product: product, eager: eager, view_button: view_button, listing_card: listing_card, sizes: sizes, xl_widths: xl_widths %}</li>
+      {%- assign offer_variant = nil -%}
+      {%- if offers -%}
+        {%- for candidate in product.variants -%}
+          {%- if candidate.available and candidate.compare_at_price > candidate.price -%}
+            {%- assign offer_variant = candidate -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if offer_variant == nil -%}{%- continue -%}{%- endif -%}
+      {%- endif -%}
+      <li{% if offers %} data-offer-price="{{ offer_variant.price }}" data-offer-terms="{{ product.title | append: ' ' | append: product.vendor | append: ' ' | append: product.type | append: ' ' | append: product.tags | escape }}"{% endif %}>{% render 'monetta-card', product: product, selected_variant: offer_variant, eager: eager, view_button: view_button, listing_card: listing_card, sizes: sizes, xl_widths: xl_widths %}</li>
     {%- endfor -%}
   </ul>
   {%- liquid
@@ -52,12 +63,12 @@
     assign percent = shown | times: 100.0 | divided_by: paginate.items | round
   -%}
   {%- if paginate.pages > 1 -%}
-    <div class="load-more" data-load-more>
-      <p class="small text-muted" data-progress-text>Se muestran {{ shown }} de {{ paginate.items }} piezas</p>
-      <div class="load-more__progress" aria-hidden="true"><span style="width: {{ percent }}%"></span></div>
+    <div class="load-more" data-load-more{% if offers %} data-offers-pagination{% endif %}>
+      {%- unless offers -%}<p class="small text-muted" data-progress-text>Se muestran {{ shown }} de {{ paginate.items }} piezas</p>
+      <div class="load-more__progress" aria-hidden="true"><span style="width: {{ percent }}%"></span></div>{%- endunless -%}
       {%- if paginate.next -%}
-        <a class="btn btn--outline" href="{{ paginate.next.url }}" data-more>Ver más piezas</a>
-      {%- else -%}
+        <a class="btn btn--outline" href="{{ paginate.next.url }}" {% unless offers %}data-more{% endunless %}>Ver más piezas</a>
+      {%- elsif offers == false or offers == nil -%}
         <p class="small text-muted">Viste las {{ paginate.items }} piezas.</p>
       {%- endif -%}
     </div>

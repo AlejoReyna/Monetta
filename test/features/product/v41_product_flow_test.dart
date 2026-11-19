@@ -86,8 +86,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('quick-view-back')), findsNothing);
     expect(
-      tester.widget<Text>(find.byKey(const Key('quick-view-price'))).data,
-      '\$1,600 MXN',
+      tester
+          .widget<Text>(find.byKey(const Key('quick-view-price')))
+          .textSpan!
+          .toPlainText(),
+      '\$1,600 mxn',
     );
     expect(
       tester.widget<MonettaImage>(find.byType(MonettaImage).first).url,
@@ -109,7 +112,8 @@ void main() {
       'gid://shopify/ProductVariant/9103',
     );
     expect(find.text('Agregado al carrito'), findsOneWidget);
-    expect(find.text('En tu bolsa'), findsNothing);
+    await tester.tap(find.byTooltip('Cerrar carrito'));
+    await tester.pumpAndSettle();
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     expect(find.byType(ProductScreen), findsNothing);
@@ -186,8 +190,11 @@ void main() {
       ),
     );
     expect(
-      tester.widget<Text>(find.byKey(const Key('product-price'))).data,
-      '\$1,400 MXN',
+      tester
+          .widget<Text>(find.byKey(const Key('product-price')))
+          .textSpan!
+          .toPlainText(),
+      '\$1,400 mxn',
     );
     expect(find.byType(ProductSoldOutBadge), findsOneWidget);
     expect(find.byKey(const Key('purchase-dock-primary')), findsNothing);
@@ -297,8 +304,11 @@ void main() {
       store.products.single.variants.last.id,
     );
     expect(
-      tester.widget<Text>(find.byKey(const Key('product-price'))).data,
-      '\$1,600 MXN',
+      tester
+          .widget<Text>(find.byKey(const Key('product-price')))
+          .textSpan!
+          .toPlainText(),
+      '\$1,600 mxn',
     );
   });
 
@@ -337,6 +347,8 @@ void main() {
     await tester.tap(find.byKey(const Key('quick-view-primary')));
     await tester.pumpAndSettle();
     expect(store.bagLines.single.variant.id, old.variants.last.id);
+    await tester.tap(find.byTooltip('Cerrar carrito'));
+    await tester.pumpAndSettle();
     final photo = find
         .descendant(
           of: find.byKey(const Key('quick-view-card')),

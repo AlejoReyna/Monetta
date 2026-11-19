@@ -19,7 +19,9 @@
   const page = () => $('[data-product-page]');
 
   /* ------------------------------------------------------------ gallery */
+  let galleryResize;
   function initGallery() {
+    galleryResize?.disconnect();
     const root = page();
     const track = $('[data-gallery]', root || document);
     if (!root || !track) return;
@@ -42,7 +44,8 @@
     Monetta.gallery = { goTo, count: () => slides.length, current: () => current };
 
     if (typeof ResizeObserver !== 'undefined') {
-      new ResizeObserver(() => track.scrollTo({ left: current * track.clientWidth, behavior: 'auto' })).observe(track);
+      galleryResize = new ResizeObserver(() => track.scrollTo({ left: current * track.clientWidth, behavior: 'auto' }));
+      galleryResize.observe(track);
     }
     let timer = 0;
     track.addEventListener(
@@ -165,7 +168,6 @@
   function validateSection(doc, root) {
     const next = $('[data-product-page]', doc);
     const dynamic = next && $('[data-product-dynamic]', next);
-    const dock = next && $('[data-purchase-dock]', next);
     const id = Number(dynamic && $('[data-variant-id]', dynamic)?.value);
     let variants = [];
     try {
@@ -174,7 +176,7 @@
       /* rejected below */
     }
     const variant = variants.find((candidate) => candidate.id === id);
-    if (!next || next.dataset.sectionId !== root.dataset.sectionId || !dynamic || !dock || !variant || !$('[data-product-form]', dynamic) || !$('[data-add]', dock)) {
+    if (!next || next.dataset.sectionId !== root.dataset.sectionId || !dynamic || !variant || !$('[data-product-form]', dynamic) || !$('[data-add]', dynamic) || !$('[data-product-gallery]', next)) {
       throw new Error('invalid-section');
     }
     if ($('[data-variant-details]', root) && !$('[data-variant-details]', next)) throw new Error('missing-variant-details');
@@ -223,12 +225,19 @@
 
     const { next, variant } = section;
     $('[data-product-dynamic]', root).replaceChildren(...$('[data-product-dynamic]', next).childNodes);
-    $('[data-purchase-dock]', root).replaceChildren(...$('[data-purchase-dock]', next).childNodes);
+    observePurchaseRow();
     const details = $('[data-variant-details]', root);
     if (details) details.replaceChildren(...$('[data-variant-details]', next).childNodes);
-    const seal = $('[data-seal]', root);
-    const nextSeal = $('[data-seal]', next);
-    if (seal && nextSeal) seal.hidden = nextSeal.hidden;
+    const previousGallery = $('[data-product-gallery]', root);
+    if (variant.id !== validatedId) {
+      previousGallery.replaceWith($('[data-product-gallery]', next));
+      root.dataset.selectedIndex = next.dataset.selectedIndex;
+      initGallery();
+    } else {
+      const seal = $('[data-seal]', root);
+      const nextSeal = $('[data-seal]', next);
+      if (seal && nextSeal) seal.hidden = nextSeal.hidden;
+    }
     validatedId = variant.id;
     root.dataset.selection = 'valid';
     root.removeAttribute('aria-busy');
@@ -236,7 +245,7 @@
     // fallback must not act on it.
     history.replaceState(history.state, '', `${root.dataset.productUrl}?variant=${variant.id}`);
     Monetta.noteNavigation?.();
-    Monetta.gallery?.goTo(Number(next.dataset.selectedIndex) || 0);
+
     if (focusedValue) {
       $(`fieldset[data-option-position="${focusedValue.position}"] input[value="${CSS.escape(focusedValue.value)}"]`, root)?.focus({ preventScroll: true });
     }
@@ -393,6 +402,42 @@
     }
   }
 
+  /* Move the same submit control using CSS while its reserved slot is outside the viewport. */
+  let purchaseRow;
+  let purchaseResize;
+  function syncStickyAdd() {
+    if (!purchaseRow?.isConnected) return;
+    const button = $('[data-sticky-add]', purchaseRow);
+    const rect = purchaseRow.getBoundingClientRect();
+    const top = Math.max(0, $('#site-top')?.getBoundingClientRect().bottom || 0);
+    const dock = $('.dock');
+    const bottom = Math.min(window.visualViewport?.height || window.innerHeight, dock?.getBoundingClientRect().top || window.innerHeight);
+    const keyboard = window.visualViewport && window.innerHeight - window.visualViewport.height > 120;
+    const textInput = document.activeElement?.matches('input:not([type="radio"]):not([type="checkbox"]), textarea, [contenteditable="true"]');
+    const fixed = !keyboard && !textInput && (rect.bottom <= top || rect.top >= bottom);
+    button.classList.toggle('is-fixed-add', fixed);
+    document.body.classList.toggle('has-fixed-add', fixed);
+  }
+
+  function observePurchaseRow() {
+    purchaseResize?.disconnect();
+    purchaseRow = $('[data-inline-purchase]', page());
+    document.body.classList.remove('has-fixed-add');
+    if (!purchaseRow) return;
+    if ('ResizeObserver' in window) {
+      purchaseResize = new ResizeObserver(syncStickyAdd);
+      purchaseResize.observe(purchaseRow);
+    }
+    syncStickyAdd();
+  }
+
+  observePurchaseRow();
+  window.addEventListener('scroll', syncStickyAdd, { passive: true });
+  window.addEventListener('resize', syncStickyAdd);
+  window.visualViewport?.addEventListener('resize', syncStickyAdd);
+  document.addEventListener('focusin', syncStickyAdd);
+  document.addEventListener('focusout', () => requestAnimationFrame(syncStickyAdd));
+
   /* ------------------------------------------------------------ add to bag */
   let adding = false;
   document.addEventListener('submit', async (event) => {
@@ -411,16 +456,13 @@
     const quantity = Number($('[data-qty-input]', form)?.value) || 1;
     const name = $('.product-panel__name', root)?.textContent?.trim() || '';
     const option = $$('[data-options] [data-option-value]', root).map((el) => el.textContent.trim()).filter(Boolean).join(' / ');
-    // The pressed button gets the focus back when the bag closes. On phones that is the purchase dock's, outside the form.
     const pressed = event.submitter?.matches?.('[data-add]') ? event.submitter : buttons.find((button) => button.offsetParent !== null);
     const buyNow = event.submitter?.matches?.('[data-buy-now]') ? event.submitter : null;
-    // UI v4.1: «Agregar conserva PDP» — the bag is not opened; the page confirms in place.
-    const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: pressed || $('[data-add]', form), open: false });
+    const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: pressed || $('[data-add]', form), open: !buyNow });
     if (result.ok && buyNow) {
       window.location.assign(buyNow.value);
       return;
     }
-    if (result.ok) Monetta.toast?.('Agregado al carrito');
     buttons.forEach((button) => Monetta.setPending(button, false));
     adding = false;
     if (root.dataset.selection === 'valid') lockPurchase(root, false);

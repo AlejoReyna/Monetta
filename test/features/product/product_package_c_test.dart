@@ -79,11 +79,11 @@ void main() {
     await scrollTo(tester, services);
     for (final text in [
       'ENVÍO GRATIS',
-      '5 - 7 días hábiles',
+      'con tu cuenta',
       'Producto Original',
       'Importado desde E.U.A',
-      'Paga a Meses',
-      'Sin Intereses',
+      'Pagos seguros',
+      'Compra con confianza',
     ]) {
       expect(
         find.descendant(of: services, matching: find.text(text)),

@@ -81,7 +81,7 @@ void main() {
     await tester.drag(scroll.first, const Offset(-500, 0));
     await tester.pumpAndSettle();
     expect(position.pixels, greaterThan(0));
-    expect(find.text('Consulta el pago'), findsOneWidget);
+    expect(find.text('Liquida o aparta'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
   testWidgets('normal 320px C5 WhatsApp label fits one line', (tester) async {
@@ -98,14 +98,13 @@ void main() {
             .toSet(),
         hasLength(1));
   });
-  testWidgets(
-      'received reservation copy is review-only, without operational action',
+  testWidgets('unverified deposit and term stay out of both views',
       (tester) async {
     await pumpClientGuide(
         tester, const WholesaleScreen(showUnapprovedEditorial: true),
         size: const Size(390, 1000));
-    expect(find.textContaining(r'$800'), findsOneWidget);
-    expect(find.textContaining('20 días'), findsOneWidget);
+    expect(find.textContaining(r'$800'), findsNothing);
+    expect(find.textContaining('20 días'), findsNothing);
     expect(find.byKey(const ValueKey('wholesale-step-2')), findsOneWidget);
   });
   testWidgets('wholesale footer returns to its hero', (tester) async {

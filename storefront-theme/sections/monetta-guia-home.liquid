@@ -11,11 +11,9 @@
   {%- when 'carousel' -%}
     {%- capture catalog_url -%}{% render 'monetta-guia-url', key: 'catalogo' %}{%- endcapture -%}
     {%- capture categories_url -%}{% render 'monetta-guia-url', key: 'categorias' %}{%- endcapture -%}
+    {%- capture brands_destination -%}{% render 'monetta-guia-url', key: 'marcas' %}{%- endcapture -%}
     {%- liquid
-      assign brands_url = routes.collections_url
-      if collections['marcas'].id != blank
-        assign brands_url = collections['marcas'].url
-      endif
+      assign brands_url = brands_destination | strip
       assign banner_count = 2
       if section.settings.show_banner_categorias
         assign banner_count = 3
@@ -78,7 +76,7 @@
     <section class="section v41-block" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
       {% render 'monetta-section-header', id: heading_id, title: 'Categorías', title_url: all_url, link_url: all_url, link_label: 'Ver todas' %}
       <ul class="v41-scroll" id="{{ track_id }}" role="list">
-        {%- assign category_entries = 'monetta-v41-f01.webp|640|640|Calzado de dama|,monetta-v41-f02.webp|640|426|Bolso de hombro|shoulder,monetta-v41-f03.webp|480|640|Bolso de mano|bolsos-de-mano,monetta-v41-f04.webp|476|640|Calzado de hombre|,monetta-v41-f05.webp|640|584|Accesorios|accesorios,monetta-v41-f06.webp|640|584|Bolsos de hombre|,monetta-v41-f07.webp|640|584|Bolsos|bolsas,monetta-v41-f08.webp|640|584|Carteras|carteras,monetta-v41-f09.webp|640|640|Carteras de mujer|carteras,monetta-v41-f10.webp|512|640|Crossbody|crossbody,monetta-v41-f11.webp|640|584|Carteras de hombre|carteras,monetta-v41-f12.webp|524|640|Lentes|,monetta-v41-f13.webp|532|640|Relojes de hombre|relojes,monetta-v41-f14.webp|640|477|Tarjeteros|,monetta-v41-f15.webp|544|544|Muñequeras|,monetta-v41-f16.webp|417|640|Reloj de mujer|relojes,monetta-v41-f17.webp|512|640|Tote|tote,monetta-v41-f18.webp|640|640|Bolsos|bolsas' | split: ',' -%}
+        {%- assign category_entries = 'monetta-v41-f07.webp|640|584|Bolsos|bolsas,monetta-v41-f08.webp|640|584|Carteras|carteras,monetta-v41-B16_perfumes_todos-768.jpg|1920|800|Perfumes|perfumes,monetta-v41-f01.webp|640|640|Calzado|calzado,monetta-v41-f05.webp|640|584|Accesorios|accesorios' | split: ',' -%}
         {%- for entry in category_entries -%}
           {%- assign parts = entry | split: '|' -%}
           {%- assign photo_key = parts[4] -%}
@@ -101,11 +99,9 @@
     </section>
 
   {%- when 'brands' -%}
+    {%- capture brands_destination -%}{% render 'monetta-guia-url', key: 'marcas' %}{%- endcapture -%}
     {%- liquid
-      assign brands_url = routes.collections_url
-      if collections['marcas'].id != blank
-        assign brands_url = collections['marcas'].url
-      endif
+      assign brands_url = brands_destination | strip
       assign brand_entries = 'Coach:coach,Guess:guess,Michael Kors:michael_kors,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Anne Klein:anne_klein,Olaplex:olaplex,Dior:dior:Christian Dior,The Ordinary:the_ordinary,Summer Fridays:summer_fridays,Laneige:laneige,Rhode:rhode,Tory Burch,Kate Spade,Marc Jacobs' | split: ','
     -%}
     {%- capture brand_tiles -%}
@@ -156,7 +152,8 @@
       <h2 class="visually-hidden" id="{{ heading_id }}">Mayoreo</h2>
       <div class="v41-mayoreo__frame">
         <img src="{{ 'monetta-v41-b04-sin-control.jpg' | asset_url }}" width="1920" height="800" alt="Precios de mayoreo a partir de 3 piezas" loading="lazy" decoding="async">
-        <a class="v41-mayoreo__cta" href="{{ mayoreo_url | strip }}">Comenzar a vender</a>
+        {%- assign wholesale_destination = mayoreo_url | strip -%}
+        {%- if wholesale_destination != blank -%}<a class="v41-mayoreo__cta" href="{{ wholesale_destination }}">Comenzar a vender</a>{%- endif -%}
       </div>
     </section>
 
@@ -167,29 +164,7 @@
 
   {%- when 'register' -%}
     {%- if section.settings.enabled -%}
-      {%- unless customer and request.design_mode == false -%}
-        <section class="v41-register" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
-          {% form 'create_customer', class: 'v41-register__panel' %}
-            <h2 class="v41-register__title" id="{{ heading_id }}">Regístrate en MONETTA REWARDS</h2>
-            <p class="v41-register__line"><span class="v41-register__gold">ENVÍO GRATIS</span> para siempre</p>
-            <p class="v41-register__line"><span class="v41-register__green">GANA CASHBACK</span> con cada compra</p>
-            <div class="v41-register__row">
-              <label class="visually-hidden" for="RewardsEmail-{{ section.id }}">Tu correo electrónico</label>
-              <input id="RewardsEmail-{{ section.id }}" type="email" name="customer[email]" inputmode="email" autocomplete="email" required placeholder="Tu correo electrónico" value="{{ form.email }}">
-              <button type="submit">Registrarme</button>
-            </div>
-            {%- if form.errors -%}
-              <p class="v41-register__error" role="alert">Revisa tu correo e inténtalo de nuevo.</p>
-            {%- elsif form.posted_successfully? -%}
-              <p class="v41-register__ok" role="status">Tu cuenta quedó creada.</p>
-            {%- endif -%}
-          {% endform %}
-        </section>
-      {%- endunless -%}
-    {%- elsif request.design_mode -%}
-      <p class="v41-note" {{ section.shopify_attributes }}>Registro oculto.</p>
-    {%- else -%}
-      {% style %}#shopify-section-{{ section.id }} { display: none; }{% endstyle %}
+      {% render 'monetta-rewards-register', heading_id: heading_id %}
     {%- endif -%}
 {%- endcase -%}
 

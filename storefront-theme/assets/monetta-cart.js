@@ -70,6 +70,10 @@
   function syncCheckoutLock() {
     const blocked = checkoutBlocked();
     for (const button of $$('[name="checkout"]')) button.disabled = blocked;
+    for (const button of $$('[data-line-form] button')) {
+      if (blocked) button.setAttribute('aria-disabled', 'true');
+      else button.removeAttribute('aria-disabled');
+    }
     for (const area of $$('.cart-additional-checkout')) area.inert = blocked;
     for (const notice of $$('[data-cart-sync]')) notice.hidden = !unconfirmed;
     document.documentElement.toggleAttribute('data-cart-locked', blocked);
@@ -119,7 +123,25 @@
     if (!sheet || !html) return null;
     const next = parseHtml(html).querySelector('#cart-sheet');
     if (!next) return null;
+    const title = sheet.open ? $('#cart-sheet-title', sheet)?.textContent : '';
+    const scroll = $('.overlay__panel', sheet)?.scrollTop || 0;
+    const focused = sheet.contains(document.activeElement) ? document.activeElement : null;
+    const key = focused?.closest('[data-line]')?.dataset.line;
+    const step = focused?.dataset.step;
+    const oldRecommendations = $('[data-cart-recommendations]', sheet);
+    const nextRecommendations = $('[data-cart-recommendations]', next);
+    if (oldRecommendations && nextRecommendations && oldRecommendations.dataset.cartRecommendations === nextRecommendations.dataset.cartRecommendations) {
+      nextRecommendations.replaceWith(oldRecommendations);
+    }
     sheet.replaceChildren(...next.childNodes);
+    if (sheet.open) {
+      if (title) $('#cart-sheet-title', sheet).textContent = title;
+      $('.overlay__panel', sheet).scrollTop = scroll;
+      const line = key ? $(`[data-line="${CSS.escape(key)}"]`, sheet) : null;
+      if (focused) ((step && line && $(`[data-step="${step}"]:not(:disabled)`, line)) ||
+        (line && $('[data-step]:not(:disabled)', line)) || $('[data-autofocus]', sheet))?.focus({ preventScroll: true });
+      loadCartRecommendations(sheet);
+    }
     const total = Number($('[data-cart-total]', sheet)?.textContent);
     if (Number.isFinite(total)) setCount(total);
     if (highlightVariantId) {
@@ -129,20 +151,36 @@
     return sheet;
   }
 
-  function openSheet(trigger) {
+  async function loadCartRecommendations(sheet) {
+    const holder = $('[data-cart-recommendations]', sheet);
+    if (!holder || holder.dataset.loaded) return;
+    holder.dataset.loaded = 'true';
+    try {
+      const response = await fetch(holder.dataset.cartRecommendations, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+      if (!response.ok) throw new Error('recommendations');
+      const next = $('[data-cart-related]', parseHtml(await response.text()));
+      if (next && holder.isConnected) holder.replaceChildren(next);
+    } catch {
+      delete holder.dataset.loaded;
+    }
+  }
+
+  function openSheet(trigger, added = false) {
     const sheet = $('#cart-sheet');
     if (!sheet) return;
-    // Right drawer from 768 px, bottom sheet below (the ported .overlay--* rules are mutually exclusive).
-    const wide = window.matchMedia('(min-width: 768px)').matches;
-    sheet.classList.toggle('overlay--drawer-right', wide);
-    sheet.classList.toggle('overlay--sheet', !wide);
-    if (sheet.open) {
-      sheet.querySelector('.overlay__footer .btn--primary')?.focus({ preventScroll: true });
-      return;
-    }
-    Monetta.openDialog(sheet, trigger);
-    sheet.querySelector('.overlay__footer .btn--primary')?.focus({ preventScroll: true });
+    $('#cart-sheet-title', sheet).textContent = added ? 'Agregado al carrito' : 'Carrito';
+    if (!sheet.open) Monetta.openDialog(sheet, trigger);
+    else if (added && trigger?.closest('#quick-view[open]')) Monetta.closeDialog(trigger.closest('dialog'));
+    loadCartRecommendations(sheet);
   }
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest?.('[data-cart-link], [data-dock="cart"]');
+    if (!trigger || event.defaultPrevented || event.button !== 0 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || !$('#cart-sheet')) return;
+    event.preventDefault();
+    openSheet(trigger);
+    if (!checkoutBlocked()) mutation(() => recoverFromServer());
+  });
 
   /**
    * Reads the bag from Shopify (a GET, safe to repeat). Resolves to the sections object, or null when it cannot be read or does not hold
@@ -168,6 +206,7 @@
 
   function renderCartPage(sections, { focusKey, focusStep } = {}) {
     const id = cartSectionId();
+    if (!id) return false;
     const wrapper = $(`#shopify-section-${CSS.escape(id)}`);
     const html = sections?.[id];
     if (!wrapper || !html) return false;
@@ -243,7 +282,7 @@
         $(`[data-variant-id="${Number(id)}"]`, $('#cart-sheet'))?.classList.add('cart-line--highlight');
       }
       // «Comprar ahora» goes straight on to the checkout, so the bag is not opened in between.
-      if (open) openSheet(trigger);
+      if (open) openSheet(trigger, true);
       Monetta.announce?.(`Agregado al carrito${name ? `: ${name}` : ''}.`);
       return { ok: true, status: result.status };
     });
@@ -287,14 +326,25 @@
     if (!form) return;
     event.preventDefault();
     const button = form.querySelector('button');
-    if (button?.dataset.pending) return;
-    button?.setAttribute('aria-busy', 'true');
-    button.dataset.pending = 'true';
-    const card = form.closest('.card');
-    const name = card?.querySelector('.card__name')?.textContent?.trim() || '';
-    await add({ id: form.elements.id.value, quantity: 1, name, trigger: button });
-    button?.removeAttribute('aria-busy');
-    delete button.dataset.pending;
+    const area = form.closest('article, li') || form;
+    if (!button || area.dataset.adding) return;
+    const feedback = $('[data-feature-error]', form);
+    if (feedback) feedback.hidden = true;
+    area.dataset.adding = 'true';
+    setPending(button, true);
+    try {
+      const checkout = form.dataset.checkout;
+      const name = form.dataset.productName || '';
+      const result = await add({ id: form.elements.id.value, quantity: 1, name, trigger: button, open: !checkout });
+      if (result.ok && checkout) location.assign(checkout);
+      if (!result.ok && feedback) {
+        feedback.textContent = result.message;
+        feedback.hidden = false;
+      }
+    } finally {
+      delete area.dataset.adding;
+      setPending(button, false);
+    }
   });
 
   /* Discount writes share the cart queue and checkout lock; never send quantity updates here. */
@@ -423,21 +473,28 @@
   async function changeLine({ key, quantity, step, name, restore }) {
     const id = cartSectionId();
     // One change at a time, and none on top of a bag that is not confirmed: a click made on stale numbers would send stale numbers.
-    if (!id || checkoutBlocked()) {
+    if (checkoutBlocked()) {
       if (unconfirmed) Monetta.announce?.('Actualiza tu bolsa antes de hacer más cambios.');
       return;
     }
-    const line = $(`[data-line="${CSS.escape(key)}"]`);
+    const scope = $('#cart-sheet[open]') || document;
+    const selector = `[data-line="${CSS.escape(key)}"]`;
+    const line = $(selector, scope);
     line?.setAttribute('aria-busy', 'true');
     await mutation(async () => {
       try {
         let result;
         try {
-          result = await postJson(routes.cartChange, { id: key, quantity, sections: `${id},${SHEET_SECTION}`, sections_url: routes.cart });
+          result = await postJson(routes.cartChange, { id: key, quantity, sections: pageSections().join(','), sections_url: routes.cart });
         } catch {
           result = { ok: false, status: 0, data: null };
         }
-        if (result.ok && renderCartPage(result.data?.sections || {}, { focusKey: quantity > 0 ? key : null, focusStep: step })) {
+        const sections = result.data?.sections || {};
+        const rendered = result.ok && (id
+          ? renderCartPage(sections, { focusKey: quantity > 0 ? key : null, focusStep: step })
+          : applySheet(sections[SHEET_SECTION]));
+        if (rendered) {
+          markConfirmed();
           if (quantity === 0) {
             Monetta.toast?.(`Eliminaste ${name || 'la pieza'} del carrito.`, {
               action: restore ? { label: 'Deshacer', onClick: () => undoRemoval(restore) } : null,
@@ -453,6 +510,14 @@
           Monetta.toast?.(result.ok ? 'No pudimos mostrar tu bolsa actualizada.' : 'No pudimos confirmar el cambio. Revisamos tu bolsa para mostrarla como está.', { tone: 'error' });
         }
         await recoverFromServer({ focusKey: key, focusStep: step });
+        const currentLine = $(selector, scope);
+        const error = currentLine && $('[data-line-error]', currentLine);
+        if (error) {
+          const { text, lang } = errorMessage(result, 'No pudimos confirmar el cambio. Revisa la cantidad.');
+          error.textContent = text;
+          if (lang) error.lang = lang;
+          error.hidden = false;
+        }
       } finally {
         line?.removeAttribute('aria-busy');
       }

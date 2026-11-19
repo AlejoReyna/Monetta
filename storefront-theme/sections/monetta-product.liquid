@@ -6,7 +6,7 @@
 
   Everything commercial is rendered by Shopify at request time: price, compare-at, availability, options, the selected variant.
   When the shopper changes an option, assets/monetta-product.js asks the Section Rendering API for this same section with
-  ?variant=ID and swaps the [data-product-dynamic] and [data-purchase-dock] regions, so no price or stock is ever cached or
+  ?variant=ID and swaps the [data-product-dynamic] regions, so no price or stock is ever cached or
   recomputed in the browser. The add button posts the exact variant id and never substitutes another: while a choice has not been
   confirmed by Shopify (or its confirmation failed) adding and the accelerated checkout are blocked, and a failed confirmation puts
   the chips back on the variant the page really shows.
@@ -29,16 +29,19 @@
   assign brand_query = brand | url_encode
   assign brand_url = routes.search_url | append: '?type=product&q=' | append: brand_query
   assign images = product.media | where: 'media_type', 'image'
+  unless product.has_only_default_variant
+    assign variant_media = current.featured_media | default: product.featured_media
+    assign images = images | where: 'id', variant_media.id
+  endunless
+  assign commercial_at = product.metafields.custom.fecha_comercial.value | date: '%s' | plus: 0
+  assign now_at = 'now' | date: '%s' | plus: 0
+  assign age_seconds = now_at | minus: commercial_at
   assign selected_index = 0
   for media in images
     if current.featured_media and media.id == current.featured_media.id
       assign selected_index = forloop.index0
     endif
   endfor
-  assign pct = 0
-  if current.available and current.compare_at_price > current.price
-    assign pct = current.compare_at_price | minus: current.price | times: 100.0 | divided_by: current.compare_at_price | round
-  endif
   assign whatsapp = section.settings.whatsapp_number | replace: '+', '' | replace: ' ', '' | replace: '-', ''
   assign variant_label = ''
   unless product.has_only_default_variant
@@ -74,7 +77,7 @@
 >
 
   <div class="product-layout">
-    <section class="gallery{% if images.size <= 1 %} gallery--single{% endif %}" aria-label="Fotos de {{ product.title | escape }}">
+    <section data-product-gallery class="gallery{% if images.size <= 1 %} gallery--single{% endif %}" aria-label="Fotos de {{ product.title | escape }}">
       <div class="gallery__main">
         <div class="gallery__track" data-gallery tabindex="0" role="group" aria-roledescription="carrusel" aria-label="Galería: usa las flechas para cambiar de foto">
           {%- for media in images -%}
@@ -86,7 +89,12 @@
             <figure class="gallery__slide">{{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}</figure>
           {%- endfor -%}
         </div>
-        <div class="gallery__seal" data-seal{% if current.available %} hidden{% endif %}><span class="badge badge--seal">Agotado</span></div>
+        <div class="v43-gallery-badges">
+          {%- if commercial_at > 0 and age_seconds >= 0 and age_seconds <= 2592000 -%}
+            <span class="badge badge--fresh">Recién llegado</span>
+          {%- endif -%}
+          <span class="badge badge--seal" data-seal{% if current.available %} hidden{% endif %}>AGOTADO</span>
+        </div>
         {%- if images.size > 1 -%}
           <button type="button" class="round-button gallery__arrow gallery__arrow--prev" data-gallery-step="-1" aria-label="Foto anterior"><span class="round-button__circle">{% render 'monetta-icon', name: 'chevronLeft', size: 22 %}</span></button>
           <button type="button" class="round-button gallery__arrow gallery__arrow--next" data-gallery-step="1" aria-label="Foto siguiente"><span class="round-button__circle">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</span></button>
@@ -124,10 +132,7 @@
 
       <div data-product-dynamic>
         <div class="product-panel__price" data-price>
-          <span class="price">{{ current.price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</span>
-          {%- if pct > 0 -%}
-            <span class="visually-hidden">Precio anterior:</span><s class="price-compare">{{ current.compare_at_price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</s><span class="badge badge--sale">-{{ pct }}%</span>
-          {%- endif -%}
+          {% render 'monetta-variant-price', variant: current, currency: currency %}
         </div>
 
 
@@ -186,15 +191,15 @@
 
           {%- comment -%}Trust row (product_screen.dart _TrustRow): three columns split by hairlines, line icons, the approved copy.{%- endcomment -%}
           <ul class="guia-trust" role="list">
-            <li><svg class="guia-trust__icon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" d="M12 2.8 20.5 7.4v9.2L12 21.2l-8.5-4.6V7.4zM3.5 7.4 12 12l8.5-4.6M12 12v9.2M7.8 5.1l8.4 4.6"/></svg><span><strong>Entrega estimada</strong><span>3 a 5 días</span></span></li>
+            <li><svg class="guia-trust__icon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" d="M12 2.8 20.5 7.4v9.2L12 21.2l-8.5-4.6V7.4zM3.5 7.4 12 12l8.5-4.6M12 12v9.2M7.8 5.1l8.4 4.6"/></svg><span><strong>Entrega estimada</strong><span>Calculada al indicar tu dirección</span></span></li>
             <li><svg class="guia-trust__icon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" d="M12 2.8 19.5 5.6v5.6c0 4.6-3.2 8.6-7.5 10-4.3-1.4-7.5-5.4-7.5-10V5.6zM8.6 12.1l2.4 2.4 4.4-4.6"/></svg><span><strong>Productos originales</strong><span>Garantía de autenticidad</span></span></li>
             <li><svg class="guia-trust__icon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" d="M3 6.5h18v11H3zM3 10h18M6.5 14.5h3"/></svg><span><strong>Pago seguro</strong><span>Compra con confianza</span></span></li>
           </ul>
           <div class="product-panel__buy">
             {%- if current.available -%}
               <input type="hidden" name="quantity" value="1">
-              <div class="buy-stack">
-                <button type="submit" name="add" class="btn btn--primary btn--block" data-add><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agregar al carrito</span></button>
+              <div class="buy-stack" data-inline-purchase>
+                <div class="pdp-add-slot"><button type="submit" name="add" class="btn btn--outline btn--block" data-add data-sticky-add><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agregar al carrito</span></button></div>
                 {%- if show_pay -%}
                   {%- comment -%}Without JavaScript Shopify adds the piece and follows return_to; with it monetta-product.js adds through the same
                   exact-variant path and then opens the checkout instead of the bag.{%- endcomment -%}
@@ -226,7 +231,7 @@
           endif
         -%}
         <p class="availability availability--{{ tone }}" data-availability><span class="availability__dot" aria-hidden="true"></span><span>{{ availability_text }}</span></p>
-          <p class="product-panel__tax">El envío y los descuentos se calculan en el checkout.</p>
+          <p class="product-panel__tax"></p>
 
           {%- if show_apartado -%}
             <div class="other-ways">
@@ -306,13 +311,7 @@
     </div>
   </div>
 
-  <div class="purchase-dock" data-purchase-dock>
-    {%- if current.available -%}
-      <button type="submit" form="{{ form_id }}" name="add" class="btn btn--primary" data-add><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agregar al carrito</span></button>
-    {%- else -%}
-      <button type="submit" form="{{ form_id }}" name="add" class="btn btn--primary" data-add disabled><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agotado</span></button>
-    {%- endif -%}
-  </div>
+  {% render 'monetta-rewards-register', heading_id: 'pdp-rewards' %}
 </article>
 
 {% schema %}

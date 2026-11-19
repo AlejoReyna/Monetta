@@ -108,7 +108,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(store.bagQuantity, 1);
-      expect(find.text('En tu bolsa'), findsOneWidget);
+      expect(find.text('Agregado al carrito'), findsOneWidget);
     });
 
     testWidgets(
@@ -122,7 +122,7 @@ void main() {
 
       expect(store.addCalls, 0);
       expect(store.bagQuantity, 0);
-      expect(find.text('En tu bolsa'), findsNothing);
+      expect(find.text('Agregado al carrito'), findsNothing);
     });
 
     testWidgets('CART-05 buyNowOpenBag adds and opens the bag', (tester) async {

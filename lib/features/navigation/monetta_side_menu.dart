@@ -245,6 +245,23 @@ class MonettaSideMenu extends StatelessWidget {
               title: const Text('Todas las marcas'),
               onTap: () => _select(context, onAllBrands ?? brands),
             ),
+            if (store != null)
+              ListTile(
+                key: const Key('side-menu-offers'),
+                leading: Icon(Icons.shopping_bag_outlined,
+                    color: context.monettaColors.sale),
+                title: const Text('Ofertas'),
+                onTap: () => _select(
+                    context,
+                    () => navigator.push<void>(
+                          MaterialPageRoute<void>(
+                            builder: (_) => scopes(const CollectionScreen(
+                              title: 'Ofertas',
+                              offersCollection: true,
+                            )),
+                          ),
+                        )),
+              ),
             ListTile(
               key: const Key('side-menu-wholesale'),
               leading: const GuideSemanticImage(

@@ -18,6 +18,11 @@
     when 'carteras'
       assign handle = 'carteras'
       assign fallback = routes.collections_url | append: '/types?q=Cartera'
+    when 'calzado'
+      assign handle = 'calzado'
+      assign fallback = routes.collections_url | append: '/types?q=Calzado'
+    when 'ofertas'
+      assign handle = 'ofertas'
     when 'relojes'
       assign handle = 'relojes'
       assign fallback = routes.collections_url | append: '/types?q=Reloj'
@@ -49,6 +54,7 @@
 {%- else -%}
   {%- case key -%}
     {%- when 'categorias' -%}{{ routes.collections_url }}
+    {%- when 'marcas' -%}{{ routes.collections_url }}?view=marcas
     {%- when 'catalogo' -%}{{ routes.all_products_collection_url }}
     {%- comment -%}
       Guide pages use the new templates page.guia-mayoreo, -contacto and -rewards; the owner's own templates stay. Until a
@@ -58,13 +64,12 @@
       {%- liquid
         assign suffix = 'guia-' | append: key
         assign target = pages[key]
-        if key == 'contacto'
+        if key == 'contacto' and target.id == blank
           assign target = pages['contact']
-        endif
-        if target.id == blank
-          assign target = pages['contact']
+        elsif key == 'mayoreo' and target.id == blank
+          assign target = pages['como-vender']
         endif
       -%}
-      {%- if target.id == blank -%}{{ routes.root_url }}{%- elsif target.template_suffix == suffix -%}{{ target.url }}{%- else -%}{{ target.url }}?view={{ suffix }}{%- endif -%}
+      {%- if target.id != blank and target.template_suffix == suffix -%}{{ target.url }}{%- elsif target.id != blank -%}{{ target.url }}?view={{ suffix }}{%- endif -%}
   {%- endcase -%}
 {%- endif -%}

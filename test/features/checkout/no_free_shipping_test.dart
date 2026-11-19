@@ -10,7 +10,6 @@ import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/shopify/cart/checkout_launcher.dart';
 import 'package:monetta_app/features/checkout/checkout_screen.dart';
-import 'package:monetta_app/features/checkout/mini_cart.dart';
 import 'package:monetta_app/main.dart';
 
 import '../../support/product_screen_harness.dart';
@@ -154,10 +153,11 @@ void main() {
           await withSemantics(tester, () async {
             final store = await _storeWithBag(bagCase);
 
-            await tester.pumpWidget(_app(store, const MiniCartSheet()));
+            await tester.pumpWidget(_app(
+                store, const BagScreen(drawerTitle: 'Agregado al carrito')));
             await tester.pump();
 
-            expect(find.text('En tu bolsa'), findsOneWidget);
+            expect(find.text('Agregado al carrito'), findsOneWidget);
             expect(find.byType(LinearProgressIndicator), findsNothing);
             _expectNoFreeShippingCopy(tester);
           });

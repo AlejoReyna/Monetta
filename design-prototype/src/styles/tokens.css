@@ -42,6 +42,28 @@
   font-display: swap;
 }
 
+:root {
+  color-scheme: light;
+  --section-gap: 32px;
+  --strip-h: 32px;
+  --grid-gap-x: 12px;
+  --grid-gap-y: 24px;
+  --bottom-ui: 0px;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --edge-l: max(var(--gutter), var(--safe-left));
+  --edge-r: max(var(--gutter), var(--safe-right));
+  --pinned-top: calc(var(--strip-h) + var(--header-h));
+  --pinned-bottom: 0px;
+
+  --color-error: var(--color-sale);
+  --radius-panel: var(--radius-sheet);
+  --halo: var(--shadow-halo);
+}
+
 /* @generated:tokens:start — design-system/build.mjs from design-system/monetta.tokens.json; edit the manifest, not this block */
 :root {
   --color-canvas: #ffffff;
@@ -254,4 +276,9 @@
   :root {
     --section-gap: 64px;
   }
+}
+
+.mw :focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
 }

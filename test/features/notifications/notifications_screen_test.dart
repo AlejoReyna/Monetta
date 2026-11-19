@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/theme.dart';
+import 'package:monetta_app/app/notification_controller.dart';
+import 'package:monetta_app/main.dart' show NotificationScope;
 import 'package:monetta_app/data/notifications/notification_models.dart';
 import 'package:monetta_app/features/notifications/notification_inbox.dart';
 import 'package:monetta_app/features/notifications/notifications_screen.dart';
@@ -41,8 +43,50 @@ Widget _host({
       ),
     );
 
+class _ScopedNotifications extends ChangeNotifier implements NotificationController {
+  @override
+  bool get available => true;
+  @override
+  NotificationPermissionState get permission => NotificationPermissionState.granted;
+  @override
+  NotificationPreferences get preferences => const NotificationPreferences();
+  @override
+  bool get saving => false;
+  @override
+  String? get lastError => null;
+  NotificationRouteData? opened;
+  @override
+  void Function(NotificationRouteData) get onOpenRoute => (route) => opened = route;
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
   group('NotificationsScreen', () {
+    testWidgets('opening from a route uses shared push state and preferences', (tester) async {
+      final controller = _ScopedNotifications();
+      final inbox = NotificationInbox()..ingest(_item());
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(MaterialApp(
+        theme: buildTheme(),
+        builder: (context, child) => NotificationScope(notifier: controller, child: child!),
+        home: Builder(builder: (context) => Scaffold(body: TextButton(
+          onPressed: () => openNotifications(context, inbox: inbox, ownerId: 'acct-1'),
+          child: const Text('Abrir avisos'),
+        ))),
+      ));
+      await tester.tap(find.text('Abrir avisos'));
+      await tester.pumpAndSettle();
+      expect(find.text('Recibes avisos en este dispositivo.'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('notification-row-n1')));
+      await tester.pumpAndSettle();
+      expect(controller.opened?.type, 'home');
+      await tester.tap(find.text('Gestionar preferencias'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tus notificaciones'), findsOneWidget);
+      expect(find.byKey(const ValueKey('save-notification-preferences')), findsOneWidget);
+    });
+
     testWidgets('empty inbox is honest and offers no dead actions',
         (tester) async {
       await tester.pumpWidget(_host(inbox: NotificationInbox()));

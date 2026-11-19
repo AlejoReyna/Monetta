@@ -545,7 +545,7 @@ class DuoWorkspaceState extends State<DuoWorkspace> {
       ..showSnackBar(
         SnackBar(
           key: const Key('duo-added-to-bag'),
-          content: const Text('Agregado a tu bolsa'),
+          content: const Text('Agregado al carrito'),
           persist: false,
           action: atBag
               ? null

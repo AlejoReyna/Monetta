@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../app/theme.dart';
 import '../../data/normalize/text.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
@@ -583,6 +584,82 @@ class _OptionChip extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Displays the active variant's price and comparison in shopper order.
+class SelectionPriceView extends StatelessWidget {
+  const SelectionPriceView({
+    required this.price,
+    this.compare,
+    this.currentKey,
+    this.size = 18,
+    this.inStock = true,
+    this.centered = false,
+    super.key,
+  });
+
+  final double price;
+  final double? compare;
+  final Key? currentKey;
+  final double size;
+  final bool inStock;
+  final bool centered;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final previous = compare;
+    final validCompare = previous != null &&
+        previous.isFinite &&
+        price.isFinite &&
+        price >= 0 &&
+        previous > price;
+    final current = formatShopperPrice(price);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment:
+          centered ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      children: [
+        if (validCompare)
+          Text(
+            formatShopperPrice(previous).replaceFirst(' MXN', ''),
+            semanticsLabel: 'Precio anterior: ${formatShopperPrice(previous)}',
+            style: boutiqueText(
+                size: 13,
+                color: palette.inkMuted,
+                decoration: TextDecoration.lineThrough),
+          ),
+        Wrap(
+          alignment: centered ? WrapAlignment.center : WrapAlignment.start,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          children: [
+            Text.rich(
+              key: currentKey,
+              style: boutiqueText(
+                size: size,
+                color: inStock ? palette.ink : palette.inkMuted,
+                weight: FontWeight.w600,
+              ),
+              TextSpan(children: [
+                TextSpan(text: current.replaceFirst(' MXN', '')),
+                TextSpan(text: ' mxn', style: TextStyle(fontSize: size * .72)),
+              ]),
+            ),
+            if (validCompare)
+              Text(
+                '-${((previous - price) * 100 / previous).round()}%',
+                key: const ValueKey('discount-badge'),
+                style: boutiqueText(
+                    size: 13,
+                    color: context.monettaColors.success,
+                    weight: FontWeight.w600),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../app/storefront_layout.dart';
+import '../boutique/boutique_tokens.dart';
 import '../../platform/system_layout_context.dart';
 
 class ProductAdaptiveBody extends StatefulWidget {
@@ -10,11 +11,15 @@ class ProductAdaptiveBody extends StatefulWidget {
     required this.gallery,
     required this.details,
     this.galleryAccessoryHeight = 0,
+    this.onScroll,
+    this.bottomAction,
     super.key,
   });
   final Widget Function(double height) gallery;
   final Widget details;
   final double galleryAccessoryHeight;
+  final VoidCallback? onScroll;
+  final Widget? bottomAction;
   @override
   State<ProductAdaptiveBody> createState() => _ProductAdaptiveBodyState();
 }
@@ -41,81 +46,109 @@ class _ProductAdaptiveBodyState extends State<ProductAdaptiveBody> {
   Widget get _details => KeyedSubtree(key: _detailsKey, child: widget.details);
 
   @override
-  Widget build(BuildContext context) => ViewRelativeLayout(
-        builder: (context, box, origin) {
-          final size = box.biggest;
-          final whole = origin & size;
-          final geometry = SystemLayoutScope.of(context);
-          final active = geometry.divisions.where(
-            (r) => r.active && r.bounds.overlaps(whole) && !r.bounds.isEmpty,
-          );
-          if (active.isNotEmpty) {
-            final cut = active.first.bounds.intersect(whole);
-            final horizontal = cut.width >= whole.width * .8;
-            final regions = horizontal
-                ? [
-                    Rect.fromLTRB(whole.left, whole.top, whole.right, cut.top),
-                    Rect.fromLTRB(
-                      whole.left,
-                      cut.bottom,
-                      whole.right,
-                      whole.bottom,
-                    ),
-                  ]
-                : [
-                    Rect.fromLTRB(
-                      whole.left,
-                      whole.top,
-                      cut.left,
-                      whole.bottom,
-                    ),
-                    Rect.fromLTRB(
-                      cut.right,
-                      whole.top,
-                      whole.right,
-                      whole.bottom,
-                    ),
-                  ];
-            if (regions.every(
-              (r) =>
-                  r.width >= StorefrontLayout.regionMinimumWidth &&
-                  r.height >= StorefrontLayout.minimumTaskHeight,
-            )) {
-              // Gallery and all related purchase controls move as groups. Each
-              // group scrolls inside its real region, including short poses.
-              return Stack(
-                children: [
-                  Positioned.fromRect(
-                    rect: regions.first.shift(-origin),
-                    child: _OcclusionSafe(
-                      child: SingleChildScrollView(
-                        child: _gallery(
-                          regions.first.height - widget.galleryAccessoryHeight,
-                        ),
+  Widget build(BuildContext context) {
+    final content = ViewRelativeLayout(
+      builder: (context, box, origin) {
+        final size = box.biggest;
+        final whole = origin & size;
+        final geometry = SystemLayoutScope.of(context);
+        final active = geometry.divisions.where(
+          (r) => r.active && r.bounds.overlaps(whole) && !r.bounds.isEmpty,
+        );
+        if (active.isNotEmpty) {
+          final cut = active.first.bounds.intersect(whole);
+          final horizontal = cut.width >= whole.width * .8;
+          final regions = horizontal
+              ? [
+                  Rect.fromLTRB(whole.left, whole.top, whole.right, cut.top),
+                  Rect.fromLTRB(
+                    whole.left,
+                    cut.bottom,
+                    whole.right,
+                    whole.bottom,
+                  ),
+                ]
+              : [
+                  Rect.fromLTRB(
+                    whole.left,
+                    whole.top,
+                    cut.left,
+                    whole.bottom,
+                  ),
+                  Rect.fromLTRB(
+                    cut.right,
+                    whole.top,
+                    whole.right,
+                    whole.bottom,
+                  ),
+                ];
+          if (regions.every(
+            (r) =>
+                r.width >= StorefrontLayout.regionMinimumWidth &&
+                r.height >= StorefrontLayout.minimumTaskHeight,
+          )) {
+            // Gallery and all related purchase controls move as groups. Each
+            // group scrolls inside its real region, including short poses.
+            return Stack(
+              children: [
+                Positioned.fromRect(
+                  rect: regions.first.shift(-origin),
+                  child: _OcclusionSafe(
+                    child: SingleChildScrollView(
+                      child: _gallery(
+                        regions.first.height - widget.galleryAccessoryHeight,
                       ),
                     ),
                   ),
-                  Positioned.fromRect(
-                    rect: regions.last.shift(-origin),
-                    child: _OcclusionSafe(
-                      child: SingleChildScrollView(
-                        controller: _detailScroll,
-                        child: _details,
-                      ),
+                ),
+                Positioned.fromRect(
+                  rect: regions.last.shift(-origin),
+                  child: _OcclusionSafe(
+                    child: SingleChildScrollView(
+                      controller: _detailScroll,
+                      child: _details,
                     ),
                   ),
-                ],
-              );
-            }
+                ),
+              ],
+            );
           }
-          return _OcclusionSafe(
-            child: LayoutBuilder(
-              builder: (context, safeBox) =>
-                  _normalFlow(context, safeBox.biggest),
+        }
+        return _OcclusionSafe(
+          child: LayoutBuilder(
+            builder: (context, safeBox) =>
+                _normalFlow(context, safeBox.biggest),
+          ),
+        );
+      },
+    );
+    if (widget.onScroll == null && widget.bottomAction == null) return content;
+    return NotificationListener<ScrollNotification>(
+      onNotification: (_) {
+        widget.onScroll?.call();
+        return false;
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          content,
+          if (widget.bottomAction case final action?)
+            Positioned(
+              left: BoutiqueSpace.gutter,
+              right: BoutiqueSpace.gutter,
+              bottom: 10,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: action,
+                ),
+              ),
             ),
-          );
-        },
-      );
+        ],
+      ),
+    );
+  }
 
   Widget _normalFlow(BuildContext context, Size size) {
     final roomy =

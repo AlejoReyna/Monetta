@@ -25,8 +25,12 @@ export class FirebaseAppCheckVerifier implements AppCheckVerifier {
         },
       );
       if (!response.ok) return false;
-      const body = await response.json() as { appId?: unknown };
-      return typeof body.appId === 'string' && body.appId !== '';
+      // Firebase returns {} or an optional alreadyConsumed boolean, not appId.
+      // Invalid tokens fail with HTTP 403. Repeat installation requests may
+      // legitimately reuse a verified token.
+      const body: unknown = await response.json();
+      return body !== null && typeof body === 'object' && !Array.isArray(body) &&
+        (!('alreadyConsumed' in body) || typeof body.alreadyConsumed === 'boolean');
     } catch {
       return false;
     }

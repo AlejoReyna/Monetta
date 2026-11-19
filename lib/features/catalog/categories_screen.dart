@@ -147,53 +147,59 @@ class CategoriesScreen extends StatelessWidget {
   final HomeContent? content;
   final Map<String, CollectionFilter> bindings;
   @override
-  Widget build(BuildContext context) => ClientGuideScaffold(
-        current: ClientGuideDestination.categories,
-        body: Center(
-          child: SizedBox(
-            width: 800,
-            child: ListView(
+  Widget build(BuildContext context) {
+    final locals = HomeContentScope.maybeOf(context)?.content;
+    final tree = CategoryTree(
+      bindings: {
+        ...configuredCategoryBindings(
+          content ?? locals ?? HomeContent.fallback,
+          StoreScope.maybeOf(context),
+        ),
+        ...bindings,
+      },
+      onOpen: (node, filter) => openCollection(
+        context,
+        CollectionScreen(title: node.label, filter: filter),
+      ),
+    );
+    final brands = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Marcas',
+            style: clientGuideStyle(context, MonettaTokens.sectionTitle)),
+        BrandDirectory(content: content),
+      ],
+    );
+    return ClientGuideScaffold(
+      current: ClientGuideDestination.categories,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1160),
+          child: LayoutBuilder(
+            builder: (context, bounds) => ListView(
               key: const ValueKey('categories-scroll'),
               padding: const EdgeInsets.all(16),
               children: [
-                Text(
-                  'Categorías',
-                  style: clientGuideStyle(
-                    context,
-                    MonettaTokens.screenTitle,
-                  ),
-                ),
+                Text('Categorías',
+                    style:
+                        clientGuideStyle(context, MonettaTokens.screenTitle)),
                 const SizedBox(height: 16),
-                CategoryTree(
-                  bindings: {
-                    ...configuredCategoryBindings(
-                      content ??
-                          HomeContentScope.maybeOf(context)?.content ??
-                          HomeContent.fallback,
-                      StoreScope.maybeOf(context),
-                    ),
-                    ...bindings,
-                  },
-                  onOpen: (node, filter) => openCollection(
-                    context,
-                    CollectionScreen(
-                      title: node.label,
-                      filter: filter,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Marcas',
-                  style: clientGuideStyle(
-                    context,
-                    MonettaTokens.sectionTitle,
-                  ),
-                ),
-                BrandDirectory(content: content),
+                if (bounds.maxWidth >= 768 &&
+                    MediaQuery.textScalerOf(context).scale(14) <= 20)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(flex: 2, child: tree),
+                      const SizedBox(width: 24),
+                      Expanded(child: brands),
+                    ],
+                  )
+                else ...[tree, const SizedBox(height: 24), brands],
               ],
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }

@@ -247,7 +247,7 @@ const List<ClientGuideService> kClientGuideHomeServices = [
   ClientGuideService(
     iconAsset: 'assets/images/v41/icons/envio-avion.svg',
     title: 'ENVÍO GRATIS',
-    subtitle: '5 - 7 días hábiles',
+    subtitle: 'con tu cuenta',
   ),
   ClientGuideService(
     iconAsset: 'assets/images/v41/icons/originales.svg',
@@ -256,8 +256,8 @@ const List<ClientGuideService> kClientGuideHomeServices = [
   ),
   ClientGuideService(
     iconAsset: 'assets/images/v41/icons/pagos.svg',
-    title: 'Paga a Meses',
-    subtitle: 'Sin Intereses',
+    title: 'Pagos seguros',
+    subtitle: 'Compra con confianza',
   ),
 ];
 

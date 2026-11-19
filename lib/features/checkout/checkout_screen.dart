@@ -42,6 +42,7 @@ import '../../main.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
+import '../catalog/quick_add_button.dart';
 import '../orders/order_detail_screen.dart';
 import '../orders/orders_screen.dart';
 import 'checkout_double_charge_sheet.dart';
@@ -96,16 +97,58 @@ Future<void> openBag(
 }) {
   // A two-sided window keeps the bag on its right side.
   if (DuoWorkspace.showBag(context)) return Future<void>.value();
+  return showBagDrawer(
+    context,
+    title: 'Carrito',
+    launchSecureCheckout: launchSecureCheckout,
+  );
+}
+
+Future<void> showBagDrawer(
+  BuildContext context, {
+  required String title,
+  SecureCheckoutLauncher? launchSecureCheckout,
+}) async {
+  // Adds from recommendations update the bag already visible.
+  if (ModalRoute.of(context)?.settings.name == DuoWorkspace.bagRoute) return;
+  final origin = FocusManager.instance.primaryFocus;
   final store = StoreScope.of(context);
-  return DuoWorkspace.navigatorFor(context).push(
-    monettaFadeRoute(
-      StoreScope(
-        notifier: store,
-        child: BagScreen(launchSecureCheckout: launchSecureCheckout),
+  await showGeneralDialog<void>(
+    context: context,
+    anchorPoint: presentationAnchor(context),
+    routeSettings: const RouteSettings(name: DuoWorkspace.bagRoute),
+    barrierLabel: 'Cerrar carrito',
+    barrierDismissible: true,
+    barrierColor: context.monettaColors.scrim,
+    transitionDuration: reduceMotion(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 240),
+    transitionBuilder: (_, animation, __, child) => SlideTransition(
+      position: Tween(begin: const Offset(1, 0), end: Offset.zero)
+          .chain(CurveTween(curve: Curves.easeOutCubic))
+          .animate(animation),
+      child: child,
+    ),
+    pageBuilder: (_, __, ___) => Align(
+      alignment: Alignment.centerRight,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 14),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: StoreScope(
+            notifier: store,
+            child: BagScreen(
+              drawerTitle: title,
+              launchSecureCheckout: launchSecureCheckout,
+            ),
+          ),
+        ),
       ),
-      settings: const RouteSettings(name: DuoWorkspace.bagRoute),
     ),
   );
+  if (origin?.context?.mounted == true && origin!.canRequestFocus) {
+    origin.requestFocus();
+  }
 }
 
 /// Acción reutilizable para que home y producto expongan una sola bolsa viva.
@@ -159,10 +202,12 @@ class BagScreen extends StatefulWidget {
   const BagScreen({
     this.launchSecureCheckout,
     this.embedded = false,
+    this.drawerTitle,
     super.key,
   });
 
   final SecureCheckoutLauncher? launchSecureCheckout;
+  final String? drawerTitle;
 
   /// The bag as the first page of a two-sided window's right side: no header
   /// or way back (the catalog stays on the left), no recommendations, and an
@@ -182,6 +227,7 @@ class _BagScreenState extends State<BagScreen> {
     final palette = context.boutique;
     final store = StoreScope.of(context);
     final lines = store.bagLines;
+    final drawerTitle = widget.drawerTitle;
     final cartScope = CartScope.maybeOf(context);
     final account = AccountScope.maybeOf(context)?.account;
     final sessionScope = cartScope == null
@@ -212,7 +258,7 @@ class _BagScreenState extends State<BagScreen> {
 
     return AdaptiveStorefrontScaffold(
       backgroundColor: palette.canvas,
-      appBar: widget.embedded
+      appBar: drawerTitle != null || widget.embedded
           ? null
           : _BoutiqueBar(
               leading: IconButton(
@@ -223,21 +269,57 @@ class _BagScreenState extends State<BagScreen> {
             ),
       body: SafeArea(
         bottom: true,
-        child: SystemUsableSurface(
-          child: lines.isEmpty
-              ? _EmptyBag(embedded: widget.embedded)
-              : _BagContents(
-                  lines: lines,
-                  launchSecureCheckout: widget.launchSecureCheckout,
-                  cartController: cartScope?.notifier,
-                  checkoutCoordinator: cartScope?.checkoutCoordinator,
-                  cartScope: sessionScope,
-                  localIntent: localIntent,
-                  embedded: widget.embedded,
+        child: Column(
+          children: [
+            if (drawerTitle != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 20, top: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Semantics(
+                        header: true,
+                        liveRegion: true,
+                        child: Text(drawerTitle, style: boutiqueDisplay(26)),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Cerrar carrito',
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
                 ),
+              ),
+            Expanded(
+              child: SystemUsableSurface(
+                child: lines.isEmpty
+                    ? _EmptyBag(embedded: widget.embedded)
+                    : _BagContents(
+                        lines: lines,
+                        launchSecureCheckout: widget.launchSecureCheckout,
+                        cartController: cartScope?.notifier,
+                        checkoutCoordinator: cartScope?.checkoutCoordinator,
+                        cartScope: sessionScope,
+                        localIntent: localIntent,
+                        embedded: widget.embedded,
+                        inDrawer: drawerTitle != null,
+                      ),
+              ),
+            ),
+            if (drawerTitle != null)
+              SafeArea(
+                top: false,
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Seguir comprando'),
+                ),
+              ),
+          ],
         ),
       ),
-      bottomNavigationBar: !SystemLayoutScope.of(context).supported
+      bottomNavigationBar: drawerTitle != null ||
+              !SystemLayoutScope.of(context).supported
           ? null
           : MonettaBottomNavigation(
               current: MonettaBottomDestination.bag,
@@ -297,6 +379,7 @@ class _BagContents extends StatelessWidget {
     required this.cartScope,
     required this.localIntent,
     this.embedded = false,
+    this.inDrawer = false,
   });
 
   final List<BagLine> lines;
@@ -309,6 +392,7 @@ class _BagContents extends StatelessWidget {
   /// On a two-sided window's right side the catalog beside it is the place to
   /// discover more, so the bag carries no recommendations.
   final bool embedded;
+  final bool inDrawer;
 
   @override
   Widget build(BuildContext context) {
@@ -486,7 +570,7 @@ class _BagContents extends StatelessWidget {
         final bagIds = {for (final line in lines) line.product.id};
         final recommendations = embedded
             ? const SizedBox.shrink()
-            : _BagRecommendations(excludeIds: bagIds);
+            : _BagRecommendations(excludeIds: bagIds, inDrawer: inDrawer);
 
         if (wide) {
           return SingleChildScrollView(
@@ -539,8 +623,8 @@ class _BagContents extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.only(bottom: 32),
           children: [
-            const _CheckoutProgress(activeIndex: 0),
-            heading,
+            if (!inDrawer) const _CheckoutProgress(activeIndex: 0),
+            if (!inDrawer) heading,
             lineTiles,
             incentive,
             Padding(
@@ -1284,7 +1368,10 @@ class _BagLineTile extends StatelessWidget {
             child: SizedBox(
               width: 76,
               height: 92,
-              child: _ProductImage(url: line.product.primaryImage),
+              child: _ProductImage(
+                url: line.variant.imageUrls.firstOrNull ??
+                    line.product.primaryImage,
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -1432,7 +1519,7 @@ class _QuantityStepper extends StatelessWidget {
             _StepperButton(
               tooltip: 'Quitar uno',
               icon: Icons.remove,
-              onPressed: () => onChanged(quantity - 1),
+              onPressed: quantity <= 1 ? null : () => onChanged(quantity - 1),
             ),
             ConstrainedBox(
               constraints: const BoxConstraints(minWidth: 36),
@@ -1488,27 +1575,29 @@ class _StepperButton extends StatelessWidget {
 }
 
 class _BagRecommendations extends StatelessWidget {
-  const _BagRecommendations({required this.excludeIds});
+  const _BagRecommendations({required this.excludeIds, required this.inDrawer});
 
   final Set<String> excludeIds;
+  final bool inDrawer;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final store = StoreScope.of(context);
+    final limit = inDrawer ? 3 : 8;
     final feed = store
         .feed(limit: 20)
         .map((r) => r.product)
         .where(
           (p) => !excludeIds.contains(p.id) && p.isInStock,
         )
-        .take(8)
+        .take(limit)
         .toList(growable: false);
     final items = feed.isNotEmpty
         ? feed
         : store.products
             .where((p) => !excludeIds.contains(p.id) && p.isInStock)
-            .take(8)
+            .take(limit)
             .toList(growable: false);
     if (items.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -1519,7 +1608,7 @@ class _BagRecommendations extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              'Recomendaciones',
+              inDrawer ? 'Le quedaría bien con esto…' : 'Recomendaciones',
               style: boutiqueTitle(color: palette.ink),
             ),
           ),
@@ -1541,9 +1630,25 @@ class _BagRecommendations extends StatelessWidget {
                 final product = items[index];
                 return SizedBox(
                   width: 148,
-                  child: ProductCard(
-                    product: product,
-                    density: ProductTileDensity.compact,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ProductCard(
+                        product: product,
+                        density: ProductTileDensity.compact,
+                      ),
+                      if (inDrawer)
+                        Positioned(
+                          top: 94,
+                          right: 4,
+                          child: ProductQuickAddButton(
+                            key: ValueKey(
+                                'bag-recommendation-add-${product.id}'),
+                            product: product,
+                            productName: product.title,
+                          ),
+                        ),
+                    ],
                   ),
                 );
               },

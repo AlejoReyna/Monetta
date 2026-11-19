@@ -7,8 +7,8 @@ import 'package:monetta_app/features/home/home_screen.dart';
 import 'package:monetta_app/main.dart';
 
 void main() {
-  testWidgets(
-      'the brands grid shows the catalog brands with their logo artwork', (
+  testWidgets('the brands rail shows configured brands with their logo artwork',
+      (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(390, 900));
@@ -44,32 +44,18 @@ void main() {
     );
     await tester.pump();
 
-    // All twelve configured brands, each with its bundled logo, including
-    // those the bundled catalog has no product of yet (Rhode, Olaplex...).
-    for (final brand in HomeContent.fallback.brands) {
-      expect(
-        find.byKey(ValueKey('home-brand-${brand.handle}')),
-        findsOneWidget,
-      );
+    final rail = find.descendant(
+      of: find.byKey(const ValueKey('home-brands-rail')),
+      matching: find.byType(Scrollable),
+    );
+    await tester.ensureVisible(rail);
+    await tester.pump();
+    expect(tester.widget<Scrollable>(rail).axis, Axis.horizontal);
+    for (final brand in guideBrandsFor(HomeContent.fallback.brands)) {
+      final tile = find.byKey(ValueKey('home-brand-${brand.handle}'));
+      await tester.scrollUntilVisible(tile, 150, scrollable: rail);
+      expect(find.descendant(of: tile, matching: find.byType(Image)),
+          findsOneWidget);
     }
-    expect(
-      find.descendant(
-        of: brandsSection,
-        matching: find.byType(SlideTransition),
-      ),
-      findsNWidgets(12),
-    );
-    expect(
-      find.byKey(const ValueKey('home-brand-entrance-coach')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey('home-brand-entrance-michael-kors')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: brandsSection, matching: find.byType(Image)),
-      findsNWidgets(12),
-    );
   });
 }

@@ -147,19 +147,24 @@
     });
   }
 
-  function renderPrice(target, variant) {
+  function renderPrice(target, variant, currency) {
     const price = document.createElement('span');
     price.className = 'price';
-    price.textContent = variant.price;
+    price.className = 'price v43-price__current';
+    price.textContent = variant.price + ' ';
+    const code = document.createElement('small');
+    code.textContent = currency;
+    price.append(code);
     const parts = [price];
     if (variant.compare) {
       const compare = document.createElement('s');
       compare.className = 'price-compare';
       compare.textContent = variant.compare;
       const badge = document.createElement('span');
-      badge.className = 'badge badge--sale';
+      badge.className = 'v43-price__discount';
       badge.textContent = `-${variant.pct}%`;
-      parts.push(compare, badge);
+      parts.unshift(compare);
+      parts.push(badge);
     }
     target.replaceChildren(...parts);
   }
@@ -172,15 +177,21 @@
     const price = root.querySelector('[data-quick-view-price]');
     const photo = root.querySelector('[data-quick-view-photo]');
     const stock = root.querySelector('[data-quick-view-stock]');
-    const added = root.querySelector('[data-quick-view-added]');
+    const error = root.querySelector('[data-quick-view-error]');
+    const pdp = root.querySelector('[data-quick-view-pdp]');
+    if (trigger.hasAttribute('data-require-option')) groups.forEach((group) => {
+      const checked = group.querySelector('input:checked');
+      if (checked) checked.checked = false;
+    });
     let chosen = null;
     const update = () => {
-      if (added) added.hidden = true;
+      if (error) error.hidden = true;
       const picked = groups.map((group) => group.querySelector('input:checked')?.value ?? null);
       const complete = picked.every((value) => value !== null);
       chosen = groups.length === 0 ? variants[0] : complete ? variants.find((v) => v.options.every((o, i) => o === picked[i])) || null : null;
       if (chosen) {
-        renderPrice(price, chosen);
+        renderPrice(price, chosen, root.dataset.currency);
+        pdp.href = `${root.dataset.productUrl}?variant=${chosen.id}`;
         if (chosen.image && photo) {
           photo.src = chosen.image;
           // The highlighted thumbnail follows the variant's photo when it is one of the four shown.
@@ -191,6 +202,7 @@
           }
         }
       }
+      if (!chosen) pdp.href = root.dataset.productUrl;
       const ready = Boolean(chosen?.available);
       if (stock) {
         // Shopify's own count, only when it tracks the piece and refuses overselling; otherwise just whether it can be bought.
@@ -210,15 +222,20 @@
         thumb.setAttribute('aria-current', 'true');
       });
     });
-    // UI v4.1: the preview stays open and confirms in place; the bag is not opened.
     add.addEventListener('click', async () => {
       if (!chosen?.available || add.dataset.pending) return;
-      add.dataset.pending = 'true';
-      if (added) added.hidden = true;
+      window.Monetta.setPending(add, true);
+      if (error) error.hidden = true;
       const option = groups.length ? ` (${chosen.options.join(' / ')})` : '';
-      const result = await window.Monetta.cart.add({ id: chosen.id, quantity: 1, name: `${root.dataset.productTitle || ''}${option}`, trigger: add, open: false });
-      if (result?.ok && added) added.hidden = false;
-      delete add.dataset.pending;
+      try {
+        const result = await window.Monetta.cart.add({ id: chosen.id, quantity: 1, name: `${root.dataset.productTitle || ''}${option}`, trigger: add });
+        if (!result.ok && error) {
+          error.textContent = result.message;
+          error.hidden = false;
+        }
+      } finally {
+        window.Monetta.setPending(add, false);
+      }
     });
     update();
   }
@@ -230,8 +247,9 @@
     button.dataset.pending = 'true';
     button.setAttribute('aria-busy', 'true');
     try {
-      const root = window.Shopify?.routes?.root || '/';
-      const response = await fetch(`${root}products/${encodeURIComponent(button.dataset.quickView)}?section_id=monetta-quick-view`, { credentials: 'same-origin' });
+      const url = new URL(button.dataset.productUrl, location.href);
+      url.searchParams.set('section_id', 'monetta-quick-view');
+      const response = await fetch(url, { credentials: 'same-origin', signal: AbortSignal.timeout(25000) });
       const view = response.ok ? new DOMParser().parseFromString(await response.text(), 'text/html').querySelector('[data-quick-view-root]') : null;
       if (!view) {
         window.location.assign(button.dataset.productUrl);
@@ -282,32 +300,14 @@
     picks.forEach((pick, item) => pick.addEventListener('click', () => show(item)));
   }
 
-  async function submitFeed(form, checkout) {
-    const id = form.querySelector('[name="id"]')?.value;
-    if (!id || !window.Monetta?.add) return false;
-    const result = await window.Monetta.add({
-      id,
-      quantity: 1,
-      name: form.dataset.productName || '',
-      open: false,
-      trigger: form.querySelector('button'),
-    });
-    if (result?.ok && checkout) window.location.assign(checkout);
-    return true;
-  }
-
-  function initFeed(root) {
-    if (root.dataset.v41Feed) return;
-    root.dataset.v41Feed = 'true';
-    root.addEventListener('submit', (event) => {
-      const form = event.target;
-      if (!(form instanceof HTMLFormElement)) return;
-      if (!form.matches('[data-feed-add], [data-feed-buy]')) return;
-      if (!window.Monetta?.add) return;
-      event.preventDefault();
-      submitFeed(form, form.dataset.checkout || '');
-    });
-  }
+  document.addEventListener('submit', (event) => {
+    const form = event.target.closest?.('[data-rewards-register]');
+    if (!form) return;
+    event.preventDefault();
+    const destination = new URL(form.action);
+    destination.searchParams.set('login_hint', form.elements.login_hint.value.trim());
+    window.location.assign(destination);
+  });
 
   const bind = (scope = document) => {
     scope.querySelectorAll('[data-guia-carousel]').forEach(initCarousel);
@@ -316,7 +316,6 @@
     scope.querySelectorAll('[data-guia-recent]').forEach(initRecent);
     scope.querySelectorAll('[data-guia-copy]').forEach(initCopy);
     scope.querySelectorAll('[data-v41-feature]').forEach(initFeature);
-    scope.querySelectorAll('.v41-feed').forEach(initFeed);
   };
   bind();
   document.addEventListener('shopify:section:load', (event) => bind(event.target));

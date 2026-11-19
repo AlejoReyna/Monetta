@@ -85,7 +85,8 @@ class _CategoryPhotoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final spec = guideAsset('homePhoto:${entry.assetId}', forHome: true);
+    final kind = entry.assetId.startsWith('B') ? 'banner' : 'homePhoto';
+    final spec = guideAsset('$kind:${entry.assetId}', forHome: true);
     return Semantics(
       button: true,
       label: 'Ver ${entry.label}',
@@ -98,13 +99,13 @@ class _CategoryPhotoTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: ClipRRect(
-                borderRadius: BoutiqueRadius.tile,
+              child: GuideGlassSurface(
+                radius: 16,
                 child: spec == null
                     ? ColoredBox(color: palette.surfaceDeep)
                     : Image.asset(
                         spec.path,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain,
                         excludeFromSemantics: true,
                       ),
               ),

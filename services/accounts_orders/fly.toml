@@ -35,15 +35,20 @@ primary_region = "dfw"
 
 [processes]
   app = "node dist/api/server.js"
+  worker = "node dist/rewards/worker.js"
 
-# Engagement is disabled in staging. Keeping its worker out of this release
-# avoids paying for a second idle Machine before notification configuration is
-# explicitly enabled and tested.
+# Push delivery runs on the separately managed notifications Machine.
+# Keep the existing rewards maintenance worker in the deploy configuration.
 
 [[vm]]
   size = "shared-cpu-1x"
   memory = "256mb"
   processes = ["app"]
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+  processes = ["worker"]
 
 [http_service]
   processes = ["app"]

@@ -17,13 +17,13 @@ class HomeWholesaleBanner extends StatelessWidget {
       key: const ValueKey('home-section-offers'),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: GuideBanner(
-        id: 'B04',
+        id: 'B04-editorial',
+        overlayAction: true,
         action: ClientGuideButton(
           key: const ValueKey('home-wholesale-button'),
           label: 'Comenzar a vender',
           onPressed: onOpenWholesale,
         ),
-        onTap: onOpenWholesale,
       ),
     );
   }

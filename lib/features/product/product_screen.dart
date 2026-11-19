@@ -30,6 +30,7 @@ import '../catalog/product_card.dart';
 import '../catalog/product_tile.dart' show PackshotBlend;
 import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
+import '../checkout/mini_cart.dart';
 import '../catalog/product_controls.dart';
 import 'product_recommendations.dart';
 import 'product_zoom.dart';
@@ -81,9 +82,39 @@ class _ProductScreenState extends State<ProductScreen> {
   final Stopwatch _dwell = Stopwatch()..start();
   final PageController _gallery = PageController();
   final GlobalKey _shareSource = GlobalKey();
+  final GlobalKey _purchaseSlot = GlobalKey();
+  final GlobalKey _purchaseViewport = GlobalKey();
+  final GlobalKey _addControl = GlobalKey();
+  bool _fixedAdd = false;
+  double _inlineAddHeight = kPurchaseButtonHeight;
+  bool _visibilityCheckScheduled = false;
+
+  void _checkPurchaseVisibility() {
+    if (_visibilityCheckScheduled) return;
+    _visibilityCheckScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _visibilityCheckScheduled = false;
+      if (!mounted) return;
+      final slot = _purchaseSlot.currentContext?.findRenderObject();
+      final viewport = _purchaseViewport.currentContext?.findRenderObject();
+      final safeBottom = MediaQuery.viewInsetsOf(context).bottom;
+      var fixed = false;
+      if (slot is RenderBox &&
+          viewport is RenderBox &&
+          safeBottom == 0 &&
+          slot.attached &&
+          viewport.attached) {
+        if (!_fixedAdd) _inlineAddHeight = slot.size.height;
+        final position = slot.localToGlobal(Offset.zero, ancestor: viewport);
+        fixed = position.dy >= viewport.size.height ||
+            position.dy + slot.size.height <= 0;
+      }
+      if (_fixedAdd != fixed) setState(() => _fixedAdd = fixed);
+    });
+  }
+
   String? _variantId;
   bool _selectionInitialized = false;
-  bool _added = false;
   int _page = 0;
   late int _variantIndex = widget.initialVariantIndex;
   final Set<String> _open = <String>{};
@@ -182,7 +213,6 @@ class _ProductScreenState extends State<ProductScreen> {
     if (_adding) return;
     setState(() {
       _adding = true;
-      _added = false;
     });
     final result = await tryAddSelectionToBag(context, product, _variantIndex);
     if (!mounted) return;
@@ -195,7 +225,7 @@ class _ProductScreenState extends State<ProductScreen> {
         if (buyNow) {
           await openBag(context);
         } else {
-          setState(() => _added = true);
+          await showMiniCart(context);
         }
       case BagAddStatus.soldOut:
         _showMessage('Esta opción está agotada.');
@@ -280,8 +310,6 @@ class _ProductScreenState extends State<ProductScreen> {
         selectionMissing ? null : selectedVariant(product, _variantIndex);
     final price = selected?.price ?? product.price;
     final compare = selected?.compareAtPrice;
-    final onSale = selectionOnSale(product, _variantIndex);
-    final discount = selectionDiscountPercent(product, _variantIndex);
     final inStock =
         !selectionMissing && selectionInStock(product, _variantIndex);
     final memberImages = imagesForVariant(product, selected);
@@ -303,6 +331,19 @@ class _ProductScreenState extends State<ProductScreen> {
           );
     final palette = context.boutique;
 
+    _checkPurchaseVisibility();
+    final addButton = KeyedSubtree(
+      key: _addControl,
+      child: PurchaseDockButton(
+        key: const Key('purchase-dock-primary'),
+        label: _adding ? 'Agregando…' : 'Agregar al carrito',
+        pending: _adding,
+        large: true,
+        halo: _fixedAdd,
+        onPressed: _adding ? null : () => _add(product),
+      ),
+    );
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -322,6 +363,9 @@ class _ProductScreenState extends State<ProductScreen> {
           top: false,
           bottom: false,
           child: ProductAdaptiveBody(
+            key: _purchaseViewport,
+            onScroll: _checkPurchaseVisibility,
+            bottomAction: inStock && _fixedAdd ? addButton : null,
             galleryAccessoryHeight: images.length > 1 ? 100 : 0,
             // The gallery is a square as wide as the content: the body always
             // scrolls it (a list, or a scroll view per region), so the height
@@ -410,56 +454,12 @@ class _ProductScreenState extends State<ProductScreen> {
                         ),
                       ),
                       const SizedBox(height: BoutiqueSpace.md),
-                      Wrap(
-                        spacing: BoutiqueSpace.md,
-                        runSpacing: 6,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(
-                            formatShopperPrice(price),
-                            key: const Key('product-price'),
-                            style: boutiqueText(
-                              size: 22,
-                              weight: FontWeight.w600,
-                              color: inStock ? palette.ink : palette.inkMuted,
-                              height: 1.2,
-                            ),
-                          ),
-                          // Previous price + -% render only off real
-                          // `compare_at` data — never otherwise.
-                          if (onSale && compare != null) ...[
-                            Text(
-                              formatShopperPrice(compare),
-                              style: boutiqueText(
-                                size: 14,
-                                color: palette.inkMuted,
-                                height: 1.2,
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                            ),
-                            if (discount > 0)
-                              Container(
-                                key: const ValueKey('discount-badge'),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: palette.saleSurface,
-                                  borderRadius: BoutiqueRadius.capsule,
-                                ),
-                                child: Text(
-                                  '-$discount%',
-                                  style: boutiqueText(
-                                    size: 13,
-                                    weight: FontWeight.w500,
-                                    color: palette.sale,
-                                    height: 1.2,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ],
+                      SelectionPriceView(
+                        price: price,
+                        compare: compare,
+                        currentKey: const Key('product-price'),
+                        size: 22,
+                        inStock: inStock,
                       ),
                       if (selectable.isNotEmpty) ...[
                         const SizedBox(height: BoutiqueSpace.lg),
@@ -472,35 +472,40 @@ class _ProductScreenState extends State<ProductScreen> {
                               _variantIndex = i;
                               _variantId = i < 0 ? null : selectable[i].id;
                               _page = 0;
-                              _added = false;
                               if (_gallery.hasClients) _gallery.jumpToPage(0);
                             });
                           },
                         ),
                       ],
                       if (inStock) ...[
-                        PurchaseDockButton(
-                          key: const Key('purchase-dock-primary'),
-                          label: _adding ? 'Agregando…' : 'Agregar al carrito',
-                          pending: _adding,
-                          large: true,
-                          onPressed: _adding ? null : () => _add(product),
-                        ),
-                        const SizedBox(height: BoutiqueSpace.sm),
-                        PurchaseOutlineButton(
-                          key: const Key('purchase-buy-now'),
-                          label: 'Comprar ahora',
-                          textColor: palette.ink,
-                          onPressed: _adding ? null : () => _buyNow(product),
-                        ),
+                        LayoutBuilder(builder: (context, constraints) {
+                          final slot = SizedBox(
+                            key: _purchaseSlot,
+                            height: _fixedAdd ? _inlineAddHeight : null,
+                            child: _fixedAdd ? null : addButton,
+                          );
+                          final buy = PurchaseOutlineButton(
+                            key: const Key('purchase-buy-now'),
+                            label: 'Comprar ahora',
+                            textColor: palette.ink,
+                            onPressed: _adding ? null : () => _buyNow(product),
+                          );
+                          if (constraints.maxWidth < 360 ||
+                              MediaQuery.textScalerOf(context).scale(14) > 16) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [slot, const SizedBox(height: 8), buy],
+                            );
+                          }
+                          return Row(children: [
+                            Expanded(child: slot),
+                            const SizedBox(width: 8),
+                            Expanded(child: buy),
+                          ]);
+                        }),
                         const SizedBox(height: BoutiqueSpace.lg),
                       ],
                       _AvailabilityLine(inStock: inStock),
-                      if (_added)
-                        Semantics(
-                          liveRegion: true,
-                          child: const Text('Agregado al carrito'),
-                        ),
                       const SizedBox(height: BoutiqueSpace.lg),
                       const ClientGuideServices(
                         key: Key('product-trust-row'),
@@ -721,7 +726,7 @@ class _Gallery extends StatelessWidget {
               if (!inStock)
                 const Positioned(
                   left: 8,
-                  bottom: 4,
+                  top: 8,
                   child: ProductSoldOutBadge(),
                 ),
               if (onPrevious != null)

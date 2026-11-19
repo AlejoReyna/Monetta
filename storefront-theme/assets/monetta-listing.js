@@ -23,6 +23,10 @@
       if (value !== '') params.append(name, String(value));
     }
     const target = new URL(form.getAttribute('action') || location.pathname, location.href);
+    if (document.querySelector('[data-offers]')) {
+      const query = new URLSearchParams(location.search).get('oferta');
+      if (query) params.set('oferta', query);
+    }
     target.search = params.toString();
     location.assign(target.href);
   });
@@ -161,4 +165,101 @@
   const searchHook = $('[data-search-autofocus]');
   const searchInput = searchHook && [searchHook, document.getElementById('header-search-input')].find(isShown);
   if (searchInput && !searchInput.value) searchInput.focus({ preventScroll: true });
+})();
+
+/* Ofertas: Liquid emits only eligible variants. Search the whole filtered
+ * collection before applying the local text query, preserving Shopify ordering. */
+(() => {
+  const root = document.querySelector('[data-offers]');
+  const grid = root?.querySelector('[data-grid]');
+  const form = root?.querySelector('[data-offers-search]');
+  if (!root || !form) return;
+  const field = form.elements.oferta;
+  const status = root.querySelector('[data-offers-status]');
+  const empty = root.querySelector('[data-offers-empty]');
+  const retry = root.querySelector('[data-offers-retry]');
+  const pagination = root.querySelector('[data-offers-pagination]');
+  const items = [...(grid?.children || [])];
+  const normalize = (value) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('es-MX');
+  const more = (scope, base = location.href) => {
+    const href = scope.querySelector('[data-offers-pagination] a')?.getAttribute('href');
+    return href ? new URL(href, base).href : null;
+  };
+  let next = more(root);
+  let loaded = !next;
+  let pending = false;
+  let query = new URLSearchParams(location.search).get('oferta') || '';
+  form.hidden = false;
+  field.value = query;
+
+  function display() {
+    if (!grid) return;
+    const words = normalize(query).trim().split(/\s+/).filter(Boolean);
+    const matches = items.filter((item) => words.every((word) => normalize(item.dataset.offerTerms).includes(word)));
+    const order = new URLSearchParams(location.search).get('sort_by');
+    if (order === 'price-ascending' || order === 'price-descending') {
+      const direction = order === 'price-ascending' ? 1 : -1;
+      matches.sort((a, b) => direction * (Number(a.dataset.offerPrice) - Number(b.dataset.offerPrice)));
+    }
+    grid.replaceChildren(...matches);
+    status.textContent = loaded ? `${matches.length} ${matches.length === 1 ? 'oferta' : 'ofertas'}` : '';
+    empty.hidden = !loaded || matches.length > 0;
+  }
+
+  async function load() {
+    if (pending) return;
+    if (loaded) {
+      display();
+      return;
+    }
+    pending = true;
+    retry.hidden = true;
+    status.textContent = 'Cargando ofertas…';
+    try {
+      while (next) {
+        const response = await fetch(next, { signal: AbortSignal.timeout(15000) });
+        if (!response.ok) throw new Error('offers');
+        const page = new DOMParser().parseFromString(await response.text(), 'text/html').querySelector('[data-offers]');
+        if (!page) throw new Error('offers');
+        items.push(...page.querySelectorAll('[data-offer-price]'));
+        const following = more(page, response.url);
+        if (following === next) throw new Error('offers');
+        next = following;
+      }
+      loaded = true;
+      if (pagination) pagination.hidden = true;
+      display();
+      if (history.state?.monettaOffersScroll != null) window.scrollTo(0, history.state.monettaOffersScroll);
+    } catch {
+      status.textContent = 'No pudimos consultar todas las ofertas.';
+      retry.hidden = false;
+    } finally {
+      pending = false;
+    }
+  }
+
+  root.addEventListener('click', (event) => {
+    if (event.target.closest('a[data-product-url]')) {
+      history.replaceState({ ...history.state, monettaOffersScroll: window.scrollY }, '', location.href);
+    }
+  });
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    query = field.value.trim();
+    const url = new URL(location.href);
+    if (query) url.searchParams.set('oferta', query);
+    else url.searchParams.delete('oferta');
+    history.replaceState({ ...history.state, monettaOffersScroll: null }, '', url);
+    load();
+  });
+
+  retry.addEventListener('click', load);
+  for (const link of root.querySelectorAll('.chip--removable, a[href*="sort_by="]')) {
+    if (!query) break;
+    const url = new URL(link.href);
+    url.searchParams.set('oferta', query);
+    link.href = url;
+  }
+  load();
 })();

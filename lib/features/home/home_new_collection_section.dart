@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/shopper_copy.dart';
-import '../../app/theme.dart' show formatShopperPrice;
 import '../../reco/explainer.dart' show brandLabel;
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../boutique/boutique_tokens.dart';
+import '../catalog/quick_add_button.dart';
 import '../boutique/client_guide_components.dart';
 import '../catalog/product_card.dart';
 import '../catalog/product_tile.dart';
@@ -35,14 +35,17 @@ class HomeNewCollectionSection extends StatefulWidget {
 class _HomeNewCollectionSectionState extends State<HomeNewCollectionSection> {
   int _selectedIndex = 0;
   int _variantIndex = 0;
+  bool _variantChosen = false;
 
-  Product? get _selected =>
-      widget.products.isEmpty ? null : widget.products[_selectedIndex];
+  Product? get _selected => widget.products.isEmpty
+      ? null
+      : widget.products[_selectedIndex % widget.products.length];
 
   void _selectProduct(int index) {
     setState(() {
       _selectedIndex = index;
       _variantIndex = 0;
+      _variantChosen = false;
     });
   }
 
@@ -70,8 +73,6 @@ class _HomeNewCollectionSectionState extends State<HomeNewCollectionSection> {
     final palette = context.boutique;
     final price = selectionPrice(product, _variantIndex);
     final compare = selectionCompareAt(product, _variantIndex);
-    final onSale = selectionOnSale(product, _variantIndex);
-    final discount = selectionDiscountPercent(product, _variantIndex);
     final inStock = selectionInStock(product, _variantIndex);
     final wishlisted = store.wishlist.contains(product.id);
 
@@ -124,6 +125,22 @@ class _HomeNewCollectionSectionState extends State<HomeNewCollectionSection> {
                                       store.toggleWishlist(product.id)),
                                 ),
                               ),
+                              if (inStock)
+                                Positioned(
+                                  right: 4,
+                                  bottom: 4,
+                                  child: ProductQuickAddButton(
+                                    key: ValueKey(
+                                        'new-collection-add-${product.id}'),
+                                    product: product,
+                                    productName: product.title,
+                                    selectedVariantId: _variantChosen
+                                        ? selectedVariant(
+                                                product, _variantIndex)
+                                            ?.id
+                                        : null,
+                                  ),
+                                ),
                               if (products.length > 1) ...[
                                 Positioned(
                                   left: 4,
@@ -190,32 +207,12 @@ class _HomeNewCollectionSectionState extends State<HomeNewCollectionSection> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Text(
-                                    formatShopperPrice(price),
-                                    style: boutiqueText(
-                                      size: 16,
-                                      weight: FontWeight.w600,
-                                      color: palette.ink,
-                                    ),
+                                  SelectionPriceView(
+                                    price: price,
+                                    compare: compare,
+                                    size: 16,
+                                    inStock: inStock,
                                   ),
-                                  if (onSale && compare != null) ...[
-                                    Text(
-                                      formatShopperPrice(compare),
-                                      style: boutiqueText(
-                                        size: 13,
-                                        color: palette.inkMuted,
-                                        decoration: TextDecoration.lineThrough,
-                                      ),
-                                    ),
-                                    Text(
-                                      '-$discount%',
-                                      style: boutiqueText(
-                                        size: 13,
-                                        color: palette.sale,
-                                        weight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
                                   if (!inStock)
                                     Text(
                                       'Agotado',
@@ -239,8 +236,10 @@ class _HomeNewCollectionSectionState extends State<HomeNewCollectionSection> {
                           child: ProductOptionSelector(
                             product: product,
                             selectedIndex: _variantIndex,
-                            onSelect: (index) =>
-                                setState(() => _variantIndex = index),
+                            onSelect: (index) => setState(() {
+                              _variantIndex = index;
+                              _variantChosen = true;
+                            }),
                           ),
                         ),
                       ],

@@ -2284,5 +2284,24 @@
         "default": "equal-width-buttons"
       }
     ]
+  },
+  {
+    "name": "Monetta Rewards",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "monetta_rewards_shipping",
+        "label": "Mostrar envío gratis con cuenta",
+        "info": "Activa solo después de verificar la tarifa de Rewards en checkout.",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "monetta_rewards_signup",
+        "label": "Mostrar registro a Rewards",
+        "info": "Activa con cuentas hospedadas y condiciones de envío y cashback publicadas.",
+        "default": false
+      }
+    ]
   }
 ]

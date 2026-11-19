@@ -60,17 +60,22 @@
 
   /* ---------------------------------------------------------------- dialogs (menu drawer, filters, bag sheet) */
   const openDialogs = [];
-  let opener = null;
+  const openers = new WeakMap();
+  const closing = new WeakSet();
 
   function openDialog(dialog, trigger) {
     if (!dialog || dialog.open) return;
-    opener = trigger || document.activeElement;
+    openers.set(dialog, trigger || document.activeElement);
     // Locking the page scroll removes the scrollbar; the ported html.is-locked rule pads by --scrollbar-comp so nothing shifts.
-    document.documentElement.style.setProperty('--scrollbar-comp', `${Math.max(0, window.innerWidth - document.documentElement.clientWidth)}px`);
+    if (!openDialogs.length) {
+      document.documentElement.style.setProperty('--scrollbar-comp', `${Math.max(0, window.innerWidth - document.documentElement.clientWidth)}px`);
+    }
     dialog.showModal();
     document.documentElement.classList.add('is-locked');
     // Two frames: the panel must paint at its start position before the transition to .is-open.
-    requestAnimationFrame(() => requestAnimationFrame(() => dialog.classList.add('is-open')));
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (dialog.open && !closing.has(dialog)) dialog.classList.add('is-open');
+    }));
     openDialogs.push(dialog);
     const focusTarget = $('[data-autofocus]', dialog) || $('.overlay__panel button, .overlay__panel a, .overlay__panel input', dialog);
     focusTarget?.focus({ preventScroll: true });
@@ -78,14 +83,23 @@
   }
 
   function closeDialog(dialog, { restoreFocus = true } = {}) {
-    if (!dialog?.open) return;
+    if (!dialog?.open || closing.has(dialog) || openDialogs.at(-1) !== dialog) return;
+    closing.add(dialog);
     dialog.classList.remove('is-open');
     const finish = () => {
       if (dialog.open) dialog.close();
       const index = openDialogs.indexOf(dialog);
       if (index >= 0) openDialogs.splice(index, 1);
       if (!openDialogs.length) document.documentElement.classList.remove('is-locked');
-      if (restoreFocus && opener && document.contains(opener)) opener.focus({ preventScroll: true });
+      closing.delete(dialog);
+      const opener = openers.get(dialog);
+      openers.delete(dialog);
+      if (restoreFocus) {
+        const parent = openDialogs.at(-1);
+        const target = opener?.isConnected && opener.getClientRects().length
+          ? opener : (parent?.querySelector('[data-overlay-close]:is(button)') || $('#MainContent'));
+        target?.focus({ preventScroll: true });
+      }
       dialog.dispatchEvent(new CustomEvent('monetta:dialog-close', { bubbles: true }));
     };
     if (reduceMotion()) finish();

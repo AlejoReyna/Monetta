@@ -160,10 +160,12 @@ class CollectionScreen extends StatefulWidget {
     this.story,
     this.approvedNewArrival,
     this.initialPanel,
+    this.offersCollection = false,
     super.key,
   });
 
   final String title;
+  final bool offersCollection;
   final CatalogInitialPanel? initialPanel;
   final String? story;
   final bool Function(Product)? approvedNewArrival;
@@ -195,6 +197,9 @@ class _CollectionScreenState extends State<CollectionScreen> {
   final ScrollController _scroll = ScrollController();
 
   void _apply(_CollectionFilters filters) {
+    if (widget.offersCollection) {
+      filters = filters.copyWith(offersOnly: true, inStockOnly: true);
+    }
     if (_queryController.text != filters.query) {
       _queryController.text = filters.query;
     }
@@ -245,6 +250,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
         brand: widget.filter.brand,
         silhouette: widget.filter.silhouette,
         category: widget.filter.category,
+        offersOnly: widget.offersCollection,
+        inStockOnly: widget.offersCollection,
       );
 
   @override
@@ -462,6 +469,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
         notifier: store,
         child: _CollectionFilterSheet(
           allowNew: widget.approvedNewArrival != null,
+          offersCollection: widget.offersCollection,
           initial: _filters,
           reset: _initialFilters,
           brands: _brandsFor(scopedItems, store),
@@ -640,7 +648,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                             ),
                           ),
                         ),
-                      if (_filters.offersOnly)
+                      if (_filters.offersOnly && !widget.offersCollection)
                         InputChip(
                           labelStyle: boutiqueText(
                             size: 14,
@@ -660,7 +668,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
                           onDeleted: () =>
                               _apply(_filters.copyWith(color: null)),
                         ),
-                      if (_filters.inStockOnly)
+                      if (_filters.inStockOnly && !widget.offersCollection)
                         InputChip(
                           labelStyle: boutiqueText(
                             size: 14,
@@ -1039,12 +1047,14 @@ class _CollectionFilterSheet extends StatefulWidget {
     this.colors = const [],
     this.priceBands = const [],
     this.allowNew = false,
+    this.offersCollection = false,
   });
   final _CollectionFilters initial, reset;
   final List<String> brands, silhouettes, categories, colors, priceBands;
   final String title;
   final int Function(_CollectionFilters) resultCount;
   final bool allowNew;
+  final bool offersCollection;
   @override
   State<_CollectionFilterSheet> createState() => _CollectionFilterSheetState();
 }
@@ -1310,22 +1320,24 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                               _selection.copyWith(newOnly: value),
                             ),
                           ),
-                        CheckboxListTile(
-                          key: const Key('collection-filter-offers'),
-                          title: const Text('Ofertas'),
-                          value: _selection.offersOnly,
-                          onChanged: (value) => _select(
-                            _selection.copyWith(offersOnly: value),
+                        if (!widget.offersCollection)
+                          CheckboxListTile(
+                            key: const Key('collection-filter-offers'),
+                            title: const Text('Ofertas'),
+                            value: _selection.offersOnly,
+                            onChanged: (value) => _select(
+                              _selection.copyWith(offersOnly: value),
+                            ),
                           ),
-                        ),
-                        CheckboxListTile(
-                          key: const Key('collection-filter-stock'),
-                          title: const Text('Disponibles'),
-                          value: _selection.inStockOnly,
-                          onChanged: (value) => _select(
-                            _selection.copyWith(inStockOnly: value),
+                        if (!widget.offersCollection)
+                          CheckboxListTile(
+                            key: const Key('collection-filter-stock'),
+                            title: const Text('Disponibles'),
+                            value: _selection.inStockOnly,
+                            onChanged: (value) => _select(
+                              _selection.copyWith(inStockOnly: value),
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),

@@ -8,32 +8,34 @@
   assign mode = section.settings.mode
   assign heading_id = section.id | append: '-heading'
   assign wa = 'https://wa.me/528261066868'
-  assign group_1_url = 'https://chat.whatsapp.com/CFdzcaBHZlsJqtETPHvtec'
-  assign group_2_url = 'https://chat.whatsapp.com/Kob3rTxvWzO53KVtXxS9DC'
-  assign facebook_group_url = 'https://www.facebook.com/share/g/1937VZAXta/'
+  assign group_1_url = section.settings.group_1_url
+  assign group_2_url = section.settings.group_2_url
+  assign facebook_group_url = section.settings.facebook_group_url
 -%}
 {%- case mode -%}
   {%- when 'mayoreo' -%}
     {%- capture catalog_url -%}{% render 'monetta-guia-url', key: 'catalogo' %}{%- endcapture -%}
     <div class="guia-page guia-page--mayoreo" {{ section.shopify_attributes }}>
-      {% render 'monetta-guia-hero', photo: 'mayoreo-banner', lettered: true, title: 'Mayoreo', caps: true, italic: true, body: 'Obtén precios especiales en productos originales importados de tus marcas favoritas.', focus: '8% 50%', eager: true, mobile_title: 'monetta-v41-b32-titulo.png', mobile_title_size: '720x159', mobile_body: 'monetta-v41-b32-descripcion.png', mobile_body_size: '720x262', tone: '#f7f5f6' %}
+      {% render 'monetta-guia-hero', photo: 'mayoreo-banner', banner: 'B32_mayoreo', lettered: true, title: 'Mayoreo', caps: true, italic: true, body: 'Obtén precios especiales en productos originales importados de tus marcas favoritas.', focus: '8% 50%', eager: true %}
       <section class="container guia-steps" aria-labelledby="{{ heading_id }}-steps">
         <h2 class="display display--section" id="{{ heading_id }}-steps">¿Cómo comprar?</h2>
         <ol class="guia-steps__list" tabindex="0" aria-label="Pasos para comprar a mayoreo">
           <li class="guia-step">{% render 'monetta-icon', name: 'bag', size: 30, class: 'guia-step__icon' %}<h3 class="guia-step__title">Elige tus productos</h3><p class="guia-step__body">Arma tu pedido seleccionando entre miles de modelos originales de tus marcas favoritas.</p></li>
-          <li class="guia-step"><span class="guia-step__icon">{% render 'monetta-nav-glyph', name: 'cart', size: 30 %}</span><h3 class="guia-step__title">Agrega mínimo 3 piezas</h3><p class="guia-step__body">Combina tus favoritos en el carrito y el descuento se aplica automáticamente.</p></li>
-          <li class="guia-step">{% render 'monetta-icon', name: 'wallet', size: 30, class: 'guia-step__icon' %}<h3 class="guia-step__title">Liquida o aparta</h3><p class="guia-step__body">Paga de contado o escríbenos por WhatsApp para apartar con $800 pesos de anticipo por pedido y liquida en 20 días.</p></li>
+          <li class="guia-step"><span class="guia-step__icon">{% render 'monetta-nav-glyph', name: 'cart', size: 30 %}</span><h3 class="guia-step__title">Agrega mínimo 3 piezas</h3><p class="guia-step__body">Consulta qué piezas y descuentos están disponibles para tu pedido.</p></li>
+          <li class="guia-step">{% render 'monetta-icon', name: 'wallet', size: 30, class: 'guia-step__icon' %}<h3 class="guia-step__title">Liquida o aparta</h3><p class="guia-step__body">Escríbenos por WhatsApp para conocer las opciones de pago y las condiciones de apartado.</p></li>
         </ol>
         <a class="guia-pill-button guia-steps__cta" href="{{ catalog_url | strip }}">Comienza a vender</a>
       </section>
+      {%- if group_1_url != blank or group_2_url != blank -%}
       <section class="container guia-community" aria-labelledby="{{ heading_id }}-community">
         <h2 class="guia-community__title" id="{{ heading_id }}-community">Únete a nuestra comunidad de emprendedores</h2>
         <p class="guia-community__body">Genera ingresos desde hoy muy fácil vendiendo miles de productos originales con nuestro sistema de venta por catálogo.</p>
         <ul class="guia-community__groups" role="list">
-          <li><a class="guia-wa" href="{{ group_1_url }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 40, class: 'guia-wa__icon' %}<span class="guia-wa__pill">Grupo 1</span><span class="visually-hidden"> (se abre en otra pestaña)</span></a></li>
-          <li><a class="guia-wa" href="{{ group_2_url }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 40, class: 'guia-wa__icon' %}<span class="guia-wa__pill">Grupo 2</span><span class="visually-hidden"> (se abre en otra pestaña)</span></a></li>
+          {% if group_1_url != blank %}<li><a class="guia-wa" href="{{ group_1_url | escape }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 40, class: 'guia-wa__icon' %}<span class="guia-wa__pill">Grupo 1</span><span class="visually-hidden"> (se abre en otra pestaña)</span></a></li>{% endif %}
+          {% if group_2_url != blank %}<li><a class="guia-wa" href="{{ group_2_url | escape }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 40, class: 'guia-wa__icon' %}<span class="guia-wa__pill">Grupo 2</span><span class="visually-hidden"> (se abre en otra pestaña)</span></a></li>{% endif %}
         </ul>
       </section>
+      {%- endif -%}
       <section class="container guia-benefits" aria-labelledby="{{ heading_id }}-benefits">
         <h2 class="display display--section" id="{{ heading_id }}-benefits">Beneficios</h2>
         <ul class="guia-benefits__list" role="list">
@@ -59,26 +61,29 @@
           </ul>
         </div>
       </section>
+      {% render 'monetta-rewards-register', heading_id: heading_id %}
     </div>
 
   {%- when 'contacto' -%}
     <div class="guia-page guia-page--contacto" {{ section.shopify_attributes }}>
-      {% render 'monetta-guia-hero', photo: 'contacto-banner', lettered: true, title: 'Tu boutique y proveedor de', accent: 'confianza.', body: 'Bienvenida a nuestro paraíso de modelos originales de marcas que amas, importados y con envíos garantizados a todo México.', focus: '8% 50%', eager: true, mobile_title: 'monetta-v41-b31-titulo.png', mobile_title_size: '720x406', mobile_body: 'monetta-v41-b31-descripcion.png', mobile_body_size: '720x240', tone: '#ece8e5' %}
+      {% render 'monetta-guia-hero', photo: 'contacto-banner', banner: 'B31_contacto', lettered: true, title: 'Tu boutique y proveedor de', accent: 'confianza.', body: 'Bienvenida a nuestro paraíso de modelos originales de marcas que amas, importados y con envíos garantizados a todo México.', focus: '8% 50%', eager: true %}
       <div class="container guia-contact">
         <section class="guia-contact__channels" aria-labelledby="{{ heading_id }}-channels">
           <h2 class="display display--section" id="{{ heading_id }}-channels">Contáctanos</h2>
           <p class="guia-contact__lede">Estamos para ayudarte</p>
           <a class="guia-wa" href="{{ wa }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 40, class: 'guia-wa__icon' %}<span class="guia-wa__pill">Enviar Whatsapp al 826 106 6868</span><span class="visually-hidden"> (se abre en otra pestaña)</span></a>
         </section>
+        {%- if group_1_url != blank or group_2_url != blank or facebook_group_url != blank -%}
         <section class="guia-contact__join" aria-labelledby="{{ heading_id }}-join">
           <h2 class="guia-contact__join-title" id="{{ heading_id }}-join">Únete</h2>
           <p class="guia-contact__lede">A nuestros grupos de emprendedores</p>
           <ul class="guia-contact__list" role="list">
-            <li><a class="guia-contact__row" href="{{ group_1_url }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 40, class: 'guia-contact__icon' %}<span class="guia-contact__text"><span class="guia-contact__title">Grupo 1</span><span class="guia-contact__sub">Únete a nuestro grupo de WhatsApp</span></span>{% render 'monetta-icon', name: 'chevronRight', size: 20, class: 'guia-contact__chevron' %}<span class="visually-hidden"> (se abre en otra pestaña)</span></a></li>
-            <li><a class="guia-contact__row" href="{{ group_2_url }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 40, class: 'guia-contact__icon' %}<span class="guia-contact__text"><span class="guia-contact__title">Grupo 2</span><span class="guia-contact__sub">Únete a nuestro grupo de WhatsApp</span></span>{% render 'monetta-icon', name: 'chevronRight', size: 20, class: 'guia-contact__chevron' %}<span class="visually-hidden"> (se abre en otra pestaña)</span></a></li>
-            <li><a class="guia-contact__row" href="{{ facebook_group_url }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'red-facebook', size: 40, class: 'guia-contact__icon' %}<span class="guia-contact__text"><span class="guia-contact__title">Grupo de Facebook</span><span class="guia-contact__sub">Únete a nuestra comunidad</span></span>{% render 'monetta-icon', name: 'chevronRight', size: 20, class: 'guia-contact__chevron' %}<span class="visually-hidden"> (se abre en otra pestaña)</span></a></li>
+            {% if group_1_url != blank %}<li><a class="guia-contact__row" href="{{ group_1_url | escape }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 40, class: 'guia-contact__icon' %}<span class="guia-contact__text"><span class="guia-contact__title">Grupo 1</span><span class="guia-contact__sub">Únete a nuestro grupo de WhatsApp</span></span>{% render 'monetta-icon', name: 'chevronRight', size: 20, class: 'guia-contact__chevron' %}<span class="visually-hidden"> (se abre en otra pestaña)</span></a></li>{% endif %}
+            {% if group_2_url != blank %}<li><a class="guia-contact__row" href="{{ group_2_url | escape }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 40, class: 'guia-contact__icon' %}<span class="guia-contact__text"><span class="guia-contact__title">Grupo 2</span><span class="guia-contact__sub">Únete a nuestro grupo de WhatsApp</span></span>{% render 'monetta-icon', name: 'chevronRight', size: 20, class: 'guia-contact__chevron' %}<span class="visually-hidden"> (se abre en otra pestaña)</span></a></li>{% endif %}
+            {% if facebook_group_url != blank %}<li><a class="guia-contact__row" href="{{ facebook_group_url | escape }}" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'red-facebook', size: 40, class: 'guia-contact__icon' %}<span class="guia-contact__text"><span class="guia-contact__title">Grupo de Facebook</span><span class="guia-contact__sub">Únete a nuestra comunidad</span></span>{% render 'monetta-icon', name: 'chevronRight', size: 20, class: 'guia-contact__chevron' %}<span class="visually-hidden"> (se abre en otra pestaña)</span></a></li>{% endif %}
           </ul>
         </section>
+        {%- endif -%}
         <section class="guia-contact__social" aria-labelledby="{{ heading_id }}-social">
           <h2 class="display display--section" id="{{ heading_id }}-social">Síguenos en redes</h2>
           <p class="guia-contact__lede">Descubre novedades, lanzamientos y más.</p>
@@ -88,65 +93,16 @@
     </div>
 
   {%- when 'rewards' -%}
-    {%- capture bags_url -%}{% render 'monetta-guia-url', key: 'bolsas' %}{%- endcapture -%}
-    {%- capture perfumes_url -%}{% render 'monetta-guia-url', key: 'perfumes' %}{%- endcapture -%}
-    {%- comment -%}
-      Monetta Rewards (slide 25; rewards_guide_screen.dart) and Comparte y gana (slide 26; rewards_share_screen.dart) on one
-      page: the app opens the second from the first's button, here a link to its section. There is no points backend, so
-      there is no balance or level, as in the app while the contract is pending.
-    {%- endcomment -%}
     <div class="container guia-page guia-page--rewards" {{ section.shopify_attributes }}>
       <h1 class="display display--page">Monetta Rewards</h1>
-      <p class="guia-rewards__lede">Tus compras, acumulas puntos.</p>
-      <div class="guia-rewards__notice" role="note">
-        {% render 'monetta-icon', name: 'info', size: 22, class: 'guia-rewards__notice-icon' %}
-        <p><strong>Monetta Rewards aún no está disponible</strong> No hay un saldo que mostrar. No se inventa un puntaje ni un nivel.</p>
-      </div>
-      <div class="guia-rewards__groups">
-        <section aria-labelledby="{{ heading_id }}-earn">
-          <h2 class="display display--section" id="{{ heading_id }}-earn">Cómo ganar puntos</h2>
-          <ul class="guia-rewards__rows" role="list">
-            <li class="guia-rewards__row">{% render 'monetta-icon', name: 'bag', size: 24, class: 'guia-rewards__icon' %}<span class="guia-rewards__title">Por cada compra</span></li>
-            <li class="guia-rewards__row">{% render 'monetta-icon', name: 'share', size: 24, class: 'guia-rewards__icon' %}<span class="guia-rewards__title">Compartir catálogo en redes</span></li>
-            <li class="guia-rewards__row">{% render 'monetta-icon', name: 'store', size: 24, class: 'guia-rewards__icon' %}<span class="guia-rewards__title">Comprar a mayoreo</span></li>
-          </ul>
-        </section>
-        <section aria-labelledby="{{ heading_id }}-redeem">
-          <h2 class="display display--section" id="{{ heading_id }}-redeem">Canjear puntos</h2>
-          <ul class="guia-rewards__rows" role="list">
-            <li class="guia-rewards__row">{% render 'monetta-icon', name: 'star', size: 24, class: 'guia-rewards__icon' %}<span class="guia-rewards__text"><span class="guia-rewards__title">Descuentos</span><span class="guia-rewards__sub">Usa tus puntos en tus compras</span></span></li>
-            <li class="guia-rewards__row">{% render 'monetta-icon', name: 'truck', size: 24, class: 'guia-rewards__icon' %}<span class="guia-rewards__text"><span class="guia-rewards__title">Envío gratis</span><span class="guia-rewards__sub">Canjea puntos por envíos</span></span></li>
-            <li class="guia-rewards__row">{% render 'monetta-icon', name: 'sparkle', size: 24, class: 'guia-rewards__icon' %}<span class="guia-rewards__text"><span class="guia-rewards__title">Acceso anticipado</span><span class="guia-rewards__sub">Sé la primera en nuevas colecciones</span></span></li>
-          </ul>
-        </section>
-      </div>
-      <a class="btn btn--primary guia-rewards__cta" href="#comparte-y-gana">Comparte y gana</a>
-
-      <section class="guia-rewards__share" id="comparte-y-gana" aria-labelledby="{{ heading_id }}-share" tabindex="-1">
-        <h2 class="display display--section" id="{{ heading_id }}-share">Comparte y gana</h2>
-        <div class="guia-share guia-share--page">
-          {% render 'monetta-guia-photo', name: 'comparte-gana-rewards', class: 'guia-share__photo', sizes: '(min-width: 1024px) 900px, 100vw' %}
-          <span class="guia-share__copy" aria-hidden="true"><span class="guia-share__script">Comparte</span><span class="guia-share__italic">y gana</span><span class="guia-share__body">Explora nuestros catálogos, compártelos con el mundo y comienza a ganar desde tu primer pedido.</span></span>
-        </div>
-        <p class="guia-rewards__lede">Comparte el catálogo de Monetta y gana puntos por cada persona que lo vea o compre.</p>
-        <p class="guia-rewards__pending">Puntos por compartir: Pendiente de contrato.</p>
-        <ul class="guia-rewards__list" role="list">
-          {%- assign bags_abs = bags_url | strip | prepend: request.origin -%}
-          {%- assign perfumes_abs = perfumes_url | strip | prepend: request.origin -%}
-          <li class="guia-copy" data-guia-copy>
-            {% render 'monetta-guia-photo', name: 'mayoreo-bolsos-carteras', class: 'guia-copy__photo', sizes: '72px' %}
-            <span class="guia-copy__text"><span class="guia-copy__title">Copiar enlace de catálogo de bolsos</span><span class="guia-copy__sub">Comparte esta colección.</span></span>
-            <button type="button" class="icon-button guia-copy__share" data-guia-share-button hidden aria-label="Compartir enlace de catálogo de bolsos">{% render 'monetta-icon', name: 'share', size: 22 %}</button>
-            <span class="guia-copy__field"><input type="text" readonly value="{{ bags_abs }}" aria-label="Enlace del catálogo de bolsos"><button type="button" class="icon-button" data-guia-copy-button aria-label="Copiar enlace de catálogo de bolsos">{% render 'monetta-icon', name: 'copy', size: 20 %}</button></span>
-          </li>
-          <li class="guia-copy" data-guia-copy>
-            {% render 'monetta-guia-photo', name: 'mayoreo-perfumes', class: 'guia-copy__photo', sizes: '72px' %}
-            <span class="guia-copy__text"><span class="guia-copy__title">Copiar enlace de catálogo de perfumes</span><span class="guia-copy__sub">Comparte esta colección.</span></span>
-            <button type="button" class="icon-button guia-copy__share" data-guia-share-button hidden aria-label="Compartir enlace de catálogo de perfumes">{% render 'monetta-icon', name: 'share', size: 22 %}</button>
-            <span class="guia-copy__field"><input type="text" readonly value="{{ perfumes_abs }}" aria-label="Enlace del catálogo de perfumes"><button type="button" class="icon-button" data-guia-copy-button aria-label="Copiar enlace de catálogo de perfumes">{% render 'monetta-icon', name: 'copy', size: 20 %}</button></span>
-          </li>
-        </ul>
-      </section>
+      {%- if customer -%}
+        <p class="guia-rewards__lede">Consulta tus compras desde tu cuenta Monetta.</p>
+        <a class="btn btn--primary" href="{{ routes.account_url }}">Ir a mi cuenta</a>
+      {%- elsif shop.customer_accounts_enabled -%}
+        <p class="guia-rewards__lede">Accede con tu correo para consultar tu cuenta.</p>
+        <a class="btn btn--primary" href="{{ routes.account_login_url }}">Iniciar sesión</a>
+      {%- endif -%}
+      <a class="btn btn--outline" href="{{ routes.all_products_collection_url }}">Ver catálogo</a>
     </div>
 {%- endcase -%}
 
@@ -154,6 +110,9 @@
 {
   "name": "Monetta · Guía (página)",
   "settings": [
+    { "type": "url", "id": "group_1_url", "label": "Grupo 1 autorizado" },
+    { "type": "url", "id": "group_2_url", "label": "Grupo 2 autorizado" },
+    { "type": "url", "id": "facebook_group_url", "label": "Grupo de Facebook autorizado" },
     {
       "type": "select",
       "id": "mode",
@@ -162,7 +121,7 @@
       "options": [
         { "value": "mayoreo", "label": "Mayoreo" },
         { "value": "contacto", "label": "Contacto" },
-        { "value": "rewards", "label": "Monetta Rewards y Comparte y gana" }
+        { "value": "rewards", "label": "Monetta Rewards" }
       ]
     }
   ],

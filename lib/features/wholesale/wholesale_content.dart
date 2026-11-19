@@ -11,7 +11,7 @@ abstract final class WholesalePresentation {
 
   /// Step 3 of «¿Cómo comprar?». The title is «Liquida o aparta».
   static const reservation =
-      'Paga de contado o escríbenos por WhatsApp para apartar con \$800 pesos de anticipo por pedido y liquida en 20 días.';
+      'Consulta las opciones de pago y las condiciones de apartado por WhatsApp.';
 
   /// Shipping line. The services row repeats it as «Envío gratis».
   static const shipping = 'Envío gratis en compras mayores a \$1,999 MXN.';

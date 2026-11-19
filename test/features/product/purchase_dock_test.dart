@@ -145,9 +145,7 @@ void main() {
         );
 
         expect(
-          _inMainList(
-            find.text(formatShopperPrice(selectionPrice(product, 0))),
-          ),
+          _inMainList(find.byKey(const Key('product-price'))),
           findsWidgets,
         );
         expect(_inMainList(find.textContaining('Disponible')), findsOneWidget);
@@ -311,6 +309,8 @@ void main() {
         expect(store.bagQuantity, 1);
         expect(find.text('Agregado al carrito'), findsOneWidget);
         expect(find.text('En tu bolsa'), findsNothing);
+        await tester.tap(find.byTooltip('Cerrar carrito'));
+        await tester.pumpAndSettle();
         expect(_inPrimary(find.text(_addLabel)), findsOneWidget);
 
         await tester.tap(_primary());

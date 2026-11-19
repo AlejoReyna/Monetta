@@ -26,7 +26,7 @@ const _collection = CollectionScreen(
   filter: CollectionFilter(category: 'bolsa'),
 );
 
-final _priceFormat = RegExp(r'^\$[\d,]+(\.\d\d)? MXN$');
+final _priceFormat = RegExp(r'^\$[\d,]+(\.\d\d)? mxn$');
 
 const _cardKey = Key('quick-view-card');
 
@@ -149,7 +149,7 @@ void main() {
 
   group('PREVIEW-03 content', () {
     testWidgets(
-        'PREVIEW-03 brand, name, a "\$… MXN" price, Stock «Disponible» and '
+        'PREVIEW-03 brand, name, a "\$… mxn" price, Stock «Disponible» and '
         'never «Últimas»', (tester) async {
       setPhoneView(tester);
       final store = await scriptedStore();
@@ -166,10 +166,13 @@ void main() {
         tester.widget<Text>(find.byKey(const Key('quick-view-name'))).data,
         shopperProductName(product.title),
       );
-      final price =
-          tester.widget<Text>(find.byKey(const Key('quick-view-price'))).data!;
+      final price = tester
+          .widget<Text>(find.byKey(const Key('quick-view-price')))
+          .textSpan!
+          .toPlainText();
       expect(price, matches(_priceFormat));
-      expect(price, formatShopperPrice(selectionPrice(product, 0)));
+      expect(
+          price, formatShopperPrice(selectionPrice(product, 0)).toLowerCase());
 
       expect(find.text('Stock'), findsOneWidget);
       final stock = find.byKey(const Key('quick-view-stock'));
@@ -221,7 +224,8 @@ void main() {
       final price = tester.getRect(find.byKey(const Key('quick-view-price')));
       final pill = tester.getRect(find.byKey(const ValueKey('discount-badge')));
       expect(find.text('-35%'), findsOneWidget);
-      expect(find.text(formatShopperPrice(1999)), findsOneWidget);
+      expect(find.text(formatShopperPrice(1999).replaceFirst(' MXN', '')),
+          findsOneWidget);
       expect(
         (pill.center.dy - price.center.dy).abs(),
         lessThan(8),
