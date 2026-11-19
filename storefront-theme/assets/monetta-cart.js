@@ -235,17 +235,19 @@
       if (!result.ok) return uncertainAdd(result.status, trigger);
 
       const shown = cartId ? renderCartPage(result.data?.sections || {}) : false;
+      let confirmed = false;
       if (!shown && !applySheet(result.data?.sections?.[SHEET_SECTION], { highlightVariantId: Number(id) })) {
-        // Shopify accepted it but the answer carries no usable bag: show the bag as Shopify has it.
-        await recoverFromServer();
+        // Shopify accepted the write but the answer carries no usable bag: read it back once, without repeating the add.
+        confirmed = await recoverFromServer();
       } else {
         markConfirmed();
+        confirmed = true;
         $(`[data-variant-id="${Number(id)}"]`, $('#cart-sheet'))?.classList.add('cart-line--highlight');
       }
       // «Comprar ahora» goes straight on to the checkout, so the bag is not opened in between.
       if (open) openSheet(trigger);
-      Monetta.announce?.(`Agregado al carrito${name ? `: ${name}` : ''}.`);
-      return { ok: true, status: result.status };
+      if (confirmed) Monetta.announce?.(`Agregado al carrito${name ? `: ${name}` : ''}.`);
+      return { ok: true, status: result.status, confirmed };
     });
   }
 

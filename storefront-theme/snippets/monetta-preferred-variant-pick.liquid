@@ -1,0 +1,114 @@
+{%- doc -%}
+  Picks one variant id for listing cards and quick view, aligned with the app's
+  `preferredMatchingCatalogVariant`: active storefront filters, optional offers-only,
+  in-stock preference, then lowest price, then lowest id.
+
+  Outputs only the numeric variant id.
+
+  @param {object} product
+  @param {object} [filters] - collection.filters or search.filters
+  @param {boolean} [offers_only] - require compare_at_price > price
+{%- enddoc -%}
+{%- liquid
+  assign filters = filters | default: empty
+  assign offers_only = offers_only | default: false
+  assign min_price = 0
+  assign max_price = 9223372036854775807
+  assign color_needles = '|'
+  if filters != empty
+    for filter in filters
+      if filter.type == 'price_range'
+        if filter.min_value.value != blank
+          assign min_price = filter.min_value.value
+        endif
+        if filter.max_value.value != blank
+          assign max_price = filter.max_value.value
+        endif
+      else
+        for value in filter.active_values
+          assign label = value.label | downcase | strip
+          unless label == blank
+            assign color_needles = color_needles | append: label | append: '|'
+          endunless
+          assign val = value.value | downcase | strip
+          unless val == blank
+            assign color_needles = color_needles | append: val | append: '|'
+          endunless
+        endfor
+      endif
+    endfor
+  endif
+  assign pick_id = 0
+  assign pick_price = 0
+  assign pick_available = false
+  for variant in product.variants
+    assign eligible = true
+    if offers_only
+      unless variant.compare_at_price > variant.price
+        assign eligible = false
+      endunless
+    endif
+    if eligible and variant.price < min_price
+      assign eligible = false
+    endif
+    if eligible and variant.price > max_price
+      assign eligible = false
+    endif
+    if eligible and color_needles != '|'
+      assign matched = false
+      assign opt1 = variant.option1 | downcase | strip
+      assign opt2 = variant.option2 | downcase | strip
+      assign opt3 = variant.option3 | downcase | strip
+      assign title_l = variant.title | downcase
+      if opt1 != blank and color_needles contains opt1
+        assign matched = true
+      endif
+      if matched == false and opt2 != blank and color_needles contains opt2
+        assign matched = true
+      endif
+      if matched == false and opt3 != blank and color_needles contains opt3
+        assign matched = true
+      endif
+      if matched == false
+        assign parts = color_needles | split: '|'
+        for needle in parts
+          if needle != blank and title_l contains needle
+            assign matched = true
+          endif
+        endfor
+      endif
+      unless matched
+        assign eligible = false
+      endunless
+    endif
+    unless eligible
+      continue
+    endunless
+    assign take = false
+    if pick_id == 0
+      assign take = true
+    elsif variant.available and pick_available == false
+      assign take = true
+    elsif variant.available == pick_available
+      if variant.price < pick_price
+        assign take = true
+      elsif variant.price == pick_price and variant.id < pick_id
+        assign take = true
+      endif
+    elsif variant.available
+      if variant.price < pick_price
+        assign take = true
+      elsif variant.price == pick_price and variant.id < pick_id
+        assign take = true
+      endif
+    endif
+    if take
+      assign pick_id = variant.id
+      assign pick_price = variant.price
+      assign pick_available = variant.available
+    endif
+  endfor
+  if pick_id == 0
+    assign pick_id = product.selected_or_first_available_variant.id
+  endif
+-%}{{ pick_id }}

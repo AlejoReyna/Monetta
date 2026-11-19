@@ -95,6 +95,16 @@ void main() {
       matchingCatalogVariants(store, p, color: 'negro').single.id,
       'black',
     );
+    expect(
+      preferredMatchingCatalogVariant(
+        store,
+        p,
+        color: 'rojo',
+        offersOnly: true,
+        priceBand: 'accesible',
+      )?.id,
+      'red',
+    );
     expect(matchingCatalogVariants(store, p, color: 'dorado'), isEmpty);
     expect(
       selectCatalogProducts(store, [p], color: 'negro', offersOnly: true),

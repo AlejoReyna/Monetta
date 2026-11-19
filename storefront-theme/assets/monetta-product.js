@@ -417,10 +417,17 @@
     // UI v4.1: «Agregar conserva PDP» — the bag is not opened; the page confirms in place.
     const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: pressed || $('[data-add]', form), open: false });
     if (result.ok && buyNow) {
-      window.location.assign(buyNow.value);
-      return;
+      if (result.confirmed !== false && !Monetta.cart.isLocked()) {
+        window.location.assign(buyNow.value);
+        return;
+      }
+      Monetta.toast?.(
+        'No pudimos confirmar tu bolsa. Actualízala antes de continuar al checkout.',
+        { tone: 'error' },
+      );
+    } else if (result.ok) {
+      Monetta.toast?.('Agregado al carrito');
     }
-    if (result.ok) Monetta.toast?.('Agregado al carrito');
     buttons.forEach((button) => Monetta.setPending(button, false));
     adding = false;
     if (root.dataset.selection === 'valid') lockPurchase(root, false);

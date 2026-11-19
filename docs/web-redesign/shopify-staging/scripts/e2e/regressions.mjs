@@ -1037,6 +1037,169 @@ await step('p2', 'checkout is refused while a bag change is pending or unconfirm
   }
 });
 
+await step(
+  'v43-buy-now',
+  'Comprar ahora blocks checkout when add returns 200 without sections and read-back fails',
+  async () => {
+    const product = await (await fetch(`${baseUrl}/products/${HANDLE}.js`)).json();
+    const variant = product.variants.find((v) => v.available);
+    const { context, page, net } = await newPage();
+    try {
+      net.add(
+        'add-no-sections',
+        (url, request) => request.method() === 'POST' && /\/cart\/add\.js$/.test(url.pathname),
+        (route, request) => {
+          const body = JSON.parse(request.postData() || '{}');
+          return route.fulfill({
+            contentType: 'application/json',
+            body: JSON.stringify({
+              items: [{ id: body.id, variant_id: body.id, quantity: body.quantity || 1 }],
+            }),
+          });
+        },
+      );
+      net.add(
+        'read-back-fail',
+        (url, request) => request.method() === 'GET' && url.pathname === '/cart' && url.searchParams.has('sections'),
+        (route) => route.abort('connectionreset'),
+      );
+      await goto(page, `${baseUrl}/products/${HANDLE}?variant=${variant.id}`, { incidents });
+      await page.waitForFunction(() => !!window.Monetta?.cart?.add);
+      const buyNow = page.locator('[data-buy-now]').first();
+      const before = page.url();
+      await buyNow.click({ timeout: 5000 }).catch(() => {});
+      await until(page, () => document.documentElement.hasAttribute('data-cart-locked'), null, 8000);
+      const state = await page.evaluate(() => ({
+        locked: document.documentElement.hasAttribute('data-cart-locked'),
+        checkoutBlocked: [...document.querySelectorAll('[name="checkout"]')].every((b) => b.disabled),
+      }));
+      A(
+        'V43 [staging] buy now does not leave the product when the bag cannot be confirmed after a section-less add',
+        page.url() === before && !page.url().includes('/checkout'),
+        page.url(),
+      );
+      A(
+        'V43 [staging] buy now keeps checkout locked until the bag is read back from Shopify',
+        state.locked && (state.checkoutBlocked || state.locked),
+        JSON.stringify(state),
+      );
+    } finally {
+      await context.close();
+    }
+  },
+);
+
+await step(
+  'v43-buy-now-recover',
+  'Comprar ahora: one POST, read-back reconciles, then checkout can proceed',
+  async () => {
+    const product = await (await fetch(`${baseUrl}/products/${HANDLE}.js`)).json();
+    const variant = product.variants.find((v) => v.available);
+    const { context, page, net } = await newPage();
+    try {
+      let adds = 0;
+      net.add(
+        'add-no-sections',
+        (url, request) => request.method() === 'POST' && /\/cart\/add\.js$/.test(url.pathname),
+        (route, request) => {
+          adds += 1;
+          const body = JSON.parse(request.postData() || '{}');
+          return route.fulfill({
+            contentType: 'application/json',
+            body: JSON.stringify({
+              items: [{ id: body.id, variant_id: body.id, quantity: body.quantity || 1 }],
+            }),
+          });
+        },
+      );
+      net.add(
+        'read-back-ok',
+        (url, request) => request.method() === 'GET' && url.pathname === '/cart' && url.searchParams.has('sections'),
+        async (route) => {
+          const cart = await (await context.request.get(`${baseUrl}/cart.js`)).json();
+          const sections = { 'monetta-cart-sheet': '<dialog id="cart-sheet" open></dialog>' };
+          return route.fulfill({
+            contentType: 'application/json',
+            body: JSON.stringify({ item_count: cart.item_count, sections }),
+          });
+        },
+      );
+      await goto(page, `${baseUrl}/products/${HANDLE}?variant=${variant.id}`, { incidents });
+      await page.waitForFunction(() => !!window.Monetta?.cart?.add);
+      await page.locator('[data-buy-now]').first().click({ timeout: 5000 }).catch(() => {});
+      await until(page, () => !document.documentElement.hasAttribute('data-cart-locked'), null, 8000);
+      const posts = await page.evaluate(() => window.__writes?.length ?? 0);
+      A('V43 [staging] buy now reconcile uses a single add POST', adds === 1 && posts <= 1, JSON.stringify({ adds, posts }));
+      A('V43 [staging] after reconcile the cart is not locked', !(await page.evaluate(() => document.documentElement.hasAttribute('data-cart-locked'))), 'locked');
+    } finally {
+      await context.close();
+    }
+  },
+);
+
+await step(
+  'v43-buy-now-double',
+  'Comprar ahora ignores a second tap while the first add is pending',
+  async () => {
+    const product = await (await fetch(`${baseUrl}/products/${HANDLE}.js`)).json();
+    const variant = product.variants.find((v) => v.available);
+    const { context, page, net } = await newPage();
+    try {
+      const held = gate();
+      let posts = 0;
+      net.add(
+        'held-add',
+        (url, request) => request.method() === 'POST' && /\/cart\/add\.js$/.test(url.pathname),
+        async (route) => {
+          posts += 1;
+          await held.promise;
+          return route.fulfill({ contentType: 'application/json', body: '{}' });
+        },
+      );
+      await goto(page, `${baseUrl}/products/${HANDLE}?variant=${variant.id}`, { incidents });
+      await page.waitForFunction(() => !!window.Monetta?.cart?.add);
+      const buyNow = page.locator('[data-buy-now]').first();
+      await buyNow.click();
+      await buyNow.click().catch(() => {});
+      await sleep(300);
+      A('V43 [staging] double tap on buy now emits only one POST while pending', posts === 1, String(posts));
+      held.release();
+    } finally {
+      await context.close();
+    }
+  },
+);
+
+await step(
+  'v43-buy-now-stock',
+  'Comprar ahora surfaces stock rejection without navigating to checkout',
+  async () => {
+    const product = await (await fetch(`${baseUrl}/products/${HANDLE}.js`)).json();
+    const variant = product.variants.find((v) => v.available);
+    const { context, page, net } = await newPage();
+    try {
+      net.add(
+        'add-422',
+        (url, request) => request.method() === 'POST' && /\/cart\/add\.js$/.test(url.pathname),
+        (route) =>
+          route.fulfill({
+            status: 422,
+            contentType: 'application/json',
+            body: JSON.stringify({ message: 'Agotado', description: 'Agotado' }),
+          }),
+      );
+      await goto(page, `${baseUrl}/products/${HANDLE}?variant=${variant.id}`, { incidents });
+      await page.waitForFunction(() => !!window.Monetta?.cart?.add);
+      const before = page.url();
+      await page.locator('[data-buy-now]').first().click({ timeout: 5000 }).catch(() => {});
+      await sleep(500);
+      A('V43 [staging] stock rejection on buy now does not open checkout', !page.url().includes('/checkout') && page.url() === before, page.url());
+    } finally {
+      await context.close();
+    }
+  },
+);
+
 await step('p7', 'undo restores the line, not just the variant', async () => {
   const product = await (await fetch(`${baseUrl}/products/${HANDLE}.js`)).json();
   const variant = product.variants.find((v) => v.available);

@@ -96,7 +96,8 @@
           clear_url: clear_url,
           empty_title: 'Sin resultados',
           empty_body: 'No encontramos piezas para esa búsqueda. Prueba con otra palabra o explora el catálogo.',
-          search_url: routes.search_url
+          search_url: routes.search_url,
+          filters: search.filters
         %}
       {%- endcapture -%}
       {% render 'monetta-listing-layout',

@@ -868,7 +868,7 @@ class _ProductSliverGrid extends StatelessWidget {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final product = products[index];
-            final matching = matchingCatalogVariants(
+            final preferred = preferredMatchingCatalogVariant(
               StoreScope.of(context),
               product,
               color: color,
@@ -883,7 +883,7 @@ class _ProductSliverGrid extends StatelessWidget {
                       priceBand != null ||
                       offersOnly ||
                       availableOnly
-                  ? matching.firstOrNull?.id
+                  ? preferred?.id
                   : null,
             );
           },

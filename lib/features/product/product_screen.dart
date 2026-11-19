@@ -193,7 +193,7 @@ class _ProductScreenState extends State<ProductScreen> {
       case BagAddStatus.added:
         // Keeps the existing confirmation surface — a sheet, never a toast.
         if (buyNow) {
-          await openBag(context);
+          await buyNowContinueToCheckout(context, product, _variantIndex);
         } else {
           setState(() => _added = true);
         }
