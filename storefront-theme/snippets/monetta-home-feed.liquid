@@ -24,7 +24,17 @@
       <ul class="v41-scroll v41-feed__track" role="list">
         {%- for product in products limit: limit -%}
           {%- liquid
+            capture listing_variant_id
+              render 'monetta-preferred-variant-pick', product: product
+            endcapture
+            assign listing_variant_id = listing_variant_id | strip | plus: 0
             assign variant = product.selected_or_first_available_variant
+            for candidate in product.variants
+              if candidate.id == listing_variant_id
+                assign variant = candidate
+                break
+              endif
+            endfor
             assign currency = cart.currency.iso_code
             assign pct = 0
             if product.available and variant.compare_at_price > variant.price
@@ -34,10 +44,14 @@
               render 'monetta-facet', product: product, kind: 'brands'
             endcapture
             assign brand = brand | strip
-            assign image = product.featured_image
+            assign image = variant.featured_image | default: product.featured_image
+            assign needs_choice = false
+            unless product.has_only_default_variant
+              assign needs_choice = true
+            endunless
           -%}
           <li class="v41-feed__item">
-            <article class="v41-feed__card" data-product-handle="{{ product.handle }}">
+            <article class="v41-feed__card" data-product-handle="{{ product.handle }}" data-listing-variant="{{ variant.id }}"{% if needs_choice %} data-feed-needs-choice="true"{% endif %}>
               <div class="v41-feed__media">
                 {%- if image -%}
                   <img src="{{ image | image_url: width: 900 }}" width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt | default: product.title | escape }}" loading="lazy" decoding="async">
@@ -63,7 +77,7 @@
                 {%- endif -%}
               </p>
               {%- if product.available -%}
-                <form action="{{ routes.cart_add_url }}" method="post" data-feed-buy data-product-name="{{ product.title | escape }}" data-checkout="{{ checkout_path }}">
+                <form action="{{ routes.cart_add_url }}" method="post" data-feed-buy data-product-name="{{ product.title | escape }}" data-checkout="{{ checkout_path }}" data-product-handle="{{ product.handle }}"{% if needs_choice %} data-feed-open-quick-view="true"{% endif %}>
                   <input type="hidden" name="id" value="{{ variant.id }}">
                   <input type="hidden" name="quantity" value="1">
                   <input type="hidden" name="return_to" value="{{ checkout_path }}">

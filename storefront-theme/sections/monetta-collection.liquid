@@ -140,8 +140,14 @@
     {%- endif -%}
     {% render 'monetta-guia-pills', active: guide_pill, filters_button: has_controls, active_count: active_count %}
 
+    {%- liquid
+      assign offers_only = false
+      if collection.handle == 'ofertas' or collection.handle contains 'oferta'
+        assign offers_only = true
+      endif
+    -%}
     {%- capture results_html -%}
-      {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', listing_card: true, sizes: card_sizes, xl_widths: '240,360,480,600,720,900' %}
+      {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', listing_card: true, sizes: card_sizes, xl_widths: '240,360,480,600,720,900', filters: collection.filters, offers_only: offers_only %}
     {%- endcapture -%}
     {% render 'monetta-listing-layout',
       filters: collection.filters,

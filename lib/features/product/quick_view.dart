@@ -2,6 +2,7 @@
 /// independent favorite, X/Escape, in-place add confirmation and PDP entry.
 library;
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -42,6 +43,7 @@ Future<void> showProductQuickView(
   Product product, {
   int initialVariantIndex = 0,
   bool requireChoice = false,
+  bool buyNowCheckout = false,
   String? initialVariantId,
   ValueChanged<String?>? onVariantChanged,
   ProductRestockAction? onRestock,
@@ -67,6 +69,7 @@ Future<void> showProductQuickView(
           product: product,
           initialVariantIndex: initialVariantIndex,
           requireChoice: requireChoice,
+          buyNowCheckout: buyNowCheckout,
           onVariantChanged: onVariantChanged,
           onRestock: onRestock,
           parentContext: paneContext,
@@ -94,6 +97,7 @@ Future<void> showProductQuickView(
         product: product,
         initialVariantIndex: initialVariantIndex,
         requireChoice: requireChoice,
+        buyNowCheckout: buyNowCheckout,
         onVariantChanged: onVariantChanged,
         onRestock: onRestock,
         parentContext: context,
@@ -110,6 +114,7 @@ class _QuickViewSheet extends StatefulWidget {
     required this.parentContext,
     this.initialVariantIndex = 0,
     this.requireChoice = false,
+    this.buyNowCheckout = false,
     this.embedded = false,
     this.onVariantChanged,
     this.onRestock,
@@ -128,6 +133,9 @@ class _QuickViewSheet extends StatefulWidget {
   /// Open with no option chosen so the shopper picks one explicitly (the "+"
   /// of a card with several variants).
   final bool requireChoice;
+
+  /// After a confirmed add, continue to checkout (Para ti «Comprar ahora»).
+  final bool buyNowCheckout;
 
   @override
   State<_QuickViewSheet> createState() => _QuickViewSheetState();
@@ -247,16 +255,38 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
 
   /// The two page buttons, under the stock line. «Agregar al carrito» keeps its
   /// key and every state of the old bar (choose, restock, pending).
+  Future<void> _buyNowCheckout() async {
+    final index = _variantIndex;
+    if (index == null || _adding) return;
+    setState(() {
+      _adding = true;
+      _error = null;
+    });
+    final product = _currentProduct;
+    final currentIndex = product == null
+        ? -1
+        : variantIndexForId(product, _selectedId, fallback: -1);
+    if (product == null || !mounted) return;
+    await buyNowContinueToCheckout(widget.parentContext, product, currentIndex);
+    if (!mounted) return;
+    setState(() => _adding = false);
+    unawaited(Navigator.of(context).maybePop());
+  }
+
   Widget _buildActions(BoutiquePalette palette, {required bool inStock}) {
     final chosen = _variantIndex;
     final String label;
     final VoidCallback? onPressed;
+  final buyNow = widget.buyNowCheckout;
     if (chosen == null) {
       label = _kChooseLabel;
       onPressed = null;
     } else if (!inStock) {
       label = 'Agotado';
       onPressed = null;
+    } else if (buyNow) {
+      label = _adding ? 'Agregando…' : 'Comprar ahora';
+      onPressed = _currentProduct == null ? null : _buyNowCheckout;
     } else {
       label = _adding ? 'Agregando…' : 'Agregar al carrito';
       onPressed = _currentProduct == null ? null : _addToBag;

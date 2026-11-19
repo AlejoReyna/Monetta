@@ -15,6 +15,8 @@
   @param {boolean} [listing_card] - Collection cards reserve optional metadata slots at XL.
   @param {string} [sizes] - Image slot override for this listing context.
   @param {string} [xl_widths] - Image width candidates from 1280px for this listing context.
+  @param {object} [filters] - Active filters for variant pick on cards.
+  @param {boolean} [offers_only] - Listing is offers-only (compare_at pick).
 {%- enddoc -%}
 {%- if total == 0 -%}
   <div class="empty">
@@ -44,7 +46,7 @@
       {%- if product.object_type != blank and product.object_type != 'product' -%}{%- continue -%}{%- endif -%}
       {%- assign eager = false -%}
       {%- if forloop.index <= 4 %}{% assign eager = true %}{% endif -%}
-      <li>{% render 'monetta-card', product: product, eager: eager, view_button: view_button, listing_card: listing_card, sizes: sizes, xl_widths: xl_widths %}</li>
+      <li>{% render 'monetta-card', product: product, eager: eager, view_button: view_button, listing_card: listing_card, sizes: sizes, xl_widths: xl_widths, filters: filters, offers_only: offers_only %}</li>
     {%- endfor -%}
   </ul>
   {%- liquid

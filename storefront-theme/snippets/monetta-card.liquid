@@ -13,11 +13,23 @@
   @param {string} [xl_widths] - Additional image candidates from 1280px only; mobile cards and compact rails keep 600px.
   @param {boolean} [listing_card] - Reserve empty metadata slots for XL collection row alignment.
   @param {boolean} [view_button] - Pass true to add a «Ver producto» pill under the price; off by default (UI v4.1).
+  @param {object} [filters] - Active listing filters for variant pick (collection/search).
+  @param {boolean} [offers_only] - Prefer a variant on offer matching filters.
 {%- enddoc -%}
 {%- liquid
   assign density = density | default: 'grid'
   assign sizes = sizes | default: '(min-width: 1200px) 260px, (min-width: 768px) 33vw, 50vw'
+  capture listing_variant_id
+    render 'monetta-preferred-variant-pick', product: product, filters: filters, offers_only: offers_only
+  endcapture
+  assign listing_variant_id = listing_variant_id | strip | plus: 0
   assign variant = product.selected_or_first_available_variant
+  for candidate in product.variants
+    if candidate.id == listing_variant_id
+      assign variant = candidate
+      break
+    endif
+  endfor
   assign in_stock = product.available
   assign currency = cart.currency.iso_code
   assign show_view = false
@@ -48,10 +60,10 @@
   if age_days >= 0 and age_days <= 30
     assign is_new = true
   endif
-  assign image = product.featured_image
+  assign image = variant.featured_image | default: product.featured_image
 -%}
-<article class="card card--{{ density }}" data-product-handle="{{ product.handle }}">
-  <a class="card__link" href="{{ product.url }}" data-quick-view="{{ product.handle }}" data-product-url="{{ product.url }}" aria-haspopup="dialog">
+<article class="card card--{{ density }}" data-product-handle="{{ product.handle }}" data-listing-variant="{{ variant.id }}">
+  <a class="card__link" href="{{ product.url }}" data-quick-view="{{ product.handle }}" data-product-url="{{ product.url }}" data-listing-variant="{{ variant.id }}" aria-haspopup="dialog">
     <div class="card__media">
       {%- if image -%}
         {%- if xl_widths != blank -%}

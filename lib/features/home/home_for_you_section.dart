@@ -234,6 +234,7 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
                                               context,
                                               product,
                                               requireChoice: true,
+                                              buyNowCheckout: true,
                                               initialVariantIndex: variantIndex,
                                             );
                                             return;

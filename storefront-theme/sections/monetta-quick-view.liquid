@@ -66,6 +66,7 @@
     <p class="quick-view__stock"><span class="quick-view__stock-label">Stock</span><span class="quick-view__stock-pill" data-quick-view-stock role="status">{% if current.available %}Disponible{% else %}Agotado{% endif %}</span></p>
     <p class="quick-view__hint" data-quick-view-hint role="status" hidden></p>
     <button type="button" class="btn btn--primary btn--block" data-quick-view-add{% unless current.available %} disabled{% endunless %}>Agregar al carrito</button>
+    <button type="button" class="btn btn--outline btn--block" data-quick-view-buy-now hidden>Comprar ahora</button>
     <p class="quick-view__added" data-quick-view-added role="status" hidden>Agregado al carrito</p>
     <a class="btn btn--outline btn--block" href="{{ product.url }}">Ver producto</a>
   </div>

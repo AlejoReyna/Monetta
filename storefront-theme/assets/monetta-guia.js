@@ -173,6 +173,8 @@
     const photo = root.querySelector('[data-quick-view-photo]');
     const stock = root.querySelector('[data-quick-view-stock]');
     const added = root.querySelector('[data-quick-view-added]');
+    const buyNow = root.querySelector('[data-quick-view-buy-now]');
+    const checkoutUrl = root.dataset.quickViewCheckout || '';
     let chosen = null;
     const update = () => {
       if (added) added.hidden = true;
@@ -220,6 +222,35 @@
       if (result?.ok && added) added.hidden = false;
       delete add.dataset.pending;
     });
+    if (buyNow && checkoutUrl) {
+      buyNow.hidden = false;
+      buyNow.addEventListener('click', async () => {
+        if (!chosen?.available || buyNow.dataset.pending) return;
+        buyNow.dataset.pending = 'true';
+        window.Monetta.setPending?.(buyNow, true);
+        try {
+          const option = groups.length ? ` (${chosen.options.join(' / ')})` : '';
+          const result = await window.Monetta.cart.add({
+            id: chosen.id,
+            quantity: 1,
+            name: `${root.dataset.productTitle || ''}${option}`,
+            open: false,
+            trigger: buyNow,
+          });
+          if (result?.ok && result.confirmed !== false && !window.Monetta.cart.isLocked()) {
+            window.location.assign(checkoutUrl);
+          } else if (result?.ok) {
+            window.Monetta.toast?.(
+              'No pudimos confirmar tu bolsa. Actualízala antes de continuar al checkout.',
+              { tone: 'error' },
+            );
+          }
+        } finally {
+          window.Monetta.setPending?.(buyNow, false);
+          delete buyNow.dataset.pending;
+        }
+      });
+    }
     update();
   }
 
@@ -231,11 +262,16 @@
     button.setAttribute('aria-busy', 'true');
     try {
       const root = window.Shopify?.routes?.root || '/';
-      const response = await fetch(`${root}products/${encodeURIComponent(button.dataset.quickView)}?section_id=monetta-quick-view`, { credentials: 'same-origin' });
+      const listingVariant = button.dataset.listingVariant || button.closest('[data-listing-variant]')?.dataset?.listingVariant;
+      const variantQuery = listingVariant ? `&variant=${encodeURIComponent(listingVariant)}` : '';
+      const response = await fetch(`${root}products/${encodeURIComponent(button.dataset.quickView)}?section_id=monetta-quick-view${variantQuery}`, { credentials: 'same-origin' });
       const view = response.ok ? new DOMParser().parseFromString(await response.text(), 'text/html').querySelector('[data-quick-view-root]') : null;
       if (!view) {
         window.location.assign(button.dataset.productUrl);
         return;
+      }
+      if (button.dataset.buyNowCheckout && button.dataset.checkout) {
+        view.dataset.quickViewCheckout = button.dataset.checkout;
       }
       panel.replaceChildren(view);
       bindQuickView(view, dialog, button);
@@ -324,6 +360,21 @@
       if (!form.matches('[data-feed-add], [data-feed-buy]')) return;
       if (!window.Monetta?.cart?.add) return;
       event.preventDefault();
+      if (form.matches('[data-feed-buy][data-feed-open-quick-view]') && form.dataset.checkout) {
+        const handle = form.dataset.productHandle;
+        const variantId = form.querySelector('[name="id"]')?.value || '';
+        const root = window.Shopify?.routes?.root || '/';
+        await openQuickView({
+          dataset: {
+            quickView: handle,
+            productUrl: `${root}products/${encodeURIComponent(handle)}`,
+            listingVariant: variantId,
+            buyNowCheckout: 'true',
+            checkout: form.dataset.checkout,
+          },
+        });
+        return;
+      }
       await submitFeed(form, form.dataset.checkout || '');
     });
   }
