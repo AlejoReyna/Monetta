@@ -19,10 +19,24 @@ Leyenda de **fuente**: `fixture` = datos de prueba locales; `shopify` = staging 
 | UI-04 goldens | 10 fallos históricos | suite completa | Sin cambio esperado | Comparar vs base antes de actualizar refs | fixture |
 | Pagos / Rewards / crédito | Seis métodos, bonos, apartados | plan QA pagos | **Pendiente insumo** | Ver `docs/qa/monetta-payments-test-plan.md` | shopify |
 
+## Auditoría Admin (19 nov 2026)
+
+Informe detallado: [ADMIN_AUDIT.md](./ADMIN_AUDIT.md).
+
+**Hallazgos en `monetta.mx` (API pública):**
+
+- **Ofertas:** no hay colección `ofertas`; **0/250** productos muestran `compare_at` > precio → filtro Ofertas vacío aunque exista UI.
+- **Mayoreo:** página `mayoreo` **sí existe** (200); falta plantilla Admin **`guia-mayoreo`** (sigue Atelier en vivo).
+- **Staging:** `monetta-staging` detrás de contraseña; no se pudo contrastar catálogo sin tu sesión.
+
 ## Responsables bloqueos Ofertas / Mayoreo
 
-- **Dueño comercial Monetta**: crear o publicar colección Ofertas y página Mayoreo en Admin; enlazar en menú del tema 193754824738.
-- **Criterio**: mismas rutas que en app (`/?view=` conservado en comparación tema); vistas previas autenticadas sin 404.
+| Bloqueo | Responsable | Dato requerido | Aceptación |
+|---------|-------------|----------------|------------|
+| Colección Ofertas 404 | Comercio | Colección handle `ofertas` + compare_at en variantes | `/collections/ofertas` 200 con productos |
+| Ofertas vacías en app | Comercio | Precios de comparación en SKUs piloto | Chip Ofertas muestra piezas |
+| Mayoreo “guía” no visible | Comercio + Ops | Página `mayoreo` → plantilla `guia-mayoreo`; tema 193754824738 en preview | HTML `guia-page--mayoreo`, sin Atelier |
+| Descuento 3+ piezas | Comercio | Descuento automático documentado | QA 2→3→4→2 sin cobro real |
 
 ## Comandos de cierre
 
