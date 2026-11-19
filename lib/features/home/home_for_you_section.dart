@@ -14,7 +14,6 @@ import '../../main.dart';
 import '../../app/motion.dart';
 import '../boutique/boutique_tokens.dart';
 import '../boutique/client_guide_components.dart';
-import '../checkout/checkout_screen.dart' show openBag;
 import '../product/product_selection.dart';
 import '../product/quick_view.dart' show showProductQuickView;
 import 'home_v41_catalog.dart';
@@ -224,17 +223,26 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
                                   label: 'Comprar ahora',
                                   onPressed: inStock
                                       ? () async {
-                                          final result =
-                                              await tryAddSelectionToBag(
+                                          if (selectableVariants(product)
+                                                  .length >
+                                              1 &&
+                                              !hasReliableColorOptions(
+                                                product,
+                                              )) {
+                                            if (!context.mounted) return;
+                                            await showProductQuickView(
+                                              context,
+                                              product,
+                                              requireChoice: true,
+                                              initialVariantIndex: variantIndex,
+                                            );
+                                            return;
+                                          }
+                                          await buyNowContinueToCheckout(
                                             context,
                                             product,
                                             variantIndex,
                                           );
-                                          if (!context.mounted) return;
-                                          if (result.status ==
-                                              BagAddStatus.added) {
-                                            await openBag(context);
-                                          }
                                         }
                                       : null,
                                 ),

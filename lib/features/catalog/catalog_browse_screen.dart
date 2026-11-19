@@ -346,7 +346,15 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     final store = StoreScope.maybeOf(context);
     final product = _productFor(store, item);
     if (product == null || store == null) return null;
-    return _eligibleVariants(store, product, _filters).firstOrNull?.id;
+    final eligible = _eligibleVariants(store, product, _filters);
+    if (eligible.isEmpty) return null;
+    eligible.sort((a, b) {
+      final byPrice = a.price.compareTo(b.price);
+      if (byPrice != 0) return byPrice;
+      return a.id.compareTo(b.id);
+    });
+    final available = eligible.where((variant) => variant.available).toList();
+    return (available.isNotEmpty ? available : eligible).first.id;
   }
 
   Widget _controls() => Padding(

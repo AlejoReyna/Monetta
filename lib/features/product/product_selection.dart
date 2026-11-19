@@ -9,7 +9,7 @@ import '../../data/normalize/text.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../boutique/boutique_tokens.dart';
-import '../checkout/checkout_screen.dart' show openBag;
+import '../checkout/checkout_screen.dart' show continueLiveBagToCheckout, openBag;
 import '../checkout/mini_cart.dart' show showMiniCart;
 import 'variant_selection.dart';
 
@@ -305,6 +305,20 @@ Future<void> buyNowOpenBag(
   final result = await tryAddSelectionToBag(context, product, variantIndex);
   if (result.status != BagAddStatus.added || !context.mounted) return;
   await openBag(context);
+}
+
+/// «Comprar ahora» with checkout: adds without dropping existing lines, then
+/// reuses the live bag → checkout hand-off. Callers resolve ambiguous options
+/// before invoking this helper.
+Future<void> buyNowContinueToCheckout(
+  BuildContext context,
+  Product product,
+  int variantIndex,
+) async {
+  final result = await tryAddSelectionToBag(context, product, variantIndex);
+  if (!context.mounted) return;
+  if (result.status != BagAddStatus.added) return;
+  await continueLiveBagToCheckout(context);
 }
 
 /// Exposed for widget tests that assert the shared helper is the only writer.

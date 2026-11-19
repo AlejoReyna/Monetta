@@ -123,6 +123,36 @@ List<ProductVariant> matchingCatalogVariants(
       return catalogVariantColors(store, product, variant).contains(color);
     }).toList(growable: false);
 
+/// The variant cards, quick view and ficha should agree on when filters
+/// intersect: prefer in-stock units, then the lowest price, then a stable id.
+ProductVariant? preferredMatchingCatalogVariant(
+  CatalogStore store,
+  Product product, {
+  String? color,
+  String? priceBand,
+  bool offersOnly = false,
+  bool availableOnly = false,
+}) {
+  var matches = matchingCatalogVariants(
+    store,
+    product,
+    color: color,
+    priceBand: priceBand,
+    offersOnly: offersOnly,
+    availableOnly: availableOnly,
+  );
+  if (matches.isEmpty) return null;
+  final available = matches.where((variant) => variant.available).toList();
+  if (available.isNotEmpty) matches = available;
+  matches = [...matches]
+    ..sort((a, b) {
+      final byPrice = a.price.compareTo(b.price);
+      if (byPrice != 0) return byPrice;
+      return a.id.compareTo(b.id);
+    });
+  return matches.first;
+}
+
 Set<String> catalogVariantColors(
   CatalogStore store,
   Product product,

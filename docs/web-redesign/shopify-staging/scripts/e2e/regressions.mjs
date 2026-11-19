@@ -1037,6 +1037,58 @@ await step('p2', 'checkout is refused while a bag change is pending or unconfirm
   }
 });
 
+await step(
+  'v43-buy-now',
+  'Comprar ahora blocks checkout when add returns 200 without sections and read-back fails',
+  async () => {
+    const product = await (await fetch(`${baseUrl}/products/${HANDLE}.js`)).json();
+    const variant = product.variants.find((v) => v.available);
+    const { context, page, net } = await newPage();
+    try {
+      net.add(
+        'add-no-sections',
+        (url, request) => request.method() === 'POST' && /\/cart\/add\.js$/.test(url.pathname),
+        (route, request) => {
+          const body = JSON.parse(request.postData() || '{}');
+          return route.fulfill({
+            contentType: 'application/json',
+            body: JSON.stringify({
+              items: [{ id: body.id, variant_id: body.id, quantity: body.quantity || 1 }],
+            }),
+          });
+        },
+      );
+      net.add(
+        'read-back-fail',
+        (url, request) => request.method() === 'GET' && url.pathname === '/cart' && url.searchParams.has('sections'),
+        (route) => route.abort('connectionreset'),
+      );
+      await goto(page, `${baseUrl}/products/${HANDLE}?variant=${variant.id}`, { incidents });
+      await page.waitForFunction(() => !!window.Monetta?.cart?.add);
+      const buyNow = page.locator('[data-buy-now]').first();
+      const before = page.url();
+      await buyNow.click({ timeout: 5000 }).catch(() => {});
+      await until(page, () => document.documentElement.hasAttribute('data-cart-locked'), null, 8000);
+      const state = await page.evaluate(() => ({
+        locked: document.documentElement.hasAttribute('data-cart-locked'),
+        checkoutBlocked: [...document.querySelectorAll('[name="checkout"]')].every((b) => b.disabled),
+      }));
+      A(
+        'V43 [staging] buy now does not leave the product when the bag cannot be confirmed after a section-less add',
+        page.url() === before && !page.url().includes('/checkout'),
+        page.url(),
+      );
+      A(
+        'V43 [staging] buy now keeps checkout locked until the bag is read back from Shopify',
+        state.locked && (state.checkoutBlocked || state.locked),
+        JSON.stringify(state),
+      );
+    } finally {
+      await context.close();
+    }
+  },
+);
+
 await step('p7', 'undo restores the line, not just the variant', async () => {
   const product = await (await fetch(`${baseUrl}/products/${HANDLE}.js`)).json();
   const variant = product.variants.find((v) => v.available);

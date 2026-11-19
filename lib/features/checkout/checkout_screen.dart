@@ -90,6 +90,88 @@ void openCheckoutOrders(BuildContext context) {
   unawaited(openOrders(context, controller: account));
 }
 
+/// Shared live-bag hand-off used by the bag screen and «Comprar ahora».
+Future<void> continueLiveBagToCheckout(
+  BuildContext context, {
+  SecureCheckoutLauncher? launchSecureCheckout,
+  CartController? cartController,
+  ShopifyCheckoutCoordinator? checkoutCoordinator,
+  CartSessionScope? cartScope,
+}) async {
+  final store = StoreScope.of(context);
+  final guard = ReviewingCheckoutScope.maybeOf(context);
+  if (guard != null) {
+    await guard.ensureLoaded();
+    if (!context.mounted) return;
+  }
+  if (guard != null && guard.blocksCheckout(bagEmpty: store.bagLines.isEmpty)) {
+    final choice = await showCheckoutDoubleChargeSheet(context);
+    if (!context.mounted) return;
+    if (choice == CheckoutDoubleChargeChoice.viewOrders) {
+      openCheckoutOrders(context);
+      return;
+    }
+    if (choice != CheckoutDoubleChargeChoice.payAnyway) return;
+  }
+  if (!context.mounted) return;
+  final controller = cartController;
+  final scope = cartScope;
+  final checkout = checkoutCoordinator;
+  final accountController = AccountScope.maybeOf(context);
+  final productionLauncher = controller == null || scope == null || checkout == null
+      ? null
+      : (CheckoutDraft draft) async {
+          final currentIntent = [
+            for (final line in store.bagLines)
+              LocalCartIntent(
+                variantId: line.variant.id,
+                quantity: line.quantity,
+              ),
+          ];
+          final buyerIdentity = await resolveCheckoutBuyerIdentity(
+            account: accountController?.account,
+            shopifyAccessToken: accountController?.accessTokenForShopifyCheckout,
+            email: draft.email,
+            phone: draft.phone,
+          );
+          return checkout.present(
+            controller: controller,
+            scope: scope,
+            localIntent: currentIntent,
+            buyerIdentity: buyerIdentity,
+            onCompleted: (purchase) async {
+              await store.applyCheckoutPurchase(purchase);
+              await accountController?.loadOrders();
+            },
+          );
+        };
+  final launcher = launchSecureCheckout ?? productionLauncher;
+  if (launcher == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'El checkout seguro no está disponible en esta configuración. '
+          'Tu bolsa se conserva.',
+        ),
+      ),
+    );
+    return;
+  }
+  unawaited(
+    DuoWorkspace.taskNavigatorFor(context).push(
+      monettaFadeRoute(
+        StoreScope(
+          notifier: store,
+          child: CheckoutFlowScreen(
+            launchSecureCheckout: launcher,
+            openExternalCheckout: checkout?.openExternalFallback,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 Future<void> openBag(
   BuildContext context, {
   SecureCheckoutLauncher? launchSecureCheckout,
@@ -316,88 +398,13 @@ class _BagContents extends StatelessWidget {
     final count = store.bagQuantity;
     final subtotal = store.bagSubtotal;
 
-    Future<void> continueToCheckout() async {
-      final guard = ReviewingCheckoutScope.maybeOf(context);
-      if (guard != null) {
-        await guard.ensureLoaded();
-        if (!context.mounted) return;
-      }
-      if (guard != null &&
-          guard.blocksCheckout(bagEmpty: store.bagLines.isEmpty)) {
-        final choice = await showCheckoutDoubleChargeSheet(context);
-        if (!context.mounted) return;
-        if (choice == CheckoutDoubleChargeChoice.viewOrders) {
-          openCheckoutOrders(context);
-          return;
-        }
-        if (choice != CheckoutDoubleChargeChoice.payAnyway) return;
-      }
-      if (!context.mounted) return;
-      final controller = cartController;
-      final scope = cartScope;
-      final checkout = checkoutCoordinator;
-      final accountController = AccountScope.maybeOf(context);
-      final productionLauncher =
-          controller == null || scope == null || checkout == null
-              ? null
-              : (CheckoutDraft draft) async {
-                  // Reconstruye el intent desde la bolsa viva justo antes de
-                  // reconciliar — nunca reusa el snapshot de apertura (F17).
-                  final currentIntent = [
-                    for (final line in store.bagLines)
-                      LocalCartIntent(
-                        variantId: line.variant.id,
-                        quantity: line.quantity,
-                      ),
-                  ];
-                  final buyerIdentity = await resolveCheckoutBuyerIdentity(
-                    account: accountController?.account,
-                    shopifyAccessToken:
-                        accountController?.accessTokenForShopifyCheckout,
-                    email: draft.email,
-                    phone: draft.phone,
-                  );
-                  return checkout.present(
-                    controller: controller,
-                    scope: scope,
-                    localIntent: currentIntent,
-                    buyerIdentity: buyerIdentity,
-                    onCompleted: (purchase) async {
-                      await store.applyCheckoutPurchase(purchase);
-                      await accountController?.loadOrders();
-                    },
-                  );
-                };
-      final launcher = launchSecureCheckout ?? productionLauncher;
-      // F05: no capturar contacto/entrega cuando el checkout no puede cerrar.
-      if (launcher == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'El checkout seguro no está disponible en esta configuración. '
-              'Tu bolsa se conserva.',
-            ),
-          ),
+    Future<void> continueToCheckout() => continueLiveBagToCheckout(
+          context,
+          launchSecureCheckout: launchSecureCheckout,
+          cartController: cartController,
+          checkoutCoordinator: checkoutCoordinator,
+          cartScope: cartScope,
         );
-        return;
-      }
-      unawaited(
-        // With two sides, checkout spans both: form left, summary right.
-        DuoWorkspace.taskNavigatorFor(context).push(
-          monettaFadeRoute(
-            StoreScope(
-              notifier: store,
-              child: CheckoutFlowScreen(
-                launchSecureCheckout: launcher,
-                // El coordinador decide al invocar si hay URL fresca; no se
-                // congela estado antes de la reconciliación final.
-                openExternalCheckout: checkout?.openExternalFallback,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
