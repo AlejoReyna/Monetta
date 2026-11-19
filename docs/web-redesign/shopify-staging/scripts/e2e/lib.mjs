@@ -5,7 +5,7 @@
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -31,7 +31,24 @@ const env = Object.fromEntries(
     .filter((l) => /^[A-Z_]+=/.test(l))
     .map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1).replace(/^"|"$/g, '')]),
 );
-export const target = { store: env.STORE, themeId: env.THEME_ID, themeName: env.THEME_NAME, themeDir: env.THEME_DIR };
+function resolveThemeDir(raw) {
+  const defaultDir = path.join(root, 'storefront-theme');
+  if (!raw) return defaultDir;
+  const candidate = path.isAbsolute(raw) ? raw : path.join(root, raw);
+  if (existsSync(candidate)) return candidate;
+  if (existsSync(defaultDir)) {
+    console.warn(`note: THEME_DIR missing (${raw}); using ${defaultDir}`);
+    return defaultDir;
+  }
+  return candidate;
+}
+
+export const target = {
+  store: env.STORE,
+  themeId: env.THEME_ID,
+  themeName: env.THEME_NAME,
+  themeDir: resolveThemeDir(env.THEME_DIR),
+};
 
 /** SHA-256 over the sorted per-file digests of the theme workspace: the "code state" of a run. */
 export function treeDigest(dir = target.themeDir) {

@@ -40,6 +40,16 @@ Detalle en [ADMIN_AUDIT.md](./ADMIN_AUDIT.md).
 
 **Temas:** activo `193754824738`, reversión `192672989218`. Conservar `/?view=account`, `/?view=orders`, carrito independiente.
 
+## Traer commits de cierre (sin `bad revision`)
+
+```bash
+git fetch origin cursor/monetta-v43-close-3c47
+git cherry-pick d2ba7ba 909096b 3d674b5
+# o: git merge --no-ff origin/cursor/monetta-v43-close-3c47
+```
+
+Si ya tienes el mismo diff en `fix/web-brands-row`, cherry-pick puede conflictar: resuelve manteniendo tu matriz local y `storefront.mjs`.
+
 ## Comandos de cierre
 
 ```bash
