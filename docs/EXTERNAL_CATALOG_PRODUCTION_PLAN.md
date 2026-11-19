@@ -528,7 +528,7 @@ narrowed selection would still serve ten unselected Coach bags per source.
 | **Location** | **Texas, United States** — see § 8.7, this is load-bearing |
 | OS | Ubuntu 26.04 LTS |
 | Resources | 2 vCPU · 4 GB RAM · 2 GB swap · 80 GB SSD · 5 TB/period |
-| Address | `209.23.11.117`, `cafe.alexisreyna.dev` |
+| Address | `209.23.11.117`, `cafe.alexisrs.dev` |
 | Ingress | Caddy `:80/:443`, automatic TLS; UFW allows only 22/80/443; fail2ban |
 | Runtime | Docker Compose at `/opt/artisanalbrew/compose.yml` |
 | Data | PostgreSQL 16 in-container, `/opt/artisanalbrew/data/postgres`, port unpublished |
@@ -575,7 +575,7 @@ CREATE DATABASE monetta_catalog OWNER monetta_catalog;
 Internet
   │
   ▼
-Caddy :80/:443  ─── cafe.alexisreyna.dev ──────► web:8080 · gateway:4022   (existing)
+Caddy :80/:443  ─── cafe.alexisrs.dev ──────► web:8080 · gateway:4022   (existing)
   └──────────────── catalog.monetta.mx ────────► monetta-catalog-api:8081  (new)
 
 monetta-catalog-api      ──┐
@@ -634,7 +634,7 @@ build. Throttling therefore lives in the Node app (WP-22), not the proxy.
 
 `catalog.monetta.mx` needs an `A` record → `209.23.11.117` in whatever manages
 `monetta.mx` DNS (Shopify, if the storefront domain is Shopify-managed).
-If that is blocked or slow, ship on `monetta-catalog.alexisreyna.dev` — the same
+If that is blocked or slow, ship on `monetta-catalog.alexisrs.dev` — the same
 zone that already resolves `cafe` — and cut over later. The hostname appears in
 exactly two places (`Caddyfile`, `EXTERNAL_CATALOG_BASE_URL`), so the cutover is
 cheap. No `AAAA` record, matching the existing setup.
@@ -1136,7 +1136,7 @@ Execute § 11 end to end, record the evidence, then flip
 
 | # | Decision | Recommendation | Cost of changing later |
 |---|---|---|---|
-| D1 | Hostname | `catalog.monetta.mx`; fall back to `monetta-catalog.alexisreyna.dev` if the `monetta.mx` zone is slow to change | Low — two config lines |
+| D1 | Hostname | `catalog.monetta.mx`; fall back to `monetta-catalog.alexisrs.dev` if the `monetta.mx` zone is slow to change | Low — two config lines |
 | D2 | Audience: internal owner build, or public App Store build | **Internal**, until § 11 has run twice and the trademark surface in `US_SOURCING_DURABILITY.md` § 1 has been reviewed with counsel | High — a public build showing brand marks and CDN images is the takedown surface |
 | D3 | Sources to enable first | Coach + Michael Kors (they have fixtures and validated URL shapes) | Low |
 | D4 | Watch cadence | 3 h standard, 1 h pinned | Low — cron env |
