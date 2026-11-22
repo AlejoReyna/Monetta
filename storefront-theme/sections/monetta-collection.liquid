@@ -8,7 +8,7 @@
 {%- endcomment -%}
 {%- liquid
   assign offers = false
-  if collection.handle == 'ofertas'
+  if collection.handle == 'ofertas' or template.suffix == 'ofertas'
     assign offers = true
   endif
   assign active_count = 0
@@ -22,7 +22,12 @@
     endif
   endfor
   assign sort_by = collection.sort_by | default: collection.default_sort_by
-  assign clear_url = collection.url
+  assign listing_url = collection.url
+  if template.suffix == 'ofertas'
+    assign listing_view = 'ofertas'
+    assign listing_url = listing_url | append: '?view=ofertas'
+  endif
+  assign clear_url = listing_url
   if sort_by != collection.default_sort_by
     assign separator = '?'
     if clear_url contains '?'
@@ -32,11 +37,19 @@
   endif
   # Shopify's automatic all-products collection keeps the title it was seeded with in the store language ("Products"); the
   # theme calls it what the app calls it. A collection the merchant created and titled is shown as titled.
+  assign search_id = 'collection-query'
+  assign search_param = 'producto'
+  assign search_label = 'Buscar producto en esta colección'
+  assign search_placeholder = 'Buscar producto…'
   assign collection_title = collection.title
   if offers
     assign collection_title = 'Ofertas'
+    assign search_id = 'offers-query'
+    assign search_param = 'oferta'
+    assign search_label = 'Buscar en Ofertas'
+    assign search_placeholder = search_label
   endif
-  if collection.handle == 'all'
+  if collection.handle == 'all' and offers == false
     assign seeded_title = collection.title | strip | downcase
     if seeded_title == 'products' or seeded_title == 'all products' or seeded_title == 'all' or seeded_title == 'productos' or seeded_title == 'todos los productos'
       assign collection_title = 'Catálogo'
@@ -142,8 +155,12 @@
   if collection.filters.size > 0
     assign card_sizes = '(min-width: 1680px) 299px, (min-width: 1440px) calc((100vw - 484px) / 4), (min-width: 1280px) calc((100vw - 448px) / 3), (min-width: 1200px) 260px, (min-width: 768px) 33vw, 50vw'
   endif
+  assign page_size = section.settings.products_per_page
+  if offers and page_size < 48
+    assign page_size = 48
+  endif
 -%}
-{% paginate collection.products by section.settings.products_per_page %}
+{% paginate collection.products by page_size %}
   {%- if guide_photo != blank and paginate.current_page == 1 -%}
     <div class="guia-collection-hero">
       {% render 'monetta-guia-hero', photo: guide_photo, banner: guide_banner, caption: true, lettered: true, title: guide_title, eager: true %}
@@ -165,19 +182,22 @@
     {%- endif -%}
     {% render 'monetta-guia-pills', active: guide_pill, filters_button: has_controls, active_count: active_count %}
 
-    {%- if offers -%}
-      <form class="search-field v43-offers-search" data-offers-search hidden role="search" aria-label="Buscar en Ofertas">
-        <label class="visually-hidden" for="offers-query">Buscar en Ofertas</label>
-        <input id="offers-query" name="oferta" type="search" placeholder="Buscar en Ofertas" enterkeyhint="search">
-        <button type="submit" class="btn btn--quiet">Buscar</button>
-      </form>
-      <p role="status" data-offers-status></p>
-      <button type="button" class="btn btn--outline" data-offers-retry hidden>Reintentar</button>
-      <div data-offers-empty class="empty" hidden><p>Sin ofertas vigentes para esta selección.</p><a class="btn btn--outline" href="{{ routes.all_products_collection_url }}">Ver catálogo</a></div>
-    {%- endif -%}
+    <form class="search-field collection-search" data-collection-search{% if offers %} data-offers-search{% endif %} hidden role="search" aria-label="{{ search_label }}">
+      <label class="visually-hidden" for="{{ search_id }}">{{ search_label }}</label>
+      <input id="{{ search_id }}" name="{{ search_param }}" type="search" placeholder="{{ search_placeholder }}" enterkeyhint="search">
+      <button type="submit" class="btn btn--quiet">Buscar</button>
+    </form>
+    <p role="status" data-collection-status{% if offers %} data-offers-status{% endif %}></p>
+    <button type="button" class="btn btn--outline" data-collection-retry hidden>Reintentar</button>
+    <button type="button" class="btn btn--outline" data-collection-more hidden>Seguir buscando en más piezas</button>
+    <div data-collection-empty class="empty" hidden>
+      <p>{% if offers %}Sin ofertas vigentes para esta selección.{% else %}No encontramos productos para esta búsqueda.{% endif %}</p>
+      <button type="button" class="btn btn--outline" data-clear-collection-query>Limpiar búsqueda</button>
+      {%- if offers -%}<a class="btn btn--outline" href="{{ routes.all_products_collection_url }}">Ver catálogo</a>{%- endif -%}
+    </div>
 
     {%- capture results_html -%}
-      {% render 'monetta-results', products: collection.products, offers: offers, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', listing_card: true, sizes: card_sizes, xl_widths: '240,360,480,600,720,900' %}
+      {% render 'monetta-results', products: collection.products, searchable: true, offers: offers, filters: collection.filters, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', listing_card: true, sizes: card_sizes, xl_widths: '240,360,480,600,720,900' %}
     {%- endcapture -%}
     {%- if offers -%}{%- assign count_text = '' -%}{%- endif -%}
     {% render 'monetta-listing-layout',
@@ -186,6 +206,7 @@
       sort_by: sort_by,
       default_sort: collection.default_sort_by,
       base_url: collection.url,
+      alternate_view: listing_view,
       clear_url: clear_url,
       results_html: results_html,
       active_count: active_count,

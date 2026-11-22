@@ -23,6 +23,7 @@
       assign fallback = routes.collections_url | append: '/types?q=Calzado'
     when 'ofertas'
       assign handle = 'ofertas'
+      assign fallback = routes.all_products_collection_url | append: '?view=ofertas'
     when 'relojes'
       assign handle = 'relojes'
       assign fallback = routes.collections_url | append: '/types?q=Reloj'
@@ -55,6 +56,7 @@
   {%- case key -%}
     {%- when 'categorias' -%}{{ routes.collections_url }}
     {%- when 'marcas' -%}{{ routes.collections_url }}?view=marcas
+    {%- when 'inicio' -%}{{ routes.root_url }}
     {%- when 'catalogo' -%}{{ routes.all_products_collection_url }}
     {%- comment -%}
       Guide pages use the new templates page.guia-mayoreo, -contacto and -rewards; the owner's own templates stay. Until a
@@ -70,6 +72,12 @@
           assign target = pages['como-vender']
         endif
       -%}
-      {%- if target.id != blank and target.template_suffix == suffix -%}{{ target.url }}{%- elsif target.id != blank -%}{{ target.url }}?view={{ suffix }}{%- endif -%}
+      {%- if target.id != blank and target.template_suffix == suffix -%}
+        {{ target.url }}
+      {%- elsif target.id != blank -%}
+        {{ target.url }}?view={{ suffix }}
+      {%- elsif key == 'mayoreo' or key == 'contacto' -%}
+        {{ routes.root_url }}?view={{ suffix }}
+      {%- endif -%}
   {%- endcase -%}
 {%- endif -%}

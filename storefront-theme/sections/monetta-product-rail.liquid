@@ -16,6 +16,15 @@
   endif
   assign rail_id = 'rail-' | append: section.id
   assign presentation = section.settings.presentation | default: 'rail'
+  if presentation == 'feature' and hidden == false
+    if section.settings.collection == blank or source.handle == 'all'
+      if collections['nueva-coleccion'].products_count > 0
+        assign source = collections['nueva-coleccion']
+      elsif collections['novedades'].products_count > 0
+        assign source = collections['novedades']
+      endif
+    endif
+  endif
 -%}
 {%- if hidden -%}
   {%- if request.design_mode -%}
@@ -42,7 +51,9 @@
     link_label: section.settings.link_label,
     rail_id: rail_id
   %}
-  {% paginate source.products by 250 %}
+  {%- assign rail_page_size = 40 -%}
+  {%- if section.settings.newest_first -%}{%- assign rail_page_size = 250 -%}{%- endif -%}
+  {% paginate source.products by rail_page_size %}
   {%- assign rail_products = source.products -%}
   {%- if section.settings.newest_first -%}{%- assign rail_products = rail_products | sort: 'created_at' | reverse -%}{%- endif -%}
   {%- if rail_products.size > 0 -%}
@@ -77,9 +88,9 @@
     },
     { "type": "checkbox", "id": "hide_without_collection", "label": "Ocultar si no hay colección", "default": false },
     { "type": "checkbox", "id": "show_new_label", "label": "Mostrar Recién llegado", "info": "Permanece oculto sin una fecha comercial en el metacampo fecha_comercial.", "default": false },
-    { "type": "checkbox", "id": "newest_first", "label": "Mostrar las más recientes primero", "default": false },
+    { "type": "checkbox", "id": "newest_first", "label": "Mostrar las más recientes primero", "info": "Con más de 250 productos en el catálogo, asigna una colección ordenada por «Más recientes» (created-descending) en Shopify Admin.", "default": false },
     { "type": "text", "id": "heading", "label": "Título", "default": "Novedades" },
-    { "type": "collection", "id": "collection", "label": "Colección", "info": "Si «Ocultar si no hay colección» está activo y esta queda vacía, la sección no se muestra." },
+    { "type": "collection", "id": "collection", "label": "Colección", "info": "Si «Ocultar si no hay colección» está activo y esta queda vacía, la sección no se muestra. Para catálogos grandes (>250 productos), usa una colección ordenada por «Más recientes» en Shopify Admin." },
     { "type": "range", "id": "products_to_show", "label": "Productos", "min": 4, "max": 40, "step": 1, "default": 8 },
     { "type": "text", "id": "link_label", "label": "Texto del enlace", "default": "Ver todo" },
     { "type": "url", "id": "link_url", "label": "Enlace" }

@@ -166,6 +166,13 @@
       parts.unshift(compare);
       parts.push(badge);
     }
+    if (variant.msi) {
+      const installments = document.createElement('span');
+      installments.className = 'v43-price__installments';
+      installments.dataset.msiLine = '';
+      installments.textContent = `6 pagos sin intereses de ${variant.msi}`;
+      parts.push(installments);
+    }
     target.replaceChildren(...parts);
   }
 
@@ -173,6 +180,8 @@
     const variants = JSON.parse(root.querySelector('[data-quick-view-variants]')?.textContent || '[]');
     const groups = [...root.querySelectorAll('[data-quick-view-group]')];
     const add = root.querySelector('[data-quick-view-add]');
+    const checkout = trigger.dataset.checkout;
+    if (checkout) add.querySelector('[data-label]').textContent = 'Comprar ahora';
     const hint = root.querySelector('[data-quick-view-hint]');
     const price = root.querySelector('[data-quick-view-price]');
     const photo = root.querySelector('[data-quick-view-photo]');
@@ -228,7 +237,7 @@
       if (error) error.hidden = true;
       const option = groups.length ? ` (${chosen.options.join(' / ')})` : '';
       try {
-        const result = await window.Monetta.cart.add({ id: chosen.id, quantity: 1, name: `${root.dataset.productTitle || ''}${option}`, trigger: add });
+        const result = await window.Monetta.cart.add({ id: chosen.id, quantity: 1, name: `${root.dataset.productTitle || ''}${option}`, trigger: add, checkout });
         if (!result.ok && error) {
           error.textContent = result.message;
           error.hidden = false;
@@ -304,8 +313,9 @@
     const form = event.target.closest?.('[data-rewards-register]');
     if (!form) return;
     event.preventDefault();
-    const destination = new URL(form.action);
-    destination.searchParams.set('login_hint', form.elements.login_hint.value.trim());
+    const destination = new URL(form.getAttribute('action') || form.action, location.href);
+    const hint = form.elements.login_hint.value.trim();
+    if (hint) destination.searchParams.set('login_hint', hint);
     window.location.assign(destination);
   });
 

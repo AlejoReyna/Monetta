@@ -5,8 +5,7 @@
       "type": "monetta-guia-home",
       "settings": {
         "mode": "carousel",
-        "show_banner_categorias": true,
-        "enabled": false
+        "show_banner_categorias": true
       }
     },
     "categorias": {
@@ -67,7 +66,7 @@
       "type": "monetta-guia-home",
       "settings": {
         "mode": "register",
-        "enabled": false
+        "enabled": true
       }
     }
   },

@@ -6,55 +6,62 @@
       <h2 class="overlay__title" id="cart-sheet-title">Carrito</h2>
       <button type="button" class="icon-button" data-overlay-close data-autofocus aria-label="Cerrar carrito">{% render 'monetta-icon', name: 'close', size: 22 %}</button>
     </div>
-    <div class="overlay__body" data-cart-sheet-body>
-      <div class="cart-sync form-error" data-cart-sync role="alert" hidden>
-        {% render 'monetta-icon', name: 'error', size: 18 %}
-        <span>No pudimos confirmar el estado de tu bolsa. Actualízala antes de continuar al checkout.</span>
-        <button type="button" class="btn btn--outline" data-cart-resync>Actualizar bolsa</button>
-      </div>
-      {%- if cart.item_count == 0 -%}
-        <div class="empty">
-          <span class="empty__mark" aria-hidden="true">{% render 'monetta-icon', name: 'bag', size: 28 %}</span>
-          <p class="empty__title">Tu bolsa está vacía</p>
-          <p class="body-copy">Encuentra una pieza que quieras llevar contigo.</p>
-          <a class="btn btn--outline" href="{{ routes.all_products_collection_url }}">Explorar catálogo</a>
+    <div class="cart-sheet__content" data-cart-sheet-scroll>
+      <div class="overlay__body" data-cart-sheet-body>
+        <div class="cart-sync form-error" data-cart-sync role="alert" hidden>
+          {% render 'monetta-icon', name: 'error', size: 18 %}
+          <span>No pudimos confirmar el estado de tu bolsa. Actualízala antes de continuar al checkout.</span>
+          <button type="button" class="btn btn--outline" data-cart-resync>Actualizar bolsa</button>
         </div>
-      {%- else -%}
-        <ul class="cart-lines cart-sheet__lines" role="list">
-          {%- for item in cart.items -%}
-            {% render 'monetta-cart-line', item: item %}
-          {%- endfor -%}
-        </ul>
+        {%- if cart.item_count == 0 -%}
+          <div class="empty">
+            <span class="empty__mark" aria-hidden="true">{% render 'monetta-icon', name: 'bag', size: 28 %}</span>
+            <p class="empty__title">Tu bolsa está vacía</p>
+            <p class="body-copy">Encuentra una pieza que quieras llevar contigo.</p>
+            <a class="btn btn--outline" href="{{ routes.all_products_collection_url }}">Explorar catálogo</a>
+          </div>
+        {%- else -%}
+          <ul class="cart-lines cart-sheet__lines" role="list">
+            {%- for item in cart.items -%}
+              {% render 'monetta-cart-line', item: item %}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+      {%- if cart.item_count > 0 -%}
+        <div class="overlay__footer" data-cart-sheet-footer>
+          <div class="cart-drawer__summary">
+            {%- if cart.cart_level_discount_applications.size > 0 -%}
+              {%- for discount in cart.cart_level_discount_applications -%}
+                <p class="cart-drawer__subtotal"><span>{{ discount.title | escape }}</span><span>−{{ discount.total_allocated_amount | money_without_trailing_zeros }}</span></p>
+              {%- endfor -%}
+            {%- endif -%}
+            <p class="cart-drawer__subtotal"><span>Total</span><span>{{ cart.total_price | money_with_currency }}</span></p>
+            {%- if settings.monetta_rewards_shipping and shop.customer_accounts_enabled -%}
+              {%- capture rewards_url -%}{% render 'monetta-guia-url', key: 'rewards' %}{%- endcapture -%}
+              <p class="cart-rewards-shipping">
+                <svg class="cart-rewards-shipping__plane" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M2 10h8l5-8h3l-2 8 6 2-6 2 2 8h-3l-5-8H2l3-2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Envío Gratis con <a href="{% if customer and rewards_url != blank %}{{ rewards_url | strip }}{% elsif customer %}{{ routes.account_url }}{% else %}{{ routes.storefront_login_url }}{% endif %}">Monetta Rewards</a></span>
+              </p>
+            {%- endif -%}
+          </div>
+          <div data-cart-recommendations="{{ routes.product_recommendations_url }}?section_id=monetta-cart-recommendations&amp;product_id={{ cart.items.first.product.id }}&amp;limit=3&amp;intent=related"></div>
+        </div>
       {%- endif -%}
     </div>
-    {%- if cart.item_count > 0 -%}
-      <div class="overlay__footer" data-cart-sheet-footer>
-        <div class="cart-drawer__summary">
-          {%- if cart.cart_level_discount_applications.size > 0 -%}
-            {%- for discount in cart.cart_level_discount_applications -%}
-              <p class="cart-drawer__subtotal"><span>{{ discount.title | escape }}</span><span>−{{ discount.total_allocated_amount | money_without_trailing_zeros }}</span></p>
-            {%- endfor -%}
-          {%- endif -%}
-          <p class="cart-drawer__subtotal"><span>Total</span><span>{{ cart.total_price | money_with_currency }}</span></p>
-          {%- if settings.monetta_rewards_shipping and shop.customer_accounts_enabled -%}
-            {%- capture rewards_url -%}{% render 'monetta-guia-url', key: 'rewards' %}{%- endcapture -%}
-            <p class="cart-rewards-shipping">
-              <img src="{{ 'monetta-v41-icon-envio-avion.svg' | asset_url }}" width="24" height="24" alt="">
-              <span>Envío Gratis con <a href="{% if customer and rewards_url != blank %}{{ rewards_url | strip }}{% elsif customer %}{{ routes.account_url }}{% else %}{{ routes.storefront_login_url }}{% endif %}">Monetta Rewards</a></span>
-            </p>
-          {%- endif -%}
-          <p class="small text-muted">La tarifa de envío y el total final se calculan al confirmar la entrega.</p>
-        </div>
-        <div data-cart-recommendations="{{ routes.product_recommendations_url }}?section_id=monetta-cart-recommendations&amp;product_id={{ cart.items.first.product.id }}&amp;limit=3&amp;intent=related"></div>
+    <div class="cart-sheet__actions">
+      {%- if cart.item_count > 0 -%}
         <form class="cart-drawer__buttons" action="{{ routes.cart_url }}" method="post">
           {%- if customer == nil and shop.customer_accounts_enabled -%}
             <a class="btn btn--primary btn--block" href="{{ routes.storefront_login_url }}">Iniciar sesión</a>
           {%- endif -%}
           <button type="submit" name="checkout" class="btn {% if customer == nil and shop.customer_accounts_enabled %}btn--outline{% else %}btn--primary{% endif %} btn--block">{% if customer == nil and shop.customer_accounts_enabled %}Continuar como invitado{% else %}Continuar al pago{% endif %}</button>
         </form>
-      </div>
-    {%- endif -%}
-    <button type="button" class="btn btn--outline cart-sheet__continue" data-overlay-close>Seguir comprando</button>
+      {%- endif -%}
+      <button type="button" class="btn btn--outline cart-sheet__continue" data-overlay-close>Seguir comprando</button>
+    </div>
   </div>
 </dialog>
 

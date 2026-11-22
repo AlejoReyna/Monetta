@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:monetta_app/features/home/home_boutique_sections.dart';
 import 'package:monetta_app/main.dart' as app;
 
 /// Real application launch using CI defines and isolated test-device storage.
@@ -10,7 +11,7 @@ void main() {
   testWidgets('launch application, browse and open account navigation',
       (tester) async {
     await app.main();
-    for (var i = 0; i < 60 && find.text('Home').evaluate().isEmpty; i++) {
+    for (var i = 0; i < 60 && find.text('Inicio').evaluate().isEmpty; i++) {
       await tester.pump(const Duration(seconds: 1));
     }
     expect(find.byType(MaterialApp), findsOneWidget);
@@ -28,9 +29,26 @@ void main() {
     }
 
     // The actual app uses a custom bottom bar; verify its public labels.
-    expect(find.text('Home'), findsWidgets);
+    expect(find.text('Inicio'), findsWidgets);
     await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byKey(const ValueKey('categories-scroll')), findsOneWidget);
+    await tester.pageBack();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    final catalogBanner =
+        find.byKey(const ValueKey('home-banner-slide-products'));
+    if (catalogBanner.hitTestable().evaluate().isEmpty) {
+      final carousel = find.descendant(
+        of: find.byType(HomeEditorialBanner),
+        matching: find.byType(PageView),
+      );
+      tester.widget<PageView>(carousel).controller!.jumpToPage(0);
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    expect(catalogBanner.hitTestable(), findsOneWidget);
+    await tester.tap(catalogBanner);
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.byKey(const Key('catalog-filter-button')), findsOneWidget);
     await tester.tap(find.byKey(const Key('catalog-filter-button')));
     await tester.pump(const Duration(milliseconds: 500));

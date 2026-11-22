@@ -19,7 +19,10 @@
   assign density = density | default: 'grid'
   assign sizes = sizes | default: '(min-width: 1200px) 260px, (min-width: 768px) 33vw, 50vw'
   assign variant = selected_variant | default: product.selected_or_first_available_variant
-  assign product_url = product.url | append: '?variant=' | append: variant.id
+  assign product_url = variant.url
+  if product_url == blank
+    assign product_url = product.url | split: '?' | first | append: '?variant=' | append: variant.id
+  endif
   assign in_stock = variant.available
   assign currency = cart.currency.iso_code
   assign show_view = false

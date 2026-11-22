@@ -2,6 +2,7 @@
 /// independent favorite, X/Escape, in-place add confirmation and PDP entry.
 library;
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -26,6 +27,8 @@ import '../checkout/mini_cart.dart';
 import '../navigation/duo_workspace.dart';
 import 'product_selection.dart';
 import 'purchase_dock.dart';
+import 'restock_push_adapter.dart';
+import 'restock_request_sheet.dart';
 
 const String _kChooseLabel = 'Elige una opción';
 
@@ -253,6 +256,24 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
   /// key and every state of the old bar (choose, restock, pending).
   Widget _buildActions(BoutiquePalette palette, {required bool inStock}) {
     final chosen = _variantIndex;
+    final notificationController = NotificationScope.maybeOf(context);
+    final effectiveOnRestock = widget.onRestock ??
+        (notificationController?.variantRestockAvailable == true
+            ? (Product p, ProductVariant v) {
+                unawaited(
+                  showRestockRequestSheet(
+                    context,
+                    product: p,
+                    variant: v,
+                    initialEmail: AccountScope.maybeOf(context)?.account?.email,
+                    onSubmit: (payload) => submitRestockViaPushNotifications(
+                      notificationController,
+                      payload,
+                    ),
+                  ),
+                );
+              }
+            : null);
     final String label;
     final VoidCallback? onPressed;
     if (chosen == null) {
@@ -292,7 +313,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
         if (!inStock &&
             chosen != null &&
             chosen >= 0 &&
-            widget.onRestock != null &&
+            effectiveOnRestock != null &&
             _currentProduct != null)
           TextButton(
             onPressed: () {
@@ -304,7 +325,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       variantIndexForId(product, _selectedId, fallback: -1),
                     );
               if (product != null && variant != null && !variant.available) {
-                widget.onRestock!(product, variant);
+                effectiveOnRestock(product, variant);
               }
             },
             child: Text(
@@ -489,11 +510,13 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
   Widget _buildPrice({
     required double price,
     required double? compare,
+    required double? sixMsiAmount,
     required bool inStock,
   }) =>
       SelectionPriceView(
         price: price,
         compare: compare,
+        sixMsiAmount: sixMsiAmount,
         currentKey: const Key('quick-view-price'),
         size: 21,
         inStock: inStock,
@@ -548,6 +571,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     final price =
         chosen == null ? product.price : selectionPrice(product, chosen);
     final compare = chosen == null ? null : selectionCompareAt(product, chosen);
+    final sixMsiAmount = chosen == null
+        ? null
+        : selectedVariant(product, chosen)?.sixMsiInstallmentAmount;
     final inStock = currentProduct != null &&
         (chosen == null || selectionInStock(product, chosen));
     final memberImages = chosen == null
@@ -646,6 +672,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                         _buildPrice(
                           price: price,
                           compare: compare,
+                          sixMsiAmount: sixMsiAmount,
                           inStock: inStock,
                         ),
                         if (selectableVariants(product).isNotEmpty) ...[

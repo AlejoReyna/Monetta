@@ -43,11 +43,13 @@ Widget _host({
       ),
     );
 
-class _ScopedNotifications extends ChangeNotifier implements NotificationController {
+class _ScopedNotifications extends ChangeNotifier
+    implements NotificationController {
   @override
   bool get available => true;
   @override
-  NotificationPermissionState get permission => NotificationPermissionState.granted;
+  NotificationPermissionState get permission =>
+      NotificationPermissionState.granted;
   @override
   NotificationPreferences get preferences => const NotificationPreferences();
   @override
@@ -56,24 +58,30 @@ class _ScopedNotifications extends ChangeNotifier implements NotificationControl
   String? get lastError => null;
   NotificationRouteData? opened;
   @override
-  void Function(NotificationRouteData) get onOpenRoute => (route) => opened = route;
+  void Function(NotificationRouteData) get onOpenRoute =>
+      (route) => opened = route;
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
   group('NotificationsScreen', () {
-    testWidgets('opening from a route uses shared push state and preferences', (tester) async {
+    testWidgets('opening from a route uses shared push state and preferences',
+        (tester) async {
       final controller = _ScopedNotifications();
       final inbox = NotificationInbox()..ingest(_item());
       addTearDown(controller.dispose);
       await tester.pumpWidget(MaterialApp(
         theme: buildTheme(),
-        builder: (context, child) => NotificationScope(notifier: controller, child: child!),
-        home: Builder(builder: (context) => Scaffold(body: TextButton(
-          onPressed: () => openNotifications(context, inbox: inbox, ownerId: 'acct-1'),
-          child: const Text('Abrir avisos'),
-        ))),
+        builder: (context, child) =>
+            NotificationScope(notifier: controller, child: child!),
+        home: Builder(
+            builder: (context) => Scaffold(
+                    body: TextButton(
+                  onPressed: () => openNotifications(context,
+                      inbox: inbox, ownerId: 'acct-1'),
+                  child: const Text('Abrir avisos'),
+                ))),
       ));
       await tester.tap(find.text('Abrir avisos'));
       await tester.pumpAndSettle();
@@ -84,7 +92,8 @@ void main() {
       await tester.tap(find.text('Gestionar preferencias'));
       await tester.pumpAndSettle();
       expect(find.text('Tus notificaciones'), findsOneWidget);
-      expect(find.byKey(const ValueKey('save-notification-preferences')), findsOneWidget);
+      expect(find.byKey(const ValueKey('save-notification-preferences')),
+          findsOneWidget);
     });
 
     testWidgets('empty inbox is honest and offers no dead actions',

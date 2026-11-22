@@ -23,10 +23,9 @@
       if (value !== '') params.append(name, String(value));
     }
     const target = new URL(form.getAttribute('action') || location.pathname, location.href);
-    if (document.querySelector('[data-offers]')) {
-      const query = new URLSearchParams(location.search).get('oferta');
-      if (query) params.set('oferta', query);
-    }
+    const field = $('[data-collection-search] input');
+    const query = field && new URLSearchParams(location.search).get(field.name);
+    if (query) params.set(field.name, query);
     target.search = params.toString();
     location.assign(target.href);
   });
@@ -167,99 +166,196 @@
   if (searchInput && !searchInput.value) searchInput.focus({ preventScroll: true });
 })();
 
-/* Ofertas: Liquid emits only eligible variants. Search the whole filtered
- * collection before applying the local text query, preserving Shopify ordering. */
+/* Search the whole filtered collection. With no local search, catalog listings
+ * retain the normal pagination. Ofertas also loads its pages to count eligible variants. */
 (() => {
-  const root = document.querySelector('[data-offers]');
-  const grid = root?.querySelector('[data-grid]');
-  const form = root?.querySelector('[data-offers-search]');
-  if (!root || !form) return;
-  const field = form.elements.oferta;
-  const status = root.querySelector('[data-offers-status]');
-  const empty = root.querySelector('[data-offers-empty]');
-  const retry = root.querySelector('[data-offers-retry]');
-  const pagination = root.querySelector('[data-offers-pagination]');
+  const form = document.querySelector('[data-collection-search]');
+  const root = form?.closest('[data-listing]');
+  if (!root) return;
+  const MAX_PAGES_PER_SCAN = 10;
+  const MAX_RATE_LIMIT_RETRIES = 2;
+  const offers = root.hasAttribute('data-offers');
+  const grid = root.querySelector('[data-grid]');
+  const serverCount = root.querySelector('[data-count]');
+  const field = form.querySelector('input');
+  const status = root.querySelector('[data-collection-status]');
+  const empty = root.querySelector('[data-collection-empty]');
+  const retry = root.querySelector('[data-collection-retry]');
+  const moreButton = root.querySelector('[data-collection-more]');
+  const clear = root.querySelector('[data-clear-collection-query]');
+  const pagination = root.querySelector('[data-load-more]');
   const items = [...(grid?.children || [])];
   const normalize = (value) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLocaleLowerCase('es-MX');
+  const address = new URL(location.href);
+  const view = address.searchParams.get('view');
   const more = (scope, base = location.href) => {
-    const href = scope.querySelector('[data-offers-pagination] a')?.getAttribute('href');
-    return href ? new URL(href, base).href : null;
+    const href = scope.querySelector('[data-offers-pagination] a, [data-load-more] a[data-more], [data-load-more] a[data-more-native]')?.getAttribute('href');
+    if (!href) return null;
+    const url = new URL(href, base);
+    if (view) url.searchParams.set('view', view);
+    return url.href;
   };
   let next = more(root);
+  if (Number(address.searchParams.get('page')) > 1 && grid) {
+    address.searchParams.delete('page');
+    next = address.href;
+    items.length = 0;
+  }
   let loaded = !next;
   let pending = false;
-  let query = new URLSearchParams(location.search).get('oferta') || '';
+  let query = address.searchParams.get(field.name) || '';
   form.hidden = false;
   field.value = query;
+
+  let scrollRestored = false;
+  function restoreCollectionScroll() {
+    const position = history.state?.monettaCollectionScroll;
+    if (!loaded || scrollRestored || !Number.isFinite(position)) return;
+    scrollRestored = true;
+    history.scrollRestoration = 'manual';
+    document.fonts.ready.then(() => requestAnimationFrame(() => {
+      window.scrollTo({ top: position, behavior: 'instant' });
+    }));
+  }
+
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
+    scrollRestored = false;
+    restoreCollectionScroll();
+  });
 
   function display() {
     if (!grid) return;
     const words = normalize(query).trim().split(/\s+/).filter(Boolean);
-    const matches = items.filter((item) => words.every((word) => normalize(item.dataset.offerTerms).includes(word)));
+    const seen = new Set();
+    const matches = items.filter((item) => {
+      const product = item.dataset.collectionProduct;
+      if (seen.has(product)) return false;
+      seen.add(product);
+      const terms = normalize(item.dataset.collectionTerms || '');
+      return words.every((word) => terms.includes(word));
+    });
     const order = new URLSearchParams(location.search).get('sort_by');
-    if (order === 'price-ascending' || order === 'price-descending') {
+    if (offers && (order === 'price-ascending' || order === 'price-descending')) {
       const direction = order === 'price-ascending' ? 1 : -1;
       matches.sort((a, b) => direction * (Number(a.dataset.offerPrice) - Number(b.dataset.offerPrice)));
     }
     grid.replaceChildren(...matches);
-    status.textContent = loaded ? `${matches.length} ${matches.length === 1 ? 'oferta' : 'ofertas'}` : '';
-    empty.hidden = !loaded || matches.length > 0;
+    const one = offers ? 'oferta' : 'producto';
+    if (loaded) {
+      status.textContent = `${matches.length} ${one}${matches.length === 1 ? '' : 's'}`;
+      empty.hidden = matches.length > 0;
+      if (moreButton) moreButton.hidden = true;
+      restoreCollectionScroll();
+    } else {
+      status.textContent = matches.length > 0
+        ? `${matches.length} ${one}${matches.length === 1 ? '' : 's'} en las páginas cargadas.`
+        : 'Sin coincidencias en las páginas cargadas.';
+      empty.hidden = true;
+      if (moreButton) moreButton.hidden = false;
+    }
+    clear.hidden = !query;
+  }
+
+  async function fetchPageWithBackoff(url) {
+    for (let attempt = 0; attempt <= MAX_RATE_LIMIT_RETRIES; attempt += 1) {
+      const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (response.status === 429) {
+        if (attempt >= MAX_RATE_LIMIT_RETRIES) throw new Error('rate-limit');
+        const retryHeader = Number(response.headers.get('Retry-After'));
+        const waitMs = Number.isFinite(retryHeader) && retryHeader >= 0
+          ? Math.min(2500, Math.max(400, retryHeader * 1000))
+          : 600 * (attempt + 1);
+        await new Promise((resolve) => setTimeout(resolve, waitMs));
+        continue;
+      }
+      if (!response.ok) throw new Error('collection-search');
+      return response;
+    }
+    throw new Error('collection-search');
   }
 
   async function load() {
-    if (pending) return;
+    if (!grid || pending) return;
+    if (pagination) pagination.hidden = true;
+    if (serverCount) serverCount.hidden = true;
     if (loaded) {
       display();
       return;
     }
     pending = true;
     retry.hidden = true;
-    status.textContent = 'Cargando ofertas…';
+    if (moreButton) moreButton.hidden = true;
+    status.textContent = offers ? 'Cargando ofertas…' : 'Buscando en la colección…';
     try {
-      while (next) {
-        const response = await fetch(next, { signal: AbortSignal.timeout(15000) });
-        if (!response.ok) throw new Error('offers');
-        const page = new DOMParser().parseFromString(await response.text(), 'text/html').querySelector('[data-offers]');
-        if (!page) throw new Error('offers');
-        items.push(...page.querySelectorAll('[data-offer-price]'));
+      let pagesThisBatch = 0;
+      while (next && pagesThisBatch < MAX_PAGES_PER_SCAN) {
+        if (pagesThisBatch >= 3) {
+          await new Promise((resolve) => setTimeout(resolve, 120));
+        }
+        const response = await fetchPageWithBackoff(next);
+        const page = new DOMParser().parseFromString(await response.text(), 'text/html').querySelector('[data-listing]');
+        if (!page || page.dataset.collectionKey !== root.dataset.collectionKey) throw new Error('collection-search');
         const following = more(page, response.url);
-        if (following === next) throw new Error('offers');
+        if (following === next) throw new Error('collection-search');
+        items.push(...page.querySelectorAll('[data-collection-terms]'));
         next = following;
+        pagesThisBatch += 1;
       }
-      loaded = true;
-      if (pagination) pagination.hidden = true;
+      loaded = !next;
+      if (loaded) root.querySelector('[data-previous]')?.closest('.load-more')?.remove();
       display();
-      if (history.state?.monettaOffersScroll != null) window.scrollTo(0, history.state.monettaOffersScroll);
-    } catch {
-      status.textContent = 'No pudimos consultar todas las ofertas.';
+    } catch (error) {
+      if (items.length > 0) display();
+      status.textContent = error?.message === 'rate-limit'
+        ? 'Shopify limitó temporalmente las consultas. Intenta de nuevo en unos segundos.'
+        : 'No pudimos completar la búsqueda en esta colección.';
       retry.hidden = false;
+      if (moreButton) moreButton.hidden = true;
     } finally {
       pending = false;
     }
   }
 
-  root.addEventListener('click', (event) => {
-    if (event.target.closest('a[data-product-url]')) {
-      history.replaceState({ ...history.state, monettaOffersScroll: window.scrollY }, '', location.href);
-    }
-  });
+  document.addEventListener('click', (event) => {
+    if ((!query && !offers) || event.button !== 0 || event.ctrlKey || event.metaKey ||
+        event.shiftKey || event.altKey) return;
+    const link = event.target.closest('a[data-product-url], a[data-quick-view-pdp]');
+    if (!link || (!root.contains(link) && !link.hasAttribute('data-quick-view-pdp'))) return;
+    history.scrollRestoration = 'manual';
+    history.replaceState({ ...history.state, monettaCollectionScroll: window.scrollY }, '', location.href);
+  }, true);
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     query = field.value.trim();
     const url = new URL(location.href);
-    if (query) url.searchParams.set('oferta', query);
-    else url.searchParams.delete('oferta');
-    history.replaceState({ ...history.state, monettaOffersScroll: null }, '', url);
+    if (query) url.searchParams.set(field.name, query);
+    else url.searchParams.delete(field.name);
+    if (!query && !offers) {
+      url.searchParams.delete('page');
+      location.assign(url);
+      return;
+    }
+    history.scrollRestoration = 'auto';
+    scrollRestored = false;
+    history.replaceState({ ...history.state, monettaCollectionScroll: null }, '', url);
     load();
   });
 
+  clear.addEventListener('click', () => {
+    field.value = '';
+    form.requestSubmit();
+  });
   retry.addEventListener('click', load);
-  for (const link of root.querySelectorAll('.chip--removable, a[href*="sort_by="]')) {
-    if (!query) break;
+  moreButton?.addEventListener('click', load);
+  root.addEventListener('click', (event) => {
+    const link = event.target.closest('a.chip--removable, a[href*="sort_by="], a[data-previous]');
+    if (!link) return;
     const url = new URL(link.href);
-    url.searchParams.set('oferta', query);
+    if (view) url.searchParams.set('view', view);
+    if (query) url.searchParams.set(field.name, query);
     link.href = url;
-  }
-  load();
+  });
+  if (query || offers) load();
 })();

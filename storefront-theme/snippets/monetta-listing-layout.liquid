@@ -8,6 +8,7 @@
   @param {string} sort_by - Current sort value.
   @param {string} default_sort - The default sort value; it is not repeated in the address.
   @param {string} base_url - collection.url or the search route; the forms submit here.
+  @param {string} [alternate_view] - Optional Shopify template view to preserve on GET forms.
   @param {string} clear_url - base_url without filters (keeps the sort).
   @param {string} results_html - Captured markup of snippets/monetta-results.liquid.
   @param {number} active_count - Number of active filters.
@@ -21,6 +22,7 @@
     <p class="guia-listing-bar__count" data-count aria-live="polite">{{ count_text }}</p>
     {%- if sort_options.size > 1 -%}
       <form class="guia-sort" action="{{ base_url }}" method="get" data-sort-form>
+        {%- if alternate_view != blank -%}<input type="hidden" name="view" value="{{ alternate_view | escape }}">{%- endif -%}
         {% render 'monetta-hidden-filters', filters: filters, query: query %}
         <label class="guia-sort__label" for="sort-select">Ordenar por</label>
         <select class="guia-sort__select" id="sort-select" name="sort_by" data-sort-select>
@@ -44,6 +46,7 @@
     </div>
     <div class="toolbar__end">
       <form class="toolbar__sort" action="{{ base_url }}" method="get" data-sort-form>
+        {%- if alternate_view != blank -%}<input type="hidden" name="view" value="{{ alternate_view | escape }}">{%- endif -%}
         {% render 'monetta-hidden-filters', filters: filters, query: query %}
         <label for="sort-select">Ordenar</label>
         <select class="select" id="sort-select" name="sort_by" data-sort-select>
@@ -83,6 +86,7 @@
   {%- if filters.size > 0 -%}
     <aside class="filter-sidebar" aria-label="Filtros">
       <form action="{{ base_url }}" method="get" data-filters-form data-autosubmit>
+        {%- if alternate_view != blank -%}<input type="hidden" name="view" value="{{ alternate_view | escape }}">{%- endif -%}
         {%- if sort_by != blank and sort_by != default_sort -%}<input type="hidden" name="sort_by" value="{{ sort_by }}">{%- endif -%}
         {%- if query != blank -%}<input type="hidden" name="q" value="{{ query | escape }}"><input type="hidden" name="type" value="product">{%- endif -%}
         {% render 'monetta-filter-groups', filters: filters, open_first: 'true' %}
@@ -102,6 +106,7 @@
         <button type="button" class="icon-button" data-overlay-close aria-label="Cerrar">{% render 'monetta-icon', name: 'close', size: 22 %}</button>
       </div>
       <form action="{{ base_url }}" method="get" data-filters-form data-drawer-form class="filters-drawer__form">
+        {%- if alternate_view != blank -%}<input type="hidden" name="view" value="{{ alternate_view | escape }}">{%- endif -%}
         <div class="overlay__body">
           {%- if query != blank -%}<input type="hidden" name="q" value="{{ query | escape }}"><input type="hidden" name="type" value="product">{%- endif -%}
           <fieldset class="options filters-drawer__sort">

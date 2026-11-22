@@ -121,7 +121,16 @@
     }
   });
 
-  // Esc closes through the same path so the transition and focus restore run.
+  // Consume Escape at the top layer before the page or Shopify preview chrome can redirect focus.
+  window.addEventListener('keydown', (event) => {
+    const dialog = openDialogs.at(-1);
+    if (event.key !== 'Escape' || event.isComposing || !dialog?.open) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.repeat) closeDialog(dialog);
+  }, true);
+
+  // Native cancellation follows the same close path for platform back gestures.
   document.addEventListener('cancel', (event) => {
     if (event.target instanceof HTMLDialogElement && event.target.classList.contains('overlay')) {
       event.preventDefault();

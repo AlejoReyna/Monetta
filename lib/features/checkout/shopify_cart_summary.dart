@@ -23,7 +23,7 @@ class ShopifyCartSummary extends StatefulWidget {
   final CartController controller;
   final CartSessionScope scope;
   final List<LocalCartIntent> localIntent;
-  final VoidCallback onContinue;
+  final VoidCallback? onContinue;
 
   @override
   State<ShopifyCartSummary> createState() => _ShopifyCartSummaryState();
@@ -60,6 +60,19 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
             .where((code) => !returnedCodes.contains(code.toUpperCase()))
             .toList(growable: false);
 
+        final totalRows = <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Container(height: .5, color: palette.hairline),
+          ),
+          _MoneyRow(
+            label: cart.cost.totalEstimated
+                ? 'Total de Shopify (estimado)'
+                : 'Total de Shopify',
+            money: cart.cost.total,
+            prominent: true,
+          ),
+        ];
         return Container(
           key: const ValueKey('shopify-cart-summary'),
           padding: const EdgeInsets.all(20),
@@ -108,17 +121,7 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                 label: 'Envío',
                 value: 'Se calcula en Shopify',
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Container(height: .5, color: palette.hairline),
-              ),
-              _MoneyRow(
-                label: cart.cost.totalEstimated
-                    ? 'Total de Shopify (estimado)'
-                    : 'Total de Shopify',
-                money: cart.cost.total,
-                prominent: true,
-              ),
+              if (widget.onContinue != null) ...totalRows,
               const SizedBox(height: 20),
               TextField(
                 key: const ValueKey('discount-code-field'),
@@ -221,11 +224,14 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                   ),
                 ),
               ],
-              const SizedBox(height: 18),
-              BoutiqueButton(
-                label: 'Continuar al checkout',
-                onPressed: widget.onContinue,
-              ),
+              if (widget.onContinue == null) ...totalRows,
+              if (widget.onContinue != null) ...[
+                const SizedBox(height: 18),
+                BoutiqueButton(
+                  label: 'Continuar al checkout',
+                  onPressed: widget.onContinue,
+                ),
+              ],
             ],
           ),
         );

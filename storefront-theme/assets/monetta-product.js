@@ -458,14 +458,17 @@
     const option = $$('[data-options] [data-option-value]', root).map((el) => el.textContent.trim()).filter(Boolean).join(' / ');
     const pressed = event.submitter?.matches?.('[data-add]') ? event.submitter : buttons.find((button) => button.offsetParent !== null);
     const buyNow = event.submitter?.matches?.('[data-buy-now]') ? event.submitter : null;
-    const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: pressed || $('[data-add]', form), open: !buyNow });
-    if (result.ok && buyNow) {
-      window.location.assign(buyNow.value);
-      return;
+    let result;
+    try {
+      result = await Monetta.cart.add({
+        id: variantId, quantity, name: option ? `${name} (${option})` : name,
+        trigger: buyNow || pressed || $('[data-add]', form), checkout: buyNow?.value,
+      });
+    } finally {
+      buttons.forEach((button) => Monetta.setPending(button, false));
+      adding = false;
+      if (root.dataset.selection === 'valid') lockPurchase(root, false);
     }
-    buttons.forEach((button) => Monetta.setPending(button, false));
-    adding = false;
-    if (root.dataset.selection === 'valid') lockPurchase(root, false);
     if (!result.ok) {
       const error = { text: result.message, lang: result.lang || '' };
       showError(root, error.text, error.lang);

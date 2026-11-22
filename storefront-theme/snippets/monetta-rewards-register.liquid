@@ -1,0 +1,20 @@
+{%- doc -%}
+  Rewards invitation for verified hosted accounts and published benefits.
+  @param {string} heading_id
+{%- enddoc -%}
+{%- assign register_login_url = routes.storefront_login_url | default: routes.account_login_url -%}
+{%- if settings.monetta_rewards_signup and shop.customer_accounts_enabled and customer == nil and register_login_url != blank -%}
+  <section class="v41-register" aria-labelledby="{{ heading_id }}">
+    <div class="v41-register__panel">
+      <h2 class="v41-register__title" id="{{ heading_id }}">Regístrate en MONETTA REWARDS</h2>
+      <p class="v41-register__line"><span class="v41-register__gold">ENVÍO GRATIS</span> para siempre</p>
+      <p class="v41-register__line"><span class="v41-register__green">GANA CASHBACK</span> con cada compra</p>
+      <form class="v41-register__row" data-rewards-register action="{{ register_login_url | escape }}">
+        <label class="visually-hidden" for="{{ heading_id }}-email">Tu correo electrónico</label>
+        <input id="{{ heading_id }}-email" type="email" name="login_hint" inputmode="email" autocomplete="email" required placeholder="Tu correo electrónico">
+        <button type="submit">Registrarme</button>
+      </form>
+      <noscript><a href="{{ register_login_url | escape }}">Acceder a mi cuenta</a></noscript>
+    </div>
+  </section>
+{%- endif -%}

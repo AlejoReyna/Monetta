@@ -16,8 +16,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/account_controller.dart';
 import '../../app/cart_controller.dart';
 import '../../app/storefront_layout.dart';
+import '../../data/customer_auth/customer_auth_error.dart';
 import '../../platform/system_layout_context.dart';
 import '../navigation/adaptive_storefront_scaffold.dart';
 import '../navigation/duo_workspace.dart';
@@ -45,6 +47,7 @@ import '../catalog/product_card.dart';
 import '../catalog/quick_add_button.dart';
 import '../orders/order_detail_screen.dart';
 import '../orders/orders_screen.dart';
+import '../product/purchase_dock.dart';
 import 'checkout_double_charge_sheet.dart';
 import 'checkout_order_lookup.dart';
 import 'checkout_return.dart';
@@ -89,6 +92,283 @@ void openCheckoutOrders(BuildContext context) {
     return;
   }
   unawaited(openOrders(context, controller: account));
+}
+
+/// Starts checkout for the live bag, including the account and payment guards.
+Future<void> openCheckout(
+  BuildContext context, {
+  SecureCheckoutLauncher? launchSecureCheckout,
+}) async {
+  final store = StoreScope.of(context);
+  final guard = ReviewingCheckoutScope.maybeOf(context);
+  if (guard != null) {
+    await guard.ensureLoaded();
+    if (!context.mounted) return;
+  }
+  if (guard != null && guard.blocksCheckout(bagEmpty: store.bagLines.isEmpty)) {
+    final choice = await showCheckoutDoubleChargeSheet(context);
+    if (!context.mounted) return;
+    if (choice == CheckoutDoubleChargeChoice.viewOrders) {
+      openCheckoutOrders(context);
+      return;
+    }
+    if (choice != CheckoutDoubleChargeChoice.payAnyway) return;
+  }
+  if (!context.mounted) return;
+  final cart = CartScope.maybeOf(context);
+  final controller = cart?.notifier;
+  final checkout = cart?.checkoutCoordinator;
+  final accountController = AccountScope.maybeOf(context);
+  final hasProductionLauncher =
+      controller != null && cart != null && checkout != null;
+  // F05: no capturar contacto/entrega cuando el checkout no puede cerrar.
+  if (launchSecureCheckout == null && !hasProductionLauncher) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'El checkout seguro no está disponible en esta configuración. '
+          'Tu bolsa se conserva.',
+        ),
+      ),
+    );
+    return;
+  }
+  if (accountController != null &&
+      !accountController.isSignedIn &&
+      accountController.canLogin) {
+    final decision = await _showGuestCheckoutChoiceSheet(
+      context,
+      accountController: accountController,
+    );
+    if (!context.mounted || decision == null) return;
+  }
+  final scope = cart == null
+      ? null
+      : _checkoutSessionScope(cart, accountController?.account?.localAccountId);
+  final productionLauncher =
+      controller == null || scope == null || checkout == null
+          ? null
+          : (CheckoutDraft draft) async {
+              // Reconstruye el intent desde la bolsa viva justo antes de
+              // reconciliar — nunca reusa el snapshot de apertura (F17).
+              final currentIntent = [
+                for (final line in store.bagLines)
+                  LocalCartIntent(
+                    variantId: line.variant.id,
+                    quantity: line.quantity,
+                  ),
+              ];
+              final buyerIdentity = await resolveCheckoutBuyerIdentity(
+                account: accountController?.account,
+                shopifyAccessToken:
+                    accountController?.accessTokenForShopifyCheckout,
+                email: draft.email,
+                phone: draft.phone,
+              );
+              return checkout.present(
+                controller: controller,
+                scope: scope,
+                localIntent: currentIntent,
+                buyerIdentity: buyerIdentity,
+                onCompleted: (purchase) async {
+                  await store.applyCheckoutPurchase(purchase);
+                  await accountController?.loadOrders();
+                },
+              );
+            };
+  final launcher = launchSecureCheckout ?? productionLauncher;
+  if (launcher == null) return;
+  // With two sides, checkout spans both: form left, summary right.
+  await DuoWorkspace.taskNavigatorFor(context).push(
+    monettaFadeRoute(
+      StoreScope(
+        notifier: store,
+        child: CheckoutFlowScreen(
+          launchSecureCheckout: launcher,
+          // El coordinador decide al invocar si hay URL fresca; no se
+          // congela estado antes de la reconciliación final.
+          openExternalCheckout: checkout?.openExternalFallback,
+        ),
+      ),
+    ),
+  );
+}
+
+CartSessionScope _checkoutSessionScope(CartScope cart, String? accountId) =>
+    accountId == null
+        ? CartSessionScope.guest(shopDomain: cart.shopDomain)
+        : CartSessionScope.authenticated(
+            shopDomain: cart.shopDomain,
+            localAccountId: accountId,
+          );
+
+enum _GuestCheckoutChoice { signedIn, guest }
+
+Future<_GuestCheckoutChoice?> _showGuestCheckoutChoiceSheet(
+  BuildContext context, {
+  required AccountController accountController,
+}) {
+  return showModalBottomSheet<_GuestCheckoutChoice>(
+    context: context,
+    useSafeArea: true,
+    showDragHandle: false,
+    isScrollControlled: true,
+    builder: (context) => _GuestCheckoutChoiceSheet(
+      accountController: accountController,
+    ),
+  );
+}
+
+class _GuestCheckoutChoiceSheet extends StatefulWidget {
+  const _GuestCheckoutChoiceSheet({required this.accountController});
+
+  final AccountController accountController;
+
+  @override
+  State<_GuestCheckoutChoiceSheet> createState() =>
+      _GuestCheckoutChoiceSheetState();
+}
+
+class _GuestCheckoutChoiceSheetState extends State<_GuestCheckoutChoiceSheet> {
+  bool _signingIn = false;
+  String? _errorMessage;
+
+  Future<void> _signIn() async {
+    if (_signingIn) return;
+    setState(() {
+      _signingIn = true;
+      _errorMessage = null;
+    });
+    await widget.accountController.login();
+    if (!mounted) return;
+    if (widget.accountController.isSignedIn) {
+      Navigator.of(context).pop(_GuestCheckoutChoice.signedIn);
+      return;
+    }
+    final error = widget.accountController.lastError;
+    setState(() {
+      _signingIn = false;
+      _errorMessage = error != null && !error.isSilent
+          ? _guestSignInErrorMessage(error.kind)
+          : null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final bottom = math.max(
+      MediaQuery.paddingOf(context).bottom,
+      MediaQuery.viewInsetsOf(context).bottom,
+    );
+    return Material(
+      key: const ValueKey('g39-choice-sheet'),
+      color: palette.canvas,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          BoutiqueSpace.gutter,
+          BoutiqueSpace.md,
+          BoutiqueSpace.gutter,
+          bottom + BoutiqueSpace.xl,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '¿Cómo deseas continuar?',
+                    style: boutiqueDisplay(22),
+                  ),
+                ),
+                IconButton(
+                  key: const ValueKey('g39-close'),
+                  tooltip: 'Cerrar',
+                  onPressed:
+                      _signingIn ? null : () => Navigator.of(context).pop(),
+                  icon: Icon(Icons.close, color: palette.inkMuted),
+                ),
+              ],
+            ),
+            const SizedBox(height: BoutiqueSpace.sm),
+            Text(
+              'Inicia sesión para asociar tu pedido a tu cuenta o continúa '
+              'como invitado. Conservamos todos los artículos de tu carrito.',
+              style: boutiqueText(size: 13, color: palette.inkMuted),
+            ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: BoutiqueSpace.md),
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  _errorMessage!,
+                  key: const ValueKey('g39-error'),
+                  style: boutiqueText(size: 13, color: palette.sale),
+                ),
+              ),
+            ],
+            const SizedBox(height: BoutiqueSpace.xl),
+            PurchaseDockButton(
+              key: const ValueKey('g39-sign-in'),
+              label: _signingIn ? 'Iniciando sesión…' : 'Iniciar sesión',
+              pending: _signingIn,
+              large: true,
+              halo: true,
+              onPressed: _signingIn ? null : _signIn,
+            ),
+            const SizedBox(height: BoutiqueSpace.sm),
+            OutlinedButton(
+              key: const ValueKey('g39-continue-guest'),
+              onPressed: _signingIn
+                  ? null
+                  : () => Navigator.of(context).pop(_GuestCheckoutChoice.guest),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, kPurchaseButtonHeight),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BoutiqueSpace.xl,
+                  vertical: BoutiqueSpace.sm,
+                ),
+                side: BorderSide(color: palette.borderControl),
+                shape: const StadiumBorder(),
+                foregroundColor: palette.ink,
+                backgroundColor: palette.canvas,
+              ),
+              child: Text(
+                'Continuar como invitado',
+                textAlign: TextAlign.center,
+                style: boutiqueText(
+                  size: 15,
+                  color: _signingIn
+                      ? palette.ink.withValues(alpha: 0.45)
+                      : palette.ink,
+                  height: 1.2,
+                ).copyWith(letterSpacing: 0.9),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+String _guestSignInErrorMessage(CustomerAuthErrorKind kind) {
+  switch (kind) {
+    case CustomerAuthErrorKind.cancelled:
+      return '';
+    case CustomerAuthErrorKind.offline:
+      return 'Sin conexión. Revisa tu internet e inténtalo de nuevo.';
+    case CustomerAuthErrorKind.configuration:
+      return 'El inicio de sesión no está disponible en esta versión de la app.';
+    case CustomerAuthErrorKind.sessionExpired:
+      return 'Tu sesión terminó. Inicia sesión de nuevo.';
+    case CustomerAuthErrorKind.server:
+      return 'Shopify no pudo completar el inicio de sesión. Inténtalo en un momento.';
+    case CustomerAuthErrorKind.unknown:
+      return 'No se pudo iniciar sesión. Inténtalo de nuevo.';
+  }
 }
 
 Future<void> openBag(
@@ -229,15 +509,9 @@ class _BagScreenState extends State<BagScreen> {
     final lines = store.bagLines;
     final drawerTitle = widget.drawerTitle;
     final cartScope = CartScope.maybeOf(context);
-    final account = AccountScope.maybeOf(context)?.account;
-    final sessionScope = cartScope == null
-        ? null
-        : account == null
-            ? CartSessionScope.guest(shopDomain: cartScope.shopDomain)
-            : CartSessionScope.authenticated(
-                shopDomain: cartScope.shopDomain,
-                localAccountId: account.localAccountId,
-              );
+    final accountId = AccountScope.maybeOf(context)?.account?.localAccountId;
+    final sessionScope =
+        cartScope == null ? null : _checkoutSessionScope(cartScope, accountId);
     final localIntent = [
       for (final line in lines)
         LocalCartIntent(variantId: line.variant.id, quantity: line.quantity),
@@ -299,7 +573,6 @@ class _BagScreenState extends State<BagScreen> {
                         lines: lines,
                         launchSecureCheckout: widget.launchSecureCheckout,
                         cartController: cartScope?.notifier,
-                        checkoutCoordinator: cartScope?.checkoutCoordinator,
                         cartScope: sessionScope,
                         localIntent: localIntent,
                         embedded: widget.embedded,
@@ -375,7 +648,6 @@ class _BagContents extends StatelessWidget {
     required this.lines,
     required this.launchSecureCheckout,
     required this.cartController,
-    required this.checkoutCoordinator,
     required this.cartScope,
     required this.localIntent,
     this.embedded = false,
@@ -385,7 +657,6 @@ class _BagContents extends StatelessWidget {
   final List<BagLine> lines;
   final SecureCheckoutLauncher? launchSecureCheckout;
   final CartController? cartController;
-  final ShopifyCheckoutCoordinator? checkoutCoordinator;
   final CartSessionScope? cartScope;
   final List<LocalCartIntent> localIntent;
 
@@ -399,89 +670,6 @@ class _BagContents extends StatelessWidget {
     final store = StoreScope.of(context);
     final count = store.bagQuantity;
     final subtotal = store.bagSubtotal;
-
-    Future<void> continueToCheckout() async {
-      final guard = ReviewingCheckoutScope.maybeOf(context);
-      if (guard != null) {
-        await guard.ensureLoaded();
-        if (!context.mounted) return;
-      }
-      if (guard != null &&
-          guard.blocksCheckout(bagEmpty: store.bagLines.isEmpty)) {
-        final choice = await showCheckoutDoubleChargeSheet(context);
-        if (!context.mounted) return;
-        if (choice == CheckoutDoubleChargeChoice.viewOrders) {
-          openCheckoutOrders(context);
-          return;
-        }
-        if (choice != CheckoutDoubleChargeChoice.payAnyway) return;
-      }
-      if (!context.mounted) return;
-      final controller = cartController;
-      final scope = cartScope;
-      final checkout = checkoutCoordinator;
-      final accountController = AccountScope.maybeOf(context);
-      final productionLauncher =
-          controller == null || scope == null || checkout == null
-              ? null
-              : (CheckoutDraft draft) async {
-                  // Reconstruye el intent desde la bolsa viva justo antes de
-                  // reconciliar — nunca reusa el snapshot de apertura (F17).
-                  final currentIntent = [
-                    for (final line in store.bagLines)
-                      LocalCartIntent(
-                        variantId: line.variant.id,
-                        quantity: line.quantity,
-                      ),
-                  ];
-                  final buyerIdentity = await resolveCheckoutBuyerIdentity(
-                    account: accountController?.account,
-                    shopifyAccessToken:
-                        accountController?.accessTokenForShopifyCheckout,
-                    email: draft.email,
-                    phone: draft.phone,
-                  );
-                  return checkout.present(
-                    controller: controller,
-                    scope: scope,
-                    localIntent: currentIntent,
-                    buyerIdentity: buyerIdentity,
-                    onCompleted: (purchase) async {
-                      await store.applyCheckoutPurchase(purchase);
-                      await accountController?.loadOrders();
-                    },
-                  );
-                };
-      final launcher = launchSecureCheckout ?? productionLauncher;
-      // F05: no capturar contacto/entrega cuando el checkout no puede cerrar.
-      if (launcher == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'El checkout seguro no está disponible en esta configuración. '
-              'Tu bolsa se conserva.',
-            ),
-          ),
-        );
-        return;
-      }
-      unawaited(
-        // With two sides, checkout spans both: form left, summary right.
-        DuoWorkspace.taskNavigatorFor(context).push(
-          monettaFadeRoute(
-            StoreScope(
-              notifier: store,
-              child: CheckoutFlowScreen(
-                launchSecureCheckout: launcher,
-                // El coordinador decide al invocar si hay URL fresca; no se
-                // congela estado antes de la reconciliación final.
-                openExternalCheckout: checkout?.openExternalFallback,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -554,17 +742,24 @@ class _BagContents extends StatelessWidget {
         final scope = cartScope;
         final hasRemoteCart = controller?.scopedSnapshot?.scope == scope &&
             controller?.snapshot?.cart != null;
+        void continueToCheckout() => unawaited(
+              openCheckout(
+                context,
+                launchSecureCheckout: launchSecureCheckout,
+              ),
+            );
+
         final summary = controller != null && scope != null && hasRemoteCart
             ? ShopifyCartSummary(
                 controller: controller,
                 scope: scope,
                 localIntent: localIntent,
-                onContinue: () => unawaited(continueToCheckout()),
+                onContinue: inDrawer ? null : continueToCheckout,
               )
             : _OrderSummary(
                 subtotal: subtotal,
                 ctaLabel: 'Continuar al checkout',
-                onContinue: () => unawaited(continueToCheckout()),
+                onContinue: inDrawer ? null : continueToCheckout,
               );
 
         final bagIds = {for (final line in lines) line.product.id};
@@ -632,6 +827,14 @@ class _BagContents extends StatelessWidget {
               child: summary,
             ),
             recommendations,
+            if (inDrawer)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                child: BoutiqueButton(
+                  label: 'Continuar al pago',
+                  onPressed: continueToCheckout,
+                ),
+              ),
           ],
         );
       },
@@ -1669,7 +1872,7 @@ class _OrderSummary extends StatelessWidget {
 
   final double subtotal;
   final String ctaLabel;
-  final VoidCallback onContinue;
+  final VoidCallback? onContinue;
 
   @override
   Widget build(BuildContext context) {
@@ -1705,28 +1908,30 @@ class _OrderSummary extends StatelessWidget {
             value: kMoney.format(subtotal),
             prominent: true,
           ),
-          const SizedBox(height: 6),
-          Text(
-            'Estimación local · totales finales en Shopify.',
-            style: boutiqueText(size: 11, color: palette.inkMuted),
-          ),
-          const SizedBox(height: 18),
-          BoutiqueButton(label: ctaLabel, onPressed: onContinue),
-          const SizedBox(height: 12),
-          Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 7,
-            runSpacing: 4,
-            children: [
-              Icon(Icons.lock_outline, size: 14, color: palette.inkMuted),
-              Text(
-                'Pagos seguros con Shopify.',
-                textAlign: TextAlign.center,
-                style: boutiqueText(size: 11, color: palette.inkMuted),
-              ),
-            ],
-          ),
+          if (onContinue != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Estimación local · totales finales en Shopify.',
+              style: boutiqueText(size: 11, color: palette.inkMuted),
+            ),
+            const SizedBox(height: 18),
+            BoutiqueButton(label: ctaLabel, onPressed: onContinue),
+            const SizedBox(height: 12),
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 7,
+              runSpacing: 4,
+              children: [
+                Icon(Icons.lock_outline, size: 14, color: palette.inkMuted),
+                Text(
+                  'Pagos seguros con Shopify.',
+                  textAlign: TextAlign.center,
+                  style: boutiqueText(size: 11, color: palette.inkMuted),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

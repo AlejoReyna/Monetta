@@ -1,0 +1,35 @@
+{%- doc -%}
+  Price and comparison for one variant in the current market.
+  @param {object} variant
+  @param {string} currency
+  @param {boolean} [show_installments]
+{%- enddoc -%}
+<span class="v43-price">
+  {%- if variant.compare_at_price > variant.price -%}
+    <s class="price-compare"><span class="visually-hidden">Precio anterior: </span>{{ variant.compare_at_price | money_without_trailing_zeros | replace: '$ ', '$' }}</s>
+  {%- endif -%}
+  <span class="price v43-price__current">{{ variant.price | money_without_trailing_zeros | replace: '$ ', '$' }} <small>{{ currency | downcase }}</small></span>
+  {%- if variant.compare_at_price > variant.price -%}
+    {%- assign percent = variant.compare_at_price | minus: variant.price | times: 100.0 | divided_by: variant.compare_at_price | round -%}
+    <span class="v43-price__discount">−{{ percent }}%</span>
+  {%- endif -%}
+  {%- if show_installments -%}
+    {%- liquid
+      assign msi_mf = variant.metafields.monetta.six_msi_amount
+      assign msi_raw = msi_mf.value | default: msi_mf
+      assign msi_text = ''
+      assign currency_lower = currency | downcase
+      if msi_raw.amount != blank
+        assign msi_text = msi_raw | money_without_trailing_zeros | replace: '$ ', '$'
+        if currency_lower != blank
+          assign msi_text = msi_text | append: ' ' | append: currency_lower
+        endif
+      elsif msi_raw != blank
+        assign msi_text = msi_raw | append: '' | strip
+      endif
+    -%}
+    {%- if msi_text != blank -%}
+      <span class="v43-price__installments" data-msi-line>6 pagos sin intereses de {{ msi_text | escape }}</span>
+    {%- endif -%}
+  {%- endif -%}
+</span>

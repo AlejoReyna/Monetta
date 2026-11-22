@@ -593,6 +593,7 @@ class SelectionPriceView extends StatelessWidget {
   const SelectionPriceView({
     required this.price,
     this.compare,
+    this.sixMsiAmount,
     this.currentKey,
     this.size = 18,
     this.inStock = true,
@@ -602,6 +603,7 @@ class SelectionPriceView extends StatelessWidget {
 
   final double price;
   final double? compare;
+  final double? sixMsiAmount;
   final Key? currentKey;
   final double size;
   final bool inStock;
@@ -659,6 +661,15 @@ class SelectionPriceView extends StatelessWidget {
               ),
           ],
         ),
+        if (sixMsiAmount != null && sixMsiAmount!.isFinite && sixMsiAmount! > 0)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              '6 pagos sin intereses de ${formatShopperPrice(sixMsiAmount!).replaceFirst(' MXN', '')} mxn',
+              key: const ValueKey('six-msi-line'),
+              style: boutiqueText(size: 13, color: palette.inkMuted),
+            ),
+          ),
       ],
     );
   }

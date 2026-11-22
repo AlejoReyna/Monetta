@@ -104,25 +104,32 @@
         </div>
         <div class="menu__identity">
           {%- if customer -%}
+            {%- liquid
+              assign tier_mf = customer.metafields.monetta.rewards_tier | default: customer.metafields.rewards.tier
+              assign rewards_tier = tier_mf.value | default: tier_mf | strip
+              assign balance_mf = customer.metafields.monetta.rewards_balance | default: customer.metafields.rewards.balance
+              assign rewards_balance_raw = balance_mf.value | default: balance_mf
+              assign rewards_balance = ''
+              if rewards_balance_raw.amount != blank
+                assign rewards_balance = rewards_balance_raw | money_with_currency
+              elsif rewards_balance_raw != blank
+                assign rewards_balance = rewards_balance_raw | append: '' | strip
+              endif
+            -%}
             <a class="guia-identity" href="{{ routes.account_url }}">
-              <span class="guia-identity__avatar" aria-hidden="true">{{ customer.first_name | default: customer.email | slice: 0 | upcase }}</span>
-              {%- comment -%}
-                v4.1 (Corrección 5), as the app's side menu (monetta_side_menu.dart): name, «Miembro» + level, and Saldo in green.
-                The web does not read Rewards yet: both stay null and print «—». Wire them here (level name, formatted amount);
-                never fill them with made-up figures.
-              {%- endcomment -%}
-              {%- assign rewards_tier = nil -%}
-              {%- assign rewards_balance = nil -%}
+              <span class="guia-identity__avatar" aria-hidden="true">{{ customer.first_name | default: customer.name | default: customer.email | slice: 0 | upcase }}</span>
               <span class="guia-identity__text">
                 <span class="guia-identity__name">{{ customer.name | default: customer.email | escape }}</span>
-                <span class="guia-identity__detail">Miembro · <span class="guia-identity__tier{% if rewards_tier == blank %} is-empty{% endif %}">{% if rewards_tier != blank %}{{ rewards_tier | escape }}{% else %}Nivel —{% endif %}</span></span>
+                <span class="guia-identity__detail">Miembro{% if rewards_tier != blank %} · {{ rewards_tier | escape }}{% endif %}</span>
               </span>
               {% render 'monetta-icon', name: 'chevronRight', size: 20, class: 'guia-identity__chevron' %}
-              <span class="guia-identity__balance">
-                <span class="guia-identity__balance-label">Saldo</span>
-                <span class="guia-identity__balance-value{% if rewards_balance == blank %} is-empty{% endif %}">{% if rewards_balance != blank %}{{ rewards_balance | escape }}{% else %}—{% endif %}</span>
-              </span>
             </a>
+            {%- if rewards_balance != blank -%}
+              <a class="guia-identity-balance" href="{{ routes.account_url }}">
+                <span class="guia-identity-balance__label">Saldo</span>
+                <span class="guia-identity-balance__amount">{{ rewards_balance | escape }}</span>
+              </a>
+            {%- endif -%}
           {%- else -%}
             <a class="guia-identity" href="{{ routes.account_login_url }}">
               <span class="guia-identity__avatar" aria-hidden="true">{% render 'monetta-icon', name: 'person', size: 24 %}</span>
@@ -132,7 +139,7 @@
           {%- endif -%}
         </div>
         <ul class="guia-menu" role="list">
-          {%- assign drawer_entries = 'bolsas:Bolsos:bag,carteras:Carteras:wallet,perfumes:Perfumes:perfume,calzado:Calzado:store,accesorios:Accesorios:sparkle,marcas:Todas las marcas:store,ofertas:Ofertas:bag,mayoreo:Mayoreo:handshake' | split: ',' -%}
+          {%- assign drawer_entries = 'inicio:Inicio:home,bolsas:Bolsos:bag,carteras:Carteras:wallet,perfumes:Perfumes:perfume,calzado:Calzado:store,accesorios:Accesorios:sparkle,marcas:Todas las marcas:store,ofertas:Ofertas:bag,mayoreo:Mayoreo:handshake' | split: ',' -%}
           {%- for entry in drawer_entries -%}
             {%- assign parts = entry | split: ':' -%}
             {%- assign key = parts[0] -%}

@@ -17,7 +17,7 @@
 -%}
 <section class="section v41-block v41-feed" aria-labelledby="{{ heading_id }}">
   {% render 'monetta-section-header', id: heading_id, title: heading, title_url: set_url, link_url: set_url, link_label: link_label %}
-  {% paginate source.products by 250 %}
+  {% paginate source.products by 40 %}
     {%- assign products = source.products -%}
     {%- if products.size > 0 -%}
       <ul class="v41-scroll v41-feed__track" role="list">
@@ -55,7 +55,7 @@
                   <p class="form-error" role="alert" data-feature-error hidden></p>
                 </form>
               {%- elsif variant.available -%}
-                <a class="v41-buy" href="{{ product.url }}?variant={{ variant.id }}">Comprar ahora</a>
+                <a class="v41-buy" href="{{ product.url }}" data-product-url="{{ product.url }}" data-quick-view="{{ product.handle }}" data-require-option data-checkout="{{ checkout_path }}" aria-haspopup="dialog">Comprar ahora</a>
               {%- endif -%}
             </article>
           </li>

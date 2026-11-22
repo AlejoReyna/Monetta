@@ -37,7 +37,6 @@ import '../boutique/boutique_tokens.dart';
 import '../notifications/notifications_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../navigation/monetta_side_menu.dart';
-import '../partner/partner_hub_screen.dart';
 import '../welcome/welcome_gate.dart';
 import 'home_account_invitation.dart';
 import 'home_boutique_sections.dart';
@@ -182,7 +181,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
-        onOpenPartner: _openPartner,
       ),
     );
   }
@@ -197,16 +195,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         builder: (_) => AboutMonettaScreen(
           content: _editorialContent.about,
           onOpenCatalog: _openFullCatalog,
-          onOpenPartner: _openPartner,
+          onOpenPartner: _openWholesale,
         ),
-      ),
-    );
-  }
-
-  void _openPartner() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => PartnerHubScreen(content: _editorialContent.partner),
       ),
     );
   }

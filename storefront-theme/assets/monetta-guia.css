@@ -1009,6 +1009,14 @@
   --menu-inline: 20px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scroll-padding-block-start: 72px;
+}
+
+.overlay--drawer-left .menu__top {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-canvas);
 }
 
 .menu__identity {
@@ -1017,8 +1025,8 @@
 
 /* The account is a card of its own, not one more row: glass avatar, name and «Miembro» in gold (the app's side menu). */
 .guia-identity {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-3);
   min-height: 76px;
@@ -1061,57 +1069,22 @@
 }
 
 .guia-identity__name {
-  overflow: hidden;
   font-family: var(--font-serif);
-  font-size: 19px;
+  font-size: 1.1875rem;
   line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .guia-identity__detail {
-  overflow: hidden;
-  font-size: 13px;
+  font-size: 0.8125rem;
   letter-spacing: 0.02em;
   color: var(--color-accent-text);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .guia-identity__chevron {
   flex: none;
   color: var(--color-accent-text);
-}
-
-.guia-identity__tier.is-empty {
-  color: var(--color-ink-muted);
-}
-
-/* Saldo: its own line under a hairline, the amount in green; «—» muted while Rewards is not wired. */
-.guia-identity__balance {
-  display: flex;
-  flex: 1 0 100%;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 0.5px solid var(--color-hairline);
-}
-
-.guia-identity__balance-label {
-  font-size: 13px;
-  color: var(--color-ink-muted);
-}
-
-.guia-identity__balance-value {
-  font-family: var(--font-serif);
-  font-size: 20px;
-  line-height: 1.2;
-  color: var(--color-success);
-}
-
-.guia-identity__balance-value.is-empty {
-  color: var(--color-ink-muted);
 }
 
 .guia-menu {
@@ -1133,7 +1106,7 @@
   background: none;
   color: var(--color-ink);
   font-family: var(--font-serif);
-  font-size: 17px;
+  font-size: 1.0625rem;
   text-align: start;
   text-decoration: none;
   cursor: pointer;
@@ -1263,7 +1236,9 @@ img.guia-menu__icon {
   gap: var(--space-2);
   color: var(--color-ink);
   font-family: var(--font-serif);
-  font-size: 14px;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+  text-align: center;
   text-decoration: none;
 }
 
@@ -1867,7 +1842,7 @@ img.guia-menu__icon {
   overflow-x: auto;
   list-style: none;
   scroll-padding-inline: var(--edge-l);
-  scroll-snap-type: x proximity;
+  scroll-snap-type: x mandatory;
 }
 
 .guia-steps__list:focus-visible {
@@ -1877,7 +1852,9 @@ img.guia-menu__icon {
 
 .guia-step {
   display: flex;
-  flex: 0 0 min(78%, 320px);
+  flex: 0 0 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-2);
@@ -1887,6 +1864,7 @@ img.guia-menu__icon {
   background: var(--color-surface);
   box-shadow: 0 1px 2px rgb(33 27 22 / 0.06), 0 6px 14px -8px rgb(33 27 22 / 0.16);
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   text-align: start;
 }
 
@@ -1897,14 +1875,14 @@ img.guia-menu__icon {
 .guia-step__title {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 400;
   line-height: 1.2;
 }
 
 .guia-step__body {
   margin: 0;
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.45;
   color: var(--color-ink);
 }
@@ -1986,7 +1964,7 @@ img.guia-menu__icon {
   color: var(--color-ink-muted);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 600px) {
   .guia-steps__list {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2000,9 +1978,11 @@ img.guia-menu__icon {
   }
 
   .guia-step__title {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
+}
 
+@media (min-width: 768px) {
   .guia-page__banners {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

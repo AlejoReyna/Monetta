@@ -242,7 +242,11 @@ void main() {
         store.bagLines.map((line) => line.variant.id).toSet(),
         {'v-chica', 'v-mediana'},
       );
-      expect(find.byType(BagScreen), findsOneWidget);
+      expect(find.byType(CheckoutFlowScreen), findsNothing);
+      expect(
+        find.textContaining('El checkout seguro no está disponible'),
+        findsOneWidget,
+      );
     });
     testWidgets(
         'lazy apartado opens contextual WhatsApp without fabricated deposit terms',

@@ -3,7 +3,9 @@
   next page (and remains a normal link to ?page=n without JavaScript), and a page after the first offers the previous one.
   Must be rendered inside the {% paginate %} block, whose object is passed in.
 
-  @param {boolean} [offers] - Pick the first available variant with a live catalog comparison.
+  @param {boolean} [searchable] - Expose the terms for collection-local search.
+  @param {boolean} [offers] - Pick an available variant matching storefront filters with a live catalog comparison.
+  @param {object} [filters] - Shopify storefront filters for the current collection.
   @param {object} products - The current page's products.
   @param {object} paginate - The paginate object.
   @param {number} total - Total products matching the filters.
@@ -40,6 +42,19 @@
   {%- if paginate.previous -%}
     <p class="load-more"><a class="btn btn--outline" href="{{ paginate.previous.url }}" data-previous>Ver piezas anteriores</a></p>
   {%- endif -%}
+  {%- if offers -%}
+    {%- assign price_filter = filters | where: 'type', 'price_range' | first -%}
+    {%- assign min_price = price_filter.min_value.value -%}
+    {%- assign max_price = price_filter.max_value.value -%}
+    {%- assign has_variant_filters = false -%}
+    {%- for filter in filters -%}
+      {%- assign scope = filter.param_name | slice: 0, 9 -%}
+      {%- if scope == 'filter.v.' and filter.active_values.size > 0 -%}
+        {%- assign has_variant_filters = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
   <ul class="product-grid product-grid--wide product-grid--flush" role="list" aria-labelledby="results-heading" data-grid>
     {%- for product in products -%}
       {%- if product.object_type != blank and product.object_type != 'product' -%}{%- continue -%}{%- endif -%}
@@ -48,6 +63,9 @@
       {%- assign offer_variant = nil -%}
       {%- if offers -%}
         {%- for candidate in product.variants -%}
+          {%- if has_variant_filters and candidate.matched == false -%}{%- continue -%}{%- endif -%}
+          {%- if min_price != blank and candidate.price < min_price -%}{%- continue -%}{%- endif -%}
+          {%- if max_price != blank and candidate.price > max_price -%}{%- continue -%}{%- endif -%}
           {%- if candidate.available and candidate.compare_at_price > candidate.price -%}
             {%- assign offer_variant = candidate -%}
             {%- break -%}
@@ -55,7 +73,7 @@
         {%- endfor -%}
         {%- if offer_variant == nil -%}{%- continue -%}{%- endif -%}
       {%- endif -%}
-      <li{% if offers %} data-offer-price="{{ offer_variant.price }}" data-offer-terms="{{ product.title | append: ' ' | append: product.vendor | append: ' ' | append: product.type | append: ' ' | append: product.tags | escape }}"{% endif %}>{% render 'monetta-card', product: product, selected_variant: offer_variant, eager: eager, view_button: view_button, listing_card: listing_card, sizes: sizes, xl_widths: xl_widths %}</li>
+      <li{% if offers %} data-offer-price="{{ offer_variant.price }}"{% endif %}{% if searchable %} data-collection-product="{{ product.id }}" data-collection-terms="{{ product.title | append: ' ' | append: product.vendor | append: ' ' | append: product.type | append: ' ' | append: product.tags | escape }}"{% endif %}>{% render 'monetta-card', product: product, selected_variant: offer_variant, eager: eager, view_button: view_button, listing_card: listing_card, sizes: sizes, xl_widths: xl_widths %}</li>
     {%- endfor -%}
   </ul>
   {%- liquid

@@ -62,6 +62,7 @@
   /* ------------------------------------------------------------ mutations vs checkout */
   let pending = 0; // mutations started and not finished (running or waiting their turn)
   let tail = Promise.resolve(); // they run one at a time, in order
+  let acceptedAdd = null;
   let unconfirmed = false; // a mutation ended and the bag on screen is not known to be Shopify's
 
   const checkoutBlocked = () => pending > 0 || unconfirmed;
@@ -80,6 +81,7 @@
   }
 
   function markConfirmed() {
+    acceptedAdd = null;
     unconfirmed = false;
     syncCheckoutLock();
   }
@@ -118,13 +120,18 @@
   );
 
   /* ------------------------------------------------------------ the "En tu bolsa" sheet */
-  function applySheet(html, { highlightVariantId } = {}) {
+  function readSheet(html) {
+    const next = typeof html === 'string' && $('#cart-sheet', parseHtml(html));
+    const count = next && $('[data-cart-total]', next)?.textContent.trim();
+    return count && /^\d+$/.test(count) && $('#cart-sheet-title', next) &&
+      $('.overlay__panel', next) ? next : null;
+  }
+
+  function applySheet(next) {
     const sheet = $('#cart-sheet');
-    if (!sheet || !html) return null;
-    const next = parseHtml(html).querySelector('#cart-sheet');
-    if (!next) return null;
+    if (!sheet || !next) return null;
     const title = sheet.open ? $('#cart-sheet-title', sheet)?.textContent : '';
-    const scroll = $('.overlay__panel', sheet)?.scrollTop || 0;
+    const scroll = $('[data-cart-sheet-scroll]', sheet)?.scrollTop || 0;
     const focused = sheet.contains(document.activeElement) ? document.activeElement : null;
     const key = focused?.closest('[data-line]')?.dataset.line;
     const step = focused?.dataset.step;
@@ -136,7 +143,8 @@
     sheet.replaceChildren(...next.childNodes);
     if (sheet.open) {
       if (title) $('#cart-sheet-title', sheet).textContent = title;
-      $('.overlay__panel', sheet).scrollTop = scroll;
+      const scroller = $('[data-cart-sheet-scroll]', sheet);
+      if (scroller) scroller.scrollTop = scroll;
       const line = key ? $(`[data-line="${CSS.escape(key)}"]`, sheet) : null;
       if (focused) ((step && line && $(`[data-step="${step}"]:not(:disabled)`, line)) ||
         (line && $('[data-step]:not(:disabled)', line)) || $('[data-autofocus]', sheet))?.focus({ preventScroll: true });
@@ -144,9 +152,6 @@
     }
     const total = Number($('[data-cart-total]', sheet)?.textContent);
     if (Number.isFinite(total)) setCount(total);
-    if (highlightVariantId) {
-      $(`[data-variant-id="${highlightVariantId}"]`, sheet)?.classList.add('cart-line--highlight');
-    }
     syncCheckoutLock();
     return sheet;
   }
@@ -179,7 +184,7 @@
     if (!trigger || event.defaultPrevented || event.button !== 0 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || !$('#cart-sheet')) return;
     event.preventDefault();
     openSheet(trigger);
-    if (!checkoutBlocked()) mutation(() => recoverFromServer());
+    if (!pending) mutation(() => recoverFromServer());
   });
 
   /**
@@ -211,9 +216,10 @@
     const html = sections?.[id];
     if (!wrapper || !html) return false;
     const next = parseHtml(html).querySelector(`#shopify-section-${CSS.escape(id)}`);
-    if (!next || !$('[data-cart-section]', next)) return false;
+    const nextSheet = readSheet(sections[SHEET_SECTION]);
+    if (!next || !$('[data-cart-section]', next) || !nextSheet || !$('#cart-sheet')) return false;
     wrapper.replaceChildren(...next.childNodes);
-    applySheet(sections[SHEET_SECTION]);
+    applySheet(nextSheet);
     const count = Number($('[data-cart-section]')?.dataset.itemCount);
     if (Number.isFinite(count)) {
       setCount(count);
@@ -241,7 +247,7 @@
     const sections = await fetchCartSections(ids);
     if (cartSectionId()) {
       if (sections && renderCartPage(sections, focus)) return true;
-    } else if (sections && applySheet(sections[SHEET_SECTION])) {
+    } else if (sections && applySheet(readSheet(sections[SHEET_SECTION]))) {
       markConfirmed();
       return true;
     }
@@ -255,37 +261,67 @@
    * count are done here; the caller handles pending state and its own inline error. A write whose result is unknown (no answer, a 5xx)
    * is never repeated: the bag is read back and shown, and the message tells the shopper to check it before trying again.
    */
-  function add({ id, quantity = 1, properties, name = '', trigger = null, open = true }) {
+  function add({ id, quantity = 1, properties, name = '', trigger = null, open = true, checkout }) {
+    const variantId = Number(id);
+    const units = Number(quantity);
     return mutation(async () => {
-      const cartId = cartSectionId();
-      const payload = { id: Number(id), quantity: Number(quantity), sections: [SHEET_SECTION, cartId].filter(Boolean).join(','), sections_url: cartId ? routes.cart : location.pathname };
-      if (properties) payload.properties = properties;
-      let result;
-      try {
-        result = await postJson(routes.cartAdd, payload);
-      } catch {
-        result = { ok: false, status: 0, data: null };
-      }
-      if (!result.ok && result.status >= 400 && result.status < 500) {
-        const { text, lang } = errorMessage(result);
-        Monetta.toast?.(text, { tone: 'error', lang });
-        return { ok: false, status: result.status, message: text, lang };
-      }
-      if (!result.ok) return uncertainAdd(result.status, trigger);
-
-      const shown = cartId ? renderCartPage(result.data?.sections || {}) : false;
-      if (!shown && !applySheet(result.data?.sections?.[SHEET_SECTION], { highlightVariantId: Number(id) })) {
-        // Shopify accepted it but the answer carries no usable bag: show the bag as Shopify has it.
-        await recoverFromServer();
+      let status = 200;
+      if (unconfirmed) {
+        if (!trigger || acceptedAdd?.trigger !== trigger || acceptedAdd.variantId !== variantId || acceptedAdd.units !== units) {
+          return { ok: false, message: 'Actualiza tu carrito antes de agregar otra pieza.' };
+        }
+        if (!(await recoverFromServer())) return acceptedAddError(status);
       } else {
-        markConfirmed();
-        $(`[data-variant-id="${Number(id)}"]`, $('#cart-sheet'))?.classList.add('cart-line--highlight');
+        const cartId = cartSectionId();
+        const payload = { id: variantId, quantity: units, sections: pageSections().join(','), sections_url: cartId ? routes.cart : location.pathname };
+        if (properties) payload.properties = properties;
+        let result;
+        try {
+          result = await postJson(routes.cartAdd, payload);
+        } catch {
+          result = { ok: false, status: 0, data: null };
+        }
+        status = result.status;
+        if (!result.ok && status >= 400 && status < 500) {
+          const { text, lang } = errorMessage(result);
+          Monetta.toast?.(text, { tone: 'error', lang });
+          return { ok: false, status, message: text, lang };
+        }
+        if (!result.ok) return uncertainAdd(status, trigger);
+
+        const sections = result.data?.sections;
+        const shown = cartId
+          ? renderCartPage(sections || {})
+          : applySheet(readSheet(sections?.[SHEET_SECTION]));
+        if (!shown && !(await recoverFromServer())) {
+          acceptedAdd = { trigger, variantId, units };
+          return acceptedAddError(status);
+        }
       }
-      // «Comprar ahora» goes straight on to the checkout, so the bag is not opened in between.
-      if (open) openSheet(trigger, true);
+
+      markConfirmed();
+      const sheet = $('#cart-sheet');
+      const line = sheet && $(`[data-variant-id="${variantId}"]`, sheet);
+      if (!line) {
+        const message = 'La pieza no aparece en el carrito actualizado. Revisa la disponibilidad.';
+        Monetta.toast?.(message, { tone: 'error' });
+        return { ok: false, status, message };
+      }
+      line.classList.add('cart-line--highlight');
       Monetta.announce?.(`Agregado al carrito${name ? `: ${name}` : ''}.`);
-      return { ok: true, status: result.status };
+      if (checkout && pending === 1) {
+        location.assign(checkout);
+      } else if (open) {
+        openSheet(trigger, true);
+      }
+      return { ok: true, status };
     });
+  }
+
+  function acceptedAddError(status) {
+    const message = 'Shopify recibió la pieza. Reintenta para actualizar tu carrito.';
+    Monetta.toast?.(message, { tone: 'error' });
+    return { ok: false, status, message };
   }
 
   async function uncertainAdd(status, trigger) {
@@ -335,8 +371,7 @@
     try {
       const checkout = form.dataset.checkout;
       const name = form.dataset.productName || '';
-      const result = await add({ id: form.elements.id.value, quantity: 1, name, trigger: button, open: !checkout });
-      if (result.ok && checkout) location.assign(checkout);
+      const result = await add({ id: form.elements.id.value, quantity: 1, name, trigger: button, checkout });
       if (!result.ok && feedback) {
         feedback.textContent = result.message;
         feedback.hidden = false;
@@ -454,7 +489,7 @@
         const item = result.data;
         const planId = item?.selling_plan_allocation?.selling_plan?.id ?? null;
         const identityKept = item && Number(item.variant_id ?? item.id) === restore.id && sameProperties(item.properties, restore.properties) && planId === restore.selling_plan;
-        const shown = cartSectionId() ? renderCartPage(result.data?.sections || {}) : applySheet(result.data?.sections?.[SHEET_SECTION]);
+        const shown = cartSectionId() ? renderCartPage(result.data?.sections || {}) : applySheet(readSheet(result.data?.sections?.[SHEET_SECTION]));
         if (!shown) await recoverFromServer();
         else markConfirmed();
         if (!identityKept) Monetta.toast?.('Restauramos la pieza, pero Shopify la registró con datos distintos a los de antes. Revisa tu bolsa.', { tone: 'error' });
@@ -492,7 +527,7 @@
         const sections = result.data?.sections || {};
         const rendered = result.ok && (id
           ? renderCartPage(sections, { focusKey: quantity > 0 ? key : null, focusStep: step })
-          : applySheet(sections[SHEET_SECTION]));
+          : applySheet(readSheet(sections[SHEET_SECTION])));
         if (rendered) {
           markConfirmed();
           if (quantity === 0) {
@@ -523,6 +558,21 @@
       }
     });
   }
+
+  let lastQuantityClick;
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest?.('[data-line-form] button[data-step]');
+    if (!button || event.detail === 0 || checkoutBlocked()) return;
+    const key = button.form.elements.id.value;
+    const step = button.dataset.step;
+    const time = performance.now();
+    if (lastQuantityClick?.key === key && lastQuantityClick.step === step &&
+        time - lastQuantityClick.time < 250) {
+      event.preventDefault();
+      return;
+    }
+    lastQuantityClick = { key, step, time };
+  });
 
   document.addEventListener('submit', (event) => {
     const form = event.target.closest?.('[data-line-form]');

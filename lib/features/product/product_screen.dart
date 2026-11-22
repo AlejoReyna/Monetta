@@ -44,6 +44,8 @@ import '../navigation/duo_workspace.dart';
 import '../../platform/system_layout_context.dart';
 import '../../data/shopify/storefront_config.dart';
 import 'purchase_dock.dart';
+import 'restock_push_adapter.dart';
+import 'restock_request_sheet.dart';
 
 class ProductScreen extends StatefulWidget {
   const ProductScreen({
@@ -216,17 +218,18 @@ class _ProductScreenState extends State<ProductScreen> {
     });
     final result = await tryAddSelectionToBag(context, product, _variantIndex);
     if (!mounted) return;
-    // Released before any feedback so the action is usable again as soon as
-    // the sheet or the snack bar appears.
+    if (buyNow && result.status == BagAddStatus.added) {
+      try {
+        await openCheckout(context);
+      } finally {
+        if (mounted) setState(() => _adding = false);
+      }
+      return;
+    }
     setState(() => _adding = false);
     switch (result.status) {
       case BagAddStatus.added:
-        // Keeps the existing confirmation surface — a sheet, never a toast.
-        if (buyNow) {
-          await openBag(context);
-        } else {
-          await showMiniCart(context);
-        }
+        await showMiniCart(context);
       case BagAddStatus.soldOut:
         _showMessage('Esta opción está agotada.');
       case BagAddStatus.unavailable:
@@ -330,6 +333,24 @@ class _ProductScreenState extends State<ProductScreen> {
             excluding: product.id,
           );
     final palette = context.boutique;
+    final notificationController = NotificationScope.maybeOf(context);
+    final effectiveOnRestock = widget.onRestock ??
+        (notificationController?.variantRestockAvailable == true
+            ? (Product p, ProductVariant v) {
+                unawaited(
+                  showRestockRequestSheet(
+                    context,
+                    product: p,
+                    variant: v,
+                    initialEmail: AccountScope.maybeOf(context)?.account?.email,
+                    onSubmit: (payload) => submitRestockViaPushNotifications(
+                      notificationController,
+                      payload,
+                    ),
+                  ),
+                );
+              }
+            : null);
 
     _checkPurchaseVisibility();
     final addButton = KeyedSubtree(
@@ -457,6 +478,7 @@ class _ProductScreenState extends State<ProductScreen> {
                       SelectionPriceView(
                         price: price,
                         compare: compare,
+                        sixMsiAmount: selected?.sixMsiInstallmentAmount,
                         currentKey: const Key('product-price'),
                         size: 22,
                         inStock: inStock,
@@ -512,10 +534,11 @@ class _ProductScreenState extends State<ProductScreen> {
                       ),
                       if (!inStock &&
                           selected != null &&
-                          widget.onRestock != null)
+                          effectiveOnRestock != null)
                         TextButton(
                           key: const ValueKey('create-restock-alert'),
-                          onPressed: () => widget.onRestock!(product, selected),
+                          onPressed: () =>
+                              effectiveOnRestock(product, selected),
                           child: Text(
                             'Avísame cuando vuelva',
                             style: boutiqueText(color: palette.ink),
