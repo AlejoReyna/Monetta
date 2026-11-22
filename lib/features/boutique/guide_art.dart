@@ -8,11 +8,14 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'client_guide_components.dart';
 
 import '../../app/monetta_tokens.g.dart';
+import '../../data/media/media_url.dart';
+import '../../main.dart' show HomeContentScope;
 import 'boutique_tokens.dart';
 
 part 'guide_assets.g.dart';
@@ -86,6 +89,35 @@ class GuideBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final spec = guideAsset('banner:$id');
     if (spec == null) return const SizedBox.shrink();
+    final remoteOverride =
+        HomeContentScope.maybeOf(context)?.content.bannersBySlot[id];
+    final remoteUrl = (remoteOverride != null && remoteOverride.active)
+        ? remoteOverride.imageUrl
+        : null;
+    final effectiveCopy = (remoteOverride?.copy != null &&
+            remoteOverride!.copy!.trim().isNotEmpty)
+        ? remoteOverride.copy!
+        : spec.copy;
+
+    Widget buildBannerImage() {
+      final assetFallback = Image.asset(
+        spec.path,
+        fit: BoxFit.contain,
+        excludeFromSemantics: true,
+      );
+      if (remoteUrl == null || remoteUrl.isEmpty) {
+        return assetFallback;
+      }
+      return CachedNetworkImage(
+        imageUrl: MediaUrl.sized(remoteUrl, width: MediaUrl.heroWidth),
+        fit: BoxFit.contain,
+        fadeInDuration: Duration.zero,
+        fadeOutDuration: Duration.zero,
+        placeholder: (_, __) => assetFallback,
+        errorWidget: (_, __, ___) => assetFallback,
+      );
+    }
+
     return LayoutBuilder(builder: (context, constraints) {
       final width = constraints.maxWidth;
       final enlarged = MediaQuery.textScalerOf(context).scale(16) > 16;
@@ -96,16 +128,14 @@ class GuideBanner extends StatelessWidget {
         art = SizedBox(
             width: width,
             height: math.min(width / 2.4, constraints.maxHeight),
-            child: Image.asset(spec.path,
-                fit: BoxFit.contain, excludeFromSemantics: true));
+            child: buildBannerImage());
       } else {
         art = AspectRatio(
             aspectRatio: 2.4,
-            child: Image.asset(spec.path,
-                fit: BoxFit.contain, excludeFromSemantics: true));
+            child: buildBannerImage());
       }
       if (enlarged) {
-        final lines = spec.copy.split('\n');
+        final lines = effectiveCopy.split('\n');
         final headingLines = switch (id) {
           'B31' => 3,
           'B32' => 1,
@@ -130,7 +160,7 @@ class GuideBanner extends StatelessWidget {
       }
       // One semantic reading, including when native text replaces the artwork.
       final editorial =
-          Semantics(label: spec.copy, excludeSemantics: true, child: art);
+          Semantics(label: effectiveCopy, excludeSemantics: true, child: art);
       if (overlayAction && action != null && !enlarged) {
         return Stack(
           alignment: Alignment.bottomRight,

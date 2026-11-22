@@ -7,6 +7,9 @@
 /// could remember a cursor between app opens.
 library;
 
+import 'dart:async';
+import 'dart:isolate';
+
 import '../local/bag_store.dart';
 import '../local/catalog_cache_store.dart';
 import '../local/wishlist_store.dart';
@@ -17,6 +20,46 @@ import '../normalize/rules.dart';
 import '../shopify/catalog_sync.dart' as shopify;
 import '../shopify/shopify_gid.dart';
 import '../../domain/product.dart';
+
+/// Threshold above which catalog normalization is offloaded to a background
+/// isolate so 2,600–5,000+ products never block the UI thread on startup.
+const int kIsolateNormalizationThreshold = 1200;
+
+/// Normalizes a batch of products, moving work to a background isolate when
+/// the batch has at least [isolateThreshold] products and is not running inside
+/// a `FakeAsync` widget-test zone.
+Future<Map<String, CanonicalFacets>> normalizeCatalogProducts(
+  List<Product> products,
+  NormalizationRules rules, {
+  DateTime? now,
+  int isolateThreshold = kIsolateNormalizationThreshold,
+}) async {
+  if (products.isEmpty) return const <String, CanonicalFacets>{};
+  final timestamp = now ?? DateTime.now();
+  final inFakeAsyncZone = Zone.current != Zone.root;
+  if (products.length < isolateThreshold || inFakeAsyncZone) {
+    return _normalizeProductsSync(products, rules, timestamp);
+  }
+  try {
+    return await Isolate.run(
+      () => _normalizeProductsSync(products, rules, timestamp),
+    );
+  } on UnsupportedError {
+    return _normalizeProductsSync(products, rules, timestamp);
+  }
+}
+
+Map<String, CanonicalFacets> _normalizeProductsSync(
+  List<Product> products,
+  NormalizationRules rules,
+  DateTime now,
+) {
+  final normalizer = Normalizer(rules);
+  return <String, CanonicalFacets>{
+    for (final product in products)
+      product.id: normalizer.normalize(product, now: now),
+  };
+}
 
 class CatalogSnapshot {
   const CatalogSnapshot({required this.products, required this.facetsById});
@@ -183,14 +226,10 @@ class CatalogRepository {
     final products = await cache.allProducts();
     if (products.isEmpty) return CatalogSnapshot.empty;
 
-    final normalizer = Normalizer(rules);
-    final now = DateTime.now();
+    final facetsById = await normalizeCatalogProducts(products, rules);
     return CatalogSnapshot(
       products: products,
-      facetsById: {
-        for (final product in products)
-          product.id: normalizer.normalize(product, now: now),
-      },
+      facetsById: facetsById,
     );
   }
 

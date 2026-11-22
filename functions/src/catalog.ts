@@ -6,6 +6,29 @@ function finiteMoney(value: string | null): number | null {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
 }
 
+function parseSixMsiAmount(raw: string | null | undefined): number | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (trimmed === "") return null;
+  const direct = finiteMoney(trimmed);
+  if (direct !== null && direct > 0) return direct;
+  if (trimmed.startsWith("{")) {
+    try {
+      const decoded = JSON.parse(trimmed) as { readonly amount?: unknown };
+      if (typeof decoded.amount === "string") {
+        const nested = finiteMoney(decoded.amount.trim());
+        return nested !== null && nested > 0 ? nested : null;
+      }
+      if (typeof decoded.amount === "number" && Number.isFinite(decoded.amount) && decoded.amount > 0) {
+        return decoded.amount;
+      }
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 export function isPublicProduct(product: AdminProduct): boolean {
   return product.status === "ACTIVE" && product.publishedAt !== null;
 }
@@ -16,21 +39,25 @@ export function toCatalogProduct(product: AdminProduct): CatalogProductDocument 
     throw new Error("Cannot map an unpublished product into the public catalog");
   }
 
-  const variants = product.variants.nodes.map((variant) => ({
-    id: variant.id,
-    title: variant.title,
-    price: finiteMoney(variant.price) ?? 0,
-    compareAtPrice: finiteMoney(variant.compareAtPrice),
-    sku: variant.sku,
-    selectedOptions: Object.fromEntries(
-      (variant.selectedOptions ?? [])
-        .filter((option) => typeof option.name === "string" && option.name.trim() !== "" &&
-          typeof option.value === "string" && option.value.trim() !== "")
-        .map((option) => [option.name, option.value]),
-    ),
-    imageUrls: variant.image?.url ? [variant.image.url] : [],
-    available: variant.availableForSale,
-  }));
+  const variants = product.variants.nodes.map((variant) => {
+    const sixMsiInstallmentAmount = parseSixMsiAmount(variant.sixMsiAmount?.value);
+    return {
+      id: variant.id,
+      title: variant.title,
+      price: finiteMoney(variant.price) ?? 0,
+      compareAtPrice: finiteMoney(variant.compareAtPrice),
+      ...(sixMsiInstallmentAmount !== null ? { sixMsiInstallmentAmount } : {}),
+      sku: variant.sku,
+      selectedOptions: Object.fromEntries(
+        (variant.selectedOptions ?? [])
+          .filter((option) => typeof option.name === "string" && option.name.trim() !== "" &&
+            typeof option.value === "string" && option.value.trim() !== "")
+          .map((option) => [option.name, option.value]),
+      ),
+      imageUrls: variant.image?.url ? [variant.image.url] : [],
+      available: variant.availableForSale,
+    };
+  });
   const availablePrices = variants
     .map((variant) => variant.price)
     .filter((price) => Number.isFinite(price));

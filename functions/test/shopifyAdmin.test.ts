@@ -21,6 +21,7 @@ describe("mobile producer variant metadata query", () => {
     for (const query of requests) {
       expect(query).toContain("selectedOptions { name value }");
       expect(query).toContain("image { url }");
+      expect(query).toContain('sixMsiAmount: metafield(namespace: "monetta", key: "six_msi_amount") { value }');
     }
   });
 });

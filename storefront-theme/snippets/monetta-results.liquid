@@ -73,7 +73,18 @@
         {%- endfor -%}
         {%- if offer_variant == nil -%}{%- continue -%}{%- endif -%}
       {%- endif -%}
-      <li{% if offers %} data-offer-price="{{ offer_variant.price }}"{% endif %}{% if searchable %} data-collection-product="{{ product.id }}" data-collection-terms="{{ product.title | append: ' ' | append: product.vendor | append: ' ' | append: product.type | append: ' ' | append: product.tags | escape }}"{% endif %}>{% render 'monetta-card', product: product, selected_variant: offer_variant, eager: eager, view_button: view_button, listing_card: listing_card, sizes: sizes, xl_widths: xl_widths %}</li>
+      {%- capture clean_tags -%}
+        {%- for t in product.tags -%}
+          {%- assign t_low = t | strip | downcase -%}
+          {%- assign t_p1 = t_low | slice: 0, 10 -%}
+          {%- assign t_p2 = t_low | slice: 0, 8 -%}
+          {%- assign t_p3 = t_low | slice: 0, 15 -%}
+          {%- assign t_p4 = t_low | slice: 0, 16 -%}
+          {%- unless t_p1 == 'proveedor-' or t_p1 == 'pendiente-' or t_p2 == 'monetta-' or t_p3 == 'disponibilidad-' or t_p4 == 'imagen-original-' or t_low == 'venta-sobre-pedido' or t_low == 'mk-outlet-us' -%}
+            {{- t }} {% endunless -%}
+        {%- endfor -%}
+      {%- endcapture -%}
+      <li{% if offers %} data-offer-price="{{ offer_variant.price }}"{% endif %}{% if searchable %} data-collection-product="{{ product.id }}" data-collection-terms="{{ product.title | append: ' ' | append: product.vendor | append: ' ' | append: product.type | append: ' ' | append: clean_tags | escape }}"{% endif %}>{% render 'monetta-card', product: product, selected_variant: offer_variant, eager: eager, view_button: view_button, listing_card: listing_card, sizes: sizes, xl_widths: xl_widths %}</li>
     {%- endfor -%}
   </ul>
   {%- liquid

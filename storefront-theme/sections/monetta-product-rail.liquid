@@ -20,9 +20,19 @@
     if section.settings.collection == blank or source.handle == 'all'
       if collections['nueva-coleccion'].products_count > 0
         assign source = collections['nueva-coleccion']
+      elsif collections['lo-mas-nuevo'].products_count > 0
+        assign source = collections['lo-mas-nuevo']
       elsif collections['novedades'].products_count > 0
         assign source = collections['novedades']
       endif
+    endif
+  elsif presentation == 'rail' and section.settings.collection == blank
+    if collections['lo-mas-buscado'].products_count > 0
+      assign source = collections['lo-mas-buscado']
+      assign hidden = false
+    elsif collections['lo-mas-vendido'].products_count > 0
+      assign source = collections['lo-mas-vendido']
+      assign hidden = false
     endif
   endif
 -%}

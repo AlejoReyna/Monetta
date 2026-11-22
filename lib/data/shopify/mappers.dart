@@ -5,6 +5,8 @@
 /// product grid.
 library;
 
+import 'dart:convert';
+
 import '../../domain/cart.dart';
 import '../../domain/collection.dart';
 import '../../domain/product.dart';
@@ -39,6 +41,28 @@ String? metafieldValue(Object? metafield) {
   return value is String && value.trim().isNotEmpty ? value : null;
 }
 
+/// Parses the `monetta.six_msi_amount` metafield value when backed by a real
+/// positive amount (either a decimal string or a JSON Money object).
+double? sixMsiAmount(Object? metafield) {
+  final raw = metafieldValue(metafield)?.trim();
+  if (raw == null || raw.isEmpty) return null;
+  double? parsed = double.tryParse(raw);
+  if (parsed == null && raw.startsWith('{')) {
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map) {
+        final amount = decoded['amount'];
+        if (amount is num) parsed = amount.toDouble();
+        if (amount is String) parsed = double.tryParse(amount.trim());
+      }
+    } on FormatException {
+      return null;
+    }
+  }
+  if (parsed == null || !parsed.isFinite || parsed <= 0) return null;
+  return parsed;
+}
+
 Product productFromJson(Map<String, dynamic> json) {
   final variants = edgeNodes(json['variants']).map((v) {
     return ProductVariant(
@@ -47,6 +71,7 @@ Product productFromJson(Map<String, dynamic> json) {
       price: money(v['price']) ?? 0,
       available: v['availableForSale'] == true,
       compareAtPrice: money(v['compareAtPrice']),
+      sixMsiInstallmentAmount: sixMsiAmount(v['sixMsiAmount']),
       sku: v['sku'] as String?,
       selectedOptions: {
         for (final option in (v['selectedOptions'] as List? ?? const [])

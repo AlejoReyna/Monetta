@@ -67,6 +67,11 @@
     assign guide_key = collection.title | handleize
     # The GET form handler rebuilds the query string. Keep Shopify's automatic type/vendor identity in each form.
     assign listing_query = collection.title
+  elsif collection.handle == 'guess'
+    assign raw_title = collection.title | strip | downcase
+    if raw_title == 'bolsas' or raw_title == 'bolsos'
+      assign guide_key = 'bolsas'
+    endif
   elsif current_tags.size > 0
     assign guide_key = current_tags.first | handleize
   endif
@@ -75,10 +80,14 @@
   assign guide_brand = false
   assign guide_pill = ''
   case guide_key
-    when 'coach', 'michael-kors', 'steve-madden', 'tory-burch', 'kate-spade', 'guess'
-      assign guide_photo = 'coleccion-' | append: guide_key
+    when 'coach', 'michael-kors', 'steve-madden', 'tory-burch', 'kate-spade', 'guess', 'guess-1'
+      assign canonical_brand_key = guide_key
+      if guide_key == 'guess-1'
+        assign canonical_brand_key = 'guess'
+      endif
+      assign guide_photo = 'coleccion-' | append: canonical_brand_key
       assign guide_brand = true
-      case guide_key
+      case canonical_brand_key
         when 'coach'
           assign guide_banner = 'B28_coach'
         when 'michael-kors'
@@ -96,17 +105,22 @@
       assign guide_banner = 'B26_marc_jacobs'
       assign guide_photo = 'coleccion-marc-jacobs'
       assign guide_brand = true
+    when 'olaplex', 'olalplex', 'tommy-hilfiger', 'anne-klein', 'christian-dior', 'the-ordinary', 'summer-fridays', 'laneige', 'rhode'
+      assign guide_brand = true
+      if guide_key == 'olalplex'
+        assign guide_title = 'Olaplex'
+      endif
     when 'tote', 'totes', 'bolsa-tote'
       assign guide_banner = 'B19_tote'
       assign guide_photo = 'coleccion-totes'
       assign guide_title = 'Totes'
       assign guide_pill = 'bolsas'
-    when 'shoulder', 'bolsa-shoulder', 'shoulder-bag'
+    when 'shoulder', 'hombro', 'bolsa-shoulder', 'shoulder-bag', 'bolsa-de-hombro'
       assign guide_banner = 'B20_bolsos_hombro'
       assign guide_photo = 'coleccion-shoulder'
       assign guide_title = 'Shoulder'
       assign guide_pill = 'bolsas'
-    when 'crossbody', 'bolsa-crossbody'
+    when 'crossbody', 'crossbodys', 'bolsa-crossbody'
       assign guide_banner = 'B18_crossbody'
       assign guide_photo = 'coleccion-crossbody'
       assign guide_title = 'Crossbody'
@@ -116,7 +130,7 @@
       assign guide_photo = 'coleccion-bolsos-de-mano'
       assign guide_title = 'Bolsos de mano'
       assign guide_pill = 'bolsas'
-    when 'cartera', 'carteras'
+    when 'cartera', 'carteras', 'carteras-1'
       assign guide_banner = 'B21_carteras'
       assign guide_photo = 'coleccion-carteras'
       assign guide_title = 'Carteras'
@@ -131,7 +145,7 @@
       assign guide_photo = 'coleccion-accesorios'
       assign guide_title = 'Accesorios'
       assign guide_pill = 'accesorios'
-    when 'reloj', 'relojes'
+    when 'reloj', 'relojes', 'relojes-1'
       assign guide_banner = 'B11_relojes'
       assign guide_photo = 'coleccion-accesorios'
       assign guide_title = 'Relojes'

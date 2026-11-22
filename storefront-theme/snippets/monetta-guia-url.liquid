@@ -10,13 +10,21 @@
 {%- enddoc -%}
 {%- liquid
   assign handle = ''
+  assign alt_handle = ''
   assign fallback = ''
   case key
     when 'bolsas'
       assign handle = 'bolsas'
+      if collections['bolsas'].id == blank and collections['guess'].id != blank
+        assign guess_title = collections['guess'].title | strip | downcase
+        if guess_title == 'bolsas' or guess_title == 'bolsos'
+          assign alt_handle = 'guess'
+        endif
+      endif
       assign fallback = routes.all_products_collection_url | append: '/bolsa'
     when 'carteras'
       assign handle = 'carteras'
+      assign alt_handle = 'carteras-1'
       assign fallback = routes.collections_url | append: '/types?q=Cartera'
     when 'calzado'
       assign handle = 'calzado'
@@ -26,6 +34,7 @@
       assign fallback = routes.all_products_collection_url | append: '?view=ofertas'
     when 'relojes'
       assign handle = 'relojes'
+      assign alt_handle = 'relojes-1'
       assign fallback = routes.collections_url | append: '/types?q=Reloj'
     when 'perfumes'
       assign handle = 'perfumes'
@@ -35,23 +44,40 @@
       assign fallback = routes.all_products_collection_url | append: '/accessory'
     when 'crossbody'
       assign handle = 'crossbody'
+      assign alt_handle = 'crossbodys'
       assign fallback = routes.all_products_collection_url | append: '/crossbody'
     when 'tote', 'totes'
       assign handle = 'totes'
+      assign alt_handle = 'tote'
       assign fallback = routes.all_products_collection_url | append: '/tote'
     when 'shoulder'
       assign handle = 'shoulder'
+      assign alt_handle = 'hombro'
       assign fallback = routes.all_products_collection_url | append: '/shoulder'
     when 'satchel', 'bolsos-de-mano'
       assign handle = 'bolsos-de-mano'
+      assign alt_handle = 'satchel'
       assign fallback = routes.all_products_collection_url | append: '/satchel'
     when 'brand'
-      assign handle = brand | handleize
+      assign brand_key = brand | handleize
+      assign handle = brand_key
       assign fallback = brand | url_for_vendor
+      if brand_key == 'guess'
+        if collections['guess-1'].id != blank
+          assign handle = 'guess-1'
+        elsif collections['guess'].id != blank
+          assign guess_col_title = collections['guess'].title | strip | downcase
+          unless guess_col_title contains 'guess'
+            assign handle = 'guess-brand-only'
+          endunless
+        endif
+      elsif brand_key == 'olaplex'
+        assign alt_handle = 'olalplex'
+      endif
   endcase
 -%}
 {%- if handle != blank -%}
-  {%- if collections[handle].id != blank -%}{{ collections[handle].url }}{%- else -%}{{ fallback }}{%- endif -%}
+  {%- if collections[handle].id != blank -%}{{ collections[handle].url }}{%- elsif alt_handle != blank and collections[alt_handle].id != blank -%}{{ collections[alt_handle].url }}{%- else -%}{{ fallback }}{%- endif -%}
 {%- else -%}
   {%- case key -%}
     {%- when 'categorias' -%}{{ routes.collections_url }}

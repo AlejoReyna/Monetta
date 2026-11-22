@@ -210,21 +210,32 @@ class CatalogStore extends ChangeNotifier {
       wishlistStore: _wishlistStore,
     );
 
-    // `AssetBundle.loadString` moves files over 50 KB to a helper isolate.
-    // The catalog is larger than that and helper isolates are not available
-    // in every Flutter test/runtime surface, so decode the already-loaded
-    // bytes directly. At ~235 KB this remains comfortably below a frame's
-    // worth of work on supported devices and avoids a startup deadlock.
-    final catalogRaw = _catalogAsset ??= await _loadCatalogAsset();
-    final catalogJson = jsonDecode(catalogRaw) as Map<String, dynamic>;
+    await _catalogRepository.prepareConfiguredShop();
+    final existingMeta = await _cacheStore.metadata();
+    final existingCursor = await _cursorStore.load();
+    final cacheEmpty = await _cacheStore.isEmpty();
+    final needsBundledAsset = cacheEmpty ||
+        (existingMeta?.source != CatalogCacheSource.shopify &&
+            existingMeta?.source != CatalogCacheSource.firestore &&
+            existingCursor.lastFullSyncAt == null);
 
-    // A no-op once the cache already has rows — the common case after the
-    // very first app open.
-    await _catalogRepository.seedFromAssetIfEmpty(catalogJson);
-    // Existing installs may have a partial cache from an older snapshot.
-    // Keep the cache-first startup path, but add products that are present in
-    // the bundled catalog and missing locally.
-    await _catalogRepository.addMissingFromAsset(catalogJson);
+    if (needsBundledAsset) {
+      // `AssetBundle.loadString` moves files over 50 KB to a helper isolate.
+      // The catalog is larger than that and helper isolates are not available
+      // in every Flutter test/runtime surface, so decode the already-loaded
+      // bytes directly. Skipping this altogether when an authoritative remote
+      // catalog is already cached avoids parsing 1.34+ MB on warm starts.
+      final catalogRaw = _catalogAsset ??= await _loadCatalogAsset();
+      final catalogJson = jsonDecode(catalogRaw) as Map<String, dynamic>;
+
+      // A no-op once the cache already has rows — the common case after the
+      // very first app open.
+      await _catalogRepository.seedFromAssetIfEmpty(catalogJson);
+      // Existing installs may have a partial cache from an older snapshot.
+      // Keep the cache-first startup path, but add products that are present in
+      // the bundled catalog and missing locally.
+      await _catalogRepository.addMissingFromAsset(catalogJson);
+    }
 
     final snapshot = await _catalogRepository.loadCached();
     products = snapshot.products;
@@ -397,13 +408,25 @@ class CatalogStore extends ChangeNotifier {
       case RealtimeCatalogOutcome.applied:
         products = update.products;
         catalogMetadata = update.metadata;
-        final normalizer = Normalizer(rules);
-        final now = DateTime.now();
-        facetsById = {
-          for (final product in products)
-            product.id: normalizer.normalize(product, now: now),
-        };
+        if (products.length < kIsolateNormalizationThreshold) {
+          final normalizer = Normalizer(rules);
+          final now = DateTime.now();
+          facetsById = {
+            for (final product in products)
+              product.id: normalizer.normalize(product, now: now),
+          };
+          realtimeStatus = CatalogRealtimeStatus.live;
+          notifyListeners();
+          return;
+        }
         realtimeStatus = CatalogRealtimeStatus.live;
+        unawaited(
+          normalizeCatalogProducts(products, rules).then((normalized) {
+            facetsById = normalized;
+            notifyListeners();
+          }),
+        );
+        return;
       case RealtimeCatalogOutcome.empty:
         realtimeStatus = CatalogRealtimeStatus.empty;
         unawaited(_recordCatalogStatus(CatalogCacheStatus.invalid, 'Vacío'));

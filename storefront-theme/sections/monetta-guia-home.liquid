@@ -14,6 +14,47 @@
     {%- capture brands_destination -%}{% render 'monetta-guia-url', key: 'marcas' %}{%- endcapture -%}
     {%- liquid
       assign brands_url = brands_destination | strip
+      assign b01_href = catalog_url | strip
+      assign b01_alt = 'Compra fácil desde México'
+      assign b01_image = nil
+      assign b02_href = brands_url
+      assign b02_alt = 'Tus marcas fav en un sólo lugar'
+      assign b02_image = nil
+      assign b03_href = categories_url | strip
+      assign b03_alt = 'Miles de modelos originales por descubrir'
+      assign b03_image = nil
+      for entry in shop.metaobjects['monetta_banner'].values
+        assign entry_slot = entry.slot.value | default: entry.system.handle | strip | upcase
+        assign entry_active = entry.active.value
+        if entry_active != false and entry.image.value != blank
+          case entry_slot
+            when 'B01'
+              assign b01_image = entry.image.value
+              if entry.alt_text.value != blank
+                assign b01_alt = entry.alt_text.value | strip
+              endif
+              if entry.destination_url.value != blank
+                assign b01_href = entry.destination_url.value | strip
+              endif
+            when 'B02'
+              assign b02_image = entry.image.value
+              if entry.alt_text.value != blank
+                assign b02_alt = entry.alt_text.value | strip
+              endif
+              if entry.destination_url.value != blank
+                assign b02_href = entry.destination_url.value | strip
+              endif
+            when 'B03'
+              assign b03_image = entry.image.value
+              if entry.alt_text.value != blank
+                assign b03_alt = entry.alt_text.value | strip
+              endif
+              if entry.destination_url.value != blank
+                assign b03_href = entry.destination_url.value | strip
+              endif
+          endcase
+        endif
+      endfor
       assign banner_count = 2
       if section.settings.show_banner_categorias
         assign banner_count = 3
@@ -24,19 +65,31 @@
       <h1 class="visually-hidden" id="{{ heading_id }}">{{ shop.name | escape }}</h1>
       <div class="guia-carousel__track" id="{{ track_id }}">
         <div class="guia-carousel__slide" role="group" aria-roledescription="diapositiva" aria-label="1 de {{ banner_count }}">
-          <a class="v41-banner" href="{{ catalog_url | strip }}">
-            <img src="{{ 'monetta-v41-b01.webp' | asset_url }}" width="1920" height="800" alt="Compra fácil desde México" loading="eager" fetchpriority="high" decoding="async">
+          <a class="v41-banner" href="{{ b01_href }}">
+            {%- if b01_image != blank -%}
+              <img src="{{ b01_image | image_url: width: 1920 }}" srcset="{{ b01_image | image_url: width: 768 }} 768w, {{ b01_image | image_url: width: 1280 }} 1280w, {{ b01_image | image_url: width: 1920 }} 1920w" sizes="100vw" width="1920" height="800" alt="{{ b01_alt | escape }}" loading="eager" fetchpriority="high" decoding="async">
+            {%- else -%}
+              <img src="{{ 'monetta-v41-b01.webp' | asset_url }}" width="1920" height="800" alt="{{ b01_alt | escape }}" loading="eager" fetchpriority="high" decoding="async">
+            {%- endif -%}
           </a>
         </div>
         <div class="guia-carousel__slide" role="group" aria-roledescription="diapositiva" aria-label="2 de {{ banner_count }}">
-          <a class="v41-banner" href="{{ brands_url }}">
-            <img src="{{ 'monetta-v41-b02.webp' | asset_url }}" width="1920" height="800" alt="Tus marcas fav en un sólo lugar" loading="lazy" decoding="async">
+          <a class="v41-banner" href="{{ b02_href }}">
+            {%- if b02_image != blank -%}
+              <img src="{{ b02_image | image_url: width: 1920 }}" srcset="{{ b02_image | image_url: width: 768 }} 768w, {{ b02_image | image_url: width: 1280 }} 1280w, {{ b02_image | image_url: width: 1920 }} 1920w" sizes="100vw" width="1920" height="800" alt="{{ b02_alt | escape }}" loading="lazy" decoding="async">
+            {%- else -%}
+              <img src="{{ 'monetta-v41-b02.webp' | asset_url }}" width="1920" height="800" alt="{{ b02_alt | escape }}" loading="lazy" decoding="async">
+            {%- endif -%}
           </a>
         </div>
         {%- if section.settings.show_banner_categorias -%}
           <div class="guia-carousel__slide" role="group" aria-roledescription="diapositiva" aria-label="3 de {{ banner_count }}">
-            <a class="v41-banner" href="{{ categories_url | strip }}">
-              <img src="{{ 'monetta-v41-b03.webp' | asset_url }}" width="1920" height="800" alt="Miles de modelos originales por descubrir" loading="lazy" decoding="async">
+            <a class="v41-banner" href="{{ b03_href }}">
+              {%- if b03_image != blank -%}
+                <img src="{{ b03_image | image_url: width: 1920 }}" srcset="{{ b03_image | image_url: width: 768 }} 768w, {{ b03_image | image_url: width: 1280 }} 1280w, {{ b03_image | image_url: width: 1920 }} 1920w" sizes="100vw" width="1920" height="800" alt="{{ b03_alt | escape }}" loading="lazy" decoding="async">
+              {%- else -%}
+                <img src="{{ 'monetta-v41-b03.webp' | asset_url }}" width="1920" height="800" alt="{{ b03_alt | escape }}" loading="lazy" decoding="async">
+              {%- endif -%}
             </a>
           </div>
         {%- endif -%}
@@ -148,11 +201,33 @@
 
   {%- when 'offers' -%}
     {%- capture mayoreo_url -%}{% render 'monetta-guia-url', key: 'mayoreo' %}{%- endcapture -%}
+    {%- liquid
+      assign wholesale_destination = mayoreo_url | strip
+      assign b04_alt = 'Precios de mayoreo a partir de 3 piezas'
+      assign b04_image = nil
+      for entry in shop.metaobjects['monetta_banner'].values
+        assign entry_slot = entry.slot.value | default: entry.system.handle | strip | upcase
+        if entry.active.value != false and entry.image.value != blank
+          if entry_slot == 'B04' or entry_slot == 'B04-EDITORIAL' or entry_slot == 'B04_EDITORIAL'
+            assign b04_image = entry.image.value
+            if entry.alt_text.value != blank
+              assign b04_alt = entry.alt_text.value | strip
+            endif
+            if entry.destination_url.value != blank
+              assign wholesale_destination = entry.destination_url.value | strip
+            endif
+          endif
+        endif
+      endfor
+    -%}
     <section class="v41-mayoreo" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
       <h2 class="visually-hidden" id="{{ heading_id }}">Mayoreo</h2>
       <div class="v41-mayoreo__frame">
-        <img src="{{ 'monetta-v41-b04-sin-control.jpg' | asset_url }}" width="1920" height="800" alt="Precios de mayoreo a partir de 3 piezas" loading="lazy" decoding="async">
-        {%- assign wholesale_destination = mayoreo_url | strip -%}
+        {%- if b04_image != blank -%}
+          <img src="{{ b04_image | image_url: width: 1920 }}" srcset="{{ b04_image | image_url: width: 768 }} 768w, {{ b04_image | image_url: width: 1280 }} 1280w, {{ b04_image | image_url: width: 1920 }} 1920w" sizes="100vw" width="1920" height="800" alt="{{ b04_alt | escape }}" loading="lazy" decoding="async">
+        {%- else -%}
+          <img src="{{ 'monetta-v41-b04-sin-control.jpg' | asset_url }}" width="1920" height="800" alt="{{ b04_alt | escape }}" loading="lazy" decoding="async">
+        {%- endif -%}
         {%- if wholesale_destination != blank -%}<a class="v41-mayoreo__cta" href="{{ wholesale_destination }}">Comenzar a vender</a>{%- endif -%}
       </div>
     </section>

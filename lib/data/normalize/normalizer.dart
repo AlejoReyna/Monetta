@@ -10,6 +10,38 @@ import 'facets.dart';
 import 'rules.dart';
 import 'text.dart';
 
+/// Internal operational tags added by ingestion scripts or supplier feeds that
+/// must never leak into shopper-facing search, filters, or facet signals.
+final RegExp _internalOperationalTagPattern = RegExp(
+  r'^(?:'
+  r'proveedor[-_\s]|'
+  r'imagen[-_\s]original[-_\s]|'
+  r'monetta[-_\s]|'
+  r'disponibilidad[-_\s]|'
+  r'pendiente[-_\s]|'
+  r'venta[-_\s]sobre[-_\s]pedido$|'
+  r'no[-_\s]publicar|'
+  r'mk[-_\s]outlet[-_\s]us$|'
+  r'michael\s+kors\s+outlet\s+usa$|'
+  r'coach\s+outlet(?:\s+us)?$'
+  r')',
+  caseSensitive: false,
+);
+
+/// Returns true when [tag] is an internal operational/ingestion tag rather
+/// than a shopper-facing attribute.
+bool isInternalOperationalTag(String tag) {
+  final trimmed = tag.trim();
+  if (trimmed.isEmpty) return true;
+  return _internalOperationalTagPattern.hasMatch(trimmed);
+}
+
+/// Filters out internal operational tags while preserving shopper-facing tags.
+List<String> shopperFacingTags(Iterable<String> tags) => [
+      for (final tag in tags)
+        if (!isInternalOperationalTag(tag)) tag,
+    ];
+
 /// One piece of evidence to match against, tagged with where it came from.
 class _Signal {
   const _Signal(this.text, this.source);
@@ -52,8 +84,12 @@ class Normalizer {
 
     // Evidence tiers, strongest first. Tags are listed individually so the
     // matched tag can be reported as evidence in the health report.
+    // Internal operational tags (Proveedor-*, MONETTA-lote-*, etc.) are
+    // excluded so supplier names never masquerade as product facets.
     final signals = <_Signal>[
-      for (final tag in product.tags) _Signal(fold(tag), FacetSource.tag),
+      for (final tag in product.tags)
+        if (!isInternalOperationalTag(tag))
+          _Signal(fold(tag), FacetSource.tag),
       if (foldedType.isNotEmpty) _Signal(foldedType, FacetSource.productType),
       if (foldedTitle.isNotEmpty) _Signal(foldedTitle, FacetSource.title),
       for (final handle in product.collectionHandles)
@@ -216,21 +252,27 @@ class Normalizer {
     return order.where((s) => signals.any((sig) => sig.source == s));
   }
 
-  /// First canonical value whose alias appears as a whole word in [text].
-  /// Aliases are pre-sorted longest-first by [NormalizationRules], so
-  /// `rosa claro` is tried before `rosa`.
+  /// Canonical value whose alias appears as a whole word in [text], preferring
+  /// the longest matched alias across the vocabulary so multi-word phrases
+  /// (`charm para bolsa`, `correa para bolso`, `set de cartera`) beat a shorter
+  /// substring (`bolsa`, `bolso`, `cartera`).
   MapEntry<String, String>? _matchWithEvidence(
     Map<String, List<String>> vocabulary,
     String text,
   ) {
+    MapEntry<String, String>? best;
     for (final entry in vocabulary.entries) {
       for (final alias in entry.value) {
         if (containsWord(text, alias)) {
-          return MapEntry(entry.key, alias);
+          if (best == null || alias.length > best.value.length) {
+            best = MapEntry(entry.key, alias);
+          }
+          // Aliases within [entry.value] are already sorted longest-first.
+          break;
         }
       }
     }
-    return null;
+    return best;
   }
 
   String? _canonicalFor(Map<String, List<String>> vocabulary, String folded) {

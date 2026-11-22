@@ -7,7 +7,7 @@ import 'package:monetta_app/features/product/variant_selection.dart';
 import '../../support/v41_product_fixture.dart';
 
 void main() {
-  test('Storefront queries preserve options and image on every variant page',
+  test('Storefront queries preserve options, image and sixMsiAmount on every variant page',
       () {
     for (final query in [
       kProductFragment,
@@ -15,7 +15,32 @@ void main() {
     ]) {
       expect(query, contains('selectedOptions { name value }'));
       expect(query, contains('image { url(transform: {maxWidth: 1200}) }'));
+      expect(
+        query,
+        contains(
+          'sixMsiAmount: metafield(namespace: "monetta", key: "six_msi_amount") { value }',
+        ),
+      );
     }
+  });
+  test('maps monetta.six_msi_amount metafield into sixMsiInstallmentAmount',
+      () {
+    final json = v41ProductJson();
+    final connection = json['variants'] as Map<String, dynamic>;
+    final variants = (connection['edges'] as List).cast<Map<String, dynamic>>();
+    (variants[0]['node'] as Map<String, dynamic>)['sixMsiAmount'] = {
+      'value': '283.50',
+    };
+    (variants[1]['node'] as Map<String, dynamic>)['sixMsiAmount'] = {
+      'value': '{"amount":"233.33","currency_code":"MXN"}',
+    };
+    (variants[2]['node'] as Map<String, dynamic>)['sixMsiAmount'] = {
+      'value': '0',
+    };
+    final product = productFromJson(json);
+    expect(product.variants[0].sixMsiInstallmentAmount, 283.50);
+    expect(product.variants[1].sixMsiInstallmentAmount, 233.33);
+    expect(product.variants[2].sixMsiInstallmentAmount, isNull);
   });
   test('real wire options resolve exact stock/price/photo combinations', () {
     final product = v41Product();

@@ -15,6 +15,7 @@ const Map<String, String> kCategoryLabels = {
   'reloj': 'Reloj',
   'cosmetiquera': 'Cosmetiquera',
   'set': 'Set',
+  'perfume': 'Perfume',
   'accesorio': 'Accesorio',
 };
 
@@ -26,6 +27,7 @@ const Map<String, String> kCategoryPlural = {
   'reloj': 'Relojes',
   'cosmetiquera': 'Cosmetiqueras',
   'set': 'Sets',
+  'perfume': 'Perfumes',
   'accesorio': 'Accesorios',
 };
 

@@ -50,6 +50,16 @@
             </label>
           {%- else -%}
             {%- for value in filter.values -%}
+              {%- liquid
+                assign v_low = value.label | strip | downcase
+                assign v_p1 = v_low | slice: 0, 10
+                assign v_p2 = v_low | slice: 0, 8
+                assign v_p3 = v_low | slice: 0, 15
+                assign v_p4 = v_low | slice: 0, 16
+                if v_p1 == 'proveedor-' or v_p1 == 'pendiente-' or v_p2 == 'monetta-' or v_p3 == 'disponibilidad-' or v_p4 == 'imagen-original-' or v_low == 'venta-sobre-pedido' or v_low == 'mk-outlet-us'
+                  continue
+                endif
+              -%}
               {%- assign unavailable = false -%}
               {%- if value.count == 0 and value.active == false -%}{%- assign unavailable = true -%}{%- endif -%}
               <label class="check{% if unavailable %} check--disabled{% endif %}">

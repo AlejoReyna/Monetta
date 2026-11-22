@@ -12,7 +12,7 @@ class FirestoreCatalogSource implements CatalogRealtimeSource {
   @override
   Stream<List<CatalogRealtimeDocument>> watchProducts() => _firestore
       .collection('products')
-      .snapshots(includeMetadataChanges: true)
+      .snapshots(includeMetadataChanges: false)
       .map(
         (snapshot) => [
           for (final document in snapshot.docs)

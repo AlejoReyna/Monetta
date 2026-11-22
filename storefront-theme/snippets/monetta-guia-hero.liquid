@@ -38,12 +38,30 @@
     assign title_size = mobile_title_size | split: 'x'
     assign body_size = mobile_body_size | split: 'x'
   endif
+  assign remote_banner_image = nil
+  if banner != blank
+    assign requested_slot = banner | split: '_' | first | strip | upcase
+    for entry in shop.metaobjects['monetta_banner'].values
+      assign entry_slot = entry.slot.value | default: entry.system.handle | split: '_' | first | strip | upcase
+      if entry_slot == requested_slot and entry.active.value != false and entry.image.value != blank
+        assign remote_banner_image = entry.image.value
+        if entry.destination_url.value != blank and url == blank
+          assign url = entry.destination_url.value | strip
+        endif
+        break
+      endif
+    endfor
+  endif
 -%}
 {%- if caption -%}
   <{{ tag }} class="v43-banner-caption">{{ title | escape }}</{{ tag }}>
 {%- endif -%}
 <div class="guide-hero guide-hero--text-{{ side }}{% if lettered %} guide-hero--lettered{% endif %}{% if has_mobile %} guide-hero--has-mobile{% endif %}" style="{% if focus != blank %}--hero-focus: {{ focus }};{% endif %}{% if tone != blank %} --hero-tone: {{ tone }};{% endif %}">
-  {%- if banner != blank -%}
+  {%- if remote_banner_image != blank -%}
+    <img class="guide-hero__photo" src="{{ remote_banner_image | image_url: width: 1280 }}"
+      srcset="{{ remote_banner_image | image_url: width: 768 }} 768w, {{ remote_banner_image | image_url: width: 1280 }} 1280w, {{ remote_banner_image | image_url: width: 1920 }} 1920w"
+      sizes="(min-width: 1480px) 1440px, 100vw" width="1920" height="800" alt="" decoding="async"{% if eager %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>
+  {%- elsif banner != blank -%}
     {%- assign base = 'monetta-v41-' | append: banner -%}
     <img class="guide-hero__photo" src="{{ base | append: '-1280.jpg' | asset_url }}"
       srcset="{{ base | append: '-768.jpg' | asset_url }} 768w, {{ base | append: '-1280.jpg' | asset_url }} 1280w, {{ base | append: '-1920.jpg' | asset_url }} 1920w"

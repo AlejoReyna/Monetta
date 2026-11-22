@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/data/normalize/normalizer.dart';
 import 'package:monetta_app/data/normalize/rules.dart';
+import 'package:monetta_app/domain/product.dart';
 
 import '../fixtures/catalog_fixture.dart';
 
@@ -119,6 +120,85 @@ void main() {
       // both are worth a human looking.
       expect(report.length, lessThan(20));
       expect(report.first.advice, isNotEmpty);
+    });
+
+    test('normalizes new perfume brands, real product types and filters operational tags',
+        () {
+      final rules = loadBundledRules();
+      final norm = Normalizer(rules);
+
+      expect(isInternalOperationalTag('Proveedor-Perfume-Palace'), isTrue);
+      expect(isInternalOperationalTag('MONETTA-lote-001'), isTrue);
+      expect(isInternalOperationalTag('MONETTA-MK-lote-015'), isTrue);
+      expect(
+        isInternalOperationalTag('Disponibilidad-proveedor-no-verificada'),
+        isTrue,
+      );
+      expect(isInternalOperationalTag('Coach'), isFalse);
+      expect(isInternalOperationalTag('Envío inmediato'), isFalse);
+
+      for (final entry in const <String, String>{
+        'Armaf': 'armaf',
+        'Lattafa': 'lattafa',
+        'Orientica': 'orientica',
+        'Maison Alhambra': 'maison_alhambra',
+        'French Avenue': 'french_avenue',
+        'Yves Saint Laurent': 'yves_saint_laurent',
+      }.entries) {
+        final product = products.first;
+        final perfume = Product(
+          id: 'gid://shopify/Product/999',
+          handle: 'perfume-test',
+          title: 'Perfume ${entry.key} Eau de Parfum 100 ml',
+          vendor: entry.key,
+          productType: 'Perfumes',
+          tags: const [
+            'Proveedor-Perfume-Palace',
+            'MONETTA-lote-001',
+            'Disponibilidad-proveedor-no-verificada',
+          ],
+          variants: product.variants,
+          images: product.images,
+          createdAt: kSnapshotDate,
+          updatedAt: kSnapshotDate,
+        );
+        final f = norm.normalize(perfume, now: kSnapshotDate);
+        expect(f.brand?.value, entry.value);
+        expect(f.category?.value, 'perfume');
+      }
+
+      final shoulderBag = Product(
+        id: 'gid://shopify/Product/1000',
+        handle: 'bolsa-hombro',
+        title: 'Bolsa Coach Laurel',
+        vendor: 'Coach',
+        productType: 'Bolsa de hombro',
+        tags: const ['Coach', 'Bolsa de hombro'],
+        variants: products.first.variants,
+        images: products.first.images,
+        createdAt: kSnapshotDate,
+        updatedAt: kSnapshotDate,
+      );
+      final shoulderFacets = norm.normalize(shoulderBag, now: kSnapshotDate);
+      expect(shoulderFacets.category?.value, 'bolsa');
+      expect(shoulderFacets.silhouette?.value, 'shoulder');
+
+      for (final accType in const ['Charm para bolsa', 'Correa para bolso']) {
+        final accessory = Product(
+          id: 'gid://shopify/Product/1001',
+          handle: 'acc',
+          title: '$accType Coach',
+          vendor: 'Coach',
+          productType: accType,
+          tags: [accType, 'Coach'],
+          variants: products.first.variants,
+          images: products.first.images,
+          createdAt: kSnapshotDate,
+          updatedAt: kSnapshotDate,
+        );
+        final accFacets = norm.normalize(accessory, now: kSnapshotDate);
+        expect(accFacets.category?.value, 'accesorio');
+      }
     });
   });
 }

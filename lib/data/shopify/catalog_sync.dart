@@ -113,7 +113,8 @@ class CatalogSync {
   const CatalogSync({
     required this.client,
     this.pageSize = 250,
-    this.maxPages = 20,
+    this.maxPages = 60,
+    this.maxNestedPages = 20,
     this.fullResyncInterval = const Duration(days: 7),
   });
 
@@ -122,9 +123,13 @@ class CatalogSync {
   /// Shopify's ceiling for this connection is 250.
   final int pageSize;
 
-  /// Hard stop on pagination. Hitting this with `hasNextPage` still true is an
-  /// incomplete sync, not success — see [CatalogSyncIncompleteException].
+  /// Hard stop on product pagination (60 * 250 = 15,000 products). Hitting this
+  /// with `hasNextPage` still true is an incomplete sync, not success — see
+  /// [CatalogSyncIncompleteException].
   final int maxPages;
+
+  /// Hard stop on nested per-product variant/collection pagination.
+  final int maxNestedPages;
 
   /// Even with a healthy cursor, do a full resync occasionally. Deletions and
   /// unpublishes do not move `updated_at` on anything we can see, so a delta-only
@@ -232,9 +237,10 @@ class CatalogSync {
       final nodes = _validatedNodes(connection);
       final seen = <String>{};
       var pages = 1;
+      final nestedLimit = maxPages < maxNestedPages ? maxPages : maxNestedPages;
       while (((connection as Map)['pageInfo'] as Map)['hasNextPage'] == true) {
         final after = (connection['pageInfo'] as Map)['endCursor'] as String;
-        if (!seen.add(after) || pages++ >= maxPages) {
+        if (!seen.add(after) || pages++ >= nestedLimit) {
           throw const CatalogSyncIncompleteException(
             'Nested pagination did not complete',
           );

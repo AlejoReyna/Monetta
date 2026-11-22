@@ -7,19 +7,22 @@ library;
 
 import '../../app/catalog_store.dart';
 import '../../app/shopper_copy.dart';
+import '../../data/normalize/normalizer.dart' show shopperFacingTags;
 import '../../domain/product.dart';
 import '../../reco/explainer.dart';
 import 'search_history.dart' show normalizeSearchText;
 
 /// Everything a product can be found by: its own Shopify text plus the
 /// shopper-facing labels of its canonical facets. Raw `vendor` is deliberately
-/// absent — on this store it is the shop name on 36 products.
+/// absent — on this store it is the shop name on 36 products. Internal
+/// operational tags (`Proveedor-*`, `MONETTA-lote-*`, `Disponibilidad-*`) are
+/// stripped so internal supplier metadata never contaminates shopper search.
 List<String> productSearchTerms(CatalogStore store, Product product) {
   final facets = store.facetsFor(product.id);
   return <String>[
     product.title,
     product.productType,
-    ...product.tags,
+    ...shopperFacingTags(product.tags),
     ...product.collectionHandles,
     for (final variant in product.variants) ...variant.selectedOptions.values,
     for (final variant in product.variants)

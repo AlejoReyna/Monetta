@@ -197,4 +197,64 @@ void main() {
     );
     expect(source.listenCount, 2);
   });
+
+  test('maps sixMsiInstallmentAmount and updates incrementally on partial changes',
+      () async {
+    final doc1 = _document(documentId: '101', title: 'Bolsa 1');
+    final doc2 = CatalogRealtimeDocument(
+      documentId: '102',
+      data: {
+        ..._document(documentId: '102', title: 'Bolsa 2').data,
+        'variants': <Map<String, Object?>>[
+          {
+            'id': 'gid://shopify/ProductVariant/457',
+            'title': 'Default Title',
+            'price': 1799,
+            'compareAtPrice': null,
+            'sixMsiInstallmentAmount': 299.83,
+            'sku': null,
+            'available': true,
+          },
+        ],
+      },
+    );
+    final repository = RealtimeCatalogRepository(
+      source: _StaticSource(
+        () => const Stream<List<CatalogRealtimeDocument>>.empty(),
+      ),
+      cache: cache,
+    );
+
+    final first = await repository.applySnapshot([doc1, doc2]);
+    expect(first.outcome, RealtimeCatalogOutcome.applied);
+    expect(
+      first.products[1].variants.single.sixMsiInstallmentAmount,
+      299.83,
+    );
+
+    final doc1Updated = CatalogRealtimeDocument(
+      documentId: '101',
+      data: {
+        ...doc1.data,
+        'title': 'Bolsa 1 Actualizada',
+        'updatedAt': '2026-09-01T12:00:00Z',
+      },
+    );
+    final second = await repository.applySnapshot([doc1Updated, doc2]);
+    expect(second.outcome, RealtimeCatalogOutcome.applied);
+    final cached = await cache.allProducts();
+    expect(cached, hasLength(2));
+    expect(
+      cached.firstWhere((p) => p.id == 'gid://shopify/Product/101').title,
+      'Bolsa 1 Actualizada',
+    );
+    expect(
+      cached
+          .firstWhere((p) => p.id == 'gid://shopify/Product/102')
+          .variants
+          .single
+          .sixMsiInstallmentAmount,
+      299.83,
+    );
+  });
 }
