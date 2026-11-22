@@ -162,9 +162,49 @@ class HomeContentRepository {
     return List.unmodifiable([
       for (final seed in fallback)
         seed.copyWith(
-          imageUrl: _url(byHandle[seed.handle.toLowerCase()]?.imageUrl),
+          imageUrl: _url(
+            _resolveBrandCollection(seed, byHandle)?.imageUrl,
+          ),
         ),
     ]);
+  }
+
+  Collection? _resolveBrandCollection(
+    HomeBrandCard seed,
+    Map<String, Collection> byHandle,
+  ) {
+    final handle = seed.handle.toLowerCase();
+    final direct = byHandle[handle];
+    if (direct != null) return direct;
+    return switch (handle) {
+      'guess-1' => byHandle['guess'],
+      'olalplex' => byHandle['olaplex'],
+      _ => null,
+    };
+  }
+
+  Collection? _resolveCardCollection(
+    HomeCollectionCard seed,
+    Map<String, Collection> byHandle,
+  ) {
+    final handle = seed.handle.toLowerCase();
+    if (seed.category == 'bolsa' && handle == 'guess') {
+      final bolsas = byHandle['bolsas'];
+      if (bolsas != null) return bolsas;
+    }
+    final direct = byHandle[handle];
+    if (direct != null) return direct;
+    return switch (handle) {
+      'carteras-1' => byHandle['carteras'],
+      'carteras' => byHandle['carteras-1'],
+      'relojes' => byHandle['relojes-1'],
+      'relojes-1' => byHandle['relojes'],
+      'crossbodys' => byHandle['crossbody'],
+      'crossbody' => byHandle['crossbodys'],
+      'hombro' => byHandle['shoulder'],
+      'shoulder' => byHandle['hombro'],
+      _ => null,
+    };
   }
 
   List<HomeSectionId> _sectionOrder(
@@ -201,7 +241,7 @@ class HomeContentRepository {
 
     final result = <HomeCollectionCard>[];
     for (final seed in seeds) {
-      final collection = byHandle[seed.handle.toLowerCase()];
+      final collection = _resolveCardCollection(seed, byHandle);
       if (configured != null && collection == null) continue;
       result.add(
         seed.copyWith(
