@@ -8,8 +8,8 @@
   assign mode = section.settings.mode
   assign heading_id = section.id | append: '-heading'
   assign wa = 'https://wa.me/528261066868'
-  assign group_1_url = section.settings.group_1_url
-  assign group_2_url = section.settings.group_2_url
+  assign group_1_url = section.settings.group_1_url | default: 'https://chat.whatsapp.com/CFdzcaBHZlsJqtETPHvtec'
+  assign group_2_url = section.settings.group_2_url | default: 'https://chat.whatsapp.com/Kob3rTxvWzO53KVtXxS9DC'
   assign facebook_group_url = section.settings.facebook_group_url
 -%}
 {%- case mode -%}
@@ -21,8 +21,8 @@
         <h2 class="display display--section" id="{{ heading_id }}-steps">¿Cómo comprar?</h2>
         <ol class="guia-steps__list" tabindex="0" aria-label="Pasos para comprar a mayoreo">
           <li class="guia-step">{% render 'monetta-icon', name: 'bag', size: 30, class: 'guia-step__icon' %}<h3 class="guia-step__title">Elige tus productos</h3><p class="guia-step__body">Arma tu pedido seleccionando entre miles de modelos originales de tus marcas favoritas.</p></li>
-          <li class="guia-step"><span class="guia-step__icon">{% render 'monetta-nav-glyph', name: 'cart', size: 30 %}</span><h3 class="guia-step__title">Agrega mínimo 3 piezas</h3><p class="guia-step__body">Consulta qué piezas y descuentos están disponibles para tu pedido.</p></li>
-          <li class="guia-step">{% render 'monetta-icon', name: 'wallet', size: 30, class: 'guia-step__icon' %}<h3 class="guia-step__title">Liquida o aparta</h3><p class="guia-step__body">Escríbenos por WhatsApp para conocer las opciones de pago y las condiciones de apartado.</p></li>
+          <li class="guia-step"><span class="guia-step__icon">{% render 'monetta-nav-glyph', name: 'cart', size: 30 %}</span><h3 class="guia-step__title">Agrega mínimo 3 piezas</h3><p class="guia-step__body">Obtén 10% de descuento en cualquier producto al elegir 3 o más piezas. Todas las colecciones están incluidas.</p></li>
+          <li class="guia-step">{% render 'monetta-icon', name: 'wallet', size: 30, class: 'guia-step__icon' %}<h3 class="guia-step__title">Liquida o aparta</h3><p class="guia-step__body">Aparta por 20 días con $800 MXN de anticipo por todo tu pedido de mayoreo (3+ piezas) o $400 MXN en menudeo (1–2 piezas).</p></li>
         </ol>
         <a class="guia-pill-button guia-steps__cta" href="{{ catalog_url | strip }}">Comienza a vender</a>
       </section>
@@ -95,11 +95,17 @@
   {%- when 'rewards' -%}
     <div class="container guia-page guia-page--rewards" {{ section.shopify_attributes }}>
       <h1 class="display display--page">Monetta Rewards</h1>
+      <p class="guia-rewards__lede">Al crear e iniciar sesión en tu cuenta obtienes <strong>envío gratis</strong> en todas tus compras, además de cashback y bonos acumulables.</p>
+      <ul class="guia-benefits__list" role="list">
+        <li>{% render 'monetta-icon', name: 'check', size: 24, class: 'guia-benefits__icon' %}<span><strong>Todas tus compras generan cashback:</strong> aplica en menudeo, mayoreo y promociones.</span></li>
+        <li>{% render 'monetta-icon', name: 'check', size: 24, class: 'guia-benefits__icon' %}<span><strong>Canje de hasta el 20%:</strong> utiliza tu saldo en pedidos de menudeo o mayoreo, con vigencia de 12 meses.</span></li>
+        <li>{% render 'monetta-icon', name: 'check', size: 24, class: 'guia-benefits__icon' %}<span><strong>Bonos sin mínimo de compra:</strong> tus bonos se abonan a tu saldo para utilizarlos en tu siguiente compra.</span></li>
+      </ul>
       {%- if customer -%}
-        <p class="guia-rewards__lede">Consulta tus compras desde tu cuenta Monetta.</p>
+        <p class="guia-rewards__lede">Consulta tus compras y beneficios desde tu cuenta Monetta.</p>
         <a class="btn btn--primary" href="{{ routes.account_url }}">Ir a mi cuenta</a>
       {%- elsif shop.customer_accounts_enabled -%}
-        <p class="guia-rewards__lede">Accede con tu correo para consultar tu cuenta.</p>
+        <p class="guia-rewards__lede">Inicia sesión con tu correo para activar tu envío gratis y acumular saldo.</p>
         <a class="btn btn--primary" href="{{ routes.account_login_url }}">Iniciar sesión</a>
       {%- endif -%}
       <a class="btn btn--outline" href="{{ routes.all_products_collection_url }}">Ver catálogo</a>

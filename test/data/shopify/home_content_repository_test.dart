@@ -33,7 +33,6 @@ void main() {
         'guess-1',
         'steve-madden',
         'tommy-hilfiger',
-        'olalplex',
         'christian-dior',
         'the-ordinary',
         'summer-fridays',
@@ -177,7 +176,7 @@ void main() {
     expect(content.storefront.announcement, 'Envío gratis');
     expect(content.storefront.showHero, isFalse);
     expect(content.storefront.showExternalPicks, isFalse);
-    expect(content.brands, hasLength(12));
+    expect(content.brands, hasLength(11));
     expect(
       content.brands.first.imageUrl,
       'https://cdn.shopify.com/coach-logo.png',

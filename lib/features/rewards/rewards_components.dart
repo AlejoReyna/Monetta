@@ -221,7 +221,6 @@ class RewardsEstimateLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.monettaColors;
-    if (isWholesale) return const SizedBox.shrink();
     if (estimatedCents <= 0) return const SizedBox.shrink();
     return Row(
       key: const ValueKey('rewards-estimate'),
@@ -253,7 +252,11 @@ class OrderRewardsStatus extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.monettaColors;
-    final line = state.isWholesale
+    final hasWholesaleActivity = state.earnedPendingCents > 0 ||
+        state.earnedReleasedCents > 0 ||
+        state.usedCents > 0 ||
+        state.state != 'none';
+    final line = (state.isWholesale && !hasWholesaleActivity)
         ? 'Este pedido de mayoreo no genera Rewards.'
         : switch (state.state) {
             'pending' =>

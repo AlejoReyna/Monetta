@@ -164,8 +164,8 @@ export class PgRewardsRepository implements RewardsRepository {
           args.ruleVersion, JSON.stringify(args.lines),
         ],
       );
-      if (args.isWholesale || args.amountCents <= 0) {
-        // Mayoreo no genera en V1: snapshot queda, sin lote. Idempotente.
+      if (args.amountCents <= 0) {
+        // Sin importe a acreditar: snapshot queda, sin lote. Idempotente.
         await client.query('COMMIT');
         return { created: false, lotId: null };
       }

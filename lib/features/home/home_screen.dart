@@ -202,9 +202,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _openWholesale() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute<void>(builder: (_) => const WholesaleScreen()));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => WholesaleScreen(groups: kMonettaAuthorizedGroups),
+      ),
+    );
   }
 
   void _openExternal(Uri uri) {

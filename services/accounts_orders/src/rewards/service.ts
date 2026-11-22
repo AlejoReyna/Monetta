@@ -68,10 +68,17 @@ export class RewardsService {
         asOf: this.now().toISOString(),
       },
       incentives: {
-        // Minimos/reglas pendientes -> deshabilitados, sin importes asignables.
-        firstPurchase: { enabled: false, amountCents: 5000, reason: 'minimum_undecided' },
-        review: { enabled: false, amountCents: 2000, reason: 'verification_integration_pending' },
-        referral: { enabled: false, amountCents: 5000, reason: 'minimum_undecided' },
+        firstPurchase: {
+          enabled: merged.firstPurchaseEnabled,
+          amountCents: merged.firstPurchaseAmountCents,
+          minPurchaseCents: 0,
+        },
+        review: { enabled: merged.reviewEnabled, amountCents: merged.reviewAmountCents, reason: 'verification_integration_pending' },
+        referral: {
+          enabled: merged.referralEnabled,
+          amountCents: merged.referralAmountCents,
+          minPurchaseCents: 0,
+        },
       },
     };
   }
@@ -221,8 +228,8 @@ export class RewardsService {
       const policy = this.policy();
       const breakdown = eligibleSubtotal(args.lines);
       const base = Math.min(args.subtotalEligibleCents, breakdown.subtotalEligibleCents);
-      // G sobre base elegible (sin canje conocido aqui; el settle ajusta si hubo canje).
-      const earn = args.isWholesale
+      // G sobre base elegible (todas las compras generan cashback, incluyendo mayoreo cuando wholesaleEarns=true).
+      const earn = (args.isWholesale && !policy.wholesaleEarns)
         ? 0
         : estimatedEarnCents({ subtotalEligibleCents: base, redeemCents: 0, earnBps: policy.earnBps });
       const res = await this.deps.rewards.earnPending({

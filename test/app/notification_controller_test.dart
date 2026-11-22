@@ -80,6 +80,15 @@ void main() {
             201,
           );
         }
+        if (request.method == 'POST' &&
+            request.url.path == '/v1/product-alerts') {
+          return http.Response(
+            jsonEncode({
+              'alert': {'id': 'alert-1'},
+            }),
+            201,
+          );
+        }
         return http.Response('{}', 200);
       }),
     );
@@ -132,12 +141,23 @@ void main() {
     expect(gateway.permissionRequests, 1);
     expect(requests, hasLength(3));
 
-    // G12 is unavailable until variant-scoped stock and delivery exist.
-    // A legacy tap must not record broad product consent or report success.
-    expect(controller.variantRestockAvailable, isFalse);
-    expect(await controller.createRestockAlert('product-1'), isFalse);
+    expect(controller.variantRestockAvailable, isTrue);
+    expect(
+      await controller.createRestockAlert('gid://shopify/Product/123'),
+      isTrue,
+    );
     expect(gateway.permissionRequests, 1);
-    expect(controller.preferences.productAlerts, isFalse);
-    expect(requests, hasLength(3));
+    expect(controller.preferences.productAlerts, isTrue);
+    expect(
+      requests.map((request) => '${request.method} ${request.url.path}'),
+      [
+        'POST /v1/device-installations',
+        'PUT /v1/device-installations/me/push-endpoint',
+        'PUT /v1/device-installations/me/preferences',
+        'PUT /v1/device-installations/me/push-endpoint',
+        'PUT /v1/device-installations/me/preferences',
+        'POST /v1/product-alerts',
+      ],
+    );
   });
 }

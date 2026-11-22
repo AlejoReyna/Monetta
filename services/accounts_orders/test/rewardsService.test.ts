@@ -90,14 +90,15 @@ describe('rewards service (paquete F)', () => {
     expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(3600);
   });
 
-  it('mayoreo no genera Rewards', async () => {
+  it('mayoreo sí genera Rewards (3% cashback en todas las compras)', async () => {
     await service.onOrderPaid({
       eventId: 'ev:paid:ws', orderShopifyId: 'WS1', accountId: CUSTOMER,
       subtotalEligibleCents: 500000, lines: [{ quantity: 5, unitPriceCents: 100000, eligible: true }],
       isWholesale: true, signals: ['tag:mayoreo'],
     });
-    expect((await service.summary(CUSTOMER)).balance.pendingCents).toBe(0);
-    expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(0);
+    expect((await service.summary(CUSTOMER)).balance.pendingCents).toBe(15000);
+    await service.onOrderDelivered({ eventId: 'ev:del:ws', orderShopifyId: 'WS1' });
+    expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(15000);
   });
 
   it('limite 20% y cambios de carrito: cotizacion menor invalida el monto anterior', async () => {
@@ -171,11 +172,11 @@ describe('rewards service (paquete F)', () => {
     })).rejects.toMatchObject({ code: 'exceeds_limit' });
   });
 
-  it('incentivos sin definicion permanecen deshabilitados', async () => {
+  it('bonos sin mínimo de compra habilitados; reseña permanece pendiente de integración', async () => {
     const summary = await service.summary(CUSTOMER);
-    expect(summary.incentives.firstPurchase.enabled).toBe(false);
+    expect(summary.incentives.firstPurchase.enabled).toBe(true);
     expect(summary.incentives.review.enabled).toBe(false);
-    expect(summary.incentives.referral.enabled).toBe(false);
+    expect(summary.incentives.referral.enabled).toBe(true);
   });
 
   it('canje deshabilitado tras bandera: quotes informan, redemptions bloquean', async () => {

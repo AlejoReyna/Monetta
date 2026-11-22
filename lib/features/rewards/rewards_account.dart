@@ -151,7 +151,10 @@ class ApiRewardsService extends RewardsService {
   }) async {
     try {
       final state = await api.orderRewards(orderId);
-      if (state.isWholesale) {
+      final hasActivity = state.earnedReleasedCents > 0 ||
+          state.earnedPendingCents > 0 ||
+          state.usedCents > 0;
+      if (state.isWholesale && !hasActivity) {
         return const RewardsOrderBreakdown(
           earnedAvailableCents: 0,
           earnedPendingCents: 0,

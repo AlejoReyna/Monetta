@@ -65,7 +65,9 @@
   {%- if section.settings.newest_first -%}{%- assign rail_page_size = 250 -%}{%- endif -%}
   {% paginate source.products by rail_page_size %}
   {%- assign rail_products = source.products -%}
-  {%- if section.settings.newest_first -%}{%- assign rail_products = rail_products | sort: 'created_at' | reverse -%}{%- endif -%}
+  {%- if section.settings.newest_first -%}
+    {%- assign rail_products = rail_products | where: 'available', true | sort: 'created_at' | reverse -%}
+  {%- endif -%}
   {%- if rail_products.size > 0 -%}
     <div class="rail">
       <ul class="rail__track" id="{{ rail_id }}" role="list" aria-label="{{ section.settings.heading | escape }}">

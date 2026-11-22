@@ -189,11 +189,11 @@
             </div>
           {%- endunless -%}
 
-          {%- comment -%}Trust row (product_screen.dart _TrustRow): three columns split by hairlines, line icons, the approved copy.{%- endcomment -%}
+          {%- comment -%}Services row (product_screen.dart ClientGuideServices): the three v4.3 document service icons without estimated delivery times.{%- endcomment -%}
           <ul class="guia-trust" role="list">
-            <li><svg class="guia-trust__icon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" d="M12 2.8 20.5 7.4v9.2L12 21.2l-8.5-4.6V7.4zM3.5 7.4 12 12l8.5-4.6M12 12v9.2M7.8 5.1l8.4 4.6"/></svg><span><strong>Entrega estimada</strong><span>Calculada al indicar tu dirección</span></span></li>
-            <li><svg class="guia-trust__icon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" d="M12 2.8 19.5 5.6v5.6c0 4.6-3.2 8.6-7.5 10-4.3-1.4-7.5-5.4-7.5-10V5.6zM8.6 12.1l2.4 2.4 4.4-4.6"/></svg><span><strong>Productos originales</strong><span>Garantía de autenticidad</span></span></li>
-            <li><svg class="guia-trust__icon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" d="M3 6.5h18v11H3zM3 10h18M6.5 14.5h3"/></svg><span><strong>Pago seguro</strong><span>Compra con confianza</span></span></li>
+            <li><img class="guia-trust__icon" src="{{ 'monetta-v41-envio.svg' | asset_url }}" width="28" height="28" alt="" loading="lazy" decoding="async"><span><strong>ENVÍO GRATIS</strong><span>con tu cuenta</span></span></li>
+            <li><img class="guia-trust__icon" src="{{ 'monetta-v41-original.svg' | asset_url }}" width="28" height="28" alt="" loading="lazy" decoding="async"><span><strong>Producto Original</strong><span>Importado desde E.U.A</span></span></li>
+            <li><img class="guia-trust__icon" src="{{ 'monetta-v41-pago.svg' | asset_url }}" width="28" height="28" alt="" loading="lazy" decoding="async"><span><strong>Pagos seguros</strong><span>Compra con confianza</span></span></li>
           </ul>
           <div class="product-panel__buy">
             {%- if current.available -%}
@@ -223,11 +223,13 @@
             else
               assign availability_text = 'Esta opción está agotada.'
             endif
-          elsif product.metafields.custom.entrega.value == 'Sobre pedido'
+          elsif category != 'Perfume' and product.metafields.custom.entrega.value == 'Sobre pedido'
             assign tone = 'pedido'
             assign availability_text = 'Sobre pedido.'
-          elsif product.tags contains 'Envío inmediato' or product.metafields.custom.entrega.value == 'Envío inmediato'
-            assign availability_text = 'Envío inmediato · lista en el inventario de Monetta.'
+          elsif category != 'Perfume'
+            if product.tags contains 'Envío inmediato' or product.metafields.custom.entrega.value == 'Envío inmediato'
+              assign availability_text = 'Envío inmediato · lista en el inventario de Monetta.'
+            endif
           endif
         -%}
         <p class="availability availability--{{ tone }}" data-availability><span class="availability__dot" aria-hidden="true"></span><span>{{ availability_text }}</span></p>
@@ -247,6 +249,32 @@
             </div>
           {%- endif -%}
         {%- endform -%}
+
+        {%- unless current.available -%}
+          {%- assign restock_form_id = 'restock-form-' | append: section.id -%}
+          <div class="other-ways" data-restock-alert>
+            <h2 class="other-ways__title">Avísame cuando vuelva</h2>
+            {%- form 'contact', id: restock_form_id, class: 'restock-alert-form' -%}
+              <input type="hidden" name="contact[tipo]" value="Aviso de reposición">
+              <input type="hidden" name="contact[modelo]" value="{{ product.title | escape }}">
+              <input type="hidden" name="contact[variante]" value="{{ variant_label | default: current.id | escape }}">
+              <input type="hidden" name="contact[body]" value="Solicito aviso automático cuando vuelva a estar activo el modelo {{ product.title | escape }}{% if variant_label != blank %} ({{ variant_label | escape }}){% endif %} - {{ product_link }}">
+              {%- if form.posted_successfully? -%}
+                <p class="body-copy" role="status">Listo. Te avisaremos por correo cuando este modelo esté de nuevo activo.</p>
+              {%- else -%}
+                <p class="text-muted">Déjanos tu correo para recibir un aviso automático en cuanto este modelo vuelva a estar disponible.</p>
+                <div class="search-field" style="margin-top:8px">
+                  <label class="visually-hidden" for="restock-email-{{ section.id }}">Correo electrónico</label>
+                  <input id="restock-email-{{ section.id }}" type="email" name="contact[email]" value="{% if customer %}{{ customer.email | escape }}{% endif %}" placeholder="tu@correo.com" required autocomplete="email">
+                  <button type="submit" class="btn btn--outline">Notificarme</button>
+                </div>
+                {%- if form.errors -%}
+                  <p class="form-error" role="alert">Escribe un correo válido para registrar tu aviso.</p>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endform -%}
+          </div>
+        {%- endunless -%}
 
         <script type="application/json" data-product-variants>
           [{% for v in product.variants %}{"id":{{ v.id }},"options":{{ v.options | json }},"available":{{ v.available | json }}}{% unless forloop.last %},{% endunless %}{% endfor %}]
@@ -321,7 +349,7 @@
     { "type": "header", "content": "Compra" },
     { "type": "checkbox", "id": "show_dynamic_checkout", "label": "Mostrar «Comprar ahora»", "default": true, "info": "Agrega la pieza elegida y abre el checkout." },
     { "type": "checkbox", "id": "show_apartado", "label": "Mostrar «Apartar por WhatsApp»", "default": true },
-    { "type": "textarea", "id": "apartado_copy", "label": "Texto del apartado", "default": "Solicitud manual. Enviar el mensaje no aparta la pieza ni cobra nada." },
+    { "type": "textarea", "id": "apartado_copy", "label": "Texto del apartado", "default": "Apartado a 20 días: $400 MXN de anticipo por todo el pedido en menudeo (1–2 piezas) y $800 MXN en mayoreo (desde 3 piezas, con 10% de descuento en todas las colecciones)." },
     { "type": "checkbox", "id": "show_whatsapp_question", "label": "Mostrar «Escribir por WhatsApp»", "default": true },
     { "type": "text", "id": "whatsapp_number", "label": "WhatsApp (número con lada)", "default": "528261066868", "info": "Solo dígitos, con 52 al inicio." }
   ],

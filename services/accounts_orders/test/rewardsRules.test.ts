@@ -45,12 +45,18 @@ describe('rewards rules (paquete F)', () => {
     expect(detectWholesale({}).isWholesale).toBe(false);
   });
 
-  it('canje en mayoreo bloqueado mientras la decision siga pendiente', () => {
-    const r = redemptionEligibility({
+  it('canje en mayoreo permitido con programa confirmado y bloqueado si sigue pendiente', () => {
+    const allowed = redemptionEligibility({
       policy: { ...DEFAULT_PROGRAM, redemptionEnabled: true },
       isWholesaleCart: true, requestedCents: 1000, maxAllowedCents: 5000,
     });
-    expect(r.ok).toBe(false);
+    expect(allowed.ok).toBe(true);
+
+    const pending = redemptionEligibility({
+      policy: { ...DEFAULT_PROGRAM, redemptionEnabled: true, wholesaleRedeemAllowed: null },
+      isWholesaleCart: true, requestedCents: 1000, maxAllowedCents: 5000,
+    });
+    expect(pending.ok).toBe(false);
   });
 
   it('canje deshabilitado tras bandera apagada', () => {

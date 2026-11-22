@@ -71,8 +71,7 @@ void main() {
         scrollable: scroll,
       );
       expect(find.text(WholesalePresentation.minimum), findsOneWidget);
-      // Received terms are not published without commercial approval.
-      expect(find.textContaining(r'$800'), findsNothing);
+      expect(find.textContaining('10% de descuento'), findsOneWidget);
       expect(find.textContaining('pendiente de confirmación'), findsNothing);
       expect(find.textContaining('pendientes de confirmación'), findsNothing);
       final catalog = find.byKey(const ValueKey('wholesale-catalog-perfume'));

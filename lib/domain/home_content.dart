@@ -318,12 +318,6 @@ class HomeContent {
         fallbackAsset: 'assets/images/brands/tommy_hilfiger.webp',
       ),
       HomeBrandCard(
-        title: 'Olaplex',
-        brand: 'Olaplex',
-        handle: 'olalplex',
-        fallbackAsset: 'assets/images/brands/olaplex.webp',
-      ),
-      HomeBrandCard(
         title: 'Dior',
         brand: 'Christian Dior',
         handle: 'christian-dior',
@@ -358,17 +352,17 @@ class HomeContent {
       HomeSocialLink(
         id: 'instagram',
         label: 'Instagram',
-        url: 'https://www.instagram.com/_monetta.mx',
+        url: 'https://instagram.com/_monetta.mx?srtk=NjhjcjBuZnMwdDF4&utm_source=qr',
       ),
       HomeSocialLink(
         id: 'tiktok',
         label: 'TikTok',
-        url: 'https://www.tiktok.com/@monetta.oficial',
+        url: 'https://www.tiktok.com/@monettamx',
       ),
       HomeSocialLink(
         id: 'facebook',
         label: 'Facebook',
-        url: 'https://www.facebook.com/profile.php?id=100091065527635',
+        url: 'https://www.facebook.com/profile.php?id=100091065527635&mibextid=LQQJ4d',
       ),
     ],
     testimonials: <HomeTestimonial>[

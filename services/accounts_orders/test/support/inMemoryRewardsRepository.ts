@@ -89,7 +89,7 @@ export class InMemoryRewardsRepository implements RewardsRepository {
     snap.accountId = args.accountId;
     snap.isWholesale = args.isWholesale;
     this.snapshots.set(args.orderShopifyId, snap);
-    if (args.isWholesale || args.amountCents <= 0) return { created: false, lotId: null };
+    if (args.amountCents <= 0) return { created: false, lotId: null };
     const dup = this.lots.find((l) =>
       l.accountId === args.accountId && l.sourceKind === 'order_earn' &&
       l.sourceRef === args.orderShopifyId && l.ruleVersion === args.ruleVersion);

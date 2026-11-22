@@ -7,7 +7,7 @@
 {%- assign category_entries = 'bolsas|Bolsos|categoria-handbags|crossbody:Crossbody;tote:Tote;shoulder:De hombro;satchel:De mano,carteras|Carteras|categoria-carteras,perfumes|Perfumes|categoria-perfumes,calzado|Calzado|monetta-calzado,accesorios|Accesorios|categoria-accesorios|relojes:Relojes' | split: ',' -%}
 {%- assign brands_only = false -%}
 {%- if template.suffix == 'marcas' -%}{%- assign brands_only = true -%}{%- endif -%}
-{%- assign brand_entries = 'Coach:coach,Michael Kors:michael_kors,Anne Klein:anne_klein,Guess:guess,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Tory Burch,Kate Spade,Marc Jacobs,Olaplex:olaplex,Dior:dior:Christian Dior,The Ordinary:the_ordinary,Laneige:laneige,Rhode:rhode,Summer Fridays:summer_fridays' | split: ',' -%}
+{%- assign brand_entries = 'Coach:coach,Michael Kors:michael_kors,Anne Klein:anne_klein,Guess:guess,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Tory Burch,Kate Spade,Marc Jacobs,Dior:dior:Christian Dior,The Ordinary:the_ordinary,Laneige:laneige,Rhode:rhode,Summer Fridays:summer_fridays' | split: ',' -%}
 <div class="container guia-categories" {{ section.shopify_attributes }}>
   <header class="guia-categories__head">
     <h1 class="display display--page">{% if brands_only %}Todas las marcas{% else %}Categorías{% endif %}</h1>

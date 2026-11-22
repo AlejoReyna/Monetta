@@ -5,6 +5,7 @@
 
   @param {boolean} [searchable] - Expose the terms for collection-local search.
   @param {boolean} [offers] - Pick an available variant matching storefront filters with a live catalog comparison.
+  @param {boolean} [synthetic_offers] - Whether the listing is rendered from the synthetic ?view=ofertas fallback.
   @param {object} [filters] - Shopify storefront filters for the current collection.
   @param {object} products - The current page's products.
   @param {object} paginate - The paginate object.
@@ -71,7 +72,13 @@
             {%- break -%}
           {%- endif -%}
         {%- endfor -%}
-        {%- if offer_variant == nil -%}{%- continue -%}{%- endif -%}
+        {%- if offer_variant == nil -%}
+          {%- if synthetic_offers -%}
+            {%- continue -%}
+          {%- else -%}
+            {%- assign offer_variant = product.selected_or_first_available_variant -%}
+          {%- endif -%}
+        {%- endif -%}
       {%- endif -%}
       {%- capture clean_tags -%}
         {%- for t in product.tags -%}
@@ -92,12 +99,12 @@
     assign percent = shown | times: 100.0 | divided_by: paginate.items | round
   -%}
   {%- if paginate.pages > 1 -%}
-    <div class="load-more" data-load-more{% if offers %} data-offers-pagination{% endif %}>
-      {%- unless offers -%}<p class="small text-muted" data-progress-text>Se muestran {{ shown }} de {{ paginate.items }} piezas</p>
+    <div class="load-more" data-load-more{% if synthetic_offers %} data-offers-pagination{% endif %}>
+      {%- unless synthetic_offers -%}<p class="small text-muted" data-progress-text>Se muestran {{ shown }} de {{ paginate.items }} piezas</p>
       <div class="load-more__progress" aria-hidden="true"><span style="width: {{ percent }}%"></span></div>{%- endunless -%}
       {%- if paginate.next -%}
-        <a class="btn btn--outline" href="{{ paginate.next.url }}" {% unless offers %}data-more{% endunless %}>Ver más piezas</a>
-      {%- elsif offers == false or offers == nil -%}
+        <a class="btn btn--outline" href="{{ paginate.next.url }}" {% unless synthetic_offers %}data-more{% endunless %}>Ver más piezas</a>
+      {%- elsif synthetic_offers == false or synthetic_offers == nil -%}
         <p class="small text-muted">Viste las {{ paginate.items }} piezas.</p>
       {%- endif -%}
     </div>

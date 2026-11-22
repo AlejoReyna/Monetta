@@ -193,7 +193,6 @@ void main() {
         'steve-madden',
         'tommy-hilfiger',
         'anne-klein',
-        'olalplex',
         'christian-dior',
         'the-ordinary',
         'summer-fridays',

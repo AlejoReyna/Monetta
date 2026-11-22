@@ -3,7 +3,11 @@
   "sections": {
     "main": {
       "type": "monetta-guia-page",
-      "settings": { "mode": "contacto" }
+      "settings": {
+        "mode": "contacto",
+        "group_1_url": "https://chat.whatsapp.com/CFdzcaBHZlsJqtETPHvtec",
+        "group_2_url": "https://chat.whatsapp.com/Kob3rTxvWzO53KVtXxS9DC"
+      }
     }
   },
   "order": ["main"]

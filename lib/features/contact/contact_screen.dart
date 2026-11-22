@@ -18,6 +18,12 @@ final Uri kMonettaContactPageUri = Uri.parse(
   'https://monetta.mx/pages/contact',
 );
 
+/// Grupos oficiales de WhatsApp confirmados por Monetta.
+final Map<String, Uri> kMonettaAuthorizedGroups = <String, Uri>{
+  'grupo-1': Uri.parse('https://chat.whatsapp.com/CFdzcaBHZlsJqtETPHvtec'),
+  'grupo-2': Uri.parse('https://chat.whatsapp.com/Kob3rTxvWzO53KVtXxS9DC'),
+};
+
 class ContactChannel {
   const ContactChannel({
     required this.key,
@@ -104,13 +110,18 @@ IconData _socialIcon(String id) => switch (id) {
 Future<void> openContact(
   BuildContext context, {
   List<HomeSocialLink>? socialLinks,
-  Map<String, Uri> groups = const {},
+  Map<String, Uri>? groups,
   Future<bool> Function(Uri uri)? openUri,
 }) {
+  final effectiveGroups = groups ?? kMonettaAuthorizedGroups;
+  final effectiveSocials = socialLinks ?? HomeContent.fallback.socialLinks;
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder: (_) => ContactScreen(
-          socialLinks: socialLinks, groups: groups, openUri: openUri),
+        socialLinks: effectiveSocials,
+        groups: effectiveGroups,
+        openUri: openUri,
+      ),
     ),
   );
 }

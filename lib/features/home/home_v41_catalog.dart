@@ -32,11 +32,12 @@ class HomeCategoryPhotoEntry {
   final CollectionFilter filter;
 }
 
-/// Newest unique products up to [limit], without padding duplicates.
+/// Newest unique in-stock products up to [limit], without padding duplicates.
 List<Product> uniqueNewestProducts(CatalogStore store,
     {int limit = kHomeNewCollectionProductLimit}) {
   if (!store.ready) return const [];
-  final sorted = [...store.products]
+  final inStock = store.products.where((p) => p.isInStock).toList();
+  final sorted = (inStock.isNotEmpty ? inStock : [...store.products])
     ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   final seen = <String>{};
   final out = <Product>[];

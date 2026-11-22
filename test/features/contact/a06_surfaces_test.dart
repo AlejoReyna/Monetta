@@ -98,13 +98,12 @@ void main() {
             .toSet(),
         hasLength(1));
   });
-  testWidgets('unverified deposit and term stay out of both views',
+  testWidgets('approved wholesale discount and reservation terms appear',
       (tester) async {
     await pumpClientGuide(
         tester, const WholesaleScreen(showUnapprovedEditorial: true),
         size: const Size(390, 1000));
-    expect(find.textContaining(r'$800'), findsNothing);
-    expect(find.textContaining('20 días'), findsNothing);
+    expect(find.textContaining('10% de descuento'), findsOneWidget);
     expect(find.byKey(const ValueKey('wholesale-step-2')), findsOneWidget);
   });
   testWidgets('wholesale footer returns to its hero', (tester) async {

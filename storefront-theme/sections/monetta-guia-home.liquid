@@ -155,7 +155,7 @@
     {%- capture brands_destination -%}{% render 'monetta-guia-url', key: 'marcas' %}{%- endcapture -%}
     {%- liquid
       assign brands_url = brands_destination | strip
-      assign brand_entries = 'Coach:coach,Guess:guess,Michael Kors:michael_kors,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Anne Klein:anne_klein,Olaplex:olaplex,Dior:dior:Christian Dior,The Ordinary:the_ordinary,Summer Fridays:summer_fridays,Laneige:laneige,Rhode:rhode,Tory Burch,Kate Spade,Marc Jacobs' | split: ','
+      assign brand_entries = 'Coach:coach,Guess:guess,Michael Kors:michael_kors,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Anne Klein:anne_klein,Dior:dior:Christian Dior,The Ordinary:the_ordinary,Summer Fridays:summer_fridays,Laneige:laneige,Rhode:rhode,Tory Burch,Kate Spade,Marc Jacobs' | split: ','
     -%}
     {%- capture brand_tiles -%}
       {%- for entry in brand_entries -%}

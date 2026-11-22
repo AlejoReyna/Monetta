@@ -214,6 +214,10 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   String? get _bannerId {
     if (_hasHero) return null;
+    if (widget.offersCollection ||
+        widget.filter.collectionHandle == 'ofertas') {
+      return 'B33';
+    }
     final brand = widget.filter.brand;
     if (brand != null) {
       return const {

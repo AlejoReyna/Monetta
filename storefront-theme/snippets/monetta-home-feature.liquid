@@ -13,11 +13,14 @@
 {%- enddoc -%}
 {%- liquid
   assign set_url = source.url
+  if newest_first and source.handle == 'all'
+    assign set_url = source.url | append: '?filter.v.availability=1&sort_by=created-descending'
+  endif
 -%}
 <section class="section v41-block v41-feature" aria-labelledby="{{ heading_id }}" data-v41-feature>
   {% render 'monetta-section-header', id: heading_id, title: heading, title_url: set_url, link_url: set_url, link_label: link_label %}
   {% paginate source.products by 250 %}
-    {%- assign products = source.products -%}
+    {%- assign products = source.products | where: 'available', true -%}
     {%- if newest_first -%}{%- assign products = products | sort: 'created_at' | reverse -%}{%- endif -%}
     {%- if products.size > 0 -%}
       <div class="v41-feature__hero">

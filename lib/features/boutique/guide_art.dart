@@ -31,10 +31,18 @@ class GuideAssetSpec {
   final String sha256;
 }
 
+const GuideAssetSpec _kOfertasBannerAsset = GuideAssetSpec(
+  'assets/images/v41/banners/B33_ofertas.jpg',
+  'OFERTAS',
+  'banner',
+  '',
+);
+
 /// IDs are namespaced to keep banner/home-photo/icon identifiers unambiguous.
 /// Home photography may only be resolved explicitly for Home.
 GuideAssetSpec? guideAsset(String id, {bool forHome = false}) {
-  final asset = _guideAssets[id];
+  final asset =
+      _guideAssets[id] ?? (id == 'banner:B33' ? _kOfertasBannerAsset : null);
   if (asset?.kind == 'homePhoto' && !forHome) return null;
   return asset;
 }

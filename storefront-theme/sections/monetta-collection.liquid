@@ -8,8 +8,12 @@
 {%- endcomment -%}
 {%- liquid
   assign offers = false
+  assign synthetic_offers = false
   if collection.handle == 'ofertas' or template.suffix == 'ofertas'
     assign offers = true
+  endif
+  if template.suffix == 'ofertas' and collection.handle != 'ofertas'
+    assign synthetic_offers = true
   endif
   assign active_count = 0
   for filter in collection.filters
@@ -105,11 +109,12 @@
       assign guide_banner = 'B26_marc_jacobs'
       assign guide_photo = 'coleccion-marc-jacobs'
       assign guide_brand = true
-    when 'olaplex', 'olalplex', 'tommy-hilfiger', 'anne-klein', 'christian-dior', 'the-ordinary', 'summer-fridays', 'laneige', 'rhode'
+    when 'tommy-hilfiger', 'anne-klein', 'christian-dior', 'the-ordinary', 'summer-fridays', 'laneige', 'rhode'
       assign guide_brand = true
-      if guide_key == 'olalplex'
-        assign guide_title = 'Olaplex'
-      endif
+    when 'ofertas'
+      assign guide_banner = 'B33_ofertas'
+      assign guide_photo = 'home-banner-nueva-coleccion'
+      assign guide_title = 'Ofertas'
     when 'tote', 'totes', 'bolsa-tote'
       assign guide_banner = 'B19_tote'
       assign guide_photo = 'coleccion-totes'
@@ -156,6 +161,11 @@
       assign guide_title = 'Bolsas'
       assign guide_pill = 'bolsas'
   endcase
+  if offers and guide_banner == blank
+    assign guide_banner = 'B33_ofertas'
+    assign guide_photo = 'home-banner-nueva-coleccion'
+    assign guide_title = 'Ofertas'
+  endif
   # A brand, with or without the guide's photograph, sits under «Marcas».
   if guide_brand or collection.handle == 'vendors'
     assign guide_pill = 'categorias'
@@ -180,7 +190,7 @@
       {% render 'monetta-guia-hero', photo: guide_photo, banner: guide_banner, caption: true, lettered: true, title: guide_title, eager: true %}
     </div>
   {%- endif -%}
-  <div class="container listing listing--collection listing--guia" data-listing{% if offers %} data-offers{% endif %} data-collection-key="{{ guide_key | escape }}" {{ section.shopify_attributes }}>
+  <div class="container listing listing--collection listing--guia" data-listing{% if synthetic_offers %} data-offers{% endif %} data-collection-key="{{ guide_key | escape }}" {{ section.shopify_attributes }}>
     <div class="page-head guia-page-head">
       {%- unless guide_photo != blank and paginate.current_page == 1 -%}
         <h1 class="display display--page">{{ guide_title | escape }}</h1>
@@ -211,9 +221,9 @@
     </div>
 
     {%- capture results_html -%}
-      {% render 'monetta-results', products: collection.products, searchable: true, offers: offers, filters: collection.filters, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', listing_card: true, sizes: card_sizes, xl_widths: '240,360,480,600,720,900' %}
+      {% render 'monetta-results', products: collection.products, searchable: true, offers: offers, synthetic_offers: synthetic_offers, filters: collection.filters, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', listing_card: true, sizes: card_sizes, xl_widths: '240,360,480,600,720,900' %}
     {%- endcapture -%}
-    {%- if offers -%}{%- assign count_text = '' -%}{%- endif -%}
+    {%- if synthetic_offers -%}{%- assign count_text = '' -%}{%- endif -%}
     {% render 'monetta-listing-layout',
       filters: collection.filters,
       sort_options: collection.sort_options,

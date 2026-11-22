@@ -7,7 +7,7 @@
   @param {string} [whatsapp] - Number with country code, digits only: adds the WhatsApp icon as the last item (the footer).
   @param {string} [whatsapp_label] - Accessible name of that icon.
 {%- enddoc -%}
-{%- assign networks = 'tiktok|TikTok|https://www.tiktok.com/@monetta.oficial,instagram|Instagram|https://www.instagram.com/_monetta.mx,facebook|Facebook|https://www.facebook.com/profile.php?id=100091065527635' | split: ',' -%}
+{%- assign networks = 'tiktok|TikTok|https://www.tiktok.com/@monettamx,instagram|Instagram|https://instagram.com/_monetta.mx?srtk=NjhjcjBuZnMwdDF4&utm_source=qr,facebook|Facebook|https://www.facebook.com/profile.php?id=100091065527635&mibextid=LQQJ4d' | split: ',' -%}
 <ul class="guia-social{% if labels %} guia-social--labeled{% endif %} {{ class }}" role="list">
   {%- for network in networks -%}
     {%- assign parts = network | split: '|' -%}

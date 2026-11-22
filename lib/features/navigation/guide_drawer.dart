@@ -119,7 +119,8 @@ Widget guideDrawer(BuildContext context) {
             onOpenPartner: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => const WholesaleScreen(),
+                  builder: (_) =>
+                      WholesaleScreen(groups: kMonettaAuthorizedGroups),
                 ),
               );
             },
@@ -129,7 +130,9 @@ Widget guideDrawer(BuildContext context) {
     },
     onPartner: () {
       Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const WholesaleScreen()),
+        MaterialPageRoute<void>(
+          builder: (_) => WholesaleScreen(groups: kMonettaAuthorizedGroups),
+        ),
       );
     },
     onSupport: () => openContact(context),

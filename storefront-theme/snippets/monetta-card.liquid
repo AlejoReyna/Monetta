@@ -33,8 +33,12 @@
     render 'monetta-facet', product: product, kind: 'brands'
   endcapture
   assign brand = brand | strip
+  capture card_category
+    render 'monetta-facet', product: product, kind: 'categories'
+  endcapture
+  assign card_category = card_category | strip
   assign eyebrow = ''
-  if in_stock and density != 'mini'
+  if in_stock and density != 'mini' and card_category != 'Perfume'
     assign delivery = product.metafields.custom.entrega.value
     if delivery != blank
       assign eyebrow = delivery

@@ -90,7 +90,7 @@
             assign vendor_key = vendor | handleize
             assign art = ''
             case vendor_key
-              when 'coach', 'guess', 'olaplex', 'laneige', 'rhode'
+              when 'coach', 'guess', 'laneige', 'rhode'
                 assign art = vendor_key
               when 'michael-kors'
                 assign art = 'michael_kors'
@@ -129,9 +129,9 @@
       {%- assign social = shop.metafields.app.social_links.value -%}
       <p class="body-copy">Nuevas piezas, inspiración y lo que pasa en Monetta.</p>
       <div class="app-social">
-        <a class="btn btn--outline" href="{{ social.instagram | default: 'https://www.instagram.com/_monetta.mx' | escape }}" target="_blank" rel="noopener">Instagram<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
-        <a class="btn btn--outline" href="{{ social.tiktok | default: 'https://www.tiktok.com/@monetta.oficial' | escape }}" target="_blank" rel="noopener">TikTok<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
-        <a class="btn btn--outline" href="{{ social.facebook | default: 'https://www.facebook.com/profile.php?id=100091065527635' | escape }}" target="_blank" rel="noopener">Facebook<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+        <a class="btn btn--outline" href="{{ social.instagram | default: 'https://instagram.com/_monetta.mx?srtk=NjhjcjBuZnMwdDF4&utm_source=qr' | escape }}" target="_blank" rel="noopener">Instagram<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+        <a class="btn btn--outline" href="{{ social.tiktok | default: 'https://www.tiktok.com/@monettamx' | escape }}" target="_blank" rel="noopener">TikTok<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+        <a class="btn btn--outline" href="{{ social.facebook | default: 'https://www.facebook.com/profile.php?id=100091065527635&mibextid=LQQJ4d' | escape }}" target="_blank" rel="noopener">Facebook<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
       </div>
     {%- when 'reviews' -%}
       {%- for block in section.blocks -%}{% render block %}{%- endfor -%}

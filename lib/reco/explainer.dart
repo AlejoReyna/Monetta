@@ -70,7 +70,6 @@ const Map<String, String> _brandLabels = {
   'tory_burch': 'Tory Burch',
   'kate_spade': 'Kate Spade',
   'marc_jacobs': 'Marc Jacobs',
-  'olaplex': 'Olaplex',
   'the_ordinary': 'The Ordinary',
   'summer_fridays': 'Summer Fridays',
   'laneige': 'Laneige',
