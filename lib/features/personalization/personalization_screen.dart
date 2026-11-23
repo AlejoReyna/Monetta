@@ -210,7 +210,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                 key: ValueKey('personalization-loading'),
               ),
             )
-          : ListView(
+          : SingleChildScrollView(
               key: const ValueKey('personalization-scroll'),
               padding: EdgeInsets.fromLTRB(
                 MonettaTokens.gutterFor(width),
@@ -218,141 +218,149 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                 MonettaTokens.gutterFor(width),
                 MonettaTokens.space[6],
               ),
-              children: [
-                Text(
-                  'Personalización',
-                  style: clientGuideStyle(context, MonettaTokens.screenTitle),
-                ),
-                SizedBox(height: MonettaTokens.space[2]),
-                Text(
-                  'Cuéntanos cuáles son tus marcas, categorías y tipo de '
-                  'compra favoritas para recibir recomendaciones personalizadas.',
-                  style: clientGuideStyle(
-                    context,
-                    MonettaTokens.body,
-                    color: palette.inkMuted,
-                  ),
-                ),
-                SizedBox(height: MonettaTokens.space[5]),
-                Text(
-                  'Marcas favoritas',
-                  style: clientGuideStyle(context, MonettaTokens.sectionTitle),
-                ),
-                SizedBox(height: MonettaTokens.space[1]),
-                Text(
-                  'Selecciona tus marcas preferidas.',
-                  style: clientGuideStyle(
-                    context,
-                    MonettaTokens.body,
-                    color: palette.inkMuted,
-                  ),
-                ),
-                SizedBox(height: MonettaTokens.space[3]),
-                if (brands.isEmpty)
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                   Text(
-                    'El catálogo no tiene marcas para elegir.',
+                    'Personalización',
+                    style: clientGuideStyle(context, MonettaTokens.screenTitle),
+                  ),
+                  SizedBox(height: MonettaTokens.space[2]),
+                  Text(
+                    'Cuéntanos cuáles son tus marcas, categorías y tipo de '
+                    'compra favoritas para recibir recomendaciones personalizadas.',
                     style: clientGuideStyle(
                       context,
                       MonettaTokens.body,
                       color: palette.inkMuted,
                     ),
-                  )
-                else
+                  ),
+                  SizedBox(height: MonettaTokens.space[5]),
+                  Text(
+                    'Marcas favoritas',
+                    style:
+                        clientGuideStyle(context, MonettaTokens.sectionTitle),
+                  ),
+                  SizedBox(height: MonettaTokens.space[1]),
+                  Text(
+                    'Selecciona tus marcas preferidas.',
+                    style: clientGuideStyle(
+                      context,
+                      MonettaTokens.body,
+                      color: palette.inkMuted,
+                    ),
+                  ),
+                  SizedBox(height: MonettaTokens.space[3]),
+                  if (brands.isEmpty)
+                    Text(
+                      'El catálogo no tiene marcas para elegir.',
+                      style: clientGuideStyle(
+                        context,
+                        MonettaTokens.body,
+                        color: palette.inkMuted,
+                      ),
+                    )
+                  else
+                    _ChoiceGrid(
+                      columns: _columns(width),
+                      aspectRatio: 1.5,
+                      children: [
+                        for (final slug in brands)
+                          GuideBrandTile(
+                            key: ValueKey('personalization-brand-$slug'),
+                            asset: _brandLogoAssets[slug],
+                            label: brandLabel(slug),
+                            selected: _brands.contains(slug),
+                            onTap: () => _toggle(_brands, slug),
+                          ),
+                      ],
+                    ),
+                  SizedBox(height: MonettaTokens.space[5]),
+                  Text(
+                    'Categorías de interés',
+                    style:
+                        clientGuideStyle(context, MonettaTokens.sectionTitle),
+                  ),
+                  SizedBox(height: MonettaTokens.space[1]),
+                  Text(
+                    'Selecciona las categorías que más te interesan.',
+                    style: clientGuideStyle(
+                      context,
+                      MonettaTokens.body,
+                      color: palette.inkMuted,
+                    ),
+                  ),
+                  SizedBox(height: MonettaTokens.space[3]),
                   _ChoiceGrid(
                     columns: _columns(width),
-                    aspectRatio: 1.5,
                     children: [
-                      for (final slug in brands)
-                        GuideBrandTile(
-                          key: ValueKey('personalization-brand-$slug'),
-                          asset: _brandLogoAssets[slug],
-                          label: brandLabel(slug),
-                          selected: _brands.contains(slug),
-                          onTap: () => _toggle(_brands, slug),
+                      for (final style in clientGuideCategories)
+                        _StyleChoice(
+                          style: style,
+                          selected: _styles.contains(style.id),
+                          onTap: () => _toggle(_styles, style.id),
                         ),
                     ],
                   ),
-                SizedBox(height: MonettaTokens.space[5]),
-                Text(
-                  'Categorías de interés',
-                  style: clientGuideStyle(context, MonettaTokens.sectionTitle),
-                ),
-                SizedBox(height: MonettaTokens.space[1]),
-                Text(
-                  'Selecciona las categorías que más te interesan.',
-                  style: clientGuideStyle(
-                    context,
-                    MonettaTokens.body,
-                    color: palette.inkMuted,
+                  SizedBox(height: MonettaTokens.space[5]),
+                  Text(
+                    'Tipo de compra favorita',
+                    style:
+                        clientGuideStyle(context, MonettaTokens.sectionTitle),
                   ),
-                ),
-                SizedBox(height: MonettaTokens.space[3]),
-                _ChoiceGrid(
-                  columns: _columns(width),
-                  children: [
-                    for (final style in clientGuideCategories)
-                      _StyleChoice(
-                        style: style,
-                        selected: _styles.contains(style.id),
-                        onTap: () => _toggle(_styles, style.id),
-                      ),
-                  ],
-                ),
-                SizedBox(height: MonettaTokens.space[5]),
-                Text(
-                  'Tipo de compra favorita',
-                  style: clientGuideStyle(context, MonettaTokens.sectionTitle),
-                ),
-                SizedBox(height: MonettaTokens.space[1]),
-                Text(
-                  'Cuéntanos cómo prefieres comprar.',
-                  style: clientGuideStyle(
-                    context,
-                    MonettaTokens.body,
-                    color: palette.inkMuted,
-                  ),
-                ),
-                SizedBox(height: MonettaTokens.space[3]),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _PurchaseChoice(
-                        id: 'menudeo',
-                        title: 'Menudeo',
-                        subtitle: 'Una a dos piezas',
-                        icon: Icons.shopping_bag_outlined,
-                        selected: _purchaseType == ShopperPurchaseType.menudeo,
-                        onTap: () =>
-                            _selectPurchase(ShopperPurchaseType.menudeo),
-                      ),
+                  SizedBox(height: MonettaTokens.space[1]),
+                  Text(
+                    'Cuéntanos cómo prefieres comprar.',
+                    style: clientGuideStyle(
+                      context,
+                      MonettaTokens.body,
+                      color: palette.inkMuted,
                     ),
-                    SizedBox(width: MonettaTokens.space[2]),
-                    Expanded(
-                      child: _PurchaseChoice(
-                        id: 'mayoreo',
-                        title: 'Mayoreo',
-                        subtitle: 'Más de tres piezas',
-                        icon: Icons.inventory_2_outlined,
-                        selected: _purchaseType == ShopperPurchaseType.mayoreo,
-                        onTap: () =>
-                            _selectPurchase(ShopperPurchaseType.mayoreo),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: MonettaTokens.space[2]),
-                Text(
-                  kMayoreoPreferenceNote,
-                  style: clientGuideStyle(
-                    context,
-                    MonettaTokens.navLabel,
-                    color: palette.inkMuted,
                   ),
-                ),
-                SizedBox(height: MonettaTokens.space[4]),
-                _SaveButton(onPressed: _saving ? null : _save),
-              ],
+                  SizedBox(height: MonettaTokens.space[3]),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _PurchaseChoice(
+                          id: 'menudeo',
+                          title: 'Menudeo',
+                          subtitle: 'Una a dos piezas',
+                          icon: Icons.shopping_bag_outlined,
+                          selected:
+                              _purchaseType == ShopperPurchaseType.menudeo,
+                          onTap: () =>
+                              _selectPurchase(ShopperPurchaseType.menudeo),
+                        ),
+                      ),
+                      SizedBox(width: MonettaTokens.space[2]),
+                      Expanded(
+                        child: _PurchaseChoice(
+                          id: 'mayoreo',
+                          title: 'Mayoreo',
+                          subtitle: 'Más de tres piezas',
+                          icon: Icons.inventory_2_outlined,
+                          selected:
+                              _purchaseType == ShopperPurchaseType.mayoreo,
+                          onTap: () =>
+                              _selectPurchase(ShopperPurchaseType.mayoreo),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: MonettaTokens.space[2]),
+                  Text(
+                    kMayoreoPreferenceNote,
+                    style: clientGuideStyle(
+                      context,
+                      MonettaTokens.navLabel,
+                      color: palette.inkMuted,
+                    ),
+                  ),
+                  SizedBox(height: MonettaTokens.space[4]),
+                  _SaveButton(onPressed: _saving ? null : _save),
+                ],
+              ),
             ),
     );
   }
