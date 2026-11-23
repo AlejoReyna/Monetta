@@ -352,7 +352,8 @@ class HomeContent {
       HomeSocialLink(
         id: 'instagram',
         label: 'Instagram',
-        url: 'https://instagram.com/_monetta.mx?srtk=NjhjcjBuZnMwdDF4&utm_source=qr',
+        url:
+            'https://instagram.com/_monetta.mx?srtk=NjhjcjBuZnMwdDF4&utm_source=qr',
       ),
       HomeSocialLink(
         id: 'tiktok',
@@ -362,7 +363,8 @@ class HomeContent {
       HomeSocialLink(
         id: 'facebook',
         label: 'Facebook',
-        url: 'https://www.facebook.com/profile.php?id=100091065527635&mibextid=LQQJ4d',
+        url:
+            'https://www.facebook.com/profile.php?id=100091065527635&mibextid=LQQJ4d',
       ),
     ],
     testimonials: <HomeTestimonial>[

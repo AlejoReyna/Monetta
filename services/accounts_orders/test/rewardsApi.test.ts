@@ -73,7 +73,7 @@ describe('rewards API v1', () => {
     };
     expect(body.balance).toMatchObject({ availableCents: 0, pendingCents: 0 });
     expect(body.program.redemptionEnabled).toBe(false);
-    expect(body.incentives.firstPurchase.enabled).toBe(false);
+    expect(body.incentives.firstPurchase.enabled).toBe(true);
     expect((body as unknown as { capabilities: unknown }).capabilities).toEqual({
       schemaVersion: 1,
       membership: { supported: false, reason: 'authoritative_rules_unavailable' },

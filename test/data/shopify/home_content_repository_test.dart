@@ -245,7 +245,8 @@ void main() {
                         'value': 'gid://shopify/MediaImage/1',
                         'reference': {
                           'image': {
-                            'url': 'https://cdn.shopify.com/banners/b01-new.jpg',
+                            'url':
+                                'https://cdn.shopify.com/banners/b01-new.jpg',
                             'altText': 'Alt desde MediaImage',
                           },
                         },

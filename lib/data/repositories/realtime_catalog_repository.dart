@@ -142,7 +142,8 @@ class RealtimeCatalogRepository {
 
     final hadPreviousSnapshot = _lastProductsByDocId.isNotEmpty;
     final hasDeletions = hadPreviousSnapshot &&
-        _lastProductsByDocId.keys.any((id) => !nextProductsByDocId.containsKey(id));
+        _lastProductsByDocId.keys
+            .any((id) => !nextProductsByDocId.containsKey(id));
 
     _lastProductsByDocId
       ..clear()

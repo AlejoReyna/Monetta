@@ -198,7 +198,8 @@ void main() {
     expect(source.listenCount, 2);
   });
 
-  test('maps sixMsiInstallmentAmount and updates incrementally on partial changes',
+  test(
+      'maps sixMsiInstallmentAmount and updates incrementally on partial changes',
       () async {
     final doc1 = _document(documentId: '101', title: 'Bolsa 1');
     final doc2 = CatalogRealtimeDocument(

@@ -115,14 +115,15 @@ class HomeContentRepository {
       if (slot == null) continue;
 
       final activeRaw = fields['active']?.toLowerCase();
-      final active = activeRaw == null ||
-          (activeRaw != 'false' && activeRaw != '0');
+      final active =
+          activeRaw == null || (activeRaw != 'false' && activeRaw != '0');
       if (!active) {
         resolved.remove(slot);
         continue;
       }
 
-      final imageUrl = _url(referenceImageUrl ?? fields['image'] ?? fields['image_url']);
+      final imageUrl =
+          _url(referenceImageUrl ?? fields['image'] ?? fields['image_url']);
       if (imageUrl == null) continue;
 
       final copy = fields['alt_text'] ?? fields['copy'] ?? referenceAltText;

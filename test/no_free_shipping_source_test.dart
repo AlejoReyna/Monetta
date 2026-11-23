@@ -32,7 +32,8 @@ const List<({String file, String literal, String why})> _exceptions = [
     file: 'lib/features/wholesale/wholesale_content.dart',
     literal:
         'Envío gratis con tu cuenta Monetta Rewards (\$199 MXN como invitado a todo México).',
-    why: 'ratified client shipping rule (free with Monetta Rewards account, \$199 MXN guest)',
+    why:
+        'ratified client shipping rule (free with Monetta Rewards account, \$199 MXN guest)',
   ),
 ];
 

@@ -88,8 +88,7 @@ class Normalizer {
     // excluded so supplier names never masquerade as product facets.
     final signals = <_Signal>[
       for (final tag in product.tags)
-        if (!isInternalOperationalTag(tag))
-          _Signal(fold(tag), FacetSource.tag),
+        if (!isInternalOperationalTag(tag)) _Signal(fold(tag), FacetSource.tag),
       if (foldedType.isNotEmpty) _Signal(foldedType, FacetSource.productType),
       if (foldedTitle.isNotEmpty) _Signal(foldedTitle, FacetSource.title),
       for (final handle in product.collectionHandles)

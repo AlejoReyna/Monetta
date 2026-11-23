@@ -122,7 +122,8 @@ void main() {
       expect(report.first.advice, isNotEmpty);
     });
 
-    test('normalizes new perfume brands, real product types and filters operational tags',
+    test(
+        'normalizes new perfume brands, real product types and filters operational tags',
         () {
       final rules = loadBundledRules();
       final norm = Normalizer(rules);

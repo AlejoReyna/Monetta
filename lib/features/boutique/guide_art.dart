@@ -138,9 +138,7 @@ class GuideBanner extends StatelessWidget {
             height: math.min(width / 2.4, constraints.maxHeight),
             child: buildBannerImage());
       } else {
-        art = AspectRatio(
-            aspectRatio: 2.4,
-            child: buildBannerImage());
+        art = AspectRatio(aspectRatio: 2.4, child: buildBannerImage());
       }
       if (enlarged) {
         final lines = effectiveCopy.split('\n');

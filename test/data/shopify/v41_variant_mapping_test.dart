@@ -7,7 +7,8 @@ import 'package:monetta_app/features/product/variant_selection.dart';
 import '../../support/v41_product_fixture.dart';
 
 void main() {
-  test('Storefront queries preserve options, image and sixMsiAmount on every variant page',
+  test(
+      'Storefront queries preserve options, image and sixMsiAmount on every variant page',
       () {
     for (final query in [
       kProductFragment,
