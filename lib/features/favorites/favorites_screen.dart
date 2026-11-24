@@ -86,10 +86,9 @@ class _FavoritesBody extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const AccountPageHeader(
-              kicker: 'Guardados',
-              title: 'Favoritos',
-              subtitle: 'Toca el corazón de una pieza para guardarla aquí.',
+            Text(
+              'Toca el corazón de una pieza para guardarla aquí.',
+              style: boutiqueText(size: 13, color: context.boutique.inkMuted),
             ),
             EEmptyState(
               icon: Icons.favorite_border_rounded,
@@ -112,13 +111,12 @@ class _FavoritesBody extends StatelessWidget {
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 4),
-            child: AccountPageHeader(
-              kicker: 'Guardados',
-              title: 'Favoritos',
-              subtitle: saved.length == 1
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+            child: Text(
+              saved.length == 1
                   ? '1 pieza guardada en esta cuenta.'
                   : '${saved.length} piezas guardadas en esta cuenta.',
+              style: boutiqueText(size: 13, color: context.boutique.inkMuted),
             ),
           ),
         ),

@@ -10,43 +10,17 @@ import '../catalog/collection_screen.dart';
 const int kHomeNewCollectionProductLimit = 40;
 const int kFavoritesTasteProductLimit = 60;
 
-/// Home-only category photograph carousel (F01–F18), in delivery order.
-const List<HomeCategoryPhotoEntry> kHomeCategoryPhotoEntries =
-    <HomeCategoryPhotoEntry>[
-  HomeCategoryPhotoEntry(
-      'F01', 'Calzado de dama', CollectionFilter(category: 'calzado')),
-  HomeCategoryPhotoEntry('F02', 'Bolsos de hombro',
-      CollectionFilter(category: 'bolsa', silhouette: 'shoulder')),
-  HomeCategoryPhotoEntry('F03', 'Bolsos de mano',
-      CollectionFilter(category: 'bolsa', silhouette: 'hand')),
-  HomeCategoryPhotoEntry(
-      'F04', 'Calzado de hombre', CollectionFilter(category: 'calzado')),
-  HomeCategoryPhotoEntry(
-      'F05', 'Accesorios', CollectionFilter(category: 'accesorio')),
-  HomeCategoryPhotoEntry(
-      'F06', 'Bolsos de hombre', CollectionFilter(category: 'bolsa')),
+/// The Home rail contains the five catalog families in editorial order.
+const List<HomeCategoryPhotoEntry> kHomeCategoryPhotoEntries = [
   HomeCategoryPhotoEntry('F07', 'Bolsos', CollectionFilter(category: 'bolsa')),
   HomeCategoryPhotoEntry(
       'F08', 'Carteras', CollectionFilter(category: 'cartera')),
   HomeCategoryPhotoEntry(
-      'F09', 'Carteras de mujer', CollectionFilter(category: 'cartera')),
-  HomeCategoryPhotoEntry('F10', 'Crossbody',
-      CollectionFilter(category: 'bolsa', silhouette: 'crossbody')),
+      'B16', 'Perfumes', CollectionFilter(category: 'perfume')),
   HomeCategoryPhotoEntry(
-      'F11', 'Carteras de hombre', CollectionFilter(category: 'cartera')),
-  HomeCategoryPhotoEntry('F12', 'Lentes',
-      CollectionFilter(category: 'accesorio', queryTerms: const ['lente'])),
+      'F01', 'Calzado', CollectionFilter(category: 'calzado')),
   HomeCategoryPhotoEntry(
-      'F13', 'Relojes de hombre', CollectionFilter(category: 'reloj')),
-  HomeCategoryPhotoEntry('F14', 'Tarjeteros',
-      CollectionFilter(category: 'cartera', queryTerms: const ['tarjetero'])),
-  HomeCategoryPhotoEntry('F15', 'Muñequeras',
-      CollectionFilter(category: 'cartera', queryTerms: const ['muñequera'])),
-  HomeCategoryPhotoEntry(
-      'F16', 'Relojes de mujer', CollectionFilter(category: 'reloj')),
-  HomeCategoryPhotoEntry(
-      'F17', 'Tote', CollectionFilter(category: 'bolsa', silhouette: 'tote')),
-  HomeCategoryPhotoEntry('F18', 'Bolsos', CollectionFilter(category: 'bolsa')),
+      'F05', 'Accesorios', CollectionFilter(category: 'accesorio')),
 ];
 
 @immutable
@@ -58,11 +32,12 @@ class HomeCategoryPhotoEntry {
   final CollectionFilter filter;
 }
 
-/// Newest unique products up to [limit], without padding duplicates.
+/// Newest unique in-stock products up to [limit], without padding duplicates.
 List<Product> uniqueNewestProducts(CatalogStore store,
     {int limit = kHomeNewCollectionProductLimit}) {
   if (!store.ready) return const [];
-  final sorted = [...store.products]
+  final inStock = store.products.where((p) => p.isInStock).toList();
+  final sorted = (inStock.isNotEmpty ? inStock : [...store.products])
     ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   final seen = <String>{};
   final out = <Product>[];

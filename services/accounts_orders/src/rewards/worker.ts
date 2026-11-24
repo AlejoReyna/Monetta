@@ -1,10 +1,24 @@
 import { fileURLToPath } from 'node:url';
-import { getPool, closePool } from '../db/pool.js';
+import { loadConfig } from '../config.js';
+import { getPool, getDirectPool, closePool } from '../db/pool.js';
 import { logger } from '../logger.js';
 import { PgRewardsRepository } from './pgRewardsRepository.js';
 import { loadRewardsEnv } from './rewardsConfig.js';
 import { RewardsService } from './service.js';
-import { DisabledDiscountAdapter } from './shopifyDiscountAdapter.js';
+import { createRewardsDiscountAdapter } from './shopifyAdminCouponProvisioner.js';
+
+const DEFAULT_MAINTENANCE_INTERVAL_MS = 60 * 60_000;
+const MIN_MAINTENANCE_INTERVAL_MS = 60_000;
+
+export function maintenanceIntervalMs(env: NodeJS.ProcessEnv = process.env): number {
+  const raw = env.REWARDS_MAINTENANCE_INTERVAL_MS;
+  if (raw === undefined || raw.trim() === '') return DEFAULT_MAINTENANCE_INTERVAL_MS;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed < MIN_MAINTENANCE_INTERVAL_MS) {
+    return MIN_MAINTENANCE_INTERVAL_MS;
+  }
+  return parsed;
+}
 
 /**
  * Worker duradero Rewards: vencimientos, reservas abandonadas y reintento de
@@ -16,18 +30,25 @@ export async function runRewardsMaintenanceOnce(): Promise<{
   retriedInbox: number;
 }> {
   const pool = getPool();
+  const directPool = getDirectPool();
+  const config = loadConfig();
+  const rewardsEnv = loadRewardsEnv();
   const service = new RewardsService({
     rewards: new PgRewardsRepository(pool),
-    env: loadRewardsEnv(),
-    discounts: new DisabledDiscountAdapter(),
+    env: rewardsEnv,
+    discounts: createRewardsDiscountAdapter(config, rewardsEnv),
+    shopDomain: config.shopDomain !== '' ? config.shopDomain : null,
   });
-  const lock = await pool.query(
-    `SELECT pg_try_advisory_lock(hashtextextended('rewards_maintenance', 0)) AS acquired`,
-  );
-  if (lock.rows[0].acquired !== true) {
-    return { expiredLots: 0, expiredCents: 0, releasedReservations: 0, needReconciliation: [], retriedInbox: 0 };
-  }
+  const lockClient = await directPool.connect();
+  let acquired = false;
   try {
+    const lock = await lockClient.query(
+      `SELECT pg_try_advisory_lock(hashtextextended('rewards_maintenance', 0)) AS acquired`,
+    );
+    acquired = lock.rows[0].acquired === true;
+    if (!acquired) {
+      return { expiredLots: 0, expiredCents: 0, releasedReservations: 0, needReconciliation: [], retriedInbox: 0 };
+    }
     const maintenance = await service.runMaintenance();
     // Reintento de inbox: marca pendientes fallidos para el siguiente ciclo.
     // La recuperacion completa por evento vive en service.* (idempotente).
@@ -41,21 +62,34 @@ export async function runRewardsMaintenanceOnce(): Promise<{
     });
     return { ...maintenance, retriedInbox: pending.length };
   } finally {
-    await pool.query(`SELECT pg_advisory_unlock(hashtextextended('rewards_maintenance', 0))`);
+    if (acquired) {
+      await lockClient
+        .query(`SELECT pg_advisory_unlock(hashtextextended('rewards_maintenance', 0))`)
+        .catch(() => {});
+    }
+    lockClient.release();
   }
 }
 
 const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 if (isMain) {
-  const intervalMs = 60_000;
-  const tick = () => {
-    runRewardsMaintenanceOnce().catch((error) => {
+  const intervalMs = maintenanceIntervalMs();
+  const tick = async () => {
+    try {
+      await runRewardsMaintenanceOnce();
+    } catch (error) {
       logger.warn('rewards maintenance failed', { error: error instanceof Error ? error.message : String(error) });
-    });
+    } finally {
+      // Cierra sockets entre ciclos para que Neon Free suspenda la base tras 5 min inactiva.
+      await closePool().catch(() => {});
+    }
   };
-  tick();
-  setInterval(tick, intervalMs);
+  void tick();
+  const timer = setInterval(() => {
+    void tick();
+  }, intervalMs);
   const shutdown = () => {
+    clearInterval(timer);
     void closePool().finally(() => process.exit(0));
   };
   process.once('SIGTERM', shutdown);

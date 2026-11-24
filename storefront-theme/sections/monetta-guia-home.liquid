@@ -11,11 +11,50 @@
   {%- when 'carousel' -%}
     {%- capture catalog_url -%}{% render 'monetta-guia-url', key: 'catalogo' %}{%- endcapture -%}
     {%- capture categories_url -%}{% render 'monetta-guia-url', key: 'categorias' %}{%- endcapture -%}
+    {%- capture brands_destination -%}{% render 'monetta-guia-url', key: 'marcas' %}{%- endcapture -%}
     {%- liquid
-      assign brands_url = routes.collections_url
-      if collections['marcas'].id != blank
-        assign brands_url = collections['marcas'].url
-      endif
+      assign brands_url = brands_destination | strip
+      assign b01_href = catalog_url | strip
+      assign b01_alt = 'Compra fácil desde México'
+      assign b01_image = nil
+      assign b02_href = brands_url
+      assign b02_alt = 'Tus marcas fav en un sólo lugar'
+      assign b02_image = nil
+      assign b03_href = categories_url | strip
+      assign b03_alt = 'Miles de modelos originales por descubrir'
+      assign b03_image = nil
+      for entry in shop.metaobjects['monetta_banner'].values
+        assign entry_slot = entry.slot.value | default: entry.system.handle | strip | upcase
+        assign entry_active = entry.active.value
+        if entry_active != false and entry.image.value != blank
+          case entry_slot
+            when 'B01'
+              assign b01_image = entry.image.value
+              if entry.alt_text.value != blank
+                assign b01_alt = entry.alt_text.value | strip
+              endif
+              if entry.destination_url.value != blank
+                assign b01_href = entry.destination_url.value | strip
+              endif
+            when 'B02'
+              assign b02_image = entry.image.value
+              if entry.alt_text.value != blank
+                assign b02_alt = entry.alt_text.value | strip
+              endif
+              if entry.destination_url.value != blank
+                assign b02_href = entry.destination_url.value | strip
+              endif
+            when 'B03'
+              assign b03_image = entry.image.value
+              if entry.alt_text.value != blank
+                assign b03_alt = entry.alt_text.value | strip
+              endif
+              if entry.destination_url.value != blank
+                assign b03_href = entry.destination_url.value | strip
+              endif
+          endcase
+        endif
+      endfor
       assign banner_count = 2
       if section.settings.show_banner_categorias
         assign banner_count = 3
@@ -26,19 +65,31 @@
       <h1 class="visually-hidden" id="{{ heading_id }}">{{ shop.name | escape }}</h1>
       <div class="guia-carousel__track" id="{{ track_id }}">
         <div class="guia-carousel__slide" role="group" aria-roledescription="diapositiva" aria-label="1 de {{ banner_count }}">
-          <a class="v41-banner" href="{{ catalog_url | strip }}">
-            <img src="{{ 'monetta-v41-b01.webp' | asset_url }}" width="1920" height="800" alt="Compra fácil desde México" loading="eager" fetchpriority="high" decoding="async">
+          <a class="v41-banner" href="{{ b01_href }}">
+            {%- if b01_image != blank -%}
+              <img src="{{ b01_image | image_url: width: 1920 }}" srcset="{{ b01_image | image_url: width: 768 }} 768w, {{ b01_image | image_url: width: 1280 }} 1280w, {{ b01_image | image_url: width: 1920 }} 1920w" sizes="100vw" width="1920" height="800" alt="{{ b01_alt | escape }}" loading="eager" fetchpriority="high" decoding="async">
+            {%- else -%}
+              <img src="{{ 'monetta-v41-b01.webp' | asset_url }}" width="1920" height="800" alt="{{ b01_alt | escape }}" loading="eager" fetchpriority="high" decoding="async">
+            {%- endif -%}
           </a>
         </div>
         <div class="guia-carousel__slide" role="group" aria-roledescription="diapositiva" aria-label="2 de {{ banner_count }}">
-          <a class="v41-banner" href="{{ brands_url }}">
-            <img src="{{ 'monetta-v41-b02.webp' | asset_url }}" width="1920" height="800" alt="Tus marcas fav en un sólo lugar" loading="lazy" decoding="async">
+          <a class="v41-banner" href="{{ b02_href }}">
+            {%- if b02_image != blank -%}
+              <img src="{{ b02_image | image_url: width: 1920 }}" srcset="{{ b02_image | image_url: width: 768 }} 768w, {{ b02_image | image_url: width: 1280 }} 1280w, {{ b02_image | image_url: width: 1920 }} 1920w" sizes="100vw" width="1920" height="800" alt="{{ b02_alt | escape }}" loading="lazy" decoding="async">
+            {%- else -%}
+              <img src="{{ 'monetta-v41-b02.webp' | asset_url }}" width="1920" height="800" alt="{{ b02_alt | escape }}" loading="lazy" decoding="async">
+            {%- endif -%}
           </a>
         </div>
         {%- if section.settings.show_banner_categorias -%}
           <div class="guia-carousel__slide" role="group" aria-roledescription="diapositiva" aria-label="3 de {{ banner_count }}">
-            <a class="v41-banner" href="{{ categories_url | strip }}">
-              <img src="{{ 'monetta-v41-b03.webp' | asset_url }}" width="1920" height="800" alt="Miles de modelos originales por descubrir" loading="lazy" decoding="async">
+            <a class="v41-banner" href="{{ b03_href }}">
+              {%- if b03_image != blank -%}
+                <img src="{{ b03_image | image_url: width: 1920 }}" srcset="{{ b03_image | image_url: width: 768 }} 768w, {{ b03_image | image_url: width: 1280 }} 1280w, {{ b03_image | image_url: width: 1920 }} 1920w" sizes="100vw" width="1920" height="800" alt="{{ b03_alt | escape }}" loading="lazy" decoding="async">
+              {%- else -%}
+                <img src="{{ 'monetta-v41-b03.webp' | asset_url }}" width="1920" height="800" alt="{{ b03_alt | escape }}" loading="lazy" decoding="async">
+              {%- endif -%}
             </a>
           </div>
         {%- endif -%}
@@ -78,7 +129,7 @@
     <section class="section v41-block" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
       {% render 'monetta-section-header', id: heading_id, title: 'Categorías', title_url: all_url, link_url: all_url, link_label: 'Ver todas' %}
       <ul class="v41-scroll" id="{{ track_id }}" role="list">
-        {%- assign category_entries = 'monetta-v41-f01.webp|640|640|Calzado de dama|,monetta-v41-f02.webp|640|426|Bolso de hombro|shoulder,monetta-v41-f03.webp|480|640|Bolso de mano|bolsos-de-mano,monetta-v41-f04.webp|476|640|Calzado de hombre|,monetta-v41-f05.webp|640|584|Accesorios|accesorios,monetta-v41-f06.webp|640|584|Bolsos de hombre|,monetta-v41-f07.webp|640|584|Bolsos|bolsas,monetta-v41-f08.webp|640|584|Carteras|carteras,monetta-v41-f09.webp|640|640|Carteras de mujer|carteras,monetta-v41-f10.webp|512|640|Crossbody|crossbody,monetta-v41-f11.webp|640|584|Carteras de hombre|carteras,monetta-v41-f12.webp|524|640|Lentes|,monetta-v41-f13.webp|532|640|Relojes de hombre|relojes,monetta-v41-f14.webp|640|477|Tarjeteros|,monetta-v41-f15.webp|544|544|Muñequeras|,monetta-v41-f16.webp|417|640|Reloj de mujer|relojes,monetta-v41-f17.webp|512|640|Tote|tote,monetta-v41-f18.webp|640|640|Bolsos|bolsas' | split: ',' -%}
+        {%- assign category_entries = 'monetta-v41-f07.webp|640|584|Bolsos|bolsas,monetta-v41-f08.webp|640|584|Carteras|carteras,monetta-v41-B16_perfumes_todos-768.jpg|1920|800|Perfumes|perfumes,monetta-v41-f01.webp|640|640|Calzado|calzado,monetta-v41-f05.webp|640|584|Accesorios|accesorios' | split: ',' -%}
         {%- for entry in category_entries -%}
           {%- assign parts = entry | split: '|' -%}
           {%- assign photo_key = parts[4] -%}
@@ -101,16 +152,15 @@
     </section>
 
   {%- when 'brands' -%}
+    {%- capture brands_destination -%}{% render 'monetta-guia-url', key: 'marcas' %}{%- endcapture -%}
     {%- liquid
-      assign brands_url = routes.collections_url
-      if collections['marcas'].id != blank
-        assign brands_url = collections['marcas'].url
-      endif
-      assign brand_entries = 'Coach:coach,Guess:guess,Michael Kors:michael_kors,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Anne Klein:anne_klein,Olaplex:olaplex,Dior:dior:Christian Dior,The Ordinary:the_ordinary,Summer Fridays:summer_fridays,Laneige:laneige,Rhode:rhode,Tory Burch,Kate Spade,Marc Jacobs' | split: ','
+      assign brands_url = brands_destination | strip
+      assign brand_entries = 'Coach:coach,Guess:guess,Michael Kors:michael_kors,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Anne Klein:anne_klein,Dior:dior:Christian Dior,The Ordinary:the_ordinary,Summer Fridays:summer_fridays,Laneige:laneige,Rhode:rhode,Tory Burch,Kate Spade,Marc Jacobs' | split: ','
     -%}
     {%- capture brand_tiles -%}
       {%- for entry in brand_entries -%}
-        {%- render 'monetta-guia-brand-tile', entry: entry, sold_only: true -%}
+        {%- comment -%}As the app: every logo tile shows (a brand not on sale today opens its search); text-only tiles only when sold.{%- endcomment -%}
+        {%- render 'monetta-guia-brand-tile', entry: entry -%}
       {%- endfor -%}
     {%- endcapture -%}
     {%- assign brand_tiles = brand_tiles | strip -%}
@@ -151,11 +201,34 @@
 
   {%- when 'offers' -%}
     {%- capture mayoreo_url -%}{% render 'monetta-guia-url', key: 'mayoreo' %}{%- endcapture -%}
+    {%- liquid
+      assign wholesale_destination = mayoreo_url | strip
+      assign b04_alt = 'Precios de mayoreo a partir de 3 piezas'
+      assign b04_image = nil
+      for entry in shop.metaobjects['monetta_banner'].values
+        assign entry_slot = entry.slot.value | default: entry.system.handle | strip | upcase
+        if entry.active.value != false and entry.image.value != blank
+          if entry_slot == 'B04' or entry_slot == 'B04-EDITORIAL' or entry_slot == 'B04_EDITORIAL'
+            assign b04_image = entry.image.value
+            if entry.alt_text.value != blank
+              assign b04_alt = entry.alt_text.value | strip
+            endif
+            if entry.destination_url.value != blank
+              assign wholesale_destination = entry.destination_url.value | strip
+            endif
+          endif
+        endif
+      endfor
+    -%}
     <section class="v41-mayoreo" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
       <h2 class="visually-hidden" id="{{ heading_id }}">Mayoreo</h2>
       <div class="v41-mayoreo__frame">
-        <img src="{{ 'monetta-v41-b04-sin-control.jpg' | asset_url }}" width="1920" height="800" alt="Precios de mayoreo a partir de 3 piezas" loading="lazy" decoding="async">
-        <a class="v41-mayoreo__cta" href="{{ mayoreo_url | strip }}">Comenzar a vender</a>
+        {%- if b04_image != blank -%}
+          <img src="{{ b04_image | image_url: width: 1920 }}" srcset="{{ b04_image | image_url: width: 768 }} 768w, {{ b04_image | image_url: width: 1280 }} 1280w, {{ b04_image | image_url: width: 1920 }} 1920w" sizes="100vw" width="1920" height="800" alt="{{ b04_alt | escape }}" loading="lazy" decoding="async">
+        {%- else -%}
+          <img src="{{ 'monetta-v41-b04-sin-control.jpg' | asset_url }}" width="1920" height="800" alt="{{ b04_alt | escape }}" loading="lazy" decoding="async">
+        {%- endif -%}
+        {%- if wholesale_destination != blank -%}<a class="v41-mayoreo__cta" href="{{ wholesale_destination }}">Comenzar a vender</a>{%- endif -%}
       </div>
     </section>
 
@@ -166,29 +239,7 @@
 
   {%- when 'register' -%}
     {%- if section.settings.enabled -%}
-      {%- unless customer and request.design_mode == false -%}
-        <section class="v41-register" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
-          {% form 'create_customer', class: 'v41-register__panel' %}
-            <h2 class="v41-register__title" id="{{ heading_id }}">Regístrate en MONETTA REWARDS</h2>
-            <p class="v41-register__line"><span class="v41-register__gold">ENVÍO GRATIS</span> para siempre</p>
-            <p class="v41-register__line"><span class="v41-register__green">GANA CASHBACK</span> con cada compra</p>
-            <div class="v41-register__row">
-              <label class="visually-hidden" for="RewardsEmail-{{ section.id }}">Tu correo electrónico</label>
-              <input id="RewardsEmail-{{ section.id }}" type="email" name="customer[email]" inputmode="email" autocomplete="email" required placeholder="Tu correo electrónico" value="{{ form.email }}">
-              <button type="submit">Registrarme</button>
-            </div>
-            {%- if form.errors -%}
-              <p class="v41-register__error" role="alert">Revisa tu correo e inténtalo de nuevo.</p>
-            {%- elsif form.posted_successfully? -%}
-              <p class="v41-register__ok" role="status">Tu cuenta quedó creada.</p>
-            {%- endif -%}
-          {% endform %}
-        </section>
-      {%- endunless -%}
-    {%- elsif request.design_mode -%}
-      <p class="v41-note" {{ section.shopify_attributes }}>Registro oculto.</p>
-    {%- else -%}
-      {% style %}#shopify-section-{{ section.id }} { display: none; }{% endstyle %}
+      {% render 'monetta-rewards-register', heading_id: heading_id %}
     {%- endif -%}
 {%- endcase -%}
 

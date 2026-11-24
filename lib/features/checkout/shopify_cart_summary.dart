@@ -5,25 +5,31 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../app/account_controller.dart';
 import '../../app/cart_controller.dart';
+import '../../app/checkout_buyer_identity.dart';
+import '../../data/shopify/cart/cart_api.dart';
 import '../../data/shopify/cart/cart_repository.dart';
 import '../../data/shopify/cart/cart_session_store.dart';
 import '../../domain/cart.dart';
+import '../../main.dart';
 import '../boutique/boutique_tokens.dart';
+import '../rewards/rewards_api.dart';
+import 'checkout_rewards_panel.dart';
 
 class ShopifyCartSummary extends StatefulWidget {
   const ShopifyCartSummary({
     required this.controller,
     required this.scope,
     required this.localIntent,
-    required this.onContinue,
+    this.rewardsApi,
     super.key,
   });
 
   final CartController controller;
   final CartSessionScope scope;
   final List<LocalCartIntent> localIntent;
-  final VoidCallback onContinue;
+  final RewardsApi? rewardsApi;
 
   @override
   State<ShopifyCartSummary> createState() => _ShopifyCartSummaryState();
@@ -40,6 +46,7 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
 
   @override
   Widget build(BuildContext context) {
+    final account = AccountScope.maybeOf(context);
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, _) {
@@ -60,6 +67,9 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
             .where((code) => !returnedCodes.contains(code.toUpperCase()))
             .toList(growable: false);
 
+        final hasAutomaticDiscount = cart.discountApplications.any(
+          (item) => item.kind == CartDiscountApplicationKind.automatic,
+        );
         return Container(
           key: const ValueKey('shopify-cart-summary'),
           padding: const EdgeInsets.all(20),
@@ -71,55 +81,16 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Resumen de compra',
-                style: boutiqueTitle(color: palette.ink),
-              ),
-              const SizedBox(height: 18),
-              _MoneyRow(
-                label: cart.cost.subtotalEstimated
-                    ? 'Subtotal de Shopify (estimado)'
-                    : 'Subtotal de Shopify',
-                money: cart.cost.subtotal,
-              ),
-              if (allocatedApplications.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                for (final application in allocatedApplications)
-                  _MoneyRow(
-                    label: application.kind ==
-                            CartDiscountApplicationKind.automatic
-                        ? 'Descuento automático'
-                        : 'Descuento aplicado',
-                    money: application.totalAllocatedAmount!,
-                    negative: true,
-                  ),
-              ],
-              if (cart.discountApplications.any(
-                (item) => item.kind == CartDiscountApplicationKind.automatic,
-              )) ...[
-                const SizedBox(height: 10),
-                Text(
-                  'Incluye descuentos automáticos de Shopify',
-                  style: boutiqueText(size: 11, color: palette.inkMuted),
+              if (cart.lines.isNotEmpty)
+                CheckoutRewardsPanel(
+                  key: const ValueKey('checkout-rewards-root'),
+                  cartController: widget.controller,
+                  scope: widget.scope,
+                  localIntent: widget.localIntent,
+                  cart: cart,
+                  accountController: account,
+                  rewardsApi: widget.rewardsApi,
                 ),
-              ],
-              const SizedBox(height: 10),
-              _SummaryTextRow(
-                label: 'Envío',
-                value: 'Se calcula en Shopify',
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Container(height: .5, color: palette.hairline),
-              ),
-              _MoneyRow(
-                label: cart.cost.totalEstimated
-                    ? 'Total de Shopify (estimado)'
-                    : 'Total de Shopify',
-                money: cart.cost.total,
-                prominent: true,
-              ),
-              const SizedBox(height: 20),
               TextField(
                 key: const ValueKey('discount-code-field'),
                 controller: _code,
@@ -171,13 +142,7 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                     tooltip: 'Eliminar código ${discount.code}',
                     onPressed: applying
                         ? null
-                        : () => unawaited(
-                              widget.controller.removeDiscountCode(
-                                scope: widget.scope,
-                                localIntent: widget.localIntent,
-                                code: discount.code,
-                              ),
-                            ),
+                        : () => _removeCode(discount.code, account),
                     icon: const Icon(Icons.close, size: 18),
                   ),
                 ),
@@ -198,18 +163,30 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                   ),
                   trailing: IconButton(
                     tooltip: 'Eliminar código $code',
-                    onPressed: applying
-                        ? null
-                        : () => unawaited(
-                              widget.controller.removeDiscountCode(
-                                scope: widget.scope,
-                                localIntent: widget.localIntent,
-                                code: code,
-                              ),
-                            ),
+                    onPressed:
+                        applying ? null : () => _removeCode(code, account),
                     icon: const Icon(Icons.close, size: 18),
                   ),
                 ),
+              if (allocatedApplications.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                for (final application in allocatedApplications)
+                  _MoneyRow(
+                    label: application.kind ==
+                            CartDiscountApplicationKind.automatic
+                        ? 'Descuento automático'
+                        : 'Descuento aplicado',
+                    money: application.totalAllocatedAmount!,
+                    negative: true,
+                  ),
+              ],
+              if (hasAutomaticDiscount) ...[
+                const SizedBox(height: 10),
+                Text(
+                  'Incluye descuentos automáticos de Shopify',
+                  style: boutiqueText(size: 11, color: palette.inkMuted),
+                ),
+              ],
               if (widget.controller.discountMessage case final message?) ...[
                 const SizedBox(height: 6),
                 Semantics(
@@ -221,11 +198,6 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                   ),
                 ),
               ],
-              const SizedBox(height: 18),
-              BoutiqueButton(
-                label: 'Continuar al checkout',
-                onPressed: widget.onContinue,
-              ),
             ],
           ),
         );
@@ -235,12 +207,49 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
 
   void _apply() {
     final value = _code.text;
-    unawaited(
-      widget.controller.applyDiscountCode(
-        scope: widget.scope,
-        localIntent: widget.localIntent,
-        code: value,
-      ),
+    final account = AccountScope.maybeOf(context);
+    unawaited(_applyWithAccount(value, account));
+  }
+
+  Future<void> _applyWithAccount(
+    String value,
+    AccountController? account,
+  ) async {
+    final buyerIdentity = await _buyerIdentityFor(account);
+    if (!mounted) return;
+    await widget.controller.applyDiscountCode(
+      scope: widget.scope,
+      localIntent: widget.localIntent,
+      code: value,
+      buyerIdentity: buyerIdentity,
+    );
+  }
+
+  void _removeCode(String code, AccountController? account) {
+    unawaited(_removeWithAccount(code, account));
+  }
+
+  Future<void> _removeWithAccount(
+    String code,
+    AccountController? account,
+  ) async {
+    final buyerIdentity = await _buyerIdentityFor(account);
+    if (!mounted) return;
+    await widget.controller.removeDiscountCode(
+      scope: widget.scope,
+      localIntent: widget.localIntent,
+      code: code,
+      buyerIdentity: buyerIdentity,
+    );
+  }
+
+  Future<CartBuyerIdentity?> _buyerIdentityFor(AccountController? account) {
+    if (account == null || !account.isSignedIn) {
+      return Future<CartBuyerIdentity?>.value(null);
+    }
+    return resolveCheckoutBuyerIdentity(
+      account: account.account,
+      shopifyAccessToken: account.accessTokenForShopifyCheckout,
     );
   }
 }
@@ -250,19 +259,16 @@ class _MoneyRow extends StatelessWidget {
     required this.label,
     required this.money,
     this.negative = false,
-    this.prominent = false,
   });
 
   final String label;
   final CartMoney money;
   final bool negative;
-  final bool prominent;
 
   @override
   Widget build(BuildContext context) => _SummaryTextRow(
         label: label,
         value: '${negative ? '−' : ''}${money.amount} ${money.currencyCode}',
-        prominent: prominent,
       );
 }
 
@@ -270,12 +276,10 @@ class _SummaryTextRow extends StatelessWidget {
   const _SummaryTextRow({
     required this.label,
     required this.value,
-    this.prominent = false,
   });
 
   final String label;
   final String value;
-  final bool prominent;
 
   @override
   Widget build(BuildContext context) {
@@ -286,8 +290,7 @@ class _SummaryTextRow extends StatelessWidget {
           child: Text(
             label,
             style: boutiqueText(
-              size: prominent ? 15 : 13,
-              weight: prominent ? FontWeight.w600 : FontWeight.w400,
+              size: 13,
               color: palette.ink,
             ),
           ),
@@ -295,8 +298,8 @@ class _SummaryTextRow extends StatelessWidget {
         Text(
           value,
           style: boutiqueText(
-            size: prominent ? 16 : 13,
-            weight: prominent ? FontWeight.w700 : FontWeight.w500,
+            size: 13,
+            weight: FontWeight.w500,
             color: palette.ink,
           ),
         ),

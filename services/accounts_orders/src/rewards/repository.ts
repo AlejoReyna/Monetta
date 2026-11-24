@@ -81,6 +81,7 @@ export interface RewardsRepository {
   ensureAccount(customerId: string, shopDomain?: string | null): Promise<void>;
   getPolicy(): Promise<ProgramPolicy>;
   balance(accountId: string, now?: Date): Promise<BalanceView>;
+  countCompletedPurchases(accountId: string): Promise<number>;
   activity(accountId: string, limit: number, cursor?: string | null): Promise<{ movements: MovementView[]; nextCursor: string | null }>;
   orderRewards(accountId: string, orderShopifyId: string): Promise<OrderRewardsView | null>;
 
@@ -95,7 +96,18 @@ export interface RewardsRepository {
   releaseForDelivery(args: {
     orderShopifyId: string; eventRef: string; occurredAt?: Date | null;
     lines?: readonly { quantity?: number }[];
-  }): Promise<{ releasedCents: number; lots: number }>;
+  }): Promise<{ releasedCents: number; lots: number; accountId: string | null }>;
+
+  /** Otorga bono de nivel de manera idempotente (una sola vez por nivel y cuenta). */
+  grantTierBonus(args: {
+    accountId: string;
+    tierKey: 'PRO' | 'VIP' | 'ÉLITE';
+    amountCents: number;
+    ruleVersion: number;
+    eventRef: string;
+    occurredAt?: Date | null;
+    expiryMonths: number;
+  }): Promise<{ granted: boolean }>;
 
   /** Reversion (cancelacion/devolucion). Aplica diferencia, no recalcula sobre bruto. */
   reverseEarn(args: {
@@ -117,6 +129,7 @@ export interface RewardsRepository {
     idempotencyKey: string; ttlMinutes: number;
   }): Promise<{ redemption: RedemptionRecord; reused: boolean }>;
   findRedemption(accountId: string, redemptionId: string): Promise<RedemptionRecord | null>;
+  findRedemptionByDiscountCode(accountId: string, discountCode: string): Promise<RedemptionRecord | null>;
   markProvisioning(redemptionId: string, discountId: string, discountCode: string): Promise<void>;
   markApplied(redemptionId: string): Promise<void>;
   attachOrder(redemptionId: string, orderShopifyId: string): Promise<void>;

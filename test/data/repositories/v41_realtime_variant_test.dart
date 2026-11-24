@@ -29,7 +29,7 @@ CatalogRealtimeDocument document({
         'images': <String>[],
         'collectionHandles': <String>[],
         'createdAt': '2026-10-01T00:00:00Z',
-        'updatedAt': '2026-11-01T00:00:00Z',
+        'updatedAt': invalid ? '2026-11-02T00:00:00Z' : '2026-11-01T00:00:00Z',
         'isPublished': true,
         'variants': [
           {

@@ -42,6 +42,27 @@ void main() {
     expect(failed.userMessage, isNot(contains('redacted-fixture')));
   });
 
+  test('staging can resume after Shopify storefront login', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+      expect(call.method, 'present');
+      final arguments = call.arguments as Map<Object?, Object?>;
+      expect(arguments['resumeAfterStorefrontPassword'], isTrue);
+      return {
+        'status': 'failed',
+        'code': 'storefront_instead_of_checkout',
+      };
+    });
+    final launcher = MethodChannelCheckoutLauncher(
+      channel: channel,
+      resumeAfterStorefrontPassword: true,
+    );
+
+    final result = await launcher.present(checkoutUrl) as CheckoutFailed;
+    expect(result.code, CheckoutFailureCode.configuration);
+    expect(result.allowExternalBrowser, isFalse);
+  });
+
   test('serializes presentation and invokes native present once', () async {
     final terminal = Completer<Map<String, String>>();
     var nativeCalls = 0;

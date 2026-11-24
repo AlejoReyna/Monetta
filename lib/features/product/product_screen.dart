@@ -12,10 +12,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
-import '../../app/monetta_tokens.g.dart';
 import '../../app/storefront_layout.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
+import '../../data/accounts_orders/accounts_orders_config.dart';
 import '../../data/media/media_url.dart';
 import '../../data/shopify/cart_attribution.dart';
 import '../../domain/product.dart';
@@ -30,7 +30,9 @@ import '../catalog/product_card.dart';
 import '../catalog/product_tile.dart' show PackshotBlend;
 import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
+import '../checkout/mini_cart.dart';
 import '../catalog/product_controls.dart';
+import '../rewards/rewards_components.dart';
 import 'product_recommendations.dart';
 import 'product_zoom.dart';
 import '../navigation/guide_chrome.dart';
@@ -43,6 +45,8 @@ import '../navigation/duo_workspace.dart';
 import '../../platform/system_layout_context.dart';
 import '../../data/shopify/storefront_config.dart';
 import 'purchase_dock.dart';
+import 'restock_push_adapter.dart';
+import 'restock_request_sheet.dart';
 
 class ProductScreen extends StatefulWidget {
   const ProductScreen({
@@ -53,6 +57,7 @@ class ProductScreen extends StatefulWidget {
     this.endSectionsBuilder,
     this.shippingPolicy,
     this.returnsPolicy,
+    this.showRewardsEstimate,
     this.onClose,
     super.key,
   });
@@ -71,6 +76,7 @@ class ProductScreen extends StatefulWidget {
   /// Only current, approved policy content may enable these accordions.
   final String? shippingPolicy;
   final String? returnsPolicy;
+  final bool? showRewardsEstimate;
   final VoidCallback? onClose;
 
   @override
@@ -81,9 +87,39 @@ class _ProductScreenState extends State<ProductScreen> {
   final Stopwatch _dwell = Stopwatch()..start();
   final PageController _gallery = PageController();
   final GlobalKey _shareSource = GlobalKey();
+  final GlobalKey _purchaseSlot = GlobalKey();
+  final GlobalKey _purchaseViewport = GlobalKey();
+  final GlobalKey _addControl = GlobalKey();
+  bool _fixedAdd = false;
+  double _inlineAddHeight = kPurchaseButtonHeight;
+  bool _visibilityCheckScheduled = false;
+
+  void _checkPurchaseVisibility() {
+    if (_visibilityCheckScheduled) return;
+    _visibilityCheckScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _visibilityCheckScheduled = false;
+      if (!mounted) return;
+      final slot = _purchaseSlot.currentContext?.findRenderObject();
+      final viewport = _purchaseViewport.currentContext?.findRenderObject();
+      final safeBottom = MediaQuery.viewInsetsOf(context).bottom;
+      var fixed = false;
+      if (slot is RenderBox &&
+          viewport is RenderBox &&
+          safeBottom == 0 &&
+          slot.attached &&
+          viewport.attached) {
+        if (!_fixedAdd) _inlineAddHeight = slot.size.height;
+        final position = slot.localToGlobal(Offset.zero, ancestor: viewport);
+        fixed = position.dy >= viewport.size.height ||
+            position.dy + slot.size.height <= 0;
+      }
+      if (_fixedAdd != fixed) setState(() => _fixedAdd = fixed);
+    });
+  }
+
   String? _variantId;
   bool _selectionInitialized = false;
-  bool _added = false;
   int _page = 0;
   late int _variantIndex = widget.initialVariantIndex;
   final Set<String> _open = <String>{};
@@ -182,21 +218,21 @@ class _ProductScreenState extends State<ProductScreen> {
     if (_adding) return;
     setState(() {
       _adding = true;
-      _added = false;
     });
     final result = await tryAddSelectionToBag(context, product, _variantIndex);
     if (!mounted) return;
-    // Released before any feedback so the action is usable again as soon as
-    // the sheet or the snack bar appears.
+    if (buyNow && result.status == BagAddStatus.added) {
+      try {
+        await openCheckout(context);
+      } finally {
+        if (mounted) setState(() => _adding = false);
+      }
+      return;
+    }
     setState(() => _adding = false);
     switch (result.status) {
       case BagAddStatus.added:
-        // Keeps the existing confirmation surface — a sheet, never a toast.
-        if (buyNow) {
-          await openBag(context);
-        } else {
-          setState(() => _added = true);
-        }
+        await showMiniCart(context);
       case BagAddStatus.soldOut:
         _showMessage('Esta opción está agotada.');
       case BagAddStatus.unavailable:
@@ -224,8 +260,9 @@ class _ProductScreenState extends State<ProductScreen> {
   Widget _recommendationSection(
     BuildContext context,
     String title,
-    List<Product> products,
-  ) =>
+    List<Product> products, {
+    bool showControls = true,
+  }) =>
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -236,9 +273,23 @@ class _ProductScreenState extends State<ProductScreen> {
             child: Text(title, style: boutiqueSectionHeading(context: context)),
           ),
           const SizedBox(height: 16),
-          _Rail(key: ValueKey(title), title: title, products: products),
+          _Rail(
+            key: ValueKey(title),
+            title: title,
+            products: products,
+            showControls: showControls,
+          ),
         ],
       );
+
+  Widget? _rewardsEstimateTrailing(double price, bool inStock) {
+    final enabled = widget.showRewardsEstimate ??
+        AccountsOrdersConfig.fromEnvironment().enabled;
+    if (!enabled || !inStock || !price.isFinite || price <= 0) return null;
+    final estimatedCents = ((price * 100).round() * 100 + 5000) ~/ 10000;
+    if (estimatedCents < 50) return null;
+    return RewardsEstimateLabel(estimatedCents: estimatedCents);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -280,8 +331,6 @@ class _ProductScreenState extends State<ProductScreen> {
         selectionMissing ? null : selectedVariant(product, _variantIndex);
     final price = selected?.price ?? product.price;
     final compare = selected?.compareAtPrice;
-    final onSale = selectionOnSale(product, _variantIndex);
-    final discount = selectionDiscountPercent(product, _variantIndex);
     final inStock =
         !selectionMissing && selectionInStock(product, _variantIndex);
     final memberImages = imagesForVariant(product, selected);
@@ -302,6 +351,37 @@ class _ProductScreenState extends State<ProductScreen> {
             excluding: product.id,
           );
     final palette = context.boutique;
+    final notificationController = NotificationScope.maybeOf(context);
+    final effectiveOnRestock = widget.onRestock ??
+        (notificationController?.variantRestockAvailable == true
+            ? (Product p, ProductVariant v) {
+                unawaited(
+                  showRestockRequestSheet(
+                    context,
+                    product: p,
+                    variant: v,
+                    initialEmail: AccountScope.maybeOf(context)?.account?.email,
+                    onSubmit: (payload) => submitRestockViaPushNotifications(
+                      notificationController,
+                      payload,
+                    ),
+                  ),
+                );
+              }
+            : null);
+
+    _checkPurchaseVisibility();
+    final addButton = KeyedSubtree(
+      key: _addControl,
+      child: PurchaseDockButton(
+        key: const Key('purchase-dock-primary'),
+        label: _adding ? 'Agregando…' : 'Agregar al carrito',
+        pending: _adding,
+        large: true,
+        halo: _fixedAdd,
+        onPressed: _adding ? null : () => _add(product),
+      ),
+    );
 
     return PopScope(
       canPop: false,
@@ -322,6 +402,9 @@ class _ProductScreenState extends State<ProductScreen> {
           top: false,
           bottom: false,
           child: ProductAdaptiveBody(
+            key: _purchaseViewport,
+            onScroll: _checkPurchaseVisibility,
+            bottomAction: inStock && _fixedAdd ? addButton : null,
             galleryAccessoryHeight: images.length > 1 ? 100 : 0,
             // The gallery is a square as wide as the content: the body always
             // scrolls it (a list, or a scroll view per region), so the height
@@ -410,56 +493,14 @@ class _ProductScreenState extends State<ProductScreen> {
                         ),
                       ),
                       const SizedBox(height: BoutiqueSpace.md),
-                      Wrap(
-                        spacing: BoutiqueSpace.md,
-                        runSpacing: 6,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(
-                            formatShopperPrice(price),
-                            key: const Key('product-price'),
-                            style: boutiqueText(
-                              size: 22,
-                              weight: FontWeight.w600,
-                              color: inStock ? palette.ink : palette.inkMuted,
-                              height: 1.2,
-                            ),
-                          ),
-                          // Previous price + -% render only off real
-                          // `compare_at` data — never otherwise.
-                          if (onSale && compare != null) ...[
-                            Text(
-                              formatShopperPrice(compare),
-                              style: boutiqueText(
-                                size: 14,
-                                color: palette.inkMuted,
-                                height: 1.2,
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                            ),
-                            if (discount > 0)
-                              Container(
-                                key: const ValueKey('discount-badge'),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: palette.saleSurface,
-                                  borderRadius: BoutiqueRadius.capsule,
-                                ),
-                                child: Text(
-                                  '-$discount%',
-                                  style: boutiqueText(
-                                    size: 13,
-                                    weight: FontWeight.w500,
-                                    color: palette.sale,
-                                    height: 1.2,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ],
+                      SelectionPriceView(
+                        price: price,
+                        compare: compare,
+                        sixMsiAmount: selected?.sixMsiInstallmentAmount,
+                        trailing: _rewardsEstimateTrailing(price, inStock),
+                        currentKey: const Key('product-price'),
+                        size: 22,
+                        inStock: inStock,
                       ),
                       if (selectable.isNotEmpty) ...[
                         const SizedBox(height: BoutiqueSpace.lg),
@@ -472,45 +513,63 @@ class _ProductScreenState extends State<ProductScreen> {
                               _variantIndex = i;
                               _variantId = i < 0 ? null : selectable[i].id;
                               _page = 0;
-                              _added = false;
                               if (_gallery.hasClients) _gallery.jumpToPage(0);
                             });
                           },
                         ),
                       ],
                       if (inStock) ...[
-                        PurchaseDockButton(
-                          key: const Key('purchase-dock-primary'),
-                          label: _adding ? 'Agregando…' : 'Agregar al carrito',
-                          pending: _adding,
-                          large: true,
-                          onPressed: _adding ? null : () => _add(product),
-                        ),
-                        const SizedBox(height: BoutiqueSpace.sm),
-                        PurchaseOutlineButton(
-                          key: const Key('purchase-buy-now'),
-                          label: 'Comprar ahora',
-                          textColor: palette.ink,
-                          onPressed: _adding ? null : () => _buyNow(product),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final slot = SizedBox(
+                              key: _purchaseSlot,
+                              height: _fixedAdd ? _inlineAddHeight : null,
+                              child: _fixedAdd ? null : addButton,
+                            );
+                            final buy = PurchaseOutlineButton(
+                              key: const Key('purchase-buy-now'),
+                              label: 'Comprar ahora',
+                              textColor: palette.ink,
+                              onPressed:
+                                  _adding ? null : () => _buyNow(product),
+                            );
+                            if (constraints.maxWidth < 360 ||
+                                MediaQuery.textScalerOf(context).scale(14) >
+                                    16) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  slot,
+                                  const SizedBox(height: 8),
+                                  buy,
+                                ],
+                              );
+                            }
+                            return Row(
+                              children: [
+                                Expanded(child: slot),
+                                const SizedBox(width: 8),
+                                Expanded(child: buy),
+                              ],
+                            );
+                          },
                         ),
                         const SizedBox(height: BoutiqueSpace.lg),
                       ],
-                      _AvailabilityLine(inStock: inStock),
-                      if (_added)
-                        Semantics(
-                          liveRegion: true,
-                          child: const Text('Agregado al carrito'),
-                        ),
-                      const SizedBox(height: BoutiqueSpace.lg),
+                      if (!inStock) ...[
+                        _AvailabilityLine(inStock: inStock),
+                        const SizedBox(height: BoutiqueSpace.lg),
+                      ],
                       const ClientGuideServices(
                         key: Key('product-trust-row'),
                       ),
                       if (!inStock &&
                           selected != null &&
-                          widget.onRestock != null)
+                          effectiveOnRestock != null)
                         TextButton(
                           key: const ValueKey('create-restock-alert'),
-                          onPressed: () => widget.onRestock!(product, selected),
+                          onPressed: () =>
+                              effectiveOnRestock(product, selected),
                           child: Text(
                             'Avísame cuando vuelva',
                             style: boutiqueText(color: palette.ink),
@@ -522,11 +581,13 @@ class _ProductScreenState extends State<ProductScreen> {
                         _BoutiqueAccordion(
                           label: 'Descripción',
                           open: _open.contains('descripcion'),
-                          onTap: () => setState(() {
-                            _open.contains('descripcion')
-                                ? _open.remove('descripcion')
-                                : _open.add('descripcion');
-                          }),
+                          onTap: () => setState(
+                            () {
+                              _open.contains('descripcion')
+                                  ? _open.remove('descripcion')
+                                  : _open.add('descripcion');
+                            },
+                          ),
                           child: Text(
                             description,
                             style: boutiqueText(
@@ -593,9 +654,19 @@ class _ProductScreenState extends State<ProductScreen> {
                   ),
                 ),
                 if (related.isNotEmpty)
-                  _recommendationSection(context, 'Relacionados', related),
+                  _recommendationSection(
+                    context,
+                    'Relacionados',
+                    related,
+                    showControls: false,
+                  ),
                 if (sameBrand.isNotEmpty)
-                  _recommendationSection(context, 'Más de la marca', sameBrand),
+                  _recommendationSection(
+                    context,
+                    'Más de la marca',
+                    sameBrand,
+                    showControls: false,
+                  ),
                 if (recent.isNotEmpty)
                   _recommendationSection(
                     context,
@@ -721,7 +792,7 @@ class _Gallery extends StatelessWidget {
               if (!inStock)
                 const Positioned(
                   left: 8,
-                  bottom: 4,
+                  top: 8,
                   child: ProductSoldOutBadge(),
                 ),
               if (onPrevious != null)
@@ -943,6 +1014,7 @@ class _AvailabilityLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (inStock) return const SizedBox.shrink();
     final palette = context.boutique;
     return Row(
       children: [
@@ -951,13 +1023,13 @@ class _AvailabilityLine extends StatelessWidget {
           height: 6,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: inStock ? MonettaTokens.success : palette.sale,
+            color: palette.sale,
           ),
         ),
         const SizedBox(width: BoutiqueSpace.sm),
         Expanded(
           child: Text(
-            inStock ? 'Disponible' : 'Esta opción no está disponible',
+            'Esta opción no está disponible',
             style: boutiqueText(size: 12, color: palette.inkMuted, height: 1.4),
           ),
         ),
@@ -1046,9 +1118,15 @@ class _BoutiqueAccordion extends StatelessWidget {
 /// Lazy common cards over one stable set, with manual paging and a full-set
 /// route. Each real ID appears once; reduced motion uses immediate movement.
 class _Rail extends StatefulWidget {
-  const _Rail({required this.products, required this.title, super.key});
+  const _Rail({
+    required this.products,
+    required this.title,
+    this.showControls = true,
+    super.key,
+  });
   final List<Product> products;
   final String title;
+  final bool showControls;
   @override
   State<_Rail> createState() => _RailState();
 }
@@ -1178,30 +1256,31 @@ class _RailState extends State<_Rail> {
                 },
               ),
             ),
-            Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                IconButton(
-                  tooltip: 'Productos anteriores',
-                  onPressed: () => _move(-tileWidth),
-                  icon: const Icon(Icons.chevron_left),
-                ),
-                TextButton(
-                  key: ValueKey('product-set-${widget.title}'),
-                  onPressed: _viewSet,
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.boutique.ink,
+            if (widget.showControls)
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  IconButton(
+                    tooltip: 'Productos anteriores',
+                    onPressed: () => _move(-tileWidth),
+                    icon: const Icon(Icons.chevron_left),
                   ),
-                  child: Text('Ver ${widget.title.toLowerCase()}'),
-                ),
-                IconButton(
-                  tooltip: 'Productos siguientes',
-                  onPressed: () => _move(tileWidth),
-                  icon: const Icon(Icons.chevron_right),
-                ),
-              ],
-            ),
+                  TextButton(
+                    key: ValueKey('product-set-${widget.title}'),
+                    onPressed: _viewSet,
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.boutique.ink,
+                    ),
+                    child: Text('Ver ${widget.title.toLowerCase()}'),
+                  ),
+                  IconButton(
+                    tooltip: 'Productos siguientes',
+                    onPressed: () => _move(tileWidth),
+                    icon: const Icon(Icons.chevron_right),
+                  ),
+                ],
+              ),
           ],
         );
       },

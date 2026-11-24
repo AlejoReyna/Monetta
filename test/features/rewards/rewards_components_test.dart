@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/theme.dart';
+import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/features/rewards/rewards_components.dart';
 import 'package:monetta_app/features/rewards/rewards_models.dart';
 
@@ -49,21 +51,58 @@ void main() {
     await tester.pumpWidget(_app(RewardsBalanceCard(summary: _summary())));
     await tester.pump();
     expect(find.byKey(const ValueKey('rewards-balance-card')), findsOneWidget);
-    final available = tester
-        .widget<Text>(find.byKey(const ValueKey('rewards-balance-available')))
-        .data;
-    expect(available, 'Saldo disponible\n\$184 Monetta');
+    expect(find.text('Saldo disponible'), findsOneWidget);
+    final availableWidget = tester.widget<Text>(
+      find.byKey(const ValueKey('rewards-balance-available')),
+    );
+    expect(availableWidget.data, r'$184 Monetta');
+    expect(availableWidget.style?.fontFamily, kBoutiqueSerifFamily);
+    expect(availableWidget.style?.color, MonettaTokens.gold);
     expect(find.textContaining('pendientes de entrega'), findsOneWidget);
+
+    await tester.pumpWidget(
+      _app(
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: RewardsBalancePill(
+            tapKey: const ValueKey('pill-tap'),
+            amountKey: const ValueKey('pill-amount'),
+            amountText: r'$0 Monetta',
+            hasBalance: true,
+            onTap: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final pillRect = tester.getRect(find.byKey(const ValueKey('pill-tap')));
+    expect(pillRect.width, closeTo(760, 0.01));
+    final pillAmount =
+        tester.widget<Text>(find.byKey(const ValueKey('pill-amount')));
+    expect(pillAmount.style?.fontFamily, kBoutiqueSerifFamily);
+    expect(pillAmount.style?.color, MonettaTokens.gold);
   });
 
-  testWidgets('estimacion de producto identificada como estimacion',
+  testWidgets('estimacion de producto muestra mensaje inline de cashback',
       (tester) async {
     await tester.pumpWidget(
       _app(const RewardsEstimateLabel(estimatedCents: 5400)),
     );
     await tester.pump();
     expect(find.byKey(const ValueKey('rewards-estimate')), findsOneWidget);
-    expect(find.textContaining('no es saldo liberado'), findsOneWidget);
+    expect(
+      find.text('Con esta compra ganarás \$54 en cashback'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Podrías ganar'), findsNothing);
+    expect(find.textContaining('no es saldo liberado'), findsNothing);
+    expect(find.byIcon(Icons.info_outline), findsNothing);
+
+    await tester
+        .pumpWidget(_app(const RewardsEstimateLabel(estimatedCents: 40)));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('rewards-estimate')), findsNothing);
+    expect(find.textContaining('\$0 en cashback'), findsNothing);
   });
 
   testWidgets('estado por pedido pendiente y mayoreo excluido', (tester) async {
@@ -100,6 +139,27 @@ void main() {
     );
     await tester.pump();
     expect(find.textContaining('no genera Rewards'), findsOneWidget);
+
+    await tester.pumpWidget(
+      _app(
+        OrderRewardsStatus(
+          state: OrderRewardsState(
+            orderShopifyId: '9002',
+            isWholesale: false,
+            earnedPendingCents: 2820,
+            earnedReleasedCents: 0,
+            usedCents: 6000,
+            state: 'pending',
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.textContaining('pendientes'), findsOneWidget);
+    expect(
+      find.textContaining('Usaste \$60 Monetta en este pedido.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('control de canje con limite y error honesto', (tester) async {

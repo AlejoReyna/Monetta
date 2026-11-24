@@ -69,12 +69,14 @@ class PurchaseDockButton extends StatelessWidget {
     required this.onPressed,
     this.pending = false,
     this.large = false,
+    this.halo = false,
     super.key,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final bool pending;
+  final bool halo;
 
   /// The page button of the preview and the product page: 52pt tall, Inter
   /// regular 15 with a tracked label. The dock keeps its 48pt / 600 / 14.
@@ -86,7 +88,7 @@ class PurchaseDockButton extends StatelessWidget {
     final enabled = onPressed != null && !pending;
     final foreground = large ? const Color(0xFF242622) : palette.onAction;
     final button = Material(
-      color: large ? Colors.transparent : palette.action,
+      color: large ? palette.canvas : palette.action,
       shape: StadiumBorder(
         side:
             large ? BorderSide(color: palette.borderControl) : BorderSide.none,
@@ -142,7 +144,7 @@ class PurchaseDockButton extends StatelessWidget {
       label: label,
       excludeSemantics: true,
       onTap: enabled ? onPressed : null,
-      child: large ? GuideGlassSurface(child: button) : button,
+      child: large ? GuideGlassSurface(halo: halo, child: button) : button,
     );
   }
 }

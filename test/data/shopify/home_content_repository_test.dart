@@ -33,7 +33,6 @@ void main() {
         'guess-1',
         'steve-madden',
         'tommy-hilfiger',
-        'olalplex',
         'christian-dior',
         'the-ordinary',
         'summer-fridays',
@@ -177,7 +176,7 @@ void main() {
     expect(content.storefront.announcement, 'Envío gratis');
     expect(content.storefront.showHero, isFalse);
     expect(content.storefront.showExternalPicks, isFalse);
-    expect(content.brands, hasLength(12));
+    expect(content.brands, hasLength(11));
     expect(
       content.brands.first.imageUrl,
       'https://cdn.shopify.com/coach-logo.png',
@@ -221,5 +220,79 @@ void main() {
       HomeContent.fallback.collections.map((item) => item.fallbackAsset),
     );
     expect(content.socialLinks.first.url, contains('instagram.com'));
+  });
+
+  test('parses active monetta_banner metaobjects and ignores inactive slots',
+      () async {
+    final repository = HomeContentRepository(
+      client: StorefrontClient(
+        config: const StorefrontConfig(
+          shopDomain: 'shop.example.com',
+          accessToken: 'public-token',
+        ),
+        transport: (_, __, ___) async => {
+          'data': {
+            'shop': <String, Object?>{},
+            'banners': {
+              'edges': [
+                {
+                  'node': {
+                    'handle': 'b01',
+                    'fields': [
+                      {'key': 'slot', 'value': 'B01'},
+                      {
+                        'key': 'image',
+                        'value': 'gid://shopify/MediaImage/1',
+                        'reference': {
+                          'image': {
+                            'url':
+                                'https://cdn.shopify.com/banners/b01-new.jpg',
+                            'altText': 'Alt desde MediaImage',
+                          },
+                        },
+                      },
+                      {
+                        'key': 'alt_text',
+                        'value': 'Compra fácil desde México · Edición Otoño',
+                      },
+                      {'key': 'destination_url', 'value': '/collections/all'},
+                      {'key': 'active', 'value': 'true'},
+                    ],
+                  },
+                },
+                {
+                  'node': {
+                    'handle': 'b02',
+                    'fields': [
+                      {'key': 'slot', 'value': 'B02'},
+                      {
+                        'key': 'image',
+                        'value': 'https://cdn.shopify.com/banners/b02-off.jpg',
+                      },
+                      {'key': 'active', 'value': 'false'},
+                    ],
+                  },
+                },
+              ],
+            },
+            'collections': {'edges': <Object>[]},
+          },
+        },
+      ),
+    );
+
+    final content = await repository.fetch();
+
+    expect(content.bannersBySlot.containsKey('B01'), isTrue);
+    expect(
+      content.bannersBySlot['B01']?.imageUrl,
+      'https://cdn.shopify.com/banners/b01-new.jpg',
+    );
+    expect(
+      content.bannersBySlot['B01']?.copy,
+      'Compra fácil desde México · Edición Otoño',
+    );
+    expect(content.bannersBySlot['B01']?.destinationUrl, '/collections/all');
+    expect(content.bannersBySlot.containsKey('B02'), isFalse);
   });
 }

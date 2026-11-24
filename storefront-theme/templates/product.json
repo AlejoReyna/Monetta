@@ -21,8 +21,8 @@
         "shipping_details": {
           "type": "custom",
           "settings": {
-            "title": "Envíos y devoluciones",
-            "content": "<p>Consulta las condiciones de envío y cambios con nuestro equipo por WhatsApp.</p>",
+            "title": "Envíos, pagos y mayoreo",
+            "content": "<p><strong>Envío gratis:</strong> Al crear e iniciar sesión en tu cuenta Monetta Rewards ($199 MXN a cualquier parte de México si compras como invitado).</p><p><strong>6 pagos sin intereses:</strong> Mediante Mercado Pago, Kueski Pay, PayPal y tarjetas participantes.</p><p><strong>Mayoreo y apartado:</strong> 10% de descuento en cualquier producto al elegir 3 o más piezas (todas las colecciones participan). Apartado de 20 días con anticipo de $800 MXN por todo el pedido en mayoreo (3+ piezas) o $400 MXN en menudeo (1–2 piezas).</p>",
             "open": false
           }
         }
@@ -35,7 +35,7 @@
       "settings": {
         "show_dynamic_checkout": true,
         "show_apartado": true,
-        "apartado_copy": "Solicitud manual. Enviar el mensaje no aparta la pieza ni cobra nada.",
+        "apartado_copy": "Apartado a 20 días: $400 MXN de anticipo por todo el pedido en menudeo (1–2 piezas) y $800 MXN en mayoreo (desde 3 piezas, con 10% de descuento en todas las colecciones).",
         "show_whatsapp_question": true,
         "whatsapp_number": "528261066868"
       }

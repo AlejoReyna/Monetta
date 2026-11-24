@@ -4,6 +4,83 @@
 /// es la autoridad; el cliente muestra lo que el contrato devuelve.
 library;
 
+class RewardsTierBenefit {
+  const RewardsTierBenefit({
+    required this.kind,
+    required this.label,
+    this.amountCents,
+  });
+
+  final String kind;
+  final String label;
+  final int? amountCents;
+
+  factory RewardsTierBenefit.fromJson(Map<String, dynamic> json) =>
+      RewardsTierBenefit(
+        kind: '${json['kind'] ?? 'benefit'}',
+        label: '${json['label'] ?? ''}',
+        amountCents: (json['amountCents'] as num?)?.toInt(),
+      );
+}
+
+class RewardsTier {
+  const RewardsTier({
+    required this.level,
+    required this.nextLevel,
+    required this.isFinalLevel,
+    required this.completedPurchases,
+    required this.targetPurchases,
+    required this.progressFraction,
+    required this.progressPercent,
+    required this.purchaseCountLabel,
+    required this.cashbackBps,
+    required this.bonusCents,
+    required this.freeShipping,
+    required this.introduction,
+    required this.benefits,
+  });
+
+  final String level;
+  final String? nextLevel;
+  final bool isFinalLevel;
+  final int completedPurchases;
+  final int targetPurchases;
+  final double progressFraction;
+  final int progressPercent;
+  final String purchaseCountLabel;
+  final int cashbackBps;
+  final int bonusCents;
+  final bool freeShipping;
+  final String introduction;
+  final List<RewardsTierBenefit> benefits;
+
+  factory RewardsTier.fromJson(Map<String, dynamic> json) {
+    final rawBenefits = json['benefits'];
+    final benefits = <RewardsTierBenefit>[
+      if (rawBenefits is List)
+        for (final item in rawBenefits)
+          if (item is Map<String, dynamic>) RewardsTierBenefit.fromJson(item),
+    ];
+    final fraction =
+        ((json['progressFraction'] as num? ?? 0).toDouble()).clamp(0.0, 1.0);
+    return RewardsTier(
+      level: '${json['level'] ?? 'PRO'}',
+      nextLevel: json['nextLevel'] as String?,
+      isFinalLevel: json['isFinalLevel'] == true,
+      completedPurchases: (json['completedPurchases'] as num? ?? 0).toInt(),
+      targetPurchases: (json['targetPurchases'] as num? ?? 10).toInt(),
+      progressFraction: fraction,
+      progressPercent: (json['progressPercent'] as num? ?? 0).toInt(),
+      purchaseCountLabel: '${json['purchaseCountLabel'] ?? ''}',
+      cashbackBps: (json['cashbackBps'] as num? ?? 100).toInt(),
+      bonusCents: (json['bonusCents'] as num? ?? 0).toInt(),
+      freeShipping: json['freeShipping'] != false,
+      introduction: '${json['introduction'] ?? ''}',
+      benefits: List.unmodifiable(benefits),
+    );
+  }
+}
+
 class RewardsSummary {
   const RewardsSummary({
     required this.redemptionEnabled,
@@ -15,6 +92,8 @@ class RewardsSummary {
     required this.firstPurchaseEnabled,
     required this.reviewEnabled,
     required this.referralEnabled,
+    this.earnBps = 100,
+    this.tier,
   });
 
   final bool redemptionEnabled;
@@ -26,12 +105,12 @@ class RewardsSummary {
   final bool firstPurchaseEnabled;
   final bool reviewEnabled;
   final bool referralEnabled;
+  final int earnBps;
+  final RewardsTier? tier;
 
-  // V1 has no authoritative membership, thresholds or benefits source.
-  // These gates must stay closed until a versioned membership DTO is approved.
-  bool get membershipAvailable => false;
-  bool get tierProgressAvailable => false;
-  bool get tierBenefitsAvailable => false;
+  bool get membershipAvailable => tier != null;
+  bool get tierProgressAvailable => tier != null;
+  bool get tierBenefitsAvailable => tier != null && tier!.benefits.isNotEmpty;
 
   factory RewardsSummary.fromJson(Map<String, dynamic> json) {
     final rawBalance = json['balance'];
@@ -44,6 +123,7 @@ class RewardsSummary {
     final program =
         (json['program'] ?? <String, dynamic>{}) as Map<String, dynamic>;
     final expiry = balance['nextExpiry'] as Map<String, dynamic>?;
+    final rawTier = json['tier'];
     return RewardsSummary(
       redemptionEnabled: program['redemptionEnabled'] == true,
       availableCents: _requiredInt(balance['availableCents']),
@@ -63,11 +143,26 @@ class RewardsSummary {
           (incentives['review'] as Map<String, dynamic>?)?['enabled'] == true,
       referralEnabled:
           (incentives['referral'] as Map<String, dynamic>?)?['enabled'] == true,
+      earnBps: (program['earnBps'] as num? ?? 100).toInt(),
+      tier: rawTier is Map<String, dynamic>
+          ? RewardsTier.fromJson(rawTier)
+          : null,
     );
   }
 
   /// "Tienes $184 Monetta disponibles".
   String get availableLabel => _short(availableCents);
+
+  /// "$41.97" (always two decimal places for UI:G19/UI:G21).
+  String get availableMxnAmount => formatMxn(availableCents);
+
+  static String formatMxn(int cents) {
+    final sign = cents < 0 ? '-' : '';
+    final abs = cents.abs();
+    final major = abs ~/ 100;
+    final frac = (abs % 100).toString().padLeft(2, '0');
+    return '$sign\$$major.$frac';
+  }
 
   static String _short(int cents) {
     final major = cents / 100;

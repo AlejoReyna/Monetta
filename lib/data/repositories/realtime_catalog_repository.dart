@@ -81,6 +81,9 @@ class RealtimeCatalogRepository {
   final CatalogWriteCoordinator _writeCoordinator;
   final RealtimeRetryDelay _retryDelay;
 
+  final Map<String, Product> _lastProductsByDocId = <String, Product>{};
+  final Map<String, String> _lastStampByDocId = <String, String>{};
+
   Stream<RealtimeCatalogUpdate> watch() async* {
     var retryAttempt = 0;
     while (true) {
@@ -105,10 +108,29 @@ class RealtimeCatalogRepository {
     if (documents.isEmpty) return const RealtimeCatalogUpdate.empty();
 
     final products = <Product>[];
+    final changedProducts = <Product>[];
+    final nextProductsByDocId = <String, Product>{};
+    final nextStampByDocId = <String, String>{};
     final invalidDocumentIds = <String>[];
+
     for (final document in documents) {
+      final stamp = _documentStamp(document);
+      final cachedProduct =
+          (stamp != null && _lastStampByDocId[document.documentId] == stamp)
+              ? _lastProductsByDocId[document.documentId]
+              : null;
+      if (cachedProduct != null) {
+        products.add(cachedProduct);
+        nextProductsByDocId[document.documentId] = cachedProduct;
+        nextStampByDocId[document.documentId] = stamp!;
+        continue;
+      }
       try {
-        products.add(_productFromDocument(document));
+        final parsed = _productFromDocument(document);
+        products.add(parsed);
+        changedProducts.add(parsed);
+        nextProductsByDocId[document.documentId] = parsed;
+        if (stamp != null) nextStampByDocId[document.documentId] = stamp;
       } catch (_) {
         invalidDocumentIds.add(document.documentId);
       }
@@ -118,16 +140,47 @@ class RealtimeCatalogRepository {
       return RealtimeCatalogUpdate.invalid(invalidDocumentIds);
     }
 
+    final hadPreviousSnapshot = _lastProductsByDocId.isNotEmpty;
+    final hasDeletions = hadPreviousSnapshot &&
+        _lastProductsByDocId.keys
+            .any((id) => !nextProductsByDocId.containsKey(id));
+
+    _lastProductsByDocId
+      ..clear()
+      ..addAll(nextProductsByDocId);
+    _lastStampByDocId
+      ..clear()
+      ..addAll(nextStampByDocId);
+
     final metadata = CatalogCacheMetadata.forProducts(
       source: CatalogCacheSource.firestore,
       products: products,
       syncedAt: DateTime.now(),
       status: CatalogCacheStatus.healthy,
     );
-    await _writeCoordinator.runFirestoreWrite(
-      () => _cache.replaceProducts(products, metadata: metadata),
-    );
+    await _writeCoordinator.runFirestoreWrite(() async {
+      if (!hadPreviousSnapshot || hasDeletions) {
+        await _cache.replaceProducts(products, metadata: metadata);
+      } else {
+        if (changedProducts.isNotEmpty) {
+          await _cache.upsertProducts(changedProducts);
+        }
+        await _cache.saveMetadata(metadata);
+      }
+    });
     return RealtimeCatalogUpdate.applied(products, metadata);
+  }
+
+  static String? _documentStamp(CatalogRealtimeDocument document) {
+    final data = document.data;
+    final updatedAt = data['updatedAt'];
+    final syncedAt = data['syncedAt'];
+    final title = data['title'];
+    final variants = data['variants'];
+    if (updatedAt is! String || title is! String || variants is! List) {
+      return null;
+    }
+    return '$updatedAt|$syncedAt|$title|${variants.length}';
   }
 
   static Product _productFromDocument(CatalogRealtimeDocument document) {
@@ -160,6 +213,10 @@ class RealtimeCatalogRepository {
           compareAtPrice: _nullableMoney(
             variant['compareAtPrice'],
             'variant.compareAtPrice',
+          ),
+          sixMsiInstallmentAmount: _nullableMoney(
+            variant['sixMsiInstallmentAmount'],
+            'variant.sixMsiInstallmentAmount',
           ),
           sku: _nullableString(variant['sku'], 'variant.sku'),
           selectedOptions: _variantOptions(variant['selectedOptions']),

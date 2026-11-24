@@ -5,6 +5,7 @@
   (new tab) opens it directly, and without JavaScript the whole card is a plain link to it. Everything shown is read from the product at render
   time (price, compare-at, availability); nothing is cached.
 
+  @param {object} [selected_variant] - Exact variant to feature.
   @param {object} product - Shopify product.
   @param {string} [density] - 'grid' (default; two-line name) or 'compact' (one-line name) for Home rails; 'mini' is the product
     page's four-across related row: photo, brand, one-line name and price, no pill.
@@ -17,23 +18,27 @@
 {%- liquid
   assign density = density | default: 'grid'
   assign sizes = sizes | default: '(min-width: 1200px) 260px, (min-width: 768px) 33vw, 50vw'
-  assign variant = product.selected_or_first_available_variant
-  assign in_stock = product.available
+  assign variant = selected_variant | default: product.selected_or_first_available_variant
+  assign product_url = variant.url
+  if product_url == blank
+    assign product_url = product.url | split: '?' | first | append: '?variant=' | append: variant.id
+  endif
+  assign in_stock = variant.available
   assign currency = cart.currency.iso_code
   assign show_view = false
   if view_button == true and density != 'mini'
     assign show_view = true
   endif
-  assign pct = 0
-  if in_stock and variant.compare_at_price > variant.price
-    assign pct = variant.compare_at_price | minus: variant.price | times: 100.0 | divided_by: variant.compare_at_price | round
-  endif
   capture brand
     render 'monetta-facet', product: product, kind: 'brands'
   endcapture
   assign brand = brand | strip
+  capture card_category
+    render 'monetta-facet', product: product, kind: 'categories'
+  endcapture
+  assign card_category = card_category | strip
   assign eyebrow = ''
-  if in_stock and density != 'mini'
+  if in_stock and density != 'mini' and card_category != 'Perfume'
     assign delivery = product.metafields.custom.entrega.value
     if delivery != blank
       assign eyebrow = delivery
@@ -42,16 +47,16 @@
     endif
   endif
   assign now_seconds = 'now' | date: '%s' | plus: 0
-  assign created_seconds = product.created_at | date: '%s' | plus: 0
+  assign created_seconds = product.metafields.custom.fecha_comercial.value | date: '%s' | plus: 0
   assign age_days = now_seconds | minus: created_seconds | divided_by: 86400
   assign is_new = false
-  if age_days >= 0 and age_days <= 30
+  if created_seconds > 0 and age_days >= 0 and age_days <= 30
     assign is_new = true
   endif
-  assign image = product.featured_image
+  assign image = variant.featured_image | default: product.featured_image
 -%}
 <article class="card card--{{ density }}" data-product-handle="{{ product.handle }}">
-  <a class="card__link" href="{{ product.url }}" data-quick-view="{{ product.handle }}" data-product-url="{{ product.url }}" aria-haspopup="dialog">
+  <a class="card__link" href="{{ product_url }}" data-quick-view="{{ product.handle }}" data-product-url="{{ product_url }}" aria-haspopup="dialog">
     <div class="card__media">
       {%- if image -%}
         {%- if xl_widths != blank -%}
@@ -69,7 +74,7 @@
       {%- else -%}
         {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
       {%- endif -%}
-      {%- if pct > 0 -%}<span class="badge badge--sale card__badge">-{{ pct }}%</span>{%- elsif is_new and in_stock -%}<span class="badge card__badge badge--fresh">Nuevo</span>{%- endif -%}
+      {%- if is_new and in_stock -%}<span class="badge card__badge badge--fresh">Nuevo</span>{%- endif -%}
       {%- unless in_stock -%}<span class="card__soldout"><span class="badge badge--seal">Agotado</span></span>{%- endunless -%}
     </div>
     <div class="card__body">
@@ -77,18 +82,13 @@
       {%- if brand != blank -%}<p class="card__brand">{{ brand | escape }}</p>{%- elsif listing_card -%}<p class="card__brand card__slot-empty" aria-hidden="true"></p>{%- endif -%}
       <h3 class="card__name">{{ product.title | escape }}</h3>
       <p class="card__price">
-        <span class="price">
-          {%- if product.price_varies -%}Desde {{ product.price_min | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}{%- else -%}{{ variant.price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}{%- endif -%}
-        </span>
-        {%- if pct > 0 -%}
-          <span class="visually-hidden">, antes</span><s class="price-compare">{{ variant.compare_at_price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</s>
-        {%- endif -%}
+        {% render 'monetta-variant-price', variant: variant, currency: currency %}
         {%- unless in_stock -%}<span class="visually-hidden">, agotado</span>{%- endunless -%}
       </p>
     </div>
   </a>
   {%- if show_view -%}
-    <a class="card__view" href="{{ product.url }}" aria-label="Ver producto: {{ product.title | escape }}">Ver producto</a>
+    <a class="card__view" href="{{ product_url }}" aria-label="Ver producto: {{ product.title | escape }}">Ver producto</a>
   {%- endif -%}
   <div class="card__actions">
     {%- comment -%}The favourite is browser-local (assets/monetta-merchandising.js shows it once it can read the list).{%- endcomment -%}

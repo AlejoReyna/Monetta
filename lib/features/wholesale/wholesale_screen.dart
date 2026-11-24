@@ -132,21 +132,13 @@ class WholesaleScreen extends StatelessWidget {
                       ),
                       (
                         Icons.shopping_cart_outlined,
-                        showUnapprovedEditorial
-                            ? 'Agrega mínimo 3 piezas'
-                            : 'Agrega tus piezas',
-                        showUnapprovedEditorial
-                            ? 'Combina tus favoritos en el carrito y el descuento se aplica automáticamente.'
-                            : WholesalePresentation.minimum,
+                        'Agrega mínimo 3 piezas',
+                        WholesalePresentation.minimum,
                       ),
                       (
                         Icons.credit_card_outlined,
-                        showUnapprovedEditorial
-                            ? 'Liquida o aparta'
-                            : 'Consulta el pago',
-                        showUnapprovedEditorial
-                            ? WholesalePresentation.reservation
-                            : 'Consulta las condiciones vigentes por WhatsApp.',
+                        'Liquida o aparta',
+                        WholesalePresentation.reservation,
                       ),
                     ];
                     return SingleChildScrollView(

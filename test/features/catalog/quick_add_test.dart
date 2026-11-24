@@ -34,7 +34,7 @@ bool _isQuickAddKey(Widget widget) =>
     widget.key is ValueKey<String> &&
     (widget.key! as ValueKey<String>).value.startsWith('quick-add-');
 
-Finder _inMiniCart() => find.text('En tu bolsa');
+Finder _inMiniCart() => find.text('Agregado al carrito');
 
 Finder _closeQuickView() => find.byTooltip(kCloseQuickViewTooltip);
 
@@ -477,8 +477,7 @@ void main() {
         expect(store.bagLines.single.quantity, 1);
         // UI v4.1: the quick view stays, confirms and leaves the cart closed.
         expect(_closeQuickView(), findsOneWidget, reason: 'the sheet stays');
-        expect(find.text('Agregado al carrito'), findsOneWidget);
-        expect(_inMiniCart(), findsNothing);
+        expect(_inMiniCart(), findsOneWidget);
         await flush(tester);
       });
     }

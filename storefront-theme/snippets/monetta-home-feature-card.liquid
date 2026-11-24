@@ -8,10 +8,6 @@
 {%- liquid
   assign variant = product.selected_or_first_available_variant
   assign currency = cart.currency.iso_code
-  assign pct = 0
-  if product.available and variant.compare_at_price > variant.price
-    assign pct = variant.compare_at_price | minus: variant.price | times: 100.0 | divided_by: variant.compare_at_price | round
-  endif
   capture brand
     render 'monetta-facet', product: product, kind: 'brands'
   endcapture
@@ -28,10 +24,11 @@
       endif
     endif
   endif
-  assign image = product.featured_image
+  assign image = variant.featured_image | default: product.featured_image
 -%}
 <article class="v41-feature__card" data-product-handle="{{ product.handle }}">
-  <a class="v41-feature__media" href="{{ product.url }}">
+  <div class="v43-feature-media">
+  <a class="v41-feature__media" href="{{ product.url }}?variant={{ variant.id }}">
     {%- if image -%}
       <img src="{{ image | image_url: width: 1200 }}" width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt | default: product.title | escape }}" {% if eager %}loading="eager"{% else %}loading="lazy"{% endif %} decoding="async">
     {%- endif -%}
@@ -41,17 +38,13 @@
     {%- unless product.available -%}<span class="v41-sold">AGOTADO</span>{%- endunless -%}
   </a>
   <button type="button" class="v41-fav" data-save-product="{{ product.handle }}" data-product-title="{{ product.title | escape }}" aria-pressed="false" aria-label="Guardar {{ product.title | escape }}" hidden>{% render 'monetta-icon', name: 'heart', size: 24, class: 'save-icon--off' %}{% render 'monetta-icon', name: 'heartFilled', size: 24, class: 'save-icon--on' %}</button>
+  {% render 'monetta-feature-add', product: product, variant: variant, class: 'v41-feed__add' %}
+  </div>
   <div class="v41-feature__meta">
     <div class="v41-feature__copy">
       {%- if brand != blank -%}<p class="v41-feature__brand">{{ brand | escape }}</p>{%- endif -%}
       <p class="v41-feature__name">{{ product.title | escape }}</p>
     </div>
-    <p class="v41-feature__price">
-      <span class="v41-feature__now">{{ variant.price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</span>
-      {%- if pct > 0 -%}
-        <s>{{ variant.compare_at_price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</s>
-        <span class="v41-feature__pct">({{ pct }}%)</span>
-      {%- endif -%}
-    </p>
+    <p class="v41-feature__price">{% render 'monetta-variant-price', variant: variant, currency: currency %}</p>
   </div>
 </article>

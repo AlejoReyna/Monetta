@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/account_controller.dart';
 import 'package:monetta_app/app/catalog_store.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/theme.dart';
+import 'package:monetta_app/features/account/account_boutique.dart';
+import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
 import 'package:monetta_app/data/customer_auth/customer_auth_error.dart';
 import 'package:monetta_app/data/local/account_store.dart';
@@ -141,6 +144,20 @@ void main() {
       expect(balance.data, isNot('Ver saldo'));
       expect(balance.data, contains('Monetta'));
       expect(balance.data, isNot(contains('pts')));
+      expect(balance.style?.fontFamily, kBoutiqueSerifFamily);
+      expect(balance.style?.color, MonettaTokens.gold);
+
+      final pillRect = tester.getRect(
+        find.byKey(const ValueKey('account-open-rewards-guide')),
+      );
+      final eCardRect = tester.getRect(
+        find.ancestor(
+          of: find.byKey(const ValueKey('account-open-orders')),
+          matching: find.byType(ECard),
+        ),
+      );
+      expect(pillRect.left, closeTo(eCardRect.left, 0.01));
+      expect(pillRect.width, closeTo(eCardRect.width, 0.01));
     });
 
     testWidgets('access rows navigate to the real E destinations',

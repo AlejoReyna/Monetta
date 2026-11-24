@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../app/theme.dart';
 import '../../data/normalize/text.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
@@ -583,6 +584,178 @@ class _OptionChip extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Displays the active variant's price and comparison in shopper order.
+class SelectionPriceView extends StatelessWidget {
+  const SelectionPriceView({
+    required this.price,
+    this.compare,
+    this.sixMsiAmount,
+    this.trailing,
+    this.currentKey,
+    this.size = 18,
+    this.inStock = true,
+    this.centered = false,
+    super.key,
+  });
+
+  final double price;
+  final double? compare;
+  final double? sixMsiAmount;
+  final Widget? trailing;
+  final Key? currentKey;
+  final double size;
+  final bool inStock;
+  final bool centered;
+
+  static double _measureSpanWidth(
+    BuildContext context,
+    InlineSpan span,
+    TextScaler scaler,
+  ) {
+    final painter = TextPainter(
+      text: span,
+      textDirection: Directionality.of(context),
+      textScaler: scaler,
+      maxLines: 1,
+    )..layout();
+    final width = painter.width;
+    painter.dispose();
+    return width;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final previous = compare;
+    final validCompare = previous != null &&
+        previous.isFinite &&
+        price.isFinite &&
+        price >= 0 &&
+        previous > price;
+    final current = formatShopperPrice(price);
+    final textScaler = MediaQuery.textScalerOf(context);
+    final enlargedText = textScaler.scale(14) > 16;
+    final priceStyle = boutiqueText(
+      size: size,
+      color: inStock ? palette.ink : palette.inkMuted,
+      weight: FontWeight.w600,
+    );
+    final priceChildren = <InlineSpan>[
+      TextSpan(text: current.replaceFirst(' MXN', '')),
+      TextSpan(text: ' mxn', style: TextStyle(fontSize: size * .72)),
+    ];
+    final discountLabel = validCompare
+        ? '-${((previous - price) * 100 / previous).round()}%'
+        : null;
+    final discountStyle = boutiqueText(
+      size: 13,
+      color: context.monettaColors.success,
+      weight: FontWeight.w600,
+    );
+    final priceAndDiscount = Wrap(
+      alignment: centered ? WrapAlignment.center : WrapAlignment.start,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        Text.rich(
+          key: currentKey,
+          style: priceStyle,
+          TextSpan(children: priceChildren),
+        ),
+        if (discountLabel != null)
+          Text(
+            discountLabel,
+            key: const ValueKey('discount-badge'),
+            style: discountStyle,
+          ),
+      ],
+    );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment:
+          centered ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      children: [
+        if (validCompare)
+          Text(
+            formatShopperPrice(previous).replaceFirst(' MXN', ''),
+            semanticsLabel: 'Precio anterior: ${formatShopperPrice(previous)}',
+            style: boutiqueText(
+              size: 13,
+              color: palette.inkMuted,
+              decoration: TextDecoration.lineThrough,
+            ),
+          ),
+        if (trailing == null)
+          priceAndDiscount
+        else
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const minTrailingWidth = 120.0;
+              const spacing = 8.0;
+              final baseStyle = DefaultTextStyle.of(context).style;
+              final priceWidth = _measureSpanWidth(
+                context,
+                TextSpan(
+                  style: baseStyle.merge(priceStyle),
+                  children: priceChildren,
+                ),
+                textScaler,
+              );
+              final discountWidth = discountLabel == null
+                  ? 0.0
+                  : spacing +
+                      _measureSpanWidth(
+                        context,
+                        TextSpan(
+                          text: discountLabel,
+                          style: baseStyle.merge(discountStyle),
+                        ),
+                        textScaler,
+                      );
+              final priceBlockWidth = priceWidth + discountWidth;
+              final useInlineRow = !centered &&
+                  !enlargedText &&
+                  constraints.maxWidth.isFinite &&
+                  constraints.maxWidth - priceBlockWidth - spacing >=
+                      minTrailingWidth;
+              if (useInlineRow) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    priceAndDiscount,
+                    const SizedBox(width: spacing),
+                    Flexible(child: trailing!),
+                  ],
+                );
+              }
+              return Wrap(
+                alignment:
+                    centered ? WrapAlignment.center : WrapAlignment.start,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: spacing,
+                runSpacing: 4,
+                children: [
+                  priceAndDiscount,
+                  trailing!,
+                ],
+              );
+            },
+          ),
+        if (sixMsiAmount != null && sixMsiAmount!.isFinite && sixMsiAmount! > 0)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              '6 pagos sin intereses de ${formatShopperPrice(sixMsiAmount!).replaceFirst(' MXN', '')} mxn',
+              key: const ValueKey('six-msi-line'),
+              style: boutiqueText(size: 13, color: palette.inkMuted),
+            ),
+          ),
+      ],
     );
   }
 }

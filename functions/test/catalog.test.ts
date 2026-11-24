@@ -104,4 +104,25 @@ describe("authoritative variant metadata", () => {
     expect(mapped.variants[0]?.selectedOptions).toEqual({});
     expect(mapped.variants[0]?.imageUrls).toEqual([]);
   });
+
+  it("maps monetta.six_msi_amount metafield into sixMsiInstallmentAmount when positive", () => {
+    const mapped = toCatalogProduct({
+      ...product,
+      variants: {
+        nodes: [
+          {
+            ...product.variants.nodes[0]!,
+            sixMsiAmount: { value: "216.50" },
+          },
+          {
+            ...product.variants.nodes[0]!,
+            id: "gid://shopify/ProductVariant/457",
+            sixMsiAmount: { value: '{"amount":"249.83","currency_code":"MXN"}' },
+          },
+        ],
+      },
+    });
+    expect(mapped.variants[0]?.sixMsiInstallmentAmount).toBe(216.5);
+    expect(mapped.variants[1]?.sixMsiInstallmentAmount).toBe(249.83);
+  });
 });

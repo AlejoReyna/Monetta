@@ -6,12 +6,15 @@ import 'package:flutter/services.dart';
 import '../data/shopify/cart/checkout_launcher.dart';
 
 final class MethodChannelCheckoutLauncher implements CheckoutLauncher {
-  MethodChannelCheckoutLauncher({MethodChannel? channel})
-      : _channel = channel ?? const MethodChannel(channelName);
+  MethodChannelCheckoutLauncher({
+    MethodChannel? channel,
+    this.resumeAfterStorefrontPassword = false,
+  }) : _channel = channel ?? const MethodChannel(channelName);
 
   static const channelName = 'mx.monetta.checkout_kit';
 
   final MethodChannel _channel;
+  final bool resumeAfterStorefrontPassword;
   bool _presenting = false;
 
   @override
@@ -39,11 +42,20 @@ final class MethodChannelCheckoutLauncher implements CheckoutLauncher {
     try {
       final raw = await _channel.invokeMethod<Object?>('present', {
         'url': checkoutUrl.revealForNativeBridge().toString(),
+        if (resumeAfterStorefrontPassword)
+          'resumeAfterStorefrontPassword': true,
       });
       if (raw is! Map) return _safeFailure(CheckoutFailureCode.unknown);
       return switch (raw['status']) {
         'completed' => const CheckoutCompleted(),
         'cancelled' => const CheckoutCancelled(),
+        'failed' when raw['code'] == 'storefront_instead_of_checkout' =>
+          const CheckoutFailed(
+            code: CheckoutFailureCode.configuration,
+            userMessage:
+                'Shopify abrió la tienda en lugar del checkout. Tu bolsa se conserva.',
+            allowExternalBrowser: false,
+          ),
         'failed' => _safeFailure(_failureCode(raw['code'])),
         _ => _safeFailure(CheckoutFailureCode.unknown),
       };

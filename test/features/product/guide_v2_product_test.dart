@@ -111,11 +111,11 @@ void main() {
       // UI v4.1 services, with the delivered copy.
       for (final text in [
         'ENVÍO GRATIS',
-        '5 - 7 días hábiles',
+        'con tu cuenta',
         'Producto Original',
         'Importado desde E.U.A',
-        'Paga a Meses',
-        'Sin Intereses',
+        'Pagos seguros',
+        'Compra con confianza',
       ]) {
         expect(
           find.descendant(of: row, matching: find.text(text)),

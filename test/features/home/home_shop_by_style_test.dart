@@ -165,7 +165,8 @@ void main() {
   });
 
   group('Tus marcas favoritas', () {
-    testWidgets('a 4-column grid of the twelve brands with their logos', (
+    testWidgets(
+        'a horizontal rail keeps the editorial logos and its closing action', (
       tester,
     ) async {
       final catalog = await store();
@@ -185,62 +186,34 @@ void main() {
       final configured = {
         for (final brand in HomeContent.fallback.brands) brand.handle: brand,
       };
-      final tiles = [
-        for (final element in find
-            .descendant(
-              of: section,
-              matching: find.byWidgetPredicate(
-                (w) =>
-                    w.key is ValueKey<String> &&
-                    (w.key! as ValueKey<String>).value.startsWith(
-                          'home-brand-entrance-',
-                        ),
-              ),
-            )
-            .evaluate())
-          (element.widget.key! as ValueKey<String>).value.substring(
-                'home-brand-entrance-'.length,
-              ),
-      ];
-      // The twelve configured brands, the guide's five first; none invented.
-      expect(tiles, [
+      final handles = [
         'coach',
         'guess-1',
         'michael-kors',
         'steve-madden',
         'tommy-hilfiger',
         'anne-klein',
-        'olalplex',
         'christian-dior',
         'the-ordinary',
         'summer-fridays',
         'laneige',
         'rhode',
-      ]);
-      for (final handle in tiles) {
+      ];
+      final rail = find.descendant(
+        of: find.byKey(const ValueKey('home-brands-rail')),
+        matching: find.byType(Scrollable),
+      );
+      for (final handle in handles) {
         final brand = configured[handle]!;
         final tile = find.byKey(ValueKey('home-brand-$handle'));
-        // The shared guide tile (tinted rectangle, large wordmark).
+        await tester.scrollUntilVisible(tile, 150, scrollable: rail);
         expect(tester.widget(tile), isA<GuideBrandTile>());
-        // Real bundled wordmark, named like `brandLogoAsset` (by the tile's
-        // title: «Christian Dior» is shown, and filed, as «Dior»).
-        expect(
-          _assetOf(tester, tile),
-          brandLogoAsset(brand.title.toLowerCase().replaceAll(' ', '_')),
-        );
+        expect(_assetOf(tester, tile),
+            brandLogoAsset(brand.title.toLowerCase().replaceAll(' ', '_')));
         expect(File(brand.fallbackAsset).existsSync(), isTrue);
       }
-      // Four across, then the fifth wraps under the first.
-      final tops = [
-        for (final handle in tiles)
-          tester.getTopLeft(find.byKey(ValueKey('home-brand-$handle'))),
-      ];
-      expect(tops[0].dy, tops[1].dy);
-      expect(tops[1].dy, tops[2].dy);
-      expect(tops[2].dy, tops[3].dy);
-      expect(tops[4].dy, greaterThan(tops[0].dy));
-      expect(tops[4].dx, tops[0].dx);
-      // «Ver todas» is kept.
+      await tester.scrollUntilVisible(find.byTooltip('Ver marcas'), 145,
+          scrollable: rail);
       expect(find.text('Ver todas'), findsOneWidget);
     });
 

@@ -29,21 +29,33 @@ void main() {
               controller: controller,
               scope: scope,
               localIntent: intent,
-              onContinue: () {},
             ),
           ),
         ),
       ),
     );
 
-    expect(find.text('1250.0000 MXN'), findsOneWidget);
-    expect(find.text('1100.5000 MXN'), findsOneWidget);
+    expect(find.text('Resumen de compra'), findsNothing);
+    expect(find.text('Subtotal de Shopify'), findsNothing);
+    expect(find.text('Subtotal de Shopify (estimado)'), findsNothing);
+    expect(find.text('Total de Shopify'), findsNothing);
+    expect(find.text('Total de Shopify (estimado)'), findsNothing);
+    expect(find.text('1250.0000 MXN'), findsNothing);
+    expect(find.text('1100.5000 MXN'), findsNothing);
     expect(find.text('−149.5000 MXN'), findsOneWidget);
     expect(
       find.text('Incluye descuentos automáticos de Shopify'),
       findsOneWidget,
     );
-    expect(find.text('Se calcula en Shopify'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('discount-code-field')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('apply-discount-button')),
+      findsOneWidget,
+    );
+    expect(find.text('Se calcula en Shopify'), findsNothing);
     expect(find.textContaining(r'$149'), findsNothing);
     expect(find.text('Gratis'), findsNothing);
   });
@@ -61,7 +73,6 @@ void main() {
               controller: controller,
               scope: scope,
               localIntent: intent,
-              onContinue: () {},
             ),
           ),
         ),

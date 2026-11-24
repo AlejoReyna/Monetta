@@ -16,6 +16,7 @@ import '../boutique/boutique_tokens.dart';
 import '../boutique/client_guide_components.dart';
 import '../boutique/guide_art.dart';
 import '../rewards/rewards_api.dart';
+import '../rewards/rewards_components.dart';
 import '../rewards/rewards_section.dart';
 import 'duo_workspace.dart';
 
@@ -196,16 +197,14 @@ class MonettaSideMenu extends StatelessWidget {
                 controller: controller,
                 reader: rewardsReader,
               ),
-            if (controller == null && signedIn && balanceLabel != null) ...[
-              const Text('Saldo'),
-              Text(
-                balanceLabel!,
-                style: boutiqueText(
-                  size: 22,
-                  color: context.monettaColors.success,
+            if (controller == null && signedIn && balanceLabel != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: RewardsBalancePill(
+                  amountText: balanceLabel!,
+                  hasBalance: true,
                 ),
               ),
-            ],
             if (onNotifications != null)
               ListTile(
                 key: const Key('side-menu-notifications'),
@@ -245,6 +244,28 @@ class MonettaSideMenu extends StatelessWidget {
               title: const Text('Todas las marcas'),
               onTap: () => _select(context, onAllBrands ?? brands),
             ),
+            if (store != null)
+              ListTile(
+                key: const Key('side-menu-offers'),
+                leading: Icon(
+                  Icons.shopping_bag_outlined,
+                  color: context.monettaColors.sale,
+                ),
+                title: const Text('Ofertas'),
+                onTap: () => _select(
+                  context,
+                  () => navigator.push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (_) => scopes(
+                        const CollectionScreen(
+                          title: 'Ofertas',
+                          offersCollection: true,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ListTile(
               key: const Key('side-menu-wholesale'),
               leading: const GuideSemanticImage(
@@ -433,34 +454,24 @@ class _SidebarBalanceState extends State<SidebarBalance> {
     if (_owner == null) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Saldo'),
-          Text(
-            _balance ??
-                (_loading
-                    ? 'Consultando…'
-                    : _failed
-                        ? 'No pudimos consultar tu saldo'
-                        : 'Saldo no disponible'),
-            style: boutiqueText(
-              size: 20,
-              color: _balance == null
-                  ? context.boutique.inkMuted
-                  : context.monettaColors.success,
-            ),
-          ),
-          if (_failed)
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: context.boutique.ink,
-                textStyle: boutiqueText(size: 14),
-              ),
-              onPressed: () => setState(_request),
-              child: const Text('Reintentar'),
-            ),
-        ],
+      child: RewardsBalancePill(
+        amountText: _balance ??
+            (_loading
+                ? 'Consultando…'
+                : _failed
+                    ? 'No pudimos consultar tu saldo'
+                    : 'Saldo no disponible'),
+        hasBalance: _balance != null,
+        footer: _failed
+            ? TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: context.boutique.ink,
+                  textStyle: boutiqueText(size: 14),
+                ),
+                onPressed: () => setState(_request),
+                child: const Text('Reintentar'),
+              )
+            : null,
       ),
     );
   }

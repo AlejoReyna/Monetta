@@ -23,6 +23,7 @@ const _labels = {
 
 const _lightActive = MonettaTokens.navigationActive;
 const _lightInactive = MonettaTokens.navigationInactive;
+const _lightSelection = Color(0xFFFBF6EE);
 const _darkActive = Color(0xFFF5F2EC);
 const _darkInactive = Color(0xFF8E8A85);
 
@@ -142,12 +143,30 @@ void main() {
             greaterThanOrEqualTo(3.0),
             reason: 'active against inactive',
           );
+          expect(
+            _selectionColor(tester, MonettaBottomDestination.home),
+            MonettaColors.dark.navigationSelection,
+            reason: 'dark active capsule keeps dark token',
+          );
+          expect(
+            _selectionColor(tester, MonettaBottomDestination.catalog).a,
+            0,
+            reason: 'dark inactive has no capsule',
+          );
+          final darkInk =
+              tester.widget<InkWell>(_dest(MonettaBottomDestination.home));
+          expect(darkInk.hoverColor, isNot(_lightSelection));
         } else {
           // v4.1 light: icon and label stay ink; the current destination is
-          // marked by its capsule (and w600), not by a second colour.
+          // marked by its cream capsule (and w600), not by a second colour.
           final capsule =
               _selectionColor(tester, MonettaBottomDestination.home);
-          expect(capsule, MonettaTokens.surfaceTile, reason: 'active capsule');
+          expect(capsule, _lightSelection, reason: 'active capsule');
+          expect(
+            capsule,
+            isNot(MonettaTokens.surfaceTile),
+            reason: 'replaces #E8ECE7',
+          );
           expect(
             _selectionColor(tester, MonettaBottomDestination.catalog).a,
             0,
@@ -158,6 +177,25 @@ void main() {
             greaterThanOrEqualTo(4.5),
             reason: 'active label on its capsule',
           );
+          final capsuleRadius = ((tester
+                  .widget<DecoratedBox>(
+                    find.byKey(const Key('bottom-nav-home-selection')),
+                  )
+                  .decoration) as BoxDecoration)
+              .borderRadius;
+          for (final d in _destinations) {
+            final ink = tester.widget<InkWell>(_dest(d));
+            expect(
+              ink.hoverColor,
+              _lightSelection,
+              reason: '${d.name} hover uses cream #FBF6EE in light theme',
+            );
+            expect(
+              ink.borderRadius,
+              capsuleRadius,
+              reason: '${d.name} InkWell borderRadius matches capsule',
+            );
+          }
         }
       });
     }
@@ -224,7 +262,7 @@ void main() {
         expect(alpha, greaterThan(0), reason: '${d.name} capsule mid-fade');
         expect(
           alpha,
-          lessThan(MonettaTokens.surfaceTile.a),
+          lessThan(_lightSelection.a),
           reason: '${d.name} capsule mid-fade',
         );
       }

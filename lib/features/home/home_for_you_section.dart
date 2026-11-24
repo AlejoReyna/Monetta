@@ -7,16 +7,15 @@ import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/shopper_copy.dart';
-import '../../app/theme.dart' show formatShopperPrice;
 import '../../reco/explainer.dart' show brandLabel;
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../../app/motion.dart';
 import '../boutique/boutique_tokens.dart';
+import '../catalog/quick_add_button.dart';
 import '../boutique/client_guide_components.dart';
-import '../checkout/checkout_screen.dart' show openBag;
+import '../checkout/checkout_screen.dart' show openCheckout;
 import '../product/product_selection.dart';
-import '../product/quick_view.dart' show showProductQuickView;
 import 'home_v41_catalog.dart';
 
 class HomeForYouSection extends StatefulWidget {
@@ -29,12 +28,36 @@ class HomeForYouSection extends StatefulWidget {
 class _HomeForYouSectionState extends State<HomeForYouSection> {
   final Map<String, int> _variantIndexByProduct = {};
   int? _expandedIndex;
+  String? _buyingProductId;
 
   int _variantIndexFor(Product product) =>
       _variantIndexByProduct[product.id] ?? 0;
 
   void _setVariantIndex(Product product, int index) {
     setState(() => _variantIndexByProduct[product.id] = index);
+  }
+
+  Future<void> _buyNow(Product product, int variantIndex) async {
+    if (_buyingProductId != null) return;
+    setState(() => _buyingProductId = product.id);
+    try {
+      final result = await tryAddSelectionToBag(context, product, variantIndex);
+      if (!mounted) return;
+      if (result.status == BagAddStatus.added) {
+        await openCheckout(context);
+        return;
+      }
+      final message = switch (result.status) {
+        BagAddStatus.soldOut => 'Esta opción está agotada.',
+        BagAddStatus.unavailable => 'Esta pieza no está disponible por ahora.',
+        _ => 'No pudimos agregar la pieza. Intenta de nuevo.',
+      };
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } finally {
+      if (mounted) setState(() => _buyingProductId = null);
+    }
   }
 
   String? _panelImage(Product product, int variantIndex) {
@@ -78,12 +101,16 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
               final product = products[index];
               final variantIndex = _variantIndexFor(product);
               final expanded = _expandedIndex == index;
+              final requiresChoice = selectableVariants(product).length > 1;
+              final chosenIndex = requiresChoice
+                  ? _variantIndexByProduct[product.id]
+                  : variantIndex;
+              final buying = _buyingProductId == product.id;
               final facets = store.facetsFor(product.id);
               final brand = facets?.brand?.value;
               final wishlisted = store.wishlist.contains(product.id);
               final price = selectionPrice(product, variantIndex);
               final inStock = selectionInStock(product, variantIndex);
-              final adding = ValueNotifier<bool>(false);
 
               return SizedBox(
                 width: expanded ? panelWidth * 1.05 : panelWidth,
@@ -107,7 +134,8 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
-                              GestureDetector(
+                              InkWell(
+                                key: ValueKey('for-you-options-${product.id}'),
                                 onTap: () => setState(
                                   () =>
                                       _expandedIndex = expanded ? null : index,
@@ -116,8 +144,9 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
                                   builder: (context) {
                                     final url =
                                         _panelImage(product, variantIndex);
-                                    if (url == null)
+                                    if (url == null) {
                                       return const SizedBox.shrink();
+                                    }
                                     return MonettaImage(
                                       url: url,
                                       fit: BoxFit.contain,
@@ -135,111 +164,96 @@ class _HomeForYouSectionState extends State<HomeForYouSection> {
                                   ),
                                 ),
                               ),
-                              Positioned(
-                                right: 4,
-                                bottom: 4,
-                                child: _FeedAddControl(
-                                  enabled: inStock,
-                                  adding: adding,
-                                  onAdd: () async {
-                                    if (selectableVariants(product).length >
-                                            1 &&
-                                        !hasReliableColorOptions(product)) {
-                                      if (!context.mounted) return;
-                                      await showProductQuickView(
-                                        context,
-                                        product,
-                                        requireChoice: true,
-                                        initialVariantIndex: variantIndex,
-                                      );
-                                      return;
-                                    }
-                                    adding.value = true;
-                                    final result = await tryAddSelectionToBag(
-                                      context,
-                                      product,
-                                      variantIndex,
-                                    );
-                                    adding.value = false;
-                                    if (!context.mounted) return;
-                                    if (result.status == BagAddStatus.added) {
-                                      ScaffoldMessenger.maybeOf(context)
-                                          ?.showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Agregado a la bolsa'),
-                                        ),
-                                      );
-                                    }
-                                  },
+                              if (inStock && !buying)
+                                Positioned(
+                                  right: 4,
+                                  bottom: 4,
+                                  child: ProductQuickAddButton(
+                                    key: ValueKey('for-you-add-${product.id}'),
+                                    product: product,
+                                    productName: product.title,
+                                    selectedVariantId: _variantIndexByProduct
+                                            .containsKey(product.id)
+                                        ? selectedVariant(product, variantIndex)
+                                            ?.id
+                                        : null,
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(BoutiqueSpace.md),
-                          child: Column(
-                            children: [
-                              if (brand != null)
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxHeight: panelWidth),
+                          child: SingleChildScrollView(
+                            primary: false,
+                            padding: const EdgeInsets.all(BoutiqueSpace.md),
+                            child: Column(
+                              children: [
+                                if (brand != null)
+                                  Text(
+                                    brandLabel(brand),
+                                    textAlign: TextAlign.center,
+                                    style: boutiqueText(
+                                      size: 14,
+                                      weight: FontWeight.w600,
+                                      color: palette.ink,
+                                    ),
+                                  ),
                                 Text(
-                                  brandLabel(brand),
+                                  cardPieceName(title: product.title),
                                   textAlign: TextAlign.center,
-                                  style: boutiqueText(
-                                    size: 14,
-                                    weight: FontWeight.w600,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: boutiqueTitle(
+                                    size: 16,
                                     color: palette.ink,
                                   ),
                                 ),
-                              Text(
-                                cardPieceName(title: product.title),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: boutiqueTitle(
-                                  size: 16,
-                                  color: palette.ink,
-                                ),
-                              ),
-                              const SizedBox(height: BoutiqueSpace.xs),
-                              Text(
-                                formatShopperPrice(price),
-                                style: boutiqueText(
+                                const SizedBox(height: BoutiqueSpace.xs),
+                                SelectionPriceView(
+                                  price: price,
+                                  compare:
+                                      selectedVariant(product, variantIndex)
+                                          ?.compareAtPrice,
                                   size: 15,
-                                  weight: FontWeight.w600,
-                                  color: palette.ink,
+                                  centered: true,
+                                  inStock: inStock,
                                 ),
-                              ),
-                              if (expanded &&
-                                  selectableVariants(product).isNotEmpty) ...[
-                                const SizedBox(height: BoutiqueSpace.sm),
-                                ProductOptionSelector(
-                                  product: product,
-                                  selectedIndex: variantIndex,
-                                  showSelectedName: false,
-                                  colorHeading: 'Colores',
-                                  onSelect: (i) => _setVariantIndex(product, i),
-                                ),
-                                const SizedBox(height: BoutiqueSpace.sm),
-                                ClientGuideButton(
-                                  label: 'Comprar ahora',
-                                  onPressed: inStock
-                                      ? () async {
-                                          final result =
-                                              await tryAddSelectionToBag(
-                                            context,
-                                            product,
-                                            variantIndex,
-                                          );
-                                          if (!context.mounted) return;
-                                          if (result.status ==
-                                              BagAddStatus.added) {
-                                            await openBag(context);
+                                if (expanded) ...[
+                                  if (requiresChoice) ...[
+                                    const SizedBox(height: BoutiqueSpace.sm),
+                                    IgnorePointer(
+                                      ignoring: buying,
+                                      child: ProductOptionSelector(
+                                        product: product,
+                                        selectedIndex: chosenIndex,
+                                        showSelectedName: false,
+                                        colorHeading: 'Colores',
+                                        onSelect: (i) {
+                                          if (!buying) {
+                                            _setVariantIndex(product, i);
                                           }
-                                        }
-                                      : null,
-                                ),
+                                        },
+                                      ),
+                                    ),
+                                    if (chosenIndex == null)
+                                      const Text(
+                                        'Elige una opción para continuar.',
+                                      ),
+                                  ],
+                                  const SizedBox(height: BoutiqueSpace.sm),
+                                  ClientGuideButton(
+                                    label:
+                                        buying ? 'Agregando…' : 'Comprar ahora',
+                                    onPressed: inStock &&
+                                            chosenIndex != null &&
+                                            _buyingProductId == null
+                                        ? () => _buyNow(product, chosenIndex)
+                                        : null,
+                                  ),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                         ),
                       ],
@@ -282,38 +296,6 @@ class _FeedWishlistControl extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _FeedAddControl extends StatelessWidget {
-  const _FeedAddControl({
-    required this.enabled,
-    required this.adding,
-    required this.onAdd,
-  });
-
-  final bool enabled;
-  final ValueNotifier<bool> adding;
-  final Future<void> Function() onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: adding,
-      builder: (context, busy, _) {
-        return GuideGlassIconButton(
-          tooltip: 'Agregar a la bolsa',
-          onPressed: !enabled || busy ? null : () => unawaited(onAdd()),
-          icon: busy
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.add_rounded, size: 20),
-        );
-      },
     );
   }
 }

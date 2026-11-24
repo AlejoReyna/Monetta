@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/account_controller.dart';
@@ -16,6 +18,7 @@ import 'package:monetta_app/data/shopify/shopify_gid.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/domain/cart.dart';
 import 'package:monetta_app/features/checkout/checkout_screen.dart';
+import 'package:monetta_app/features/checkout/order_confirmation_screen.dart';
 import 'package:monetta_app/features/checkout/shopify_cart_summary.dart';
 import 'package:monetta_app/main.dart';
 
@@ -56,6 +59,9 @@ void main() {
     expect(find.text('Mi bolsa'), findsOneWidget);
     expect(find.text(product.title), findsOneWidget);
     expect(find.text('Continuar al checkout'), findsOneWidget);
+    expect(find.text('Resumen de compra'), findsNothing);
+    expect(find.text('Subtotal'), findsNothing);
+    expect(find.text('Total estimado'), findsNothing);
 
     final headingRow = find.byKey(const ValueKey('bag-heading-row'));
     expect(
@@ -71,12 +77,12 @@ void main() {
       findsNothing,
     );
 
-    final summary = find.byKey(const ValueKey('bag-order-summary'));
-    expect(summary, findsOneWidget);
-    // Boutique card: 20pt page margins, not full-bleed.
-    expect(tester.getTopLeft(summary).dx, 20);
+    final continueBtn = find.byKey(const ValueKey('bag-continue-button'));
+    expect(continueBtn, findsOneWidget);
+    // Boutique control: 20pt page margins, not full-bleed.
+    expect(tester.getTopLeft(continueBtn).dx, 20);
     expect(
-      tester.getSize(summary).width,
+      tester.getSize(continueBtn).width,
       tester.getSize(find.byType(Scaffold).first).width - 40,
     );
     expect(store.bagQuantity, 1);
@@ -97,21 +103,6 @@ void main() {
     await tester.pump();
 
     expect(find.text('SEGURO'), findsOneWidget);
-    expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
-    expect(
-      find.textContaining('dirección y el envío se capturan en el checkout'),
-      findsOneWidget,
-    );
-
-    final fields = find.byType(TextFormField);
-    expect(fields, findsNWidgets(2));
-    await tester.enterText(fields.at(0), 'ana@example.com');
-    await tester.enterText(fields.at(1), '8112345678');
-
-    await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-    await tester.tap(find.text('REVISAR PEDIDO'));
-    await tester.pumpAndSettle();
-
     expect(find.text('Todo listo'), findsOneWidget);
     expect(find.text('CONTINUAR AL PAGO SEGURO'), findsOneWidget);
     expect(find.textContaining('Shopify procesa el pago'), findsOneWidget);
@@ -180,6 +171,36 @@ void main() {
       ),
     );
     expect(find.byType(ShopifyCartSummary), findsOneWidget);
+    expect(find.text('Resumen de compra'), findsNothing);
+    expect(find.text('Subtotal de Shopify'), findsNothing);
+    expect(find.text('Subtotal de Shopify (estimado)'), findsNothing);
+    expect(find.text('Total de Shopify'), findsNothing);
+    expect(find.text('Total de Shopify (estimado)'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('discount-code-field')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('apply-discount-button')),
+      findsOneWidget,
+    );
+
+    final payRect = tester.getRect(
+      find.byKey(const ValueKey('bag-continue-button')),
+    );
+    final summaryRect = tester.getRect(
+      find.byKey(const ValueKey('shopify-cart-summary')),
+    );
+    expect(payRect.bottom, lessThan(summaryRect.top));
+
+    final bagScrollRect =
+        tester.getRect(find.byType(SingleChildScrollView).first);
+    expect(bagScrollRect.bottom, 600);
+
+    final continueShoppingText = tester.widget<Text>(
+      find.text('Seguir comprando'),
+    );
+    expect(continueShoppingText.style?.color, isNot(Colors.white));
 
     cartController.dispose();
     accountController.dispose();
@@ -195,7 +216,7 @@ void main() {
     await tester.pump();
 
     final cta = find.text('Continuar al checkout');
-    await tester.scrollUntilVisible(cta, 300);
+    await tester.ensureVisible(cta);
     await tester.pumpAndSettle();
     await tester.tap(cta);
     await tester.pumpAndSettle();
@@ -204,7 +225,7 @@ void main() {
       find.textContaining('El checkout seguro no está disponible'),
       findsOneWidget,
     );
-    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+    expect(find.text('Todo listo'), findsNothing);
     expect(store.bagQuantity, 1);
   });
 
@@ -225,13 +246,7 @@ void main() {
         ),
       ),
     );
-    final fields = find.byType(TextFormField);
-    expect(fields, findsNWidgets(2));
-    await tester.enterText(fields.at(0), 'buyer@example.invalid');
-    await tester.enterText(fields.at(1), '8112345678');
-    await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-    await tester.tap(find.text('REVISAR PEDIDO'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     await tester.ensureVisible(find.text('CONTINUAR AL PAGO SEGURO'));
     await tester.tap(find.text('CONTINUAR AL PAGO SEGURO'));
     await tester.pumpAndSettle();
@@ -242,6 +257,44 @@ void main() {
     expect(find.text('Intentar de nuevo'), findsNothing);
     expect(find.text('Pago protegido'), findsNothing);
     expect(find.textContaining('rechaz'), findsNothing);
+  });
+
+  testWidgets(
+      'bag launches Shopify checkout directly without intermediate screen and opens confirmation on CheckoutCompleted',
+      (tester) async {
+    final store = await _loadedStore();
+    await store.addToBag(store.products.firstWhere((item) => item.isInStock));
+    final completer = Completer<CheckoutResult>();
+    var launches = 0;
+
+    await tester.pumpWidget(
+      _app(
+        store,
+        BagScreen(
+          launchSecureCheckout: (_) {
+            launches += 1;
+            return completer.future;
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final cta = find.byKey(const ValueKey('bag-continue-button'));
+    await tester.ensureVisible(cta);
+    await tester.pumpAndSettle();
+    await tester.tap(cta);
+    await tester.pump();
+
+    expect(launches, 1);
+    expect(find.byType(CheckoutFlowScreen), findsNothing);
+    expect(find.text('Todo listo'), findsNothing);
+    expect(find.text('Abriendo pago seguro…'), findsOneWidget);
+
+    completer.complete(const CheckoutCompleted());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(OrderConfirmationScreen), findsOneWidget);
   });
 }
 

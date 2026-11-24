@@ -154,6 +154,23 @@ class HomeTestimonial {
   final bool verified;
 }
 
+/// Remote override for a guide banner slot (`B01`..`B32`, `B04-editorial`).
+class GuideBannerOverride {
+  const GuideBannerOverride({
+    required this.slot,
+    this.imageUrl,
+    this.copy,
+    this.destinationUrl,
+    this.active = true,
+  });
+
+  final String slot;
+  final String? imageUrl;
+  final String? copy;
+  final String? destinationUrl;
+  final bool active;
+}
+
 class HomeContent {
   const HomeContent({
     required this.sectionOrder,
@@ -163,6 +180,7 @@ class HomeContent {
     required this.socialLinks,
     required this.testimonials,
     this.storefront = AdminStorefrontSettings.defaults,
+    this.bannersBySlot = const <String, GuideBannerOverride>{},
     this.aboutImageUrl,
     this.reviewAverage,
     this.reviewCount,
@@ -175,6 +193,7 @@ class HomeContent {
   final List<HomeSocialLink> socialLinks;
   final List<HomeTestimonial> testimonials;
   final AdminStorefrontSettings storefront;
+  final Map<String, GuideBannerOverride> bannersBySlot;
   final String? aboutImageUrl;
   final double? reviewAverage;
   final int? reviewCount;
@@ -187,6 +206,7 @@ class HomeContent {
     List<HomeSocialLink>? socialLinks,
     List<HomeTestimonial>? testimonials,
     AdminStorefrontSettings? storefront,
+    Map<String, GuideBannerOverride>? bannersBySlot,
     String? aboutImageUrl,
     double? reviewAverage,
     int? reviewCount,
@@ -199,6 +219,7 @@ class HomeContent {
       socialLinks: socialLinks ?? this.socialLinks,
       testimonials: testimonials ?? this.testimonials,
       storefront: storefront ?? this.storefront,
+      bannersBySlot: bannersBySlot ?? this.bannersBySlot,
       aboutImageUrl: aboutImageUrl ?? this.aboutImageUrl,
       reviewAverage: reviewAverage ?? this.reviewAverage,
       reviewCount: reviewCount ?? this.reviewCount,
@@ -297,12 +318,6 @@ class HomeContent {
         fallbackAsset: 'assets/images/brands/tommy_hilfiger.webp',
       ),
       HomeBrandCard(
-        title: 'Olaplex',
-        brand: 'Olaplex',
-        handle: 'olalplex',
-        fallbackAsset: 'assets/images/brands/olaplex.webp',
-      ),
-      HomeBrandCard(
         title: 'Dior',
         brand: 'Christian Dior',
         handle: 'christian-dior',
@@ -337,17 +352,19 @@ class HomeContent {
       HomeSocialLink(
         id: 'instagram',
         label: 'Instagram',
-        url: 'https://www.instagram.com/_monetta.mx',
+        url:
+            'https://instagram.com/_monetta.mx?srtk=NjhjcjBuZnMwdDF4&utm_source=qr',
       ),
       HomeSocialLink(
         id: 'tiktok',
         label: 'TikTok',
-        url: 'https://www.tiktok.com/@monetta.oficial',
+        url: 'https://www.tiktok.com/@monettamx',
       ),
       HomeSocialLink(
         id: 'facebook',
         label: 'Facebook',
-        url: 'https://www.facebook.com/profile.php?id=100091065527635',
+        url:
+            'https://www.facebook.com/profile.php?id=100091065527635&mibextid=LQQJ4d',
       ),
     ],
     testimonials: <HomeTestimonial>[

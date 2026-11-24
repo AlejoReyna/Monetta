@@ -149,3 +149,112 @@ export function redemptionEligibility(args: {
   }
   return { ok: true };
 }
+
+export type RewardsTierLevel = 'PRO' | 'VIP' | 'ÉLITE';
+
+export interface RewardsTierBenefit {
+  readonly kind: 'cashback' | 'bonus' | 'shipping';
+  readonly label: string;
+  readonly amountCents?: number;
+}
+
+export interface RewardsTierSnapshot {
+  readonly level: RewardsTierLevel;
+  readonly nextLevel: RewardsTierLevel | null;
+  readonly isFinalLevel: boolean;
+  readonly completedPurchases: number;
+  readonly targetPurchases: number;
+  readonly progressFraction: number;
+  readonly progressPercent: number;
+  readonly purchaseCountLabel: string;
+  readonly cashbackBps: number;
+  readonly bonusCents: number;
+  readonly freeShipping: boolean;
+  readonly introduction: string;
+  readonly benefits: readonly RewardsTierBenefit[];
+}
+
+export function resolveTier(completedPurchases: number): RewardsTierSnapshot {
+  const count = Math.max(0, Math.floor(completedPurchases));
+  const targetPurchases = 10;
+  const clamped = Math.min(count, targetPurchases);
+  const progressFraction = count >= targetPurchases ? 1 : clamped / targetPurchases;
+  const progressPercent = Math.round(progressFraction * 100);
+
+  if (count >= 10) {
+    return {
+      level: 'ÉLITE',
+      nextLevel: null,
+      isFinalLevel: true,
+      completedPurchases: count,
+      targetPurchases,
+      progressFraction: 1,
+      progressPercent: 100,
+      purchaseCountLabel: '10 de 10 compras',
+      cashbackBps: 300,
+      bonusCents: 20000,
+      freeShipping: true,
+      introduction:
+        'Completa 10 pedidos y accede al nivel más exclusivo de MONETTA Rewards',
+      benefits: [
+        { kind: 'cashback', label: '3% de Cashback' },
+        { kind: 'bonus', label: 'Bono de $200 mxn', amountCents: 20000 },
+        { kind: 'shipping', label: 'Envío Gratis en todos tus pedidos' },
+      ],
+    };
+  }
+
+  if (count >= 5) {
+    return {
+      level: 'VIP',
+      nextLevel: 'ÉLITE',
+      isFinalLevel: false,
+      completedPurchases: count,
+      targetPurchases,
+      progressFraction,
+      progressPercent,
+      purchaseCountLabel: `${count} de 10 compras`,
+      cashbackBps: 200,
+      bonusCents: 10000,
+      freeShipping: true,
+      introduction:
+        'Este nivel lo consigues completando 5 compras con tu cuenta de MONETTA Rewards',
+      benefits: [
+        { kind: 'cashback', label: '2% de Cashback' },
+        { kind: 'bonus', label: 'Bono de $100 mxn', amountCents: 10000 },
+        { kind: 'shipping', label: 'Envío Gratis en todos tus pedidos' },
+      ],
+    };
+  }
+
+  return {
+    level: 'PRO',
+    nextLevel: 'VIP',
+    isFinalLevel: false,
+    completedPurchases: count,
+    targetPurchases,
+    progressFraction,
+    progressPercent,
+    purchaseCountLabel: `${count} de 10 compras`,
+    cashbackBps: 100,
+    bonusCents: 10000,
+    freeShipping: true,
+    introduction:
+      'Estos beneficios son los que consigues registrándote en MONETTA Rewards',
+    benefits: [
+      { kind: 'cashback', label: '1% de Cashback' },
+      { kind: 'bonus', label: 'Bono de $100 mxn', amountCents: 10000 },
+      { kind: 'shipping', label: 'Envío Gratis en todos tus pedidos' },
+    ],
+  };
+}
+
+export function tierBonusesUnlocked(
+  completedPurchases: number,
+): readonly { readonly tierKey: RewardsTierLevel; readonly amountCents: number }[] {
+  const out: { tierKey: RewardsTierLevel; amountCents: number }[] = [];
+  if (completedPurchases >= 1) out.push({ tierKey: 'PRO', amountCents: 10000 });
+  if (completedPurchases >= 5) out.push({ tierKey: 'VIP', amountCents: 10000 });
+  if (completedPurchases >= 10) out.push({ tierKey: 'ÉLITE', amountCents: 20000 });
+  return out;
+}

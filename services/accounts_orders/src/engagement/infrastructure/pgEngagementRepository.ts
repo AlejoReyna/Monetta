@@ -474,7 +474,7 @@ export class PgEngagementRepository implements EngagementRepository {
           `UPDATE notification_campaigns SET status = 'targeting' WHERE id = $1`,
           [row.id],
         );
-        const eligible = eligibilityQuery(row.segment_definition, row.purpose, now, true);
+        const eligible = eligibilityQuery(row.segment_definition, row.purpose, now, true, row.kind === 'test');
         const endpoints = await client.query<{ endpoint_id: string }>(eligible.text, eligible.values);
         for (const endpoint of endpoints.rows) {
           await client.query(
@@ -832,11 +832,12 @@ function eligibilityQuery(
   purpose: ConsentPurpose,
   now: Date,
   deduplicateAccounts: boolean,
+  isTestCampaign = false,
 ): { text: string; values: unknown[] } {
   const values: unknown[] = [purpose, now];
   const conditions = [
     `e.status = 'active'`,
-    `e.token_updated_at > $2 - interval '60 days'`,
+    `e.token_updated_at > $2::timestamptz - interval '60 days'`,
     `e.permission_state IN ('granted', 'provisional')`,
     `i.disabled_at IS NULL`,
     `c.granted = TRUE`,
@@ -906,14 +907,14 @@ function eligibilityQuery(
              LEFT JOIN device_interest_profiles p ON p.device_id = i.device_id
              ${joins.join('\n')}
             WHERE ${conditions.join('\n AND ')}
-              AND ($1 = 'product_alerts' OR NOT EXISTS (
+              AND (${isTestCampaign && segment.kind === 'device'} OR $1 = 'product_alerts' OR NOT EXISTS (
                 SELECT 1
                   FROM notification_deliveries recent
                   JOIN notification_campaigns recent_campaign ON recent_campaign.id = recent.campaign_id
                  WHERE recent.push_endpoint_id = e.id
                    AND recent.status = 'accepted'
                    AND recent_campaign.purpose <> 'product_alerts'
-                   AND recent.accepted_at > $2 - interval '24 hours'
+                   AND recent.accepted_at > $2::timestamptz - interval '24 hours'
               ))
             ${order}`,
     values,

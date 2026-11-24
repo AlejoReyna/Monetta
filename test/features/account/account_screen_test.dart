@@ -412,11 +412,14 @@ void main() {
       await openEditor(tester);
       expect(find.text('Elegir foto'), findsOneWidget);
       expect(find.text('Quitar foto'), findsNothing);
-      expect(find.text('JPG o PNG. Se ajusta a 384 px.'), findsOneWidget);
+      expect(
+        find.text('JPG, PNG o HEIC. Se ajusta a 384 px.'),
+        findsOneWidget,
+      );
       expect(find.text('Nombre que se muestra'), findsOneWidget);
       expect(
         find.text('Tu foto y tu nombre se guardan en tu cuenta de Monetta.'),
-        findsOneWidget,
+        findsNothing,
       );
       expect(find.text('Guardar cambios'), findsOneWidget);
       expect(find.text('Cancelar'), findsOneWidget);
@@ -473,6 +476,34 @@ void main() {
         find.byKey(const ValueKey('account-avatar-photo')),
         findsOneWidget,
       );
+    });
+
+    testWidgets('accepts HEIC bytes from picker and stores data:image/heic URL',
+        (tester) async {
+      final tinyHeic = Uint8List.fromList([
+        0x00, 0x00, 0x00, 0x18,
+        0x66, 0x74, 0x79, 0x70, // ftyp
+        0x68, 0x65, 0x69, 0x63, // heic
+        0x00, 0x00, 0x00, 0x00,
+        0x6D, 0x69, 0x66, 0x31,
+        ..._tinyPng,
+      ]);
+      final service = _FakeProfileService();
+      await pumpAccount(
+        tester,
+        service: service,
+        picker: () async => tinyHeic,
+      );
+      await openEditor(tester);
+
+      await tester.tap(find.byKey(const ValueKey('profile-choose-photo')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('profile-save')));
+      await tester.pumpAndSettle();
+
+      expect(service.calls, ['fetch', 'setPhoto']);
+      expect(service.lastDataUrl, startsWith('data:image/heic;base64,'));
+      expect(decodeProfilePhotoDataUrl(service.lastDataUrl), tinyHeic);
     });
 
     testWidgets('a cancelled picker changes nothing', (tester) async {

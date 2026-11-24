@@ -53,7 +53,7 @@ import { PgRewardsRepository } from '../rewards/pgRewardsRepository.js';
 import { loadRewardsEnv } from '../rewards/rewardsConfig.js';
 import { registerRewardsRoutes } from '../rewards/routes.js';
 import { RewardsService } from '../rewards/service.js';
-import { DisabledDiscountAdapter } from '../rewards/shopifyDiscountAdapter.js';
+import { createRewardsDiscountAdapter } from '../rewards/shopifyAdminCouponProvisioner.js';
 import { bridgeDelivery, bridgeOrderPaid, refundReverseCents } from '../rewards/webhookBridge.js';
 import { verifyShopifyWebhookHmac } from '../webhooks/verifyHmac.js';
 import {
@@ -978,7 +978,7 @@ if (isMain) {
   const rewardsService = new RewardsService({
     rewards: new PgRewardsRepository(pool),
     env: rewardsEnv,
-    discounts: new DisabledDiscountAdapter(),
+    discounts: createRewardsDiscountAdapter(config, rewardsEnv),
     shopDomain: config.shopDomain !== '' ? config.shopDomain : null,
   });
   const app = createApp({

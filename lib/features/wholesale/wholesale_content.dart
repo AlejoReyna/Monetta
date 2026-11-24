@@ -6,15 +6,17 @@ import '../../app/shopper_copy.dart';
 abstract final class WholesalePresentation {
   /// Step 2 of «¿Cómo comprar?». The title is «Agrega mínimo 3 piezas».
   static const minimum =
-      'a tu carrito o mándanos captura de los modelos de tu interés por '
-      'WhatsApp.';
+      'Obtén 10% de descuento en cualquier producto al elegir 3 o más piezas. '
+      'Todas las colecciones están incluidas.';
 
   /// Step 3 of «¿Cómo comprar?». The title is «Liquida o aparta».
   static const reservation =
-      'Paga de contado o escríbenos por WhatsApp para apartar con \$800 pesos de anticipo por pedido y liquida en 20 días.';
+      'Aparta por 20 días con \$800 MXN de anticipo por todo el pedido en '
+      'mayoreo (3+ piezas) o \$400 MXN en menudeo (1–2 piezas).';
 
-  /// Shipping line. The services row repeats it as «Envío gratis».
-  static const shipping = 'Envío gratis en compras mayores a \$1,999 MXN.';
+  /// Shipping line. Free with Monetta Rewards account, $199 MXN as guest.
+  static const shipping =
+      'Envío gratis con tu cuenta Monetta Rewards (\$199 MXN como invitado a todo México).';
 }
 
 /// Reuses the configured channel without pre-accepting any commercial terms.

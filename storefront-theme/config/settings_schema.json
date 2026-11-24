@@ -2284,5 +2284,24 @@
         "default": "equal-width-buttons"
       }
     ]
+  },
+  {
+    "name": "Monetta Rewards",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "monetta_rewards_shipping",
+        "label": "Mostrar envío gratis con cuenta",
+        "info": "Envío gratis al iniciar sesión en Monetta Rewards ($199 MXN como invitado a cualquier parte de México).",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "monetta_rewards_signup",
+        "label": "Mostrar registro a Rewards",
+        "info": "Invitación a crear cuenta en Monetta Rewards con envío gratis y cashback en todas las compras.",
+        "default": true
+      }
+    ]
   }
 ]

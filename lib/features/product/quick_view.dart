@@ -2,6 +2,7 @@
 /// independent favorite, X/Escape, in-place add confirmation and PDP entry.
 library;
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -22,9 +23,12 @@ import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
 import '../catalog/product_tile.dart' show PackshotBlend;
 import '../catalog/product_controls.dart';
+import '../checkout/mini_cart.dart';
 import '../navigation/duo_workspace.dart';
 import 'product_selection.dart';
 import 'purchase_dock.dart';
+import 'restock_push_adapter.dart';
+import 'restock_request_sheet.dart';
 
 const String _kChooseLabel = 'Elige una opción';
 
@@ -140,7 +144,6 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
   int? _variantIndex;
   int _page = 0;
   bool _adding = false;
-  bool _added = false;
   String? _selectedId;
   bool _missingCombination = false;
   String? _error;
@@ -186,10 +189,12 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
   Future<void> _addToBag() async {
     final index = _variantIndex;
     if (index == null || _adding) return;
+    final fromBag = widget.parentContext.mounted &&
+        ModalRoute.of(widget.parentContext)?.settings.name ==
+            DuoWorkspace.bagRoute;
     setState(() {
       _adding = true;
       _error = null;
-      _added = false;
     });
     final product = _currentProduct;
     final currentIndex = product == null
@@ -213,10 +218,12 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
       return;
     }
     NotificationScope.maybeOf(context)?.recordPushOutcome('add_to_cart');
-    setState(() {
-      _adding = false;
-      _added = true;
-    });
+    setState(() => _adding = false);
+    if (fromBag && !widget.embedded) {
+      Navigator.of(context).pop();
+      return;
+    }
+    await showMiniCart(context);
   }
 
   void _viewFullProduct() {
@@ -249,6 +256,24 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
   /// key and every state of the old bar (choose, restock, pending).
   Widget _buildActions(BoutiquePalette palette, {required bool inStock}) {
     final chosen = _variantIndex;
+    final notificationController = NotificationScope.maybeOf(context);
+    final effectiveOnRestock = widget.onRestock ??
+        (notificationController?.variantRestockAvailable == true
+            ? (Product p, ProductVariant v) {
+                unawaited(
+                  showRestockRequestSheet(
+                    context,
+                    product: p,
+                    variant: v,
+                    initialEmail: AccountScope.maybeOf(context)?.account?.email,
+                    onSubmit: (payload) => submitRestockViaPushNotifications(
+                      notificationController,
+                      payload,
+                    ),
+                  ),
+                );
+              }
+            : null);
     final String label;
     final VoidCallback? onPressed;
     if (chosen == null) {
@@ -288,7 +313,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
         if (!inStock &&
             chosen != null &&
             chosen >= 0 &&
-            widget.onRestock != null &&
+            effectiveOnRestock != null &&
             _currentProduct != null)
           TextButton(
             onPressed: () {
@@ -300,7 +325,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       variantIndexForId(product, _selectedId, fallback: -1),
                     );
               if (product != null && variant != null && !variant.available) {
-                widget.onRestock!(product, variant);
+                effectiveOnRestock(product, variant);
               }
             },
             child: Text(
@@ -308,8 +333,6 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
               style: boutiqueText(color: palette.ink),
             ),
           ),
-        if (_added)
-          Semantics(liveRegion: true, child: const Text('Agregado al carrito')),
         if (_currentProduct == null)
           const Text('Este producto ya no está disponible.'),
         const SizedBox(height: BoutiqueSpace.sm),
@@ -484,63 +507,20 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     );
   }
 
-  Widget _buildPrice(
-    BoutiquePalette palette, {
+  Widget _buildPrice({
     required double price,
     required double? compare,
-    required bool onSale,
-    required int discount,
+    required double? sixMsiAmount,
     required bool inStock,
-  }) {
-    return Wrap(
-      spacing: BoutiqueSpace.sm,
-      runSpacing: BoutiqueSpace.xs,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Text(
-          formatShopperPrice(price),
-          key: const Key('quick-view-price'),
-          style: boutiqueText(
-            size: 21,
-            weight: FontWeight.w600,
-            color: inStock ? palette.ink : palette.inkMuted,
-            height: 1.2,
-          ),
-        ),
-        // Same rule as the ficha: previous price and -% only off real
-        // compare_at data.
-        if (onSale && compare != null) ...[
-          Text(
-            formatShopperPrice(compare),
-            style: boutiqueText(
-              size: 14,
-              color: palette.inkMuted,
-              height: 1.2,
-              decoration: TextDecoration.lineThrough,
-            ),
-          ),
-          if (discount > 0)
-            Container(
-              key: const ValueKey('discount-badge'),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: palette.saleSurface,
-                borderRadius: BoutiqueRadius.capsule,
-              ),
-              child: Text(
-                '-$discount%',
-                style: boutiqueText(
-                  size: 13,
-                  weight: FontWeight.w500,
-                  color: palette.sale,
-                  height: 1.2,
-                ),
-              ),
-            ),
-        ],
-      ],
-    );
-  }
+  }) =>
+      SelectionPriceView(
+        price: price,
+        compare: compare,
+        sixMsiAmount: sixMsiAmount,
+        currentKey: const Key('quick-view-price'),
+        size: 21,
+        inStock: inStock,
+      );
 
   /// «Stock» and its pill. Availability is factual (`available` bool);
   /// low-stock urgency («Últimas piezas») needs a quantity the catalog does
@@ -591,9 +571,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     final price =
         chosen == null ? product.price : selectionPrice(product, chosen);
     final compare = chosen == null ? null : selectionCompareAt(product, chosen);
-    final onSale = chosen != null && selectionOnSale(product, chosen);
-    final discount =
-        chosen == null ? 0 : selectionDiscountPercent(product, chosen);
+    final sixMsiAmount = chosen == null
+        ? null
+        : selectedVariant(product, chosen)?.sixMsiInstallmentAmount;
     final inStock = currentProduct != null &&
         (chosen == null || selectionInStock(product, chosen));
     final memberImages = chosen == null
@@ -690,11 +670,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                         ),
                         const SizedBox(height: BoutiqueSpace.md),
                         _buildPrice(
-                          palette,
                           price: price,
                           compare: compare,
-                          onSale: onSale,
-                          discount: discount,
+                          sixMsiAmount: sixMsiAmount,
                           inStock: inStock,
                         ),
                         if (selectableVariants(product).isNotEmpty) ...[
@@ -725,7 +703,6 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                 widget.onVariantChanged?.call(_selectedId);
                                 _page = 0;
                                 if (_gallery.hasClients) _gallery.jumpToPage(0);
-                                _added = false;
                                 _error = null;
                               });
                             },

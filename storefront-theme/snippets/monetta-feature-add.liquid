@@ -1,0 +1,22 @@
+{%- doc -%}
+  Add a specific variant when it is the only choice. Otherwise ask for the option in quick view.
+  @param {object} product
+  @param {object} variant
+  @param {string} class
+  @param {string} [icon]
+{%- enddoc -%}
+{%- assign icon = icon | default: 'bag' -%}
+{%- if variant.available -%}
+  {%- if product.has_only_default_variant or product.variants.size == 1 -%}
+    <form class="{{ class }}" action="{{ routes.cart_add_url }}" method="post" data-quick-add data-product-name="{{ product.title | escape }}">
+      <input type="hidden" name="id" value="{{ variant.id }}">
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit" aria-label="Agregar {{ product.title | escape }}">{% render 'monetta-icon', name: icon, size: 20 %}</button>
+      <p class="form-error" role="alert" data-feature-error hidden></p>
+    </form>
+  {%- else -%}
+    <span class="{{ class }}">
+      <a href="{{ product.url }}" data-quick-view="{{ product.handle }}" data-product-url="{{ product.url }}" data-require-option aria-haspopup="dialog" aria-label="Elegir una opción para agregar {{ product.title | escape }}">{% render 'monetta-icon', name: icon, size: 20 %}</a>
+    </span>
+  {%- endif -%}
+{%- endif -%}

@@ -3,6 +3,10 @@
   next page (and remains a normal link to ?page=n without JavaScript), and a page after the first offers the previous one.
   Must be rendered inside the {% paginate %} block, whose object is passed in.
 
+  @param {boolean} [searchable] - Expose the terms for collection-local search.
+  @param {boolean} [offers] - Pick an available variant matching storefront filters with a live catalog comparison.
+  @param {boolean} [synthetic_offers] - Whether the listing is rendered from the synthetic ?view=ofertas fallback.
+  @param {object} [filters] - Shopify storefront filters for the current collection.
   @param {object} products - The current page's products.
   @param {object} paginate - The paginate object.
   @param {number} total - Total products matching the filters.
@@ -39,12 +43,55 @@
   {%- if paginate.previous -%}
     <p class="load-more"><a class="btn btn--outline" href="{{ paginate.previous.url }}" data-previous>Ver piezas anteriores</a></p>
   {%- endif -%}
+  {%- if offers -%}
+    {%- assign price_filter = filters | where: 'type', 'price_range' | first -%}
+    {%- assign min_price = price_filter.min_value.value -%}
+    {%- assign max_price = price_filter.max_value.value -%}
+    {%- assign has_variant_filters = false -%}
+    {%- for filter in filters -%}
+      {%- assign scope = filter.param_name | slice: 0, 9 -%}
+      {%- if scope == 'filter.v.' and filter.active_values.size > 0 -%}
+        {%- assign has_variant_filters = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
   <ul class="product-grid product-grid--wide product-grid--flush" role="list" aria-labelledby="results-heading" data-grid>
     {%- for product in products -%}
       {%- if product.object_type != blank and product.object_type != 'product' -%}{%- continue -%}{%- endif -%}
       {%- assign eager = false -%}
       {%- if forloop.index <= 4 %}{% assign eager = true %}{% endif -%}
-      <li>{% render 'monetta-card', product: product, eager: eager, view_button: view_button, listing_card: listing_card, sizes: sizes, xl_widths: xl_widths %}</li>
+      {%- assign offer_variant = nil -%}
+      {%- if offers -%}
+        {%- for candidate in product.variants -%}
+          {%- if has_variant_filters and candidate.matched == false -%}{%- continue -%}{%- endif -%}
+          {%- if min_price != blank and candidate.price < min_price -%}{%- continue -%}{%- endif -%}
+          {%- if max_price != blank and candidate.price > max_price -%}{%- continue -%}{%- endif -%}
+          {%- if candidate.available and candidate.compare_at_price > candidate.price -%}
+            {%- assign offer_variant = candidate -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if offer_variant == nil -%}
+          {%- if synthetic_offers -%}
+            {%- continue -%}
+          {%- else -%}
+            {%- assign offer_variant = product.selected_or_first_available_variant -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endif -%}
+      {%- capture clean_tags -%}
+        {%- for t in product.tags -%}
+          {%- assign t_low = t | strip | downcase -%}
+          {%- assign t_p1 = t_low | slice: 0, 10 -%}
+          {%- assign t_p2 = t_low | slice: 0, 8 -%}
+          {%- assign t_p3 = t_low | slice: 0, 15 -%}
+          {%- assign t_p4 = t_low | slice: 0, 16 -%}
+          {%- unless t_p1 == 'proveedor-' or t_p1 == 'pendiente-' or t_p2 == 'monetta-' or t_p3 == 'disponibilidad-' or t_p4 == 'imagen-original-' or t_low == 'venta-sobre-pedido' or t_low == 'mk-outlet-us' -%}
+            {{- t }} {% endunless -%}
+        {%- endfor -%}
+      {%- endcapture -%}
+      <li{% if offers %} data-offer-price="{{ offer_variant.price }}"{% endif %}{% if searchable %} data-collection-product="{{ product.id }}" data-collection-terms="{{ product.title | append: ' ' | append: product.vendor | append: ' ' | append: product.type | append: ' ' | append: clean_tags | escape }}"{% endif %}>{% render 'monetta-card', product: product, selected_variant: offer_variant, eager: eager, view_button: view_button, listing_card: listing_card, sizes: sizes, xl_widths: xl_widths %}</li>
     {%- endfor -%}
   </ul>
   {%- liquid
@@ -52,12 +99,12 @@
     assign percent = shown | times: 100.0 | divided_by: paginate.items | round
   -%}
   {%- if paginate.pages > 1 -%}
-    <div class="load-more" data-load-more>
-      <p class="small text-muted" data-progress-text>Se muestran {{ shown }} de {{ paginate.items }} piezas</p>
-      <div class="load-more__progress" aria-hidden="true"><span style="width: {{ percent }}%"></span></div>
+    <div class="load-more" data-load-more{% if synthetic_offers %} data-offers-pagination{% endif %}>
+      {%- unless synthetic_offers -%}<p class="small text-muted" data-progress-text>Se muestran {{ shown }} de {{ paginate.items }} piezas</p>
+      <div class="load-more__progress" aria-hidden="true"><span style="width: {{ percent }}%"></span></div>{%- endunless -%}
       {%- if paginate.next -%}
-        <a class="btn btn--outline" href="{{ paginate.next.url }}" data-more>Ver más piezas</a>
-      {%- else -%}
+        <a class="btn btn--outline" href="{{ paginate.next.url }}" {% unless synthetic_offers %}data-more{% endunless %}>Ver más piezas</a>
+      {%- elsif synthetic_offers == false or synthetic_offers == nil -%}
         <p class="small text-muted">Viste las {{ paginate.items }} piezas.</p>
       {%- endif -%}
     </div>

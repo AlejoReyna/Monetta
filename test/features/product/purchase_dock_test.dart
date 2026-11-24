@@ -145,12 +145,10 @@ void main() {
         );
 
         expect(
-          _inMainList(
-            find.text(formatShopperPrice(selectionPrice(product, 0))),
-          ),
+          _inMainList(find.byKey(const Key('product-price'))),
           findsWidgets,
         );
-        expect(_inMainList(find.textContaining('Disponible')), findsOneWidget);
+        expect(_inMainList(find.text('Disponible')), findsNothing);
         expect(_inMainList(find.byType(ProductOptionSelector)), findsOneWidget);
       },
     );
@@ -244,7 +242,11 @@ void main() {
         store.bagLines.map((line) => line.variant.id).toSet(),
         {'v-chica', 'v-mediana'},
       );
-      expect(find.byType(BagScreen), findsOneWidget);
+      expect(find.byType(CheckoutFlowScreen), findsNothing);
+      expect(
+        find.textContaining('El checkout seguro no está disponible'),
+        findsOneWidget,
+      );
     });
     testWidgets(
         'lazy apartado opens contextual WhatsApp without fabricated deposit terms',
@@ -311,6 +313,8 @@ void main() {
         expect(store.bagQuantity, 1);
         expect(find.text('Agregado al carrito'), findsOneWidget);
         expect(find.text('En tu bolsa'), findsNothing);
+        await tester.tap(find.byTooltip('Cerrar carrito'));
+        await tester.pumpAndSettle();
         expect(_inPrimary(find.text(_addLabel)), findsOneWidget);
 
         await tester.tap(_primary());
@@ -371,6 +375,8 @@ void main() {
       expect(find.text(_restockLabel), findsNothing);
       expect(find.byKey(kBuyNowKey), findsNothing);
       expect(find.text('AGOTADO'), findsOneWidget);
+      expect(find.text('Esta opción no está disponible'), findsOneWidget);
+      expect(find.text('Disponible'), findsNothing);
       expect(store.bagQuantity, 0);
       expect(find.text('Otras formas de comprar'), findsOneWidget);
     });
@@ -386,8 +392,11 @@ void main() {
       await selectOption(tester, 'Talla chica');
       expect(_primary(), findsNothing);
       expect(find.byKey(kRestockKey), findsNothing);
+      expect(find.text('Esta opción no está disponible'), findsOneWidget);
       await selectOption(tester, 'Talla mediana');
       expect(_inPrimary(find.text(_addLabel)), findsOneWidget);
+      expect(find.text('Esta opción no está disponible'), findsNothing);
+      expect(find.text('Disponible'), findsNothing);
       await scrollTo(tester, _primary());
       await tester.tap(_primary());
       await tester.pumpAndSettle();

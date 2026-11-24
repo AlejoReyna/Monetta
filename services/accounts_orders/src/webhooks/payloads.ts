@@ -69,11 +69,14 @@ export interface ShopifyOrderWebhookPayload {
     readonly total_discount?: string | null;
   }>;
   /**
-   * Order-level codes. Rewards reads `code` to detect wholesale; the
-   * eligible subtotal comes from each line's `total_discount`, not from
-   * the code amount.
+   * Order-level codes. Rewards reads `code` to detect wholesale and settle
+   * redeemed single-use coupons; the eligible subtotal comes from each line's
+   * `total_discount`, not from the code amount.
    */
-  readonly discount_codes?: ReadonlyArray<{ readonly code?: string }>;
+  readonly discount_codes?: ReadonlyArray<{
+    readonly code?: string;
+    readonly amount?: string | null;
+  }>;
 }
 
 export interface ShopifyCustomerRedactWebhookPayload {

@@ -266,15 +266,41 @@ class SystemUsableSurface extends StatelessWidget {
           final whole = origin & box.biggest;
           final regions = SystemLayoutScope.of(context).usableRegions(whole);
           final rect = regions.isEmpty ? whole : regions.first;
+          final appliedLeft =
+              (rect.left - whole.left).clamp(0.0, double.infinity);
+          final appliedTop = (rect.top - whole.top).clamp(0.0, double.infinity);
+          final appliedRight =
+              (whole.right - rect.right).clamp(0.0, double.infinity);
+          final appliedBottom =
+              (whole.bottom - rect.bottom).clamp(0.0, double.infinity);
+          final media = MediaQuery.of(context);
+          final nextPadding = EdgeInsets.fromLTRB(
+            (media.padding.left - appliedLeft).clamp(0.0, double.infinity),
+            (media.padding.top - appliedTop).clamp(0.0, double.infinity),
+            (media.padding.right - appliedRight).clamp(0.0, double.infinity),
+            (media.padding.bottom - appliedBottom).clamp(0.0, double.infinity),
+          );
+          final nextViewPadding = EdgeInsets.fromLTRB(
+            (media.viewPadding.left - appliedLeft).clamp(0.0, double.infinity),
+            (media.viewPadding.top - appliedTop).clamp(0.0, double.infinity),
+            (media.viewPadding.right - appliedRight)
+                .clamp(0.0, double.infinity),
+            (media.viewPadding.bottom - appliedBottom)
+                .clamp(0.0, double.infinity),
+          );
           return Padding(
             padding: EdgeInsets.fromLTRB(
-              rect.left - whole.left,
-              rect.top - whole.top,
-              whole.right - rect.right,
-              whole.bottom - rect.bottom,
+              appliedLeft,
+              appliedTop,
+              appliedRight,
+              appliedBottom,
             ),
             child: MediaQuery(
-              data: MediaQuery.of(context).copyWith(size: rect.size),
+              data: media.copyWith(
+                size: rect.size,
+                padding: nextPadding,
+                viewPadding: nextViewPadding,
+              ),
               child: child,
             ),
           );

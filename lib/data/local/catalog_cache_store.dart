@@ -81,6 +81,10 @@ class CatalogCacheStore {
 
   final AppDatabase _db;
 
+  /// Preserves optional variant `sixMsiInstallmentAmount` across cache reads
+  /// without altering the on-disk Drift schema version.
+  static final Map<String, double> _sixMsiByVariantId = <String, double>{};
+
   Future<T> transaction<T>(Future<T> Function() action) =>
       _db.transaction(action);
 
@@ -203,6 +207,7 @@ class CatalogCacheStore {
     await _db.transaction(() async {
       await _db.delete(_db.cachedVariants).go();
       await _db.delete(_db.cachedProducts).go();
+      _sixMsiByVariantId.clear();
       if (products.isNotEmpty) await _upsertProducts(products);
       if (metadata != null) await _writeMetadata(metadata);
     });
@@ -215,6 +220,7 @@ class CatalogCacheStore {
       await _db.delete(_db.cachedVariants).go();
       await _db.delete(_db.cachedProducts).go();
       await _db.delete(_db.catalogStates).go();
+      _sixMsiByVariantId.clear();
     });
   }
 
@@ -237,23 +243,34 @@ class CatalogCacheStore {
   }
 
   Future<void> _upsertProducts(List<Product> products) async {
-    for (final product in products) {
-      await _upsertProduct(product);
-    }
-  }
-
-  Future<void> _upsertProduct(Product product) async {
-    await _db.into(_db.cachedProducts).insertOnConflictUpdate(
-          _productToCompanion(product),
+    if (products.isEmpty) return;
+    await _db.batch((batch) {
+      batch.insertAllOnConflictUpdate(
+        _db.cachedProducts,
+        [for (final product in products) _productToCompanion(product)],
+      );
+      for (final product in products) {
+        batch.deleteWhere(
+          _db.cachedVariants,
+          (table) => table.productId.equals(product.id),
         );
-    await (_db.delete(_db.cachedVariants)
-          ..where((table) => table.productId.equals(product.id)))
-        .go();
-    for (final variant in product.variants) {
-      await _db.into(_db.cachedVariants).insertOnConflictUpdate(
-            _variantToCompanion(product.id, variant),
-          );
-    }
+      }
+      final variantCompanions = <CachedVariantsCompanion>[];
+      for (final product in products) {
+        for (final variant in product.variants) {
+          final msi = variant.sixMsiInstallmentAmount;
+          if (msi != null && msi.isFinite && msi > 0) {
+            _sixMsiByVariantId[variant.id] = msi;
+          } else {
+            _sixMsiByVariantId.remove(variant.id);
+          }
+          variantCompanions.add(_variantToCompanion(product.id, variant));
+        }
+      }
+      if (variantCompanions.isNotEmpty) {
+        batch.insertAllOnConflictUpdate(_db.cachedVariants, variantCompanions);
+      }
+    });
   }
 
   Future<void> upsertCollections(List<domain.Collection> collections) async {
@@ -313,6 +330,7 @@ class CatalogCacheStore {
       price: row.price,
       available: row.available,
       compareAtPrice: row.compareAtPrice,
+      sixMsiInstallmentAmount: _sixMsiByVariantId[row.id],
       sku: row.sku,
       selectedOptions: Map<String, String>.from(
         jsonDecode(row.selectedOptions) as Map,

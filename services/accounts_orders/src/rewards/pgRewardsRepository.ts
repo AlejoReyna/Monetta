@@ -44,6 +44,63 @@ export class PgRewardsRepository implements RewardsRepository {
     };
   }
 
+  async countCompletedPurchases(accountId: string): Promise<number> {
+    const res = await this.pool.query(
+      `SELECT COUNT(DISTINCT source_ref)::int AS c
+       FROM rewards_credit_lots
+       WHERE account_id = $1 AND source_kind = 'order_earn' AND state IN ('available', 'used', 'expired')`,
+      [accountId],
+    );
+    return Number(res.rows[0]?.c ?? 0);
+  }
+
+  async grantTierBonus(args: {
+    accountId: string;
+    tierKey: 'PRO' | 'VIP' | 'ÉLITE';
+    amountCents: number;
+    ruleVersion: number;
+    eventRef: string;
+    occurredAt?: Date | null;
+    expiryMonths: number;
+  }): Promise<{ granted: boolean }> {
+    if (args.amountCents <= 0) return { granted: false };
+    const sourceRef = `tier_bonus:${args.tierKey}`;
+    const releasedAt = args.occurredAt ?? new Date();
+    const expiresAt = expiryFromRelease(releasedAt, args.expiryMonths);
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const lot = await client.query(
+        `INSERT INTO rewards_credit_lots
+           (account_id, source_kind, source_ref, rule_version, amount_cents, remaining_cents,
+            state, released_at, expires_at)
+         VALUES ($1, 'adjustment', $2, 1, $3, $3, 'available', $4, $5)
+         ON CONFLICT (account_id, source_kind, source_ref, rule_version) DO NOTHING
+         RETURNING id`,
+        [args.accountId, sourceRef, args.amountCents, releasedAt, expiresAt],
+      );
+      if ((lot.rowCount ?? 0) === 0) {
+        await client.query('ROLLBACK');
+        return { granted: false };
+      }
+      const lotId = Number(lot.rows[0].id);
+      await client.query(
+        `INSERT INTO rewards_ledger_entries
+           (account_id, entry_type, state, amount_cents, lot_id, order_shopify_id,
+            bonus_kind, rule_version, event_ref, actor, reason)
+         VALUES ($1, 'bonus_released', 'available', $2, $3, NULL, NULL, $4, $5, 'system', $6)`,
+        [args.accountId, args.amountCents, lotId, args.ruleVersion, `${args.eventRef}:${sourceRef}`, `Bono de nivel ${args.tierKey}`],
+      );
+      await client.query('COMMIT');
+      return { granted: true };
+    } catch (error) {
+      try { await client.query('ROLLBACK'); } catch { /* noop */ }
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async balance(accountId: string, now: Date = new Date()): Promise<BalanceView> {
     const [avail, pend, resv, next] = await Promise.all([
       this.pool.query(
@@ -164,8 +221,8 @@ export class PgRewardsRepository implements RewardsRepository {
           args.ruleVersion, JSON.stringify(args.lines),
         ],
       );
-      if (args.isWholesale || args.amountCents <= 0) {
-        // Mayoreo no genera en V1: snapshot queda, sin lote. Idempotente.
+      if (args.amountCents <= 0) {
+        // Sin importe a acreditar: snapshot queda, sin lote. Idempotente.
         await client.query('COMMIT');
         return { created: false, lotId: null };
       }
@@ -242,7 +299,7 @@ export class PgRewardsRepository implements RewardsRepository {
   async releaseForDelivery(args: {
     orderShopifyId: string; eventRef: string; occurredAt?: Date | null;
     lines?: readonly { quantity?: number }[];
-  }): Promise<{ releasedCents: number; lots: number }> {
+  }): Promise<{ releasedCents: number; lots: number; accountId: string | null }> {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -254,7 +311,7 @@ export class PgRewardsRepository implements RewardsRepository {
       );
       if ((dup.rowCount ?? 0) > 0) {
         await client.query('ROLLBACK');
-        return { releasedCents: 0, lots: 0 };
+        return { releasedCents: 0, lots: 0, accountId: null };
       }
       const lots = await client.query(
         `SELECT id, account_id, remaining_cents, rule_version
@@ -271,7 +328,7 @@ export class PgRewardsRepository implements RewardsRepository {
           [args.orderShopifyId, args.eventRef, args.occurredAt ?? new Date()],
         );
         await client.query('COMMIT');
-        return { releasedCents: 0, lots: 0 };
+        return { releasedCents: 0, lots: 0, accountId: null };
       }
       const policy = await this.getPolicyTx(client);
       const now = new Date();
@@ -313,7 +370,7 @@ export class PgRewardsRepository implements RewardsRepository {
         [accountId, JSON.stringify({ orderShopifyId: args.orderShopifyId, releasedCents: released })],
       );
       await client.query('COMMIT');
-      return { releasedCents: released, lots: lots.rowCount ?? 0 };
+      return { releasedCents: released, lots: lots.rowCount ?? 0, accountId };
     } catch (error) {
       try { await client.query('ROLLBACK'); } catch { /* noop */ }
       throw error;
@@ -541,6 +598,21 @@ export class PgRewardsRepository implements RewardsRepository {
     const res = await this.pool.query(
       `SELECT * FROM rewards_redemptions WHERE id = $1 AND account_id = $2`,
       [redemptionId, accountId],
+    );
+    return res.rows[0] ? mapRedemption(res.rows[0]) : null;
+  }
+
+  async findRedemptionByDiscountCode(accountId: string, discountCode: string): Promise<RedemptionRecord | null> {
+    const code = discountCode.trim();
+    if (code === '') return null;
+    const res = await this.pool.query(
+      `SELECT * FROM rewards_redemptions
+       WHERE account_id = $1
+         AND UPPER(shopify_discount_code) = UPPER($2)
+         AND state IN ('reserved', 'provisioning', 'applied', 'order_committed')
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [accountId, code],
     );
     return res.rows[0] ? mapRedemption(res.rows[0]) : null;
   }

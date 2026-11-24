@@ -23,10 +23,12 @@ class ProductQuickAddButton extends StatefulWidget {
   const ProductQuickAddButton({
     required this.product,
     required this.productName,
+    this.selectedVariantId,
     super.key,
   });
 
   final Product product;
+  final String? selectedVariantId;
 
   /// The name as the card prints it, used for the accessible label.
   final String productName;
@@ -37,20 +39,29 @@ class ProductQuickAddButton extends StatefulWidget {
 
 class _ProductQuickAddButtonState extends State<ProductQuickAddButton> {
   bool _pending = false;
+  bool _openingChoice = false;
 
   Future<void> _onPressed() async {
-    if (_pending) return;
+    if (_pending || _openingChoice) return;
     final product = widget.product;
 
-    if (selectableVariants(product).length > 1) {
+    if (selectableVariants(product).length > 1 &&
+        widget.selectedVariantId == null) {
       // Several variants: the shopper picks one in the quick view. Nothing is
       // added here.
-      await showProductQuickView(context, product, requireChoice: true);
+      _openingChoice = true;
+      try {
+        await showProductQuickView(context, product, requireChoice: true);
+      } finally {
+        _openingChoice = false;
+      }
       return;
     }
 
     setState(() => _pending = true);
-    final result = await tryAddSelectionToBag(context, product, 0);
+    final index =
+        variantIndexForId(product, widget.selectedVariantId, fallback: 0);
+    final result = await tryAddSelectionToBag(context, product, index);
     if (!mounted) return;
     setState(() => _pending = false);
 

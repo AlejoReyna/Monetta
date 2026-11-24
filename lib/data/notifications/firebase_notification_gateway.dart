@@ -103,7 +103,9 @@ class FirebaseNotificationGateway implements NotificationGateway {
 
   @override
   Future<NotificationEnvelope?> takeInitialMessage() async {
-    final message = await _messaging.getInitialMessage();
+    final message = await _messaging
+        .getInitialMessage()
+        .timeout(const Duration(seconds: 2), onTimeout: () => null);
     return message == null ? null : _envelope(message);
   }
 

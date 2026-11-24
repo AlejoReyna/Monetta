@@ -9,10 +9,10 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../app/card_lift.dart';
 import '../../app/catalog_store.dart';
 import '../../app/motion.dart';
 import '../boutique/client_guide_sections.dart';
+import '../boutique/client_guide_components.dart';
 import '../boutique/guide_brand_tile.dart';
 import '../wholesale/wholesale_screen.dart';
 import '../contact/contact_screen.dart';
@@ -37,7 +37,6 @@ import '../boutique/boutique_tokens.dart';
 import '../notifications/notifications_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../navigation/monetta_side_menu.dart';
-import '../partner/partner_hub_screen.dart';
 import '../welcome/welcome_gate.dart';
 import 'home_account_invitation.dart';
 import 'home_boutique_sections.dart';
@@ -182,7 +181,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
-        onOpenPartner: _openPartner,
       ),
     );
   }
@@ -197,24 +195,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         builder: (_) => AboutMonettaScreen(
           content: _editorialContent.about,
           onOpenCatalog: _openFullCatalog,
-          onOpenPartner: _openPartner,
+          onOpenPartner: _openWholesale,
         ),
       ),
     );
   }
 
-  void _openPartner() {
+  void _openWholesale() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PartnerHubScreen(content: _editorialContent.partner),
+        builder: (_) => WholesaleScreen(groups: kMonettaAuthorizedGroups),
       ),
     );
-  }
-
-  void _openWholesale() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute<void>(builder: (_) => const WholesaleScreen()));
   }
 
   void _openExternal(Uri uri) {
@@ -544,17 +536,74 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 }
 
-class _BrandsSection extends StatefulWidget {
+class _BrandsSection extends StatelessWidget {
   const _BrandsSection({required this.brands, this.onSeeAll});
 
   final List<HomeBrandCard> brands;
   final VoidCallback? onSeeAll;
 
   @override
-  State<_BrandsSection> createState() => _BrandsSectionState();
+  Widget build(BuildContext context) {
+    if (brands.isEmpty) return const SizedBox.shrink();
+    return Column(
+      key: const ValueKey('home-section-brands'),
+      children: [
+        BoutiqueSectionHeader(
+          title: 'Tus marcas favoritas',
+          actionLabel: onSeeAll == null ? null : 'Ver todas',
+          onAction: onSeeAll,
+        ),
+        SizedBox(
+          height: 102,
+          child: ListView.separated(
+            key: const ValueKey('home-brands-rail'),
+            scrollDirection: Axis.horizontal,
+            padding:
+                const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
+            itemCount: brands.length + (onSeeAll == null ? 0 : 1),
+            separatorBuilder: (_, __) =>
+                const SizedBox(width: BoutiqueSpace.md),
+            itemBuilder: (context, index) {
+              if (index == brands.length) {
+                return Center(
+                  child: GuideGlassIconButton(
+                    tooltip: 'Ver marcas',
+                    onPressed: onSeeAll,
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                  ),
+                );
+              }
+              final brand = brands[index];
+              return SizedBox(
+                width: 156,
+                child: Center(
+                  child: GuideGlassSurface(
+                    child: GuideBrandTile(
+                      key: ValueKey('home-brand-${brand.handle}'),
+                      asset: brand.fallbackAsset,
+                      imageUrl: brand.imageUrl,
+                      label: brand.title,
+                      aspectRatio: 1.7,
+                      onTap: () => openCollection(
+                        context,
+                        CollectionScreen(
+                          title: brand.title,
+                          filter: CollectionFilter(brand: brand.brand),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
 }
 
-/// The guide's own brands, first in the grid and in this order.
+/// The guide's own brands, first in the rail and in this order.
 const List<String> _kGuideBrandOrder = <String>[
   'coach',
   'guess',
@@ -566,7 +615,7 @@ const List<String> _kGuideBrandOrder = <String>[
 String _brandSlug(String brand) =>
     brand.trim().toLowerCase().replaceAll(RegExp(r'[\s\-]+'), '_');
 
-/// The brands the grid shows: every configured brand (they all come with
+/// The brands the rail shows: every configured brand (they all come with
 /// bundled artwork), the guide's own five first. A brand the catalog does not
 /// carry yet still has its tile; it opens its (empty) listing.
 @visibleForTesting
@@ -586,145 +635,4 @@ List<HomeBrandCard> guideBrandsFor(List<HomeBrandCard> configured) {
     return byRank != 0 ? byRank : position[a]!.compareTo(position[b]!);
   });
   return ordered;
-}
-
-Duration _brandEntranceDuration(int brandCount) {
-  final lastRow = brandCount <= 1 ? 0 : (brandCount - 1) ~/ 4;
-  return kEnter + Duration(milliseconds: lastRow * 70);
-}
-
-class _BrandsSectionState extends State<_BrandsSection>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: _brandEntranceDuration(widget.brands.length),
-  );
-  ScrollPosition? _scrollPosition;
-  bool _checkScheduled = false;
-  bool _started = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final nextPosition = Scrollable.maybeOf(context)?.position;
-    if (nextPosition != _scrollPosition) {
-      _scrollPosition?.removeListener(_scheduleVisibilityCheck);
-      _scrollPosition = nextPosition;
-      _scrollPosition?.addListener(_scheduleVisibilityCheck);
-    }
-    if (reduceMotion(context)) {
-      _started = true;
-      _controller.value = 1;
-    } else {
-      _scheduleVisibilityCheck();
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant _BrandsSection oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (!_started && oldWidget.brands.length != widget.brands.length) {
-      _controller.duration = _brandEntranceDuration(widget.brands.length);
-    }
-  }
-
-  void _scheduleVisibilityCheck() {
-    if (_started || _checkScheduled || !mounted) return;
-    _checkScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkScheduled = false;
-      if (!mounted || _started) return;
-      final renderObject = context.findRenderObject();
-      if (renderObject is! RenderBox || !renderObject.attached) return;
-      final top = renderObject.localToGlobal(Offset.zero).dy;
-      final bottom = top + renderObject.size.height;
-      final viewportHeight = MediaQuery.sizeOf(context).height;
-      if (bottom <= 0 || top >= viewportHeight) return;
-      _started = true;
-      _controller.forward();
-    });
-  }
-
-  Animation<Offset> _entranceFor(int index) {
-    final totalMilliseconds = _controller.duration!.inMilliseconds;
-    final startMilliseconds = (index ~/ 4) * 70;
-    final endMilliseconds = startMilliseconds + kEnter.inMilliseconds;
-    final begin = (startMilliseconds / totalMilliseconds).clamp(0.0, 1.0);
-    final end = (endMilliseconds / totalMilliseconds).clamp(begin, 1.0);
-    final direction = index.isEven ? -1.2 : 1.2;
-    return Tween<Offset>(begin: Offset(direction, 0), end: Offset.zero).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Interval(begin, end, curve: kMotionCurve),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _scrollPosition?.removeListener(_scheduleVisibilityCheck);
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.brands.isEmpty) return const SizedBox.shrink();
-    return Column(
-      key: const ValueKey('home-section-brands'),
-      children: [
-        BoutiqueSectionHeader(
-          title: 'Tus marcas favoritas',
-          actionLabel: widget.onSeeAll == null ? null : 'Ver todas',
-          onAction: widget.onSeeAll,
-        ),
-        GridView.builder(
-          clipBehavior: Clip.none,
-          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          // Four tiles across, as in the guide. Official wordmarks sit in the
-          // vertical middle of a square file: a wide cell plus fitWidth shows
-          // that band edge to edge instead of a speck inside an empty square.
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            childAspectRatio: 1.7,
-            crossAxisSpacing: BoutiqueSpace.sm,
-            mainAxisSpacing: BoutiqueSpace.sm,
-          ),
-          itemCount: widget.brands.length,
-          itemBuilder: (context, index) {
-            final brand = widget.brands[index];
-            return SlideTransition(
-              key: ValueKey('home-brand-entrance-${brand.handle}'),
-              position: _entranceFor(index),
-              child: Semantics(
-                button: true,
-                label: 'Ver ${brand.title}',
-                child: MonettaCardLift(
-                  borderRadius: BoutiqueRadius.tile,
-                  // The shared guide tile: the wordmark large on a tinted
-                  // rectangle, no hairline and no drop shadow.
-                  child: GuideBrandTile(
-                    key: ValueKey('home-brand-${brand.handle}'),
-                    asset: brand.fallbackAsset,
-                    imageUrl: brand.imageUrl,
-                    label: brand.title,
-                    aspectRatio: 1.7,
-                    onTap: () => openCollection(
-                      context,
-                      CollectionScreen(
-                        title: brand.title,
-                        filter: CollectionFilter(brand: brand.brand),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
 }

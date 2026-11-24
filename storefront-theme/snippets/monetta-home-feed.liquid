@@ -1,7 +1,6 @@
 {%- doc -%}
   Para ti (UI:G01-B). Editorial products from the chosen collection. No purchase history is read.
-  Agregar stays on the page. Comprar ahora adds the active variant and continues to checkout.
-  The small add control is only on this feed.
+  Add opens the cart drawer. Buy now continues to Shopify checkout.
 
   @param {string} heading_id
   @param {object} source
@@ -18,7 +17,7 @@
 -%}
 <section class="section v41-block v41-feed" aria-labelledby="{{ heading_id }}">
   {% render 'monetta-section-header', id: heading_id, title: heading, title_url: set_url, link_url: set_url, link_label: link_label %}
-  {% paginate source.products by 250 %}
+  {% paginate source.products by 40 %}
     {%- assign products = source.products -%}
     {%- if products.size > 0 -%}
       <ul class="v41-scroll v41-feed__track" role="list">
@@ -26,49 +25,37 @@
           {%- liquid
             assign variant = product.selected_or_first_available_variant
             assign currency = cart.currency.iso_code
-            assign pct = 0
-            if product.available and variant.compare_at_price > variant.price
-              assign pct = variant.compare_at_price | minus: variant.price | times: 100.0 | divided_by: variant.compare_at_price | round
-            endif
             capture brand
               render 'monetta-facet', product: product, kind: 'brands'
             endcapture
             assign brand = brand | strip
-            assign image = product.featured_image
+            assign image = variant.featured_image | default: product.featured_image
           -%}
           <li class="v41-feed__item">
             <article class="v41-feed__card" data-product-handle="{{ product.handle }}">
               <div class="v41-feed__media">
+                <a class="v43-feed-product" href="{{ product.url }}?variant={{ variant.id }}" aria-label="{{ product.title | escape }}">
                 {%- if image -%}
                   <img src="{{ image | image_url: width: 900 }}" width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt | default: product.title | escape }}" loading="lazy" decoding="async">
                 {%- endif -%}
                 {%- unless product.available -%}<span class="v41-sold">AGOTADO</span>{%- endunless -%}
+                </a>
                 <button type="button" class="v41-fav" data-save-product="{{ product.handle }}" data-product-title="{{ product.title | escape }}" aria-pressed="false" aria-label="Guardar {{ product.title | escape }}" hidden>{% render 'monetta-icon', name: 'heart', size: 24, class: 'save-icon--off' %}{% render 'monetta-icon', name: 'heartFilled', size: 24, class: 'save-icon--on' %}</button>
-                {%- if product.available -%}
-                  <form class="v41-feed__add" action="{{ routes.cart_add_url }}" method="post" data-feed-add data-product-name="{{ product.title | escape }}">
-                    <input type="hidden" name="id" value="{{ variant.id }}">
-                    <input type="hidden" name="quantity" value="1">
-                    <input type="hidden" name="return_to" value="{{ request.path }}">
-                    <button type="submit" aria-label="Agregar {{ product.title | escape }}">{% render 'monetta-icon', name: 'bag', size: 18 %}</button>
-                  </form>
-                {%- endif -%}
+                {% render 'monetta-feature-add', product: product, variant: variant, class: 'v41-feed__add' %}
               </div>
               {%- if brand != blank -%}<p class="v41-feed__brand">{{ brand | escape }}</p>{%- endif -%}
               <p class="v41-feed__name">{{ product.title | escape }}</p>
-              <p class="v41-feed__price">
-                <span>{{ variant.price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</span>
-                {%- if pct > 0 -%}
-                  <s>{{ variant.compare_at_price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</s>
-                  <span class="v41-feed__pct">({{ pct }}%)</span>
-                {%- endif -%}
-              </p>
-              {%- if product.available -%}
-                <form action="{{ routes.cart_add_url }}" method="post" data-feed-buy data-product-name="{{ product.title | escape }}" data-checkout="{{ checkout_path }}">
+              <p class="v41-feed__price">{% render 'monetta-variant-price', variant: variant, currency: currency %}</p>
+              {%- if variant.available and product.variants.size == 1 -%}
+                <form action="{{ routes.cart_add_url }}" method="post" data-quick-add data-product-name="{{ product.title | escape }}" data-checkout="{{ checkout_path }}">
                   <input type="hidden" name="id" value="{{ variant.id }}">
                   <input type="hidden" name="quantity" value="1">
                   <input type="hidden" name="return_to" value="{{ checkout_path }}">
                   <button type="submit" class="v41-buy">Comprar ahora</button>
+                  <p class="form-error" role="alert" data-feature-error hidden></p>
                 </form>
+              {%- elsif variant.available -%}
+                <a class="v41-buy" href="{{ product.url }}" data-product-url="{{ product.url }}" data-quick-view="{{ product.handle }}" data-require-option data-checkout="{{ checkout_path }}" aria-haspopup="dialog">Comprar ahora</a>
               {%- endif -%}
             </article>
           </li>

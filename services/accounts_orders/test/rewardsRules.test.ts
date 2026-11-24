@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { formatMonettaShort } from '../src/rewards/money.js';
 import {
   detectWholesale, eligibleSubtotal, estimatedEarnCents, expiryFromRelease,
-  maxRedeemableCents, redemptionEligibility,
+  maxRedeemableCents, redemptionEligibility, resolveTier, tierBonusesUnlocked,
 } from '../src/rewards/rules.js';
 import { DEFAULT_PROGRAM } from '../src/rewards/types.js';
 
@@ -45,12 +45,18 @@ describe('rewards rules (paquete F)', () => {
     expect(detectWholesale({}).isWholesale).toBe(false);
   });
 
-  it('canje en mayoreo bloqueado mientras la decision siga pendiente', () => {
-    const r = redemptionEligibility({
+  it('canje en mayoreo permitido con programa confirmado y bloqueado si sigue pendiente', () => {
+    const allowed = redemptionEligibility({
       policy: { ...DEFAULT_PROGRAM, redemptionEnabled: true },
       isWholesaleCart: true, requestedCents: 1000, maxAllowedCents: 5000,
     });
-    expect(r.ok).toBe(false);
+    expect(allowed.ok).toBe(true);
+
+    const pending = redemptionEligibility({
+      policy: { ...DEFAULT_PROGRAM, redemptionEnabled: true, wholesaleRedeemAllowed: null },
+      isWholesaleCart: true, requestedCents: 1000, maxAllowedCents: 5000,
+    });
+    expect(pending.ok).toBe(false);
   });
 
   it('canje deshabilitado tras bandera apagada', () => {
@@ -63,5 +69,40 @@ describe('rewards rules (paquete F)', () => {
 
   it('presentacion en pesos: "Tienes $184 Monetta disponibles"', () => {
     expect(formatMonettaShort(18400)).toBe('$184 Monetta');
+  });
+
+  it('resuelve niveles PRO (1%), VIP (2%) y ÉLITE (3%) sobre 10 compras y bonos', () => {
+    expect(resolveTier(0)).toMatchObject({
+      level: 'PRO', nextLevel: 'VIP', isFinalLevel: false,
+      progressPercent: 0, purchaseCountLabel: '0 de 10 compras', cashbackBps: 100, bonusCents: 10000,
+    });
+    expect(resolveTier(4)).toMatchObject({
+      level: 'PRO', nextLevel: 'VIP', isFinalLevel: false,
+      progressPercent: 40, purchaseCountLabel: '4 de 10 compras', cashbackBps: 100,
+    });
+    expect(resolveTier(5)).toMatchObject({
+      level: 'VIP', nextLevel: 'ÉLITE', isFinalLevel: false,
+      progressPercent: 50, purchaseCountLabel: '5 de 10 compras', cashbackBps: 200, bonusCents: 10000,
+    });
+    expect(resolveTier(9)).toMatchObject({
+      level: 'VIP', nextLevel: 'ÉLITE', isFinalLevel: false,
+      progressPercent: 90, purchaseCountLabel: '9 de 10 compras', cashbackBps: 200,
+    });
+    expect(resolveTier(10)).toMatchObject({
+      level: 'ÉLITE', nextLevel: null, isFinalLevel: true,
+      progressPercent: 100, cashbackBps: 300, bonusCents: 20000,
+    });
+    expect(resolveTier(12).progressFraction).toBe(1);
+    expect(tierBonusesUnlocked(0)).toEqual([]);
+    expect(tierBonusesUnlocked(1)).toEqual([{ tierKey: 'PRO', amountCents: 10000 }]);
+    expect(tierBonusesUnlocked(5)).toEqual([
+      { tierKey: 'PRO', amountCents: 10000 },
+      { tierKey: 'VIP', amountCents: 10000 },
+    ]);
+    expect(tierBonusesUnlocked(10)).toEqual([
+      { tierKey: 'PRO', amountCents: 10000 },
+      { tierKey: 'VIP', amountCents: 10000 },
+      { tierKey: 'ÉLITE', amountCents: 20000 },
+    ]);
   });
 });

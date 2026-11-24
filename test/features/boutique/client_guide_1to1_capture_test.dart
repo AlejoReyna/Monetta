@@ -271,7 +271,8 @@ void main() {
       ),
       size: _phone,
     );
-    expect(find.text('Bolsas'), findsWidgets);
+    expect(find.byType(GuideBanner), findsOneWidget);
+    expect(find.text('Bolsas'), findsNothing);
     await captureClientGuide(tester, 'p-09-coleccion');
   });
 

@@ -59,26 +59,26 @@ describe.skipIf(!available)('rewards ledger on PostgreSQL (paquete F)', () => {
     })).earned).toBe(false);
 
     const rel = await service.onOrderDelivered({ eventId: `ev:${order}:del`, orderShopifyId: order });
-    expect(rel.releasedCents).toBe(5400);
+    expect(rel.releasedCents).toBe(1800);
 
     const q = await service.quote(customer, {
       cartRevision: 'rev-pg-1',
       lines: [{ quantity: 1, unitPriceCents: 90000, eligible: true }],
     });
-    expect(q.maxAllowedCents).toBe(5400);
+    expect(q.maxAllowedCents).toBe(11800);
 
     const { redemption } = await service.redeem({
-      accountId: customer, quoteId: q.quoteId, amountCents: 5400,
+      accountId: customer, quoteId: q.quoteId, amountCents: 11800,
       isWholesaleCart: false, idempotencyKey: `pg-key-${order}`,
     });
     expect(redemption.state).toBe('reserved');
 
     // Shopify aplico menos (carrito editado): se consume lo real.
-    const settled = await repo.settle({ redemptionId: redemption.redemptionId, appliedCents: 5000, orderShopifyId: `pg-new-${order}` });
+    const settled = await repo.settle({ redemptionId: redemption.redemptionId, appliedCents: 11000, orderShopifyId: `pg-new-${order}` });
     expect(settled.state).toBe('settled');
-    expect(settled.settledCents).toBe(5000);
+    expect(settled.settledCents).toBe(11000);
     const balance = await repo.balance(customer);
-    expect(balance.availableCents).toBe(400);
+    expect(balance.availableCents).toBe(800);
   });
 
   it('exceso sobre la reserva marca reconciliacion, no saldo negativo sorpresa', async () => {
@@ -106,7 +106,7 @@ describe.skipIf(!available)('rewards ledger on PostgreSQL (paquete F)', () => {
     expect(over.state).toBe('reconciliation_required');
   });
 
-  it('mayoreo no genera lote aunque el pago este verificado', async () => {
+  it('mayoreo sí genera lote cuando el pago esta verificado', async () => {
     const order = `pg-ws-${randomUUID().slice(0, 8)}`;
     await service.onOrderPaid({
       eventId: `ev:${order}:paid`, orderShopifyId: order, accountId: 'pg-cust-3',
@@ -115,6 +115,6 @@ describe.skipIf(!available)('rewards ledger on PostgreSQL (paquete F)', () => {
       isWholesale: true, signals: ['tag:mayoreo'],
     });
     await service.onOrderDelivered({ eventId: `ev:${order}:del`, orderShopifyId: order });
-    expect((await repo.balance('pg-cust-3')).availableCents).toBe(0);
+    expect((await repo.balance('pg-cust-3')).availableCents).toBe(15000);
   });
 });

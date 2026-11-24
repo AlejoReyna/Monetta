@@ -115,4 +115,58 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
+
+  testWidgets(
+      'SystemUsableSurface subtracts consumed top cutout padding from MediaQuery',
+      (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+
+    late EdgeInsets childPadding;
+    late EdgeInsets childViewPadding;
+    late Size childSize;
+    const geometry = SystemLayoutContext(
+      supported: true,
+      occlusions: [
+        ReservedRegion(
+          bounds: Rect.fromLTWH(120, 0, 150, 62),
+          active: true,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            size: Size(390, 844),
+            padding: EdgeInsets.only(top: 62, bottom: 34),
+            viewPadding: EdgeInsets.only(top: 62, bottom: 34),
+          ),
+          child: SystemLayoutScope(
+            geometry: geometry,
+            child: SystemUsableSurface(
+              child: Builder(
+                builder: (context) {
+                  final media = MediaQuery.of(context);
+                  childPadding = media.padding;
+                  childViewPadding = media.viewPadding;
+                  childSize = media.size;
+                  return const SizedBox.expand();
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(childPadding.top, 0);
+    expect(childViewPadding.top, 0);
+    expect(childPadding.bottom, 34);
+    expect(childViewPadding.bottom, 34);
+    expect(childSize.height, 844 - 62);
+  });
 }

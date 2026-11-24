@@ -101,6 +101,7 @@ class ProductVariant {
     required this.price,
     required this.available,
     this.compareAtPrice,
+    this.sixMsiInstallmentAmount,
     this.sku,
     this.selectedOptions = const {},
     this.imageUrls = const [],
@@ -112,6 +113,7 @@ class ProductVariant {
   final double price;
   final bool available;
   final double? compareAtPrice;
+  final double? sixMsiInstallmentAmount;
 
   /// Null for every variant on this store today — do not build logic on it.
   final String? sku;

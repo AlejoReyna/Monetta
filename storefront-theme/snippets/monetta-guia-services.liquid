@@ -9,8 +9,8 @@
   {%- if variant == 'wholesale' -%}
     <li class="guide-services__item">
       {% render 'monetta-guia-icon', name: 'servicio-envios', size: 72, class: 'guide-services__icon' %}
-      <p class="guide-services__title">Envío gratis</p>
-      <p class="guide-services__body">En compras mayores a $1,999 MXN</p>
+      <p class="guide-services__title">Envío gratis con tu cuenta</p>
+      <p class="guide-services__body">$199 MXN a todo México como invitado</p>
     </li>
     <li class="guide-services__item">
       {% render 'monetta-guia-icon', name: 'servicio-pagos', size: 72, class: 'guide-services__icon' %}
@@ -31,7 +31,7 @@
     {%- comment -%}UI v4.1 (UI:G01, servicios recibidos): two lines under each gold icon.{%- endcomment -%}
     <li class="guide-services__item">
       <img class="guide-services__icon" src="{{ 'monetta-v41-envio.svg' | asset_url }}" width="30" height="30" alt="" loading="lazy" decoding="async">
-      <p class="guide-services__line">ENVÍO GRATIS<br>5 - 7 días hábiles</p>
+      <p class="guide-services__line">ENVÍO GRATIS<br>con tu cuenta</p>
     </li>
     <li class="guide-services__item">
       <img class="guide-services__icon" src="{{ 'monetta-v41-original.svg' | asset_url }}" width="30" height="30" alt="" loading="lazy" decoding="async">
@@ -39,7 +39,7 @@
     </li>
     <li class="guide-services__item">
       <img class="guide-services__icon" src="{{ 'monetta-v41-pago.svg' | asset_url }}" width="30" height="30" alt="" loading="lazy" decoding="async">
-      <p class="guide-services__line">Paga a Meses<br>Sin Intereses</p>
+      <p class="guide-services__line">Pagos seguros<br>Compra con confianza</p>
     </li>
   {%- endif -%}
 </ul>

@@ -105,7 +105,7 @@ void main() {
 
     await tester.tap(find.byKey(const Key('home-menu-button')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Bolsos'));
+    await tester.tap(find.text('Bolsos').hitTestable().last);
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('category-open-bags')));
     await tester.pumpAndSettle();

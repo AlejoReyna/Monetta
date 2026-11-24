@@ -31,13 +31,16 @@ if (!config.notificationsEnabled) {
   process.once('SIGTERM', stop);
   process.once('SIGINT', stop);
 
+  const rawIdleMs = Number.parseInt(process.env.ENGAGEMENT_WORKER_IDLE_MS ?? '', 10);
+  const idlePollMs = Number.isFinite(rawIdleMs) && rawIdleMs >= 1_000 ? rawIdleMs : 5_000;
+
   try {
     while (!stopping) {
       const result = await service.dispatchOnce(100);
       if (result.materialized > 0 || result.processed > 0) {
         logger.info('notification worker batch complete', result);
       }
-      await delay(result.processed === 0 ? 5_000 : 250);
+      await delay(result.processed === 0 ? idlePollMs : 250);
     }
   } catch (error) {
     logger.error('notification worker stopped after an unhandled error', {

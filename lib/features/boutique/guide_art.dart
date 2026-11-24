@@ -8,11 +8,14 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'client_guide_components.dart';
 
 import '../../app/monetta_tokens.g.dart';
+import '../../data/media/media_url.dart';
+import '../../main.dart' show HomeContentScope;
 import 'boutique_tokens.dart';
 
 part 'guide_assets.g.dart';
@@ -28,10 +31,18 @@ class GuideAssetSpec {
   final String sha256;
 }
 
+const GuideAssetSpec _kOfertasBannerAsset = GuideAssetSpec(
+  'assets/images/v41/banners/B33_ofertas.jpg',
+  'OFERTAS',
+  'banner',
+  '',
+);
+
 /// IDs are namespaced to keep banner/home-photo/icon identifiers unambiguous.
 /// Home photography may only be resolved explicitly for Home.
 GuideAssetSpec? guideAsset(String id, {bool forHome = false}) {
-  final asset = _guideAssets[id];
+  final asset =
+      _guideAssets[id] ?? (id == 'banner:B33' ? _kOfertasBannerAsset : null);
   if (asset?.kind == 'homePhoto' && !forHome) return null;
   return asset;
 }
@@ -70,7 +81,15 @@ class GuideSemanticImage extends StatelessWidget {
 /// At enlarged text sizes, native exact copy reflows over the photo. Normal
 /// narrow layouts use the original transparent lettering layers, not fonts.
 class GuideBanner extends StatelessWidget {
-  const GuideBanner({required this.id, this.action, this.onTap, super.key});
+  const GuideBanner({
+    required this.id,
+    this.action,
+    this.onTap,
+    this.overlayAction = false,
+    super.key,
+  });
+
+  final bool overlayAction;
   final String id;
   final Widget? action;
   final VoidCallback? onTap;
@@ -78,88 +97,88 @@ class GuideBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final spec = guideAsset('banner:$id');
     if (spec == null) return const SizedBox.shrink();
+    final remoteOverride =
+        HomeContentScope.maybeOf(context)?.content.bannersBySlot[id];
+    final remoteUrl = (remoteOverride != null && remoteOverride.active)
+        ? remoteOverride.imageUrl
+        : null;
+    final effectiveCopy = (remoteOverride?.copy != null &&
+            remoteOverride!.copy!.trim().isNotEmpty)
+        ? remoteOverride.copy!
+        : spec.copy;
+
+    Widget buildBannerImage() {
+      final assetFallback = Image.asset(
+        spec.path,
+        fit: BoxFit.contain,
+        excludeFromSemantics: true,
+      );
+      if (remoteUrl == null || remoteUrl.isEmpty) {
+        return assetFallback;
+      }
+      return CachedNetworkImage(
+        imageUrl: MediaUrl.sized(remoteUrl, width: MediaUrl.heroWidth),
+        fit: BoxFit.contain,
+        fadeInDuration: Duration.zero,
+        fadeOutDuration: Duration.zero,
+        placeholder: (_, __) => assetFallback,
+        errorWidget: (_, __, ___) => assetFallback,
+      );
+    }
+
     return LayoutBuilder(builder: (context, constraints) {
       final width = constraints.maxWidth;
       final enlarged = MediaQuery.textScalerOf(context).scale(16) > 16;
-      final layered = id == 'B31' || id == 'B32';
       Widget art;
-      if (layered && (width < 768 || enlarged)) {
-        final lines = spec.copy.split('\n');
-        final title = id == 'B31' ? lines.take(3).join(' ') : lines.first;
-        final body = lines.skip(id == 'B31' ? 3 : 1).join(' ');
-        art = ColoredBox(
-            color: const Color(0xFFF4F1EE),
-            child: Stack(children: [
-              Positioned.fill(
-                  child: Image.asset(
-                      'assets/images/v41/banners/${id}_photo.png',
-                      fit: BoxFit.cover,
-                      alignment: Alignment.centerRight,
-                      excludeFromSemantics: true)),
-              const Positioned.fill(
-                  child: GuideScrim(textSide: GuideTextSide.left)),
-              Padding(
-                  padding: EdgeInsets.all(MonettaTokens.gutterFor(width)),
-                  child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                          width: (width - 32) * (enlarged ? 1 : .67),
-                          child: enlarged
-                              ? DecoratedBox(
-                                  decoration: BoxDecoration(
-                                      color: const Color(0xFFF4F1EE)
-                                          .withValues(alpha: .94)),
-                                  child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(title,
-                                                style: guideSerifStyle(context,
-                                                    size: 28)),
-                                            const SizedBox(height: 16),
-                                            Text(body,
-                                                style: boutiqueText(size: 16)),
-                                          ])))
-                              : Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                      Image.asset(
-                                          'assets/images/v41/lettering/${id}_titulo.png',
-                                          excludeFromSemantics: true),
-                                      const SizedBox(height: 16),
-                                      Image.asset(
-                                          'assets/images/v41/lettering/${id}_descripcion.png',
-                                          excludeFromSemantics: true),
-                                    ])))),
-            ]));
-      } else if (constraints.hasBoundedHeight && !enlarged && action == null) {
+      if (constraints.hasBoundedHeight && !enlarged && action == null) {
         // A fixed slot (the home carousel) may be shorter than the 2.4:1
         // artwork on wide screens: fit the whole banner inside it.
         art = SizedBox(
             width: width,
             height: math.min(width / 2.4, constraints.maxHeight),
-            child: Image.asset(spec.path,
-                fit: BoxFit.contain, excludeFromSemantics: true));
+            child: buildBannerImage());
       } else {
-        art = AspectRatio(
-            aspectRatio: 2.4,
-            child: Image.asset(spec.path,
-                fit: BoxFit.contain, excludeFromSemantics: true));
+        art = AspectRatio(aspectRatio: 2.4, child: buildBannerImage());
       }
-      if (enlarged && !layered) {
+      if (enlarged) {
+        final lines = effectiveCopy.split('\n');
+        final headingLines = switch (id) {
+          'B31' => 3,
+          'B32' => 1,
+          _ => 0,
+        };
         art = Column(mainAxisSize: MainAxisSize.min, children: [
           art,
           Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(spec.copy, style: boutiqueText(size: 16))),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (headingLines > 0)
+                  Text(lines.take(headingLines).join(' '),
+                      style: guideSerifStyle(context, size: 24)),
+                Text(lines.skip(headingLines).join(' '),
+                    style: boutiqueText(size: 16)),
+              ],
+            ),
+          ),
         ]);
       }
       // One semantic reading, including when native text replaces the artwork.
       final editorial =
-          Semantics(label: spec.copy, excludeSemantics: true, child: art);
+          Semantics(label: effectiveCopy, excludeSemantics: true, child: art);
+      if (overlayAction && action != null && !enlarged) {
+        return Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            editorial,
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: action!,
+            ),
+          ],
+        );
+      }
       final column = Column(mainAxisSize: MainAxisSize.min, children: [
         if (onTap != null)
           InkWell(onTap: onTap, child: editorial)

@@ -14,7 +14,7 @@
   assign brand = brand | strip
   assign image = current.featured_image | default: product.featured_image
 -%}
-<div class="quick-view" data-quick-view-root data-product-title="{{ product.title | escape }}">
+<div class="quick-view" data-currency="{{ currency | downcase }}" data-quick-view-root data-product-url="{{ product.url }}" data-product-title="{{ product.title | escape }}">
   <div class="quick-view__media">
     {%- if image -%}
       <img class="quick-view__photo" data-quick-view-photo src="{{ image | image_url: width: 900 }}" width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt | default: product.title | escape }}">
@@ -25,7 +25,7 @@
     </div>
   </div>
   <div class="quick-view__body">
-    {%- if product.images.size > 1 -%}
+    {%- if product.has_only_default_variant and product.images.size > 1 -%}
       <ul class="quick-view__thumbs" role="list">
         {%- for thumb in product.images limit: 4 -%}
           <li><button type="button" class="quick-view__thumb" data-quick-view-thumb="{{ thumb | image_url: width: 900 }}" data-image-id="{{ thumb.id }}" aria-label="Ver foto {{ forloop.index }} de {{ product.images.size }}"{% if thumb.id == image.id %} aria-current="true"{% endif %}><img src="{{ thumb | image_url: width: 200 }}" width="80" height="80" alt="" loading="lazy"></button></li>
@@ -35,11 +35,7 @@
     {%- if brand != blank -%}<p class="quick-view__brand">{{ brand | escape }}</p>{%- endif -%}
     <h2 class="quick-view__name" id="quick-view-title">{{ product.title | escape }}</h2>
     <p class="quick-view__price" data-quick-view-price>
-      <span class="price">{{ current.price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</span>
-      {%- if current.compare_at_price > current.price -%}
-        {%- assign pct = current.compare_at_price | minus: current.price | times: 100.0 | divided_by: current.compare_at_price | round -%}
-        <s class="price-compare">{{ current.compare_at_price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</s><span class="badge badge--sale">-{{ pct }}%</span>
-      {%- endif -%}
+      {% render 'monetta-variant-price', variant: current, currency: currency, show_installments: true %}
     </p>
     {%- unless product.has_only_default_variant -%}
       {%- for option in product.options_with_values -%}
@@ -65,15 +61,31 @@
     {%- endunless -%}
     <p class="quick-view__stock"><span class="quick-view__stock-label">Stock</span><span class="quick-view__stock-pill" data-quick-view-stock role="status">{% if current.available %}Disponible{% else %}Agotado{% endif %}</span></p>
     <p class="quick-view__hint" data-quick-view-hint role="status" hidden></p>
-    <button type="button" class="btn btn--primary btn--block" data-quick-view-add{% unless current.available %} disabled{% endunless %}>Agregar al carrito</button>
-    <p class="quick-view__added" data-quick-view-added role="status" hidden>Agregado al carrito</p>
-    <a class="btn btn--outline btn--block" href="{{ product.url }}">Ver producto</a>
+    <button type="button" class="btn btn--primary btn--block" data-quick-view-add{% unless current.available %} disabled{% endunless %}><span data-label>Agregar al carrito</span></button>
+    <p class="form-error" data-quick-view-error role="alert" hidden></p>
+    <a class="btn btn--outline btn--block" href="{{ product.url }}?variant={{ current.id }}" data-quick-view-pdp>Ver producto</a>
   </div>
   <script type="application/json" data-quick-view-variants>
     [{%- for v in product.variants -%}
-      {%- assign low = 0 -%}
-      {%- if v.available and v.inventory_management == 'shopify' and v.inventory_policy == 'deny' and v.inventory_quantity > 0 and v.inventory_quantity <= 3 -%}{%- assign low = v.inventory_quantity -%}{%- endif -%}
-      {"id":{{ v.id }},"available":{{ v.available }},"low":{{ low }},"options":{{ v.options | json }},"price":{{ v.price | money_without_trailing_zeros | replace: '$ ', '$' | append: ' ' | append: currency | json }},"compare":{% if v.compare_at_price > v.price %}{{ v.compare_at_price | money_without_trailing_zeros | replace: '$ ', '$' | append: ' ' | append: currency | json }}{% else %}null{% endif %},"pct":{% if v.compare_at_price > v.price %}{{ v.compare_at_price | minus: v.price | times: 100.0 | divided_by: v.compare_at_price | round }}{% else %}0{% endif %},"image":{% if v.featured_image %}{{ v.featured_image | image_url: width: 900 | json }}{% else %}null{% endif %},"imageId":{% if v.featured_image %}{{ v.featured_image.id }}{% else %}null{% endif %}}{% unless forloop.last %},{% endunless %}
+      {%- liquid
+        assign low = 0
+        if v.available and v.inventory_management == 'shopify' and v.inventory_policy == 'deny' and v.inventory_quantity > 0 and v.inventory_quantity <= 3
+          assign low = v.inventory_quantity
+        endif
+        assign v_msi_mf = v.metafields.monetta.six_msi_amount
+        assign v_msi_raw = v_msi_mf.value | default: v_msi_mf
+        assign v_msi_text = ''
+        assign v_currency_lower = currency | downcase
+        if v_msi_raw.amount != blank
+          assign v_msi_text = v_msi_raw | money_without_trailing_zeros | replace: '$ ', '$'
+          if v_currency_lower != blank
+            assign v_msi_text = v_msi_text | append: ' ' | append: v_currency_lower
+          endif
+        elsif v_msi_raw != blank
+          assign v_msi_text = v_msi_raw | append: '' | strip
+        endif
+      -%}
+      {"id":{{ v.id }},"available":{{ v.available }},"low":{{ low }},"options":{{ v.options | json }},"price":{{ v.price | money_without_trailing_zeros | replace: '$ ', '$' | json }},"compare":{% if v.compare_at_price > v.price %}{{ v.compare_at_price | money_without_trailing_zeros | replace: '$ ', '$' | json }}{% else %}null{% endif %},"pct":{% if v.compare_at_price > v.price %}{{ v.compare_at_price | minus: v.price | times: 100.0 | divided_by: v.compare_at_price | round }}{% else %}0{% endif %},"msi":{% if v_msi_text != blank %}{{ v_msi_text | json }}{% else %}null{% endif %},"image":{% if v.featured_image %}{{ v.featured_image | image_url: width: 900 | json }}{% elsif product.featured_image %}{{ product.featured_image | image_url: width: 900 | json }}{% else %}null{% endif %},"imageId":{% if v.featured_image %}{{ v.featured_image.id }}{% else %}null{% endif %}}{% unless forloop.last %},{% endunless %}
     {%- endfor -%}]
   </script>
 </div>

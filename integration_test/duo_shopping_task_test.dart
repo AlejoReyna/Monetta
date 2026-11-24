@@ -6,7 +6,6 @@ import 'package:integration_test/integration_test.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
 import 'package:monetta_app/app/storefront_layout.dart';
-import 'package:monetta_app/features/checkout/mini_cart.dart';
 import 'package:monetta_app/features/product/product_screen.dart';
 import 'package:monetta_app/features/product/product_selection.dart';
 import 'package:monetta_app/main.dart' as app;
@@ -276,12 +275,12 @@ void main() {
       final before = store.bagQuantity;
       await tester.tap(primary);
       for (var i = 0;
-          i < 20 && find.byType(MiniCartSheet).evaluate().isEmpty;
+          i < 20 && find.byTooltip('Cerrar carrito').evaluate().isEmpty;
           i++) {
         await tester.pump(const Duration(milliseconds: 300));
       }
       expect(store.bagQuantity, before + 1);
-      await tester.tap(find.byTooltip('Cerrar'));
+      await tester.tap(find.byTooltip('Cerrar carrito'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('bottom-nav-bag')));
       await tester.pumpAndSettle();

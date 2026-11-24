@@ -38,7 +38,6 @@ const Map<String, String> _kBrandLogoAssets = <String, String>{
   'guess': 'assets/images/brands/guess.webp',
   'laneige': 'assets/images/brands/laneige.webp',
   'michael_kors': 'assets/images/brands/michael_kors.webp',
-  'olaplex': 'assets/images/brands/olaplex.webp',
   'rhode': 'assets/images/brands/rhode.webp',
   'steve_madden': 'assets/images/brands/steve_madden.webp',
   'summer_fridays': 'assets/images/brands/summer_fridays.webp',

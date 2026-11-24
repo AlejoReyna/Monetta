@@ -1,7 +1,6 @@
 /// SHIP-01 to SHIP-03: the app neither promises nor computes shipping by
 /// amount, never invents a shipping cost, and its local total adds no
-/// shipping. Where a shipping line exists it says "Se calcula en Shopify",
-/// the same words the remote cart summary uses.
+/// shipping.
 library;
 
 import 'package:flutter/material.dart';
@@ -10,7 +9,6 @@ import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/shopify/cart/checkout_launcher.dart';
 import 'package:monetta_app/features/checkout/checkout_screen.dart';
-import 'package:monetta_app/features/checkout/mini_cart.dart';
 import 'package:monetta_app/main.dart';
 
 import '../../support/product_screen_harness.dart';
@@ -126,17 +124,13 @@ void main() {
               expect(find.byType(LinearProgressIndicator), findsNothing);
               _expectNoFreeShippingCopy(tester);
 
-              final summary = find.byKey(const ValueKey('bag-order-summary'));
-              expect(summary, findsOneWidget);
+              expect(find.text('Resumen de compra'), findsNothing);
+              expect(find.text('Subtotal'), findsNothing);
+              expect(find.text('Total estimado'), findsNothing);
+              expect(find.text('Se calcula en Shopify'), findsNothing);
               final subtotal = kMoney.format(_subtotalOf(bagCase));
-              expect(_valuesOfRow(summary, 'Subtotal'), [subtotal]);
-              expect(_valuesOfRow(summary, 'Envío'), [_calculatedByShopify]);
-              expect(_valuesOfRow(summary, 'Total estimado'), [subtotal]);
-              expect(
-                find.descendant(of: summary, matching: find.text('Total')),
-                findsNothing,
-                reason: 'the local figure is an estimate and must say so',
-              );
+              expect(find.text(subtotal), findsOneWidget);
+              expect(find.text('Continuar al checkout'), findsOneWidget);
             });
           },
         );
@@ -154,10 +148,15 @@ void main() {
           await withSemantics(tester, () async {
             final store = await _storeWithBag(bagCase);
 
-            await tester.pumpWidget(_app(store, const MiniCartSheet()));
+            await tester.pumpWidget(
+              _app(
+                store,
+                const BagScreen(drawerTitle: 'Agregado al carrito'),
+              ),
+            );
             await tester.pump();
 
-            expect(find.text('En tu bolsa'), findsOneWidget);
+            expect(find.text('Agregado al carrito'), findsOneWidget);
             expect(find.byType(LinearProgressIndicator), findsNothing);
             _expectNoFreeShippingCopy(tester);
           });
@@ -184,65 +183,25 @@ void main() {
       final scope = find.byType(Scaffold).first;
       final subtotal = kMoney.format(_subtotalOf(bagCase));
       expect(_valuesOfRow(scope, 'Subtotal'), [subtotal]);
-      expect(_valuesOfRow(scope, 'Envío estimado'), [_calculatedByShopify]);
+      expect(find.text(_calculatedByShopify), findsNothing);
       expect(_valuesOfRow(scope, 'Total estimado'), [subtotal]);
     }
 
     for (final bagCase in _cases) {
       testWidgets(
-        'SHIP-03 contact step shows no delivery amount and a calculated '
+        'SHIP-03 direct payment step shows no shipping line and a calculated '
         'total (${bagCase.name})',
         (tester) async {
           _setSurface(tester, const Size(390, 2400));
           final store = await _storeWithBag(bagCase);
           await pumpCheckout(tester, store);
-
-          expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
-          _expectNoFreeShippingCopy(tester);
-
-          final option = _valuesOfRow(
-            find.byType(Scaffold).first,
-            'Envío estándar',
-          );
-          expect(option, contains('SE CALCULA EN SHOPIFY'));
-          for (final text in option) {
-            expect(text, isNot(contains(r'$')), reason: 'no invented amount');
-            expect(text, isNot(contains('ESTIMADO')));
-            expect(text.toUpperCase(), isNot(contains('GRATIS')));
-          }
-          expectTotals(bagCase);
-        },
-      );
-
-      testWidgets(
-        'SHIP-03 review step shows no estimated shipping and a calculated '
-        'total (${bagCase.name})',
-        (tester) async {
-          _setSurface(tester, const Size(390, 2400));
-          final store = await _storeWithBag(bagCase);
-          await pumpCheckout(tester, store);
-
-          final fields = find.byType(TextFormField);
-          await tester.enterText(fields.at(0), 'buyer@example.invalid');
-          await tester.enterText(fields.at(1), '8112345678');
-          await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-          await tester.tap(find.text('REVISAR PEDIDO'));
-          await tester.pumpAndSettle();
 
           expect(find.text('Todo listo'), findsOneWidget);
+          expect(find.text('¿Cómo te contactamos?'), findsNothing);
+          expect(find.text('Envío estándar'), findsNothing);
+          expect(find.text('MÉTODO DE ENVÍO'), findsNothing);
           _expectNoFreeShippingCopy(tester);
           expect(find.textContaining('Estimado previo'), findsNothing);
-
-          // The block title is upper-cased by _ReviewBlock.
-          final method = _valuesOfRow(
-            find.byType(Scaffold).first,
-            'MÉTODO DE ENVÍO',
-          );
-          expect(method, hasLength(1));
-          expect(method.single, isNot(contains(r'$')));
-          expect(method.single, isNot(contains('Estimado previo')));
-          expect(method.single.toLowerCase(), isNot(contains('gratis')));
-
           expectTotals(bagCase);
         },
       );

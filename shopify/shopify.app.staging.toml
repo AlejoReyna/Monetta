@@ -19,7 +19,7 @@ embedded = true
 handle = "monetta-staging"
 
 [access_scopes]
-scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects,write_customer_data_erasure"
+scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects,write_customer_data_erasure,read_discounts,write_discounts,read_fulfillments"
 
 # App-owned singleton for the native admin control plane. The $app type keeps
 # the schema under this app's ownership while allowing the merchant to update
@@ -53,6 +53,33 @@ type = "boolean"
 name = "Version"
 type = "number_integer"
 
+[metaobjects.app.monetta_banner]
+name = "Monetta Banner"
+display_name_field = "slot"
+access.admin = "merchant_read_write"
+access.storefront = "public_read"
+
+[metaobjects.app.monetta_banner.fields.slot]
+name = "Slot (B01..B32)"
+type = "single_line_text_field"
+required = true
+
+[metaobjects.app.monetta_banner.fields.image]
+name = "Imagen (2.4:1)"
+type = "file_reference"
+
+[metaobjects.app.monetta_banner.fields.alt_text]
+name = "Texto alternativo / copy accesible"
+type = "multi_line_text_field"
+
+[metaobjects.app.monetta_banner.fields.destination_url]
+name = "Destino (URL o ruta)"
+type = "single_line_text_field"
+
+[metaobjects.app.monetta_banner.fields.active]
+name = "Activo"
+type = "boolean"
+
 [auth]
 redirect_urls = [
   "https://shopify.dev/apps/default-app-home/api/auth"
@@ -69,6 +96,10 @@ uri = "https://monetta-accounts-staging.fly.dev/webhooks/orders/create"
 [[webhooks.subscriptions]]
 topics = ["orders/updated"]
 uri = "https://monetta-accounts-staging.fly.dev/webhooks/orders/updated"
+
+[[webhooks.subscriptions]]
+topics = ["fulfillment_events/create"]
+uri = "https://monetta-accounts-staging.fly.dev/webhooks/fulfillment_events/create"
 
 [[webhooks.subscriptions]]
 topics = ["products/create"]

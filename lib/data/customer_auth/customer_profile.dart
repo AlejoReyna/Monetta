@@ -103,6 +103,17 @@ abstract class CustomerProfileService {
 
 const String _jpegPrefix = 'data:image/jpeg;base64,';
 const String _pngPrefix = 'data:image/png;base64,';
+const String _heicPrefix = 'data:image/heic;base64,';
+const String _heifPrefix = 'data:image/heif;base64,';
+
+const Set<String> _heicBrands = {
+  'heic',
+  'heix',
+  'hevc',
+  'hevx',
+  'mif1',
+  'msf1',
+};
 
 bool _looksLikePng(List<int> bytes) =>
     bytes.length > 8 &&
@@ -111,27 +122,57 @@ bool _looksLikePng(List<int> bytes) =>
     bytes[2] == 0x4E &&
     bytes[3] == 0x47;
 
-/// Wraps the picker's image bytes as a data URL. The picker re-encodes to
-/// JPEG; a PNG that slips through is labelled as such so the web page can
-/// still render it.
-String profilePhotoDataUrl(Uint8List bytes) =>
-    '${_looksLikePng(bytes) ? _pngPrefix : _jpegPrefix}${base64Encode(bytes)}';
+bool isHeicProfilePhoto(List<int> bytes) {
+  if (bytes.length < 12) return false;
+  // ISO BMFF box header: `<size>ftyp<major_brand><minor_version>[compat_brands...]`
+  if (bytes[4] != 0x66 ||
+      bytes[5] != 0x74 ||
+      bytes[6] != 0x79 ||
+      bytes[7] != 0x70) {
+    return false;
+  }
+  String brandAt(int offset) =>
+      String.fromCharCodes(bytes.sublist(offset, offset + 4)).toLowerCase();
+  if (_heicBrands.contains(brandAt(8))) return true;
+  final boxSize =
+      (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
+  final limit = boxSize > 16 && boxSize < bytes.length ? boxSize : bytes.length;
+  for (var offset = 16; offset + 4 <= limit && offset < 64; offset += 4) {
+    if (_heicBrands.contains(brandAt(offset))) return true;
+  }
+  return false;
+}
 
-/// Decodes a stored photo value back to bytes. Anything that is not a base64
-/// `data:image/jpeg` or `data:image/png` URL — including malformed base64 —
-/// returns null: a metafield is merchant-editable text, so it is untrusted.
+/// Wraps the picker's image bytes as a data URL. Supports JPEG, PNG, and
+/// iPhone's default HEIC format so raw HEIC or transcoded bytes are stored
+/// cleanly.
+String profilePhotoDataUrl(Uint8List bytes) {
+  final String prefix;
+  if (_looksLikePng(bytes)) {
+    prefix = _pngPrefix;
+  } else if (isHeicProfilePhoto(bytes)) {
+    prefix = _heicPrefix;
+  } else {
+    prefix = _jpegPrefix;
+  }
+  return '$prefix${base64Encode(bytes)}';
+}
+
+/// Decodes a stored photo value back to bytes. Accepts base64
+/// `data:image/jpeg`, `data:image/png`, `data:image/heic`, and `data:image/heif`
+/// URLs — rejecting anything else or malformed base64.
 Uint8List? decodeProfilePhotoDataUrl(String? value) {
   if (value == null) return null;
   final trimmed = value.trim();
-  final String payload;
-  if (trimmed.startsWith(_jpegPrefix)) {
-    payload = trimmed.substring(_jpegPrefix.length);
-  } else if (trimmed.startsWith(_pngPrefix)) {
-    payload = trimmed.substring(_pngPrefix.length);
-  } else {
-    return null;
+  const prefixes = [_jpegPrefix, _pngPrefix, _heicPrefix, _heifPrefix];
+  String? payload;
+  for (final prefix in prefixes) {
+    if (trimmed.startsWith(prefix)) {
+      payload = trimmed.substring(prefix.length);
+      break;
+    }
   }
-  if (payload.isEmpty) return null;
+  if (payload == null || payload.isEmpty) return null;
   try {
     final bytes = base64Decode(payload);
     return bytes.isEmpty ? null : bytes;

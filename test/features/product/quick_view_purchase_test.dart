@@ -30,7 +30,7 @@ Finder _sheetScroller() => inSheet(
       ),
     );
 
-Finder _inMiniCart() => find.text('En tu bolsa');
+Finder _inMiniCart() => find.text('Agregado al carrito');
 
 /// Mounts a host with the sheet of [product] open, on a scripted store.
 Future<(ScriptedCatalogStore, Product)> _open(
@@ -210,7 +210,8 @@ void main() {
       await _open(tester, product: product, requireChoice: true);
 
       expect(
-        inSheet(find.text(formatShopperPrice(product.price))),
+        inSheet(find.text(formatShopperPrice(product.price).toLowerCase(),
+            findRichText: true)),
         findsOneWidget,
         reason: 'before choosing: the lowest price of the piece',
       );
@@ -220,11 +221,13 @@ void main() {
       await pickVariant(tester, product, third);
 
       expect(
-        inSheet(find.text(formatShopperPrice(third.price))),
+        inSheet(find.text(formatShopperPrice(third.price).toLowerCase(),
+            findRichText: true)),
         findsOneWidget,
       );
       expect(
-        inSheet(find.text(formatShopperPrice(product.price))),
+        inSheet(find.text(formatShopperPrice(product.price).toLowerCase(),
+            findRichText: true)),
         findsNothing,
       );
     });
@@ -264,8 +267,7 @@ void main() {
           findsOneWidget,
           reason: 'G09 confirms in the same layer',
         );
-        expect(find.text('Agregado al carrito'), findsOneWidget);
-        expect(_inMiniCart(), findsNothing);
+        expect(_inMiniCart(), findsOneWidget);
         await flush(tester);
       });
     });

@@ -12,8 +12,84 @@ import '../boutique/boutique_tokens.dart';
 import 'rewards_models.dart';
 
 // ---------------------------------------------------------------------------
-// Resumen de saldo: «Saldo disponible $184» en verde.
+// Pill / resumen de saldo Monetta Rewards.
 // ---------------------------------------------------------------------------
+
+/// Pill de ancho completo para presentar el saldo de Monetta Rewards con la
+/// tipografía editorial del nombre de usuario y el dorado del logo.
+class RewardsBalancePill extends StatelessWidget {
+  const RewardsBalancePill({
+    required this.amountText,
+    required this.hasBalance,
+    this.amountKey,
+    this.tapKey,
+    this.onTap,
+    this.footer,
+    super.key,
+  });
+
+  final String amountText;
+  final bool hasBalance;
+  final Key? amountKey;
+  final Key? tapKey;
+  final VoidCallback? onTap;
+  final Widget? footer;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: BoutiqueSpace.md,
+        vertical: BoutiqueSpace.md,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Saldo',
+            style: boutiqueText(size: 13, color: palette.inkMuted),
+          ),
+          Text(
+            amountText,
+            key: amountKey,
+            style: hasBalance
+                ? boutiqueScreenTitle(context: context, color: palette.gold)
+                : boutiqueText(
+                    size: 18,
+                    weight: FontWeight.w500,
+                    color: palette.inkMuted,
+                  ),
+          ),
+          if (footer != null) footer!,
+          const SizedBox(height: BoutiqueSpace.sm),
+          Text(
+            'MONETTA REWARDS',
+            style: boutiqueRowLabel(context: context, color: palette.ink),
+          ),
+        ],
+      ),
+    );
+    return SizedBox(
+      width: double.infinity,
+      child: Material(
+        color: palette.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BoutiqueRadius.card,
+          side: BorderSide(color: palette.hairline),
+        ),
+        child: onTap == null
+            ? content
+            : InkWell(
+                key: tapKey,
+                borderRadius: BoutiqueRadius.card,
+                onTap: onTap,
+                child: content,
+              ),
+      ),
+    );
+  }
+}
 
 /// Bloque disponible/pendiente + próximo vencimiento + movimientos.
 /// E lo integra en Cuenta. `movements` es presentación paginada del contrato.
@@ -36,8 +112,10 @@ class RewardsBalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.monettaColors;
+    final palette = context.boutique;
     return Container(
       key: const ValueKey('rewards-balance-card'),
+      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: colors.surfaceWarm,
@@ -64,14 +142,20 @@ class RewardsBalanceCard extends StatelessWidget {
                       'MONETTA REWARDS',
                       style: boutiqueRowLabel(color: colors.contentPrimary),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
-                      'Saldo disponible\n${summary.availableLabel}',
-                      key: const ValueKey('rewards-balance-available'),
+                      'Saldo disponible',
                       style: boutiqueText(
-                        size: 16,
-                        weight: FontWeight.w600,
-                        color: const Color(0xFF3B7030),
+                        size: 13,
+                        color: colors.contentMuted,
+                      ),
+                    ),
+                    Text(
+                      summary.availableLabel,
+                      key: const ValueKey('rewards-balance-available'),
+                      style: boutiqueScreenTitle(
+                        context: context,
+                        color: palette.gold,
                       ),
                     ),
                   ],
@@ -203,11 +287,10 @@ class _MovementRow extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Beneficio estimado (Producto): siempre identificado como estimación.
+// Beneficio estimado (Producto): inline junto al precio.
 // ---------------------------------------------------------------------------
 
-/// Debajo del precio: "Podrías ganar $54 Monetta" + aclaración.
-/// Nunca afirma ganancia definitiva antes del pedido.
+/// En la fila del precio: "Con esta compra ganarás $54 en cashback".
 class RewardsEstimateLabel extends StatelessWidget {
   const RewardsEstimateLabel({
     required this.estimatedCents,
@@ -221,22 +304,18 @@ class RewardsEstimateLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.monettaColors;
-    if (isWholesale) return const SizedBox.shrink();
     if (estimatedCents <= 0) return const SizedBox.shrink();
-    return Row(
+    final formatted = (estimatedCents / 100).toStringAsFixed(0);
+    if (formatted == '0') return const SizedBox.shrink();
+    return Text(
+      'Con esta compra ganarás \$$formatted en cashback',
       key: const ValueKey('rewards-estimate'),
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(Icons.info_outline, size: 15, color: colors.contentMuted),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            'Podrías ganar \$${(estimatedCents / 100).toStringAsFixed(0)} Monetta. '
-            'Estimación pendiente de entrega; no es saldo liberado.',
-            style: sans(size: 12, color: colors.contentMuted, height: 1.5),
-          ),
-        ),
-      ],
+      style: sans(
+        size: 12,
+        weight: FontWeight.w500,
+        color: colors.success,
+        height: 1.3,
+      ),
     );
   }
 }
@@ -253,15 +332,25 @@ class OrderRewardsStatus extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.monettaColors;
-    final line = state.isWholesale
+    final hasWholesaleActivity = state.earnedPendingCents > 0 ||
+        state.earnedReleasedCents > 0 ||
+        state.usedCents > 0 ||
+        state.state != 'none';
+    final usedSuffix = state.usedCents > 0 &&
+            (state.state == 'pending' ||
+                state.state == 'available' ||
+                state.state == 'reversed')
+        ? ' Usaste \$${(state.usedCents / 100).toStringAsFixed(0)} Monetta en este pedido.'
+        : '';
+    final line = (state.isWholesale && !hasWholesaleActivity)
         ? 'Este pedido de mayoreo no genera Rewards.'
         : switch (state.state) {
             'pending' =>
-              'Generaste \$${(state.earnedPendingCents / 100).toStringAsFixed(0)} Monetta pendientes. Se liberan al entregar tu pedido.',
+              'Generaste \$${(state.earnedPendingCents / 100).toStringAsFixed(0)} Monetta pendientes. Se liberan al entregar tu pedido.$usedSuffix',
             'available' =>
-              'Liberados \$${(state.earnedReleasedCents / 100).toStringAsFixed(0)} Monetta de este pedido.',
+              'Liberados \$${(state.earnedReleasedCents / 100).toStringAsFixed(0)} Monetta de este pedido.$usedSuffix',
             'reversed' =>
-              'El saldo de este pedido se ajustó por devolución o cancelación.',
+              'El saldo de este pedido se ajustó por devolución o cancelación.$usedSuffix',
             _ => state.usedCents > 0
                 ? 'Usaste \$${(state.usedCents / 100).toStringAsFixed(0)} Monetta en este pedido.'
                 : 'Sin movimientos Rewards en este pedido.',

@@ -73,12 +73,24 @@ describe('rewards API v1', () => {
     };
     expect(body.balance).toMatchObject({ availableCents: 0, pendingCents: 0 });
     expect(body.program.redemptionEnabled).toBe(false);
-    expect(body.incentives.firstPurchase.enabled).toBe(false);
-    expect((body as unknown as { capabilities: unknown }).capabilities).toEqual({
-      schemaVersion: 1,
-      membership: { supported: false, reason: 'authoritative_rules_unavailable' },
-      tierProgress: { supported: false, reason: 'authoritative_rules_unavailable' },
-      tierBenefits: { supported: false, reason: 'authoritative_rules_unavailable' },
+    expect(body.incentives.firstPurchase.enabled).toBe(true);
+    expect((body as unknown as { capabilities: unknown; tier: unknown }).capabilities).toEqual({
+      schemaVersion: 2,
+      membership: { supported: true, reason: null },
+      tierProgress: { supported: true, reason: null },
+      tierBenefits: { supported: true, reason: null },
+    });
+    expect((body as unknown as { tier: Record<string, unknown> }).tier).toMatchObject({
+      level: 'PRO',
+      nextLevel: 'VIP',
+      isFinalLevel: false,
+      completedPurchases: 0,
+      targetPurchases: 10,
+      progressPercent: 0,
+      purchaseCountLabel: '0 de 10 compras',
+      cashbackBps: 100,
+      bonusCents: 10000,
+      freeShipping: true,
     });
   });
 
@@ -99,7 +111,7 @@ describe('rewards API v1', () => {
     });
     expect(quote.status).toBe(201);
     const q = (await quote.json()) as { quoteId: string; maxAllowedCents: number };
-    expect(q.maxAllowedCents).toBe(5400);
+    expect(q.maxAllowedCents).toBe(11800); // min(1800 + 10000 disp, 18000)
     const redeem = await fetch(`${baseUrl}/customers/me/rewards/redemptions`, {
       method: 'POST', headers: auth,
       body: JSON.stringify({ quoteId: q.quoteId, amountCents: 1000, idempotencyKey: 'api-key-1234' }),

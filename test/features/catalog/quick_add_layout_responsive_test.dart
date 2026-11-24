@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/shopper_copy.dart';
-import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/product/product_selection.dart';
 
 import '../../support/product_screen_harness.dart';
@@ -102,7 +101,7 @@ void main() {
           inSheet(find.text(shopperProductName(product.title))),
         );
         final price = tester.getSemantics(
-          inSheet(find.text(formatShopperPrice(selectionPrice(product, 0)))),
+          inSheet(find.byKey(const Key('quick-view-price'))),
         );
         final options = tester.getSemantics(
           optionOf(product, selectableVariants(product).first),

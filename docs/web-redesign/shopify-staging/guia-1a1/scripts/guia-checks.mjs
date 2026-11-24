@@ -283,10 +283,11 @@ async function f2() {
         heights: [...document.querySelectorAll('#menu-drawer .guia-menu__row')].filter((r) => !r.hidden).map((r) => Math.round(r.getBoundingClientRect().height)),
         share: !!document.querySelector('#menu-drawer .guia-share'),
         social: document.querySelectorAll('#menu-drawer .guia-social__link').length,
+        socialLabels: [...document.querySelectorAll('#menu-drawer .guia-social__label')].map((l) => l.textContent.trim()),
         identity: document.querySelector('#menu-drawer .guia-identity')?.textContent.replace(/\s+/g, ' ').trim(),
       }));
-      run.check(`F2 ${w}: menu drawer rows are the guide's (Bolsas, Carteras, Relojes, Perfumes, Todas las marcas, Contacto por WhatsApp)`, drawer.rows.filter((r) => r !== 'Guardados').join(',') === 'Bolsas,Carteras,Relojes,Perfumes,Todas las marcas,Contacto por WhatsApp', JSON.stringify(drawer.rows));
-      run.check(`F2 ${w}: drawer has the identity row, «Comparte y gana» banner and the three networks; rows ≥48px`, !!drawer.identity && drawer.share && drawer.social === 3 && drawer.heights.every((x) => x >= 48), JSON.stringify(drawer));
+      run.check(`F2 ${w}: menu drawer rows are v4.1's (Bolsas, Carteras, Relojes, Perfumes, Todas las marcas, Mayoreo, Contacto por WhatsApp)`, drawer.rows.filter((r) => r !== 'Guardados').join(',') === 'Bolsas,Carteras,Relojes,Perfumes,Todas las marcas,Mayoreo,Contacto por WhatsApp', JSON.stringify(drawer.rows));
+      run.check(`F2 ${w}: drawer has the identity card, no «Comparte y gana» banner (v4.1) and the three labeled networks; rows ≥48px`, !!drawer.identity && !drawer.share && drawer.social === 3 && drawer.socialLabels.join(',') === 'TikTok,Instagram,Facebook' && drawer.heights.every((x) => x >= 48), JSON.stringify(drawer));
       const rowFont = await platformFonts(page, '#menu-drawer .guia-menu__row span');
       run.check(`F2 ${w}: drawer rows measured in Playfair Display`, rowFont.length > 0 && rowFont.every((f) => /Playfair/.test(f)), JSON.stringify(rowFont));
     } finally {
@@ -681,8 +682,8 @@ async function f5() {
 
       // Navigation reaches these pages and the account.
       await open(page, '/');
-      const nav = await page.evaluate(() => ({ share: document.querySelector('#menu-drawer .guia-share')?.getAttribute('href'), mayoreo: [...document.querySelectorAll('.site-nav__link')].find((a) => a.textContent.trim() === 'Mayoreo')?.getAttribute('href'), offer: document.querySelector('.guia-offer .guide-pill')?.getAttribute('href'), account: document.querySelector('.header-utility--account')?.getAttribute('href'), dockAccount: document.querySelector('#dock [data-dock="account"]')?.getAttribute('href') }));
-      run.check(`F5 ${w}: the drawer's «Comparte y gana · VER CATÁLOGO» leads to Comparte y gana, as the app's account banner`, /view=guia-rewards#comparte-y-gana|\/pages\/rewards#comparte-y-gana/.test(nav.share || ''), JSON.stringify({ share: nav.share }));
+      const nav = await page.evaluate(() => ({ drawerMayoreo: [...document.querySelectorAll('#menu-drawer .guia-menu__row')].find((a) => a.textContent.trim() === 'Mayoreo')?.getAttribute('href'), mayoreo: [...document.querySelectorAll('.site-nav__link')].find((a) => a.textContent.trim() === 'Mayoreo')?.getAttribute('href'), offer: document.querySelector('.guia-offer .guide-pill')?.getAttribute('href'), account: document.querySelector('.header-utility--account')?.getAttribute('href'), dockAccount: document.querySelector('#dock [data-dock="account"]')?.getAttribute('href') }));
+      run.check(`F5 ${w}: the drawer's «Mayoreo» (after Todas las marcas, v4.1) leads to the Mayoreo page`, /view=guia-mayoreo|\/pages\/mayoreo/.test(nav.drawerMayoreo || ''), JSON.stringify({ drawerMayoreo: nav.drawerMayoreo }));
       run.check(`F5 ${w}: «Mayoreo» (header) and «CONOCE MÁS» lead to the Mayoreo page; «Cuenta» to Shopify's account`, /view=guia-mayoreo|\/pages\/mayoreo/.test(nav.offer || '') && (w < 768 || /view=guia-mayoreo|\/pages\/mayoreo/.test(nav.mayoreo || '')) && /\/account/.test(w < 768 ? nav.dockAccount : nav.account), JSON.stringify(nav));
     } finally {
       await browser.close();

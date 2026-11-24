@@ -1,0 +1,19 @@
+{%- if recommendations.performed and recommendations.products_count > 0 -%}
+  <section class="cart-related" data-cart-related aria-label="Recomendaciones para tu carrito">
+    <h3>Le quedaría bien con esto…</h3>
+    <ul role="list">
+      {%- for item in recommendations.products limit: 3 -%}
+        {%- assign variant = item.selected_or_first_available_variant -%}
+        {%- if variant.available -%}
+          <li>
+            {% render 'monetta-card', product: item, density: 'mini', sizes: '120px' %}
+            {% render 'monetta-feature-add', product: item, variant: variant, class: 'cart-related__add', icon: 'add' %}
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </section>
+{%- endif -%}
+{% schema %}
+{"name":"Monetta · Combina","settings":[]}
+{% endschema %}

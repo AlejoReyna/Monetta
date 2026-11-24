@@ -5,8 +5,17 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:monetta_app/data/normalize/normalizer.dart'
+    show shopperFacingTags;
 
 const _catalogPath = 'assets/catalog/catalog.json';
+
+/// Maximum number of products and per-product images bundled into the offline
+/// seed snapshot so the APK/IPA binary does not bloat as the live catalog grows
+/// past 2,600–5,000+ products. Full catalog coverage arrives via Storefront
+/// delta sync or Firestore after first paint.
+const int _maxSnapshotProducts = 1000;
+const int _maxImagesPerProduct = 2;
 
 Future<void> main() async {
   final file = File(_catalogPath);
@@ -26,7 +35,10 @@ Future<void> main() async {
       collectionsUri,
       'collections',
     );
-    final normalizedProducts = products.map(_normalizeProduct).toList();
+    final normalizedProducts = products
+        .take(_maxSnapshotProducts)
+        .map(_normalizeProduct)
+        .toList();
     final snapshot = <String, Object?>{
       '_source': source.replace(query: '').toString(),
       '_snapshot': DateTime.now().toUtc().toIso8601String().split('T').first,
@@ -78,12 +90,15 @@ Map<String, Object?> _normalizeProduct(Map<String, dynamic> product) => {
       'product_type': product['product_type'],
       'created_at': product['created_at'],
       'updated_at': product['updated_at'],
-      'tags': product['tags'],
+      'tags': shopperFacingTags(
+        (product['tags'] as List<dynamic>).whereType<String>(),
+      ),
       // Shopify exposes this as `body_html`. Preserve it in the normalized
       // snapshot so cache-first/offline product pages keep their descriptions.
       'description_html': product['body_html'],
       'images': [
-        for (final image in product['images'] as List<dynamic>)
+        for (final image
+            in (product['images'] as List<dynamic>).take(_maxImagesPerProduct))
           (image as Map)['src'],
       ],
       'variants': [

@@ -799,7 +799,7 @@ class _CatalogActions extends StatelessWidget {
           Builder(
             builder: (buttonContext) => IconButton.outlined(
               key: ValueKey('share-${catalog.id}'),
-              tooltip: 'Compartir catálogo',
+              tooltip: 'Compartir enlace',
               onPressed: () => onShare!(buttonContext),
               icon: const Icon(Icons.ios_share_outlined, size: 19),
             ),

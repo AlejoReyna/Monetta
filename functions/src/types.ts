@@ -43,6 +43,7 @@ export interface AdminProduct {
       readonly title: string;
       readonly price: string;
       readonly compareAtPrice: string | null;
+      readonly sixMsiAmount?: { readonly value: string } | null;
       readonly sku: string | null;
       readonly selectedOptions?: ReadonlyArray<{ readonly name: string; readonly value: string }>;
       readonly image?: { readonly url: string } | null;
@@ -74,6 +75,7 @@ export interface CatalogProductDocument {
     readonly title: string;
     readonly price: number;
     readonly compareAtPrice: number | null;
+    readonly sixMsiInstallmentAmount?: number | null;
     readonly sku: string | null;
     readonly selectedOptions: Readonly<Record<string, string>>;
     readonly imageUrls: readonly string[];

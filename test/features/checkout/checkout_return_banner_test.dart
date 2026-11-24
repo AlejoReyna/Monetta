@@ -294,9 +294,10 @@ void main() {
     CheckoutOrderMatch? found;
 
     await tester.pumpWidget(
-      _flow(
+      _directCheckout(
         store,
-        CheckoutFlowScreen(
+        (context) => openCheckout(
+          context,
           launchSecureCheckout: (_) async => const CheckoutCancelled(),
           orderLookup: _ScriptedLookup(
             (_) async => const CheckoutOrderMatch(
@@ -306,13 +307,14 @@ void main() {
           ),
           attemptIdentity: const CheckoutAttemptIdentity(cartToken: 'cart-1'),
           onOrderFound: (context, match) async {
+            expect(Navigator.maybeOf(context), isNotNull);
+            expect(StoreScope.of(context), same(store));
             found = match;
           },
         ),
       ),
     );
-    await _openReview(tester);
-    await tester.tap(find.byKey(const ValueKey('checkout-pay-button')));
+    await tester.tap(find.text('Pagar'));
     await tester.pumpAndSettle();
 
     expect(found?.orderId, 'gid://shopify/Order/5');
@@ -322,6 +324,82 @@ void main() {
     expect(find.text('Estamos revisando tu pago'), findsNothing);
     expect(find.text('No pudimos abrir el pago'), findsNothing);
     expect(store.bagQuantity, 1);
+  });
+
+  testWidgets('retry completion and view orders work in direct checkout', (
+    tester,
+  ) async {
+    final store = await _loadedStore();
+    var attempts = 0;
+    await tester.pumpWidget(
+      _directCheckout(
+        store,
+        (context) => openCheckout(
+          context,
+          launchSecureCheckout: (_) async {
+            if (++attempts == 1) {
+              return const CheckoutFailed(
+                code: CheckoutFailureCode.configuration,
+                userMessage: 'No se pudo abrir Shopify.',
+              );
+            }
+            return const CheckoutCompleted();
+          },
+        ),
+      ),
+    );
+    await tester.tap(find.text('Pagar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Intentar de nuevo'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('¡Gracias por tu compra!'), findsOneWidget);
+    expect(find.byType(CheckoutFlowScreen), findsNothing);
+    final orders = find.text('Ver detalles del pedido');
+    await tester.ensureVisible(orders);
+    await tester.tap(orders);
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Inicia sesión para ver Mis pedidos'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('browser fallback is actionable in the checkout return sheet', (
+    tester,
+  ) async {
+    final store = await _loadedStore();
+    var browserOpens = 0;
+    await tester.pumpWidget(
+      _directCheckout(
+        store,
+        (context) => openCheckout(
+          context,
+          launchSecureCheckout: (_) async => const CheckoutFailed(
+            code: CheckoutFailureCode.configuration,
+            userMessage: 'Shopify necesita el navegador.',
+          ),
+          openExternalCheckout: () async {
+            browserOpens += 1;
+            return true;
+          },
+        ),
+      ),
+    );
+    await tester.tap(find.text('Pagar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Abrir en navegador'));
+    await tester.pumpAndSettle();
+
+    expect(browserOpens, 1);
+    expect(find.text('Estamos revisando tu pago'), findsOneWidget);
+    expect(find.text('Intentar de nuevo'), findsNothing);
+    await tester.tap(find.text('Ver mis pedidos'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Inicia sesión para ver Mis pedidos'),
+      findsOneWidget,
+    );
   });
 }
 
@@ -357,6 +435,23 @@ Widget _flow(CatalogStore store, Widget child) {
   );
 }
 
+Widget _directCheckout(
+  CatalogStore store,
+  Future<void> Function(BuildContext) start,
+) {
+  return _flow(
+    store,
+    Scaffold(
+      body: Builder(
+        builder: (context) => TextButton(
+          onPressed: () => unawaited(start(context)),
+          child: const Text('Pagar'),
+        ),
+      ),
+    ),
+  );
+}
+
 Future<CatalogStore> _loadedStore() async {
   final store = CatalogStore(database: openTestDatabase());
   await store.loadFromAsset();
@@ -365,12 +460,6 @@ Future<CatalogStore> _loadedStore() async {
 
 Future<void> _openReview(WidgetTester tester) async {
   await tester.pump();
-  final fields = find.byType(TextFormField);
-  await tester.enterText(fields.at(0), 'buyer@example.invalid');
-  await tester.enterText(fields.at(1), '8112345678');
-  await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-  await tester.tap(find.text('REVISAR PEDIDO'));
-  await tester.pumpAndSettle();
   await tester.ensureVisible(find.byKey(const ValueKey('checkout-pay-button')));
 }
 

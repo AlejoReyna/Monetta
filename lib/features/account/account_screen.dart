@@ -29,6 +29,8 @@ import '../../main.dart';
 import '../../data/accounts_orders/account_deletion_client.dart';
 import '../../data/accounts_orders/accounts_orders_config.dart';
 import '../rewards/rewards_api.dart';
+import '../rewards/rewards_components.dart';
+import '../rewards/rewards_models.dart';
 import '../../data/customer_auth/customer_auth_error.dart';
 import '../../data/local/database.dart' show OrderSummary;
 import '../catalog/categories_screen.dart';
@@ -236,7 +238,7 @@ class AccountScreen extends StatelessWidget {
   }
 }
 
-class _SignedIn extends StatelessWidget {
+class _SignedIn extends StatefulWidget {
   const _SignedIn({
     required this.controller,
     required this.showAdmin,
@@ -264,6 +266,25 @@ class _SignedIn extends StatelessWidget {
   final Future<bool> Function(Uri uri)? openExternalUri;
   final ProfilePhotoPicker? profilePhotoPicker;
 
+  @override
+  State<_SignedIn> createState() => _SignedInState();
+}
+
+class _SignedInState extends State<_SignedIn> {
+  String? _tierLevel;
+
+  AccountController get controller => widget.controller;
+  bool get showAdmin => widget.showAdmin;
+  VoidCallback? get onOpenAdmin => widget.onOpenAdmin;
+  VoidCallback? get onOpenPartner => widget.onOpenPartner;
+  RewardsReader? get rewardsReader => widget.rewardsReader;
+  NotificationInbox? get notificationInbox => widget.notificationInbox;
+  VoidCallback? get onOpenInvite => widget.onOpenInvite;
+  AccountDeletionClient? get deletionClient => widget.deletionClient;
+  PrivacyPolicyConfig? get privacyPolicy => widget.privacyPolicy;
+  Future<bool> Function(Uri uri)? get openExternalUri => widget.openExternalUri;
+  ProfilePhotoPicker? get profilePhotoPicker => widget.profilePhotoPicker;
+
   Future<void> _logout(BuildContext context) async {
     final owner = controller.account?.localAccountId;
     await controller.logout();
@@ -289,12 +310,22 @@ class _SignedIn extends StatelessWidget {
         children: [
           _IdentityCard(
             controller: controller,
+            tierLevel: _tierLevel,
             onRelogin: controller.isLoading ? null : () => controller.login(),
             profilePhotoPicker:
                 profilePhotoPicker ?? pickProfilePhotoFromGallery,
           ),
           const SizedBox(height: BoutiqueSpace.lg),
-          _RewardsRow(controller: controller, reader: rewardsReader),
+          _RewardsRow(
+            controller: controller,
+            reader: rewardsReader,
+            onSummaryLoaded: (summary) {
+              final next = summary.tier?.level;
+              if (mounted && next != _tierLevel) {
+                setState(() => _tierLevel = next);
+              }
+            },
+          ),
           const SizedBox(height: BoutiqueSpace.md),
           ECard(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -559,11 +590,13 @@ class _IdentityCard extends StatefulWidget {
     required this.controller,
     required this.onRelogin,
     required this.profilePhotoPicker,
+    this.tierLevel,
   });
 
   final AccountController controller;
   final VoidCallback? onRelogin;
   final ProfilePhotoPicker profilePhotoPicker;
+  final String? tierLevel;
 
   @override
   State<_IdentityCard> createState() => _IdentityCardState();
@@ -705,10 +738,14 @@ class _IdentityCardState extends State<_IdentityCard> {
                   color: palette.ink,
                 ),
               ),
-              // The level appears only when the Rewards service reports one;
+              // The level appears when the Rewards service reports one;
               // until then nothing hints at a missing figure.
-              Text('Miembro',
-                  style: boutiqueText(size: 13, color: palette.inkMuted)),
+              Text(
+                widget.tierLevel == null
+                    ? 'Miembro'
+                    : 'Miembro · ${widget.tierLevel}',
+                style: boutiqueText(size: 13, color: palette.inkMuted),
+              ),
               if (account.displayName != null && account.email != null) ...[
                 const SizedBox(height: 2),
                 Text(
@@ -1001,7 +1038,7 @@ class _ProfileEditorSheetState extends State<_ProfileEditorSheet> {
                 ),
               ),
             Text(
-              'JPG o PNG. Se ajusta a 384 px.',
+              'JPG, PNG o HEIC. Se ajusta a 384 px.',
               textAlign: TextAlign.center,
               style: boutiqueText(size: 12, color: palette.inkMuted),
             ),
@@ -1021,11 +1058,6 @@ class _ProfileEditorSheetState extends State<_ProfileEditorSheet> {
               decoration: const InputDecoration(
                 labelText: 'Nombre que se muestra',
               ),
-            ),
-            const SizedBox(height: BoutiqueSpace.sm),
-            Text(
-              'Tu foto y tu nombre se guardan en tu cuenta de Monetta.',
-              style: boutiqueText(size: 12, color: palette.inkMuted),
             ),
             if (_error != null) ...[
               const SizedBox(height: BoutiqueSpace.md),
@@ -1087,10 +1119,15 @@ class _ProfileEditorSheetState extends State<_ProfileEditorSheet> {
 /// «Consultando tu saldo…», «Saldo no disponible», or «No pudimos consultar tu
 /// saldo» with a retry. A late answer for another account is discarded.
 class _RewardsRow extends StatefulWidget {
-  const _RewardsRow({required this.controller, required this.reader});
+  const _RewardsRow({
+    required this.controller,
+    required this.reader,
+    this.onSummaryLoaded,
+  });
 
   final AccountController controller;
   final RewardsReader? reader;
+  final ValueChanged<RewardsSummary>? onSummaryLoaded;
 
   @override
   State<_RewardsRow> createState() => _RewardsRowState();
@@ -1184,6 +1221,7 @@ class _RewardsRowState extends State<_RewardsRow> {
             _balance = summary.availableLabel;
             _loading = false;
           });
+          widget.onSummaryLoaded?.call(summary);
         },
         onError: (Object _) {
           if (!mounted || generation != _generation) return;
@@ -1206,62 +1244,31 @@ class _RewardsRowState extends State<_RewardsRow> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.boutique;
     return Semantics(
       button: true,
       label: 'Monetta Rewards. ${_balance ?? 'Saldo no disponible'}',
       excludeSemantics: true,
-      child: Material(
-        color: palette.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BoutiqueRadius.card,
-          side: BorderSide(color: palette.hairline),
+      child: RewardsBalancePill(
+        tapKey: const ValueKey('account-open-rewards-guide'),
+        amountKey: const ValueKey('account-rewards-balance'),
+        amountText: _balance ??
+            (_loading
+                ? 'Consultando tu saldo…'
+                : _failed
+                    ? 'No pudimos consultar tu saldo'
+                    : 'Saldo no disponible'),
+        hasBalance: _balance != null,
+        onTap: () => openRewardsGuide(
+          context,
+          controller: widget.controller,
+          reader: widget.reader,
         ),
-        child: InkWell(
-          key: const ValueKey('account-open-rewards-guide'),
-          borderRadius: BoutiqueRadius.card,
-          onTap: () => openRewardsGuide(
-            context,
-            controller: widget.controller,
-            reader: widget.reader,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: BoutiqueSpace.md,
-              vertical: BoutiqueSpace.md,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Saldo',
-                    style: boutiqueText(size: 13, color: palette.inkMuted)),
-                Text(
-                  _balance ??
-                      (_loading
-                          ? 'Consultando tu saldo…'
-                          : _failed
-                              ? 'No pudimos consultar tu saldo'
-                              : 'Saldo no disponible'),
-                  key: const ValueKey('account-rewards-balance'),
-                  style: boutiqueText(
-                      size: 22,
-                      weight: FontWeight.w600,
-                      color: _balance == null
-                          ? palette.inkMuted
-                          : const Color(0xFF3B7030)),
-                ),
-                if (_failed)
-                  TextButton(
-                      onPressed: () => setState(_request),
-                      child: const Text('Reintentar')),
-                const SizedBox(height: BoutiqueSpace.sm),
-                Text('MONETTA REWARDS',
-                    style:
-                        boutiqueRowLabel(context: context, color: palette.ink)),
-              ],
-            ),
-          ),
-        ),
+        footer: _failed
+            ? TextButton(
+                onPressed: () => setState(_request),
+                child: const Text('Reintentar'),
+              )
+            : null,
       ),
     );
   }

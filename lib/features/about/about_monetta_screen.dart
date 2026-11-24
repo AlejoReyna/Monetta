@@ -69,7 +69,7 @@ class AboutMonettaScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  'Comparte nuestros catálogos y vende con Monetta.',
+                  'Obtén precios especiales de mayoreo a partir de 3 piezas.',
                   style: display(27, color: Colors.white, height: 1.25),
                 ),
                 const SizedBox(height: 26),
@@ -80,7 +80,7 @@ class AboutMonettaScreen extends StatelessWidget {
                     backgroundColor: Colors.white,
                     foregroundColor: kInk,
                   ),
-                  child: const Text('CONOCER EL PROGRAMA'),
+                  child: const Text('CONOCER MAYOREO'),
                 ),
                 const SizedBox(height: 12),
                 TextButton(

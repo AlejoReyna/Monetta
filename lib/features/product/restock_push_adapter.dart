@@ -1,17 +1,16 @@
-/// G12 remains unavailable until an exact-variant channel is implemented.
+/// Connects the G12 restock sheet to the automatic push notification alert service.
 library;
 
 import '../../app/notification_controller.dart';
 import 'restock_request.dart';
 
-/// The existing notification transport accepts product-level subscriptions.
-/// Passing a variant ID to that endpoint does not make it variant-aware.
-/// Keep the legacy callback signature for callers, but do not request system
-/// permission, record consent, subscribe, or report success through it.
-/// The production entry stays hidden while variantRestockAvailable is false.
 Future<RestockSubmitResult> submitRestockViaPushNotifications(
   NotificationController? controller,
   RestockRequestPayload payload,
 ) async {
-  return RestockSubmitResult.unavailable;
+  if (controller == null || !controller.variantRestockAvailable) {
+    return RestockSubmitResult.unavailable;
+  }
+  final created = await controller.createRestockAlert(payload.product.id);
+  return created ? RestockSubmitResult.created : RestockSubmitResult.error;
 }

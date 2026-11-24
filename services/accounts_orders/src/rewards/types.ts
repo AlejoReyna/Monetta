@@ -33,19 +33,19 @@ export interface ProgramPolicy {
 }
 
 export const DEFAULT_PROGRAM: ProgramPolicy = {
-  version: 1,
+  version: 2,
   currency: 'MXN',
   earnBps: 300,
   maxRedeemBps: 2000,
   expiryMonths: 12,
-  wholesaleEarns: false,
-  wholesaleRedeemAllowed: null,
+  wholesaleEarns: true,
+  wholesaleRedeemAllowed: true,
   redemptionEnabled: false,
-  firstPurchaseEnabled: false,
+  firstPurchaseEnabled: true,
   firstPurchaseAmountCents: 5000,
   reviewEnabled: false,
   reviewAmountCents: 2000,
-  referralEnabled: false,
+  referralEnabled: true,
   referralAmountCents: 5000,
 };
 

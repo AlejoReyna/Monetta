@@ -24,6 +24,7 @@ const PRODUCT_FIELDS = `
         title
         price
         compareAtPrice
+        sixMsiAmount: metafield(namespace: "monetta", key: "six_msi_amount") { value }
         sku
         selectedOptions { name value }
         image { url }

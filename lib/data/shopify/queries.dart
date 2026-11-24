@@ -37,6 +37,7 @@ fragment ProductFields on Product {
         availableForSale
         price { amount currencyCode }
         compareAtPrice { amount }
+        sixMsiAmount: metafield(namespace: "monetta", key: "six_msi_amount") { value }
         sku
         selectedOptions { name value }
         image { url(transform: {maxWidth: 1200}) }
@@ -393,6 +394,38 @@ query HomeContent {
   storefrontConfig: metaobject(handle: {type: "$app:storefront_config", handle: "monetta"}) {
     fields { key value }
   }
+  banners: metaobjects(type: "monetta_banner", first: 50) {
+    edges {
+      node {
+        handle
+        fields {
+          key
+          value
+          reference {
+            ... on MediaImage {
+              image { url(transform: {maxWidth: 1920}) altText }
+            }
+          }
+        }
+      }
+    }
+  }
+  appBanners: metaobjects(type: "$app:monetta_banner", first: 50) {
+    edges {
+      node {
+        handle
+        fields {
+          key
+          value
+          reference {
+            ... on MediaImage {
+              image { url(transform: {maxWidth: 1920}) altText }
+            }
+          }
+        }
+      }
+    }
+  }
   collections(first: 50, sortKey: TITLE) {
     edges {
       node {
@@ -412,7 +445,7 @@ query HomeContent {
 String productConnectionQuery(String field) {
   final selection = switch (field) {
     'variants' =>
-      'id title availableForSale price { amount currencyCode } compareAtPrice { amount } sku selectedOptions { name value } image { url(transform: {maxWidth: 1200}) }',
+      'id title availableForSale price { amount currencyCode } compareAtPrice { amount } sixMsiAmount: metafield(namespace: "monetta", key: "six_msi_amount") { value } sku selectedOptions { name value } image { url(transform: {maxWidth: 1200}) }',
     'collections' => 'handle',
     _ => throw ArgumentError.value(field),
   };

@@ -4,38 +4,56 @@
   come from snippets/monetta-guia-url.liquid, so real collections the owner creates take over without a code change.
 {%- endcomment -%}
 {%- assign heading_id = section.id | append: '-heading' -%}
-{%- assign category_entries = 'crossbody:Crossbody:categoria-crossbody,tote:Tote:categoria-tote,shoulder:Shoulder:categoria-shoulder,satchel:Handbags:categoria-handbags,carteras:Carteras:categoria-carteras,perfumes:Perfumes:categoria-perfumes,accesorios:Accesorios:categoria-accesorios' | split: ',' -%}
-{%- assign brand_entries = 'Coach:coach,Michael Kors:michael_kors,Anne Klein:anne_klein,Guess:guess,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Tory Burch,Kate Spade,Marc Jacobs,Olaplex:olaplex,Dior:dior:Christian Dior,The Ordinary:the_ordinary,Laneige:laneige,Rhode:rhode,Summer Fridays:summer_fridays' | split: ',' -%}
+{%- assign category_entries = 'bolsas|Bolsos|categoria-handbags|crossbody:Crossbody;tote:Tote;shoulder:De hombro;satchel:De mano,carteras|Carteras|categoria-carteras,perfumes|Perfumes|categoria-perfumes,calzado|Calzado|monetta-calzado,accesorios|Accesorios|categoria-accesorios|relojes:Relojes' | split: ',' -%}
+{%- assign brands_only = false -%}
+{%- if template.suffix == 'marcas' -%}{%- assign brands_only = true -%}{%- endif -%}
+{%- assign brand_entries = 'Coach:coach,Michael Kors:michael_kors,Anne Klein:anne_klein,Guess:guess,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Tory Burch,Kate Spade,Marc Jacobs,Dior:dior:Christian Dior,The Ordinary:the_ordinary,Laneige:laneige,Rhode:rhode,Summer Fridays:summer_fridays' | split: ',' -%}
 <div class="container guia-categories" {{ section.shopify_attributes }}>
   <header class="guia-categories__head">
-    <h1 class="display display--page">Categorías</h1>
+    <h1 class="display display--page">{% if brands_only %}Todas las marcas{% else %}Categorías{% endif %}</h1>
     <p class="guia-categories__lede">Descubre todas nuestras colecciones de tus marcas favoritas.</p>
   </header>
+  <div class="v43-directories{% if brands_only %} v43-directories--brands{% endif %}">
+  {%- unless brands_only -%}
   <section class="guia-categories__block" aria-labelledby="{{ heading_id }}-collections">
     <h2 class="display display--section" id="{{ heading_id }}-collections">Colecciones</h2>
-    <ul class="guia-categories__grid" role="list">
+    <ul class="v43-family-list" role="list">
       {%- for entry in category_entries -%}
-        {%- assign parts = entry | split: ':' -%}
+        {%- assign parts = entry | split: '|' -%}
         {%- assign key = parts[0] -%}
         {%- assign icon = parts[2] -%}
         {%- capture url -%}{% render 'monetta-guia-url', key: key %}{%- endcapture -%}
         <li>
-          <a class="guia-category" href="{{ url | strip }}">
-            {% render 'monetta-guia-icon', name: icon, size: 72, class: 'guia-category__icon' %}
-            <span class="guia-category__label">{{ parts[1] }}</span>
-          </a>
+          {%- if parts[3] != blank -%}
+            <details>
+              <summary>{% render 'monetta-guia-icon', name: icon, size: 34 %}{{ parts[1] }}</summary>
+              <ul role="list">
+                <li><a href="{{ url | strip }}">Ver todos</a></li>
+                {%- assign children = parts[3] | split: ';' -%}
+                {%- for child in children -%}
+                  {%- assign item = child | split: ':' -%}
+                  {%- capture child_url -%}{% render 'monetta-guia-url', key: item[0] %}{%- endcapture -%}
+                  <li><a href="{{ child_url | strip }}">{{ item[1] }}</a></li>
+                {%- endfor -%}
+              </ul>
+            </details>
+          {%- else -%}
+            <a href="{{ url | strip }}">{% if key == 'calzado' %}{% render 'monetta-icon', name: 'store', size: 30 %}{% else %}{% render 'monetta-guia-icon', name: icon, size: 34 %}{% endif %}{{ parts[1] }}</a>
+          {%- endif -%}
         </li>
       {%- endfor -%}
     </ul>
   </section>
+  {%- endunless -%}
   <section class="guia-categories__block" aria-labelledby="{{ heading_id }}-brands">
-    <h2 class="display display--section" id="{{ heading_id }}-brands">Marcas</h2>
-    <ul class="guia-brands__grid guia-brands__grid--three" role="list">
+    <h2 class="display display--section{% if brands_only %} visually-hidden{% endif %}" id="{{ heading_id }}-brands">Marcas</h2>
+    <ul class="guia-brands__grid v43-directory-brands" role="list">
       {%- for entry in brand_entries -%}
         {% render 'monetta-guia-brand-tile', entry: entry %}
       {%- endfor -%}
     </ul>
   </section>
+  </div>
 </div>
 
 {% schema %}
