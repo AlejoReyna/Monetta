@@ -16,10 +16,11 @@ import 'package:flutter/material.dart';
 import '../../app/account_controller.dart';
 import '../../app/notification_controller.dart';
 import '../../data/notifications/notification_models.dart';
-import '../../main.dart' show NotificationScope;
+import '../../main.dart' show AccountScope, NotificationScope;
 import 'notification_settings_sheet.dart';
 import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
+import '../catalog/catalog_controls.dart' show AdjustmentsIcon;
 import '../rewards/rewards_section.dart';
 import 'notification_inbox.dart';
 
@@ -34,13 +35,14 @@ Future<void> openNotifications(
   VoidCallback? onManagePreferences,
 }) {
   final effectiveController = controller ?? NotificationScope.maybeOf(context);
+  final effectiveAccount = accountController ?? AccountScope.maybeOf(context);
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
       builder: (_) => NotificationsScreen(
         inbox: inbox,
         ownerId: ownerId,
         controller: effectiveController,
-        accountController: accountController,
+        accountController: effectiveAccount,
         rewardsReader: rewardsReader,
         onOpenRoute: onOpenRoute ?? effectiveController?.onOpenRoute,
         onManagePreferences: onManagePreferences ??
@@ -128,19 +130,24 @@ class NotificationsScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
           children: [
-            const AccountPageHeader(
-              kicker: 'Avisos',
-              title: 'Notificaciones',
-            ),
-            const SizedBox(height: BoutiqueSpace.lg),
             _PermissionSection(
               controller: controller,
               onManagePreferences: onManagePreferences,
             ),
-            const SizedBox(height: BoutiqueSpace.lg),
-            const ESectionTitle(title: 'Recientes'),
+            Row(
+              children: [
+                const Expanded(child: ESectionTitle(title: 'Recientes')),
+                if (onManagePreferences != null)
+                  IconButton(
+                    key: const ValueKey('notifications-preferences-filter'),
+                    tooltip: 'Gestionar preferencias',
+                    onPressed: onManagePreferences,
+                    icon: AdjustmentsIcon(size: 20, color: palette.ink),
+                  ),
+              ],
+            ),
             const SizedBox(height: BoutiqueSpace.sm),
             _InboxList(
               inbox: inbox,
@@ -151,11 +158,18 @@ class NotificationsScreen extends StatelessWidget {
               const SizedBox(height: BoutiqueSpace.lg),
               const ESectionTitle(title: 'Tu saldo Monetta'),
               const SizedBox(height: BoutiqueSpace.sm),
-              RewardsSection(
-                controller: accountController,
-                reader: rewardsReader,
-                showMovements: false,
-              ),
+              if (accountController != null)
+                AutoRewardsSection(
+                  controller: accountController!,
+                  reader: rewardsReader,
+                  showMovements: false,
+                )
+              else
+                RewardsSection(
+                  controller: null,
+                  reader: rewardsReader,
+                  showMovements: false,
+                ),
             ],
           ],
         ),
@@ -177,45 +191,49 @@ class _PermissionSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = this.controller;
     if (controller == null) {
-      return const ENotice(
-        message: 'Las notificaciones aún no están configuradas en esta '
-            'versión de la app.',
-        icon: Icons.notifications_off_outlined,
+      return const Padding(
+        padding: EdgeInsets.only(bottom: BoutiqueSpace.lg),
+        child: ENotice(
+          message: 'Las notificaciones aún no están configuradas en esta '
+              'versión de la app.',
+          icon: Icons.notifications_off_outlined,
+        ),
       );
     }
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
         if (!controller.available) {
-          return const ENotice(
-            message: 'Las notificaciones aún no están configuradas en esta '
-                'versión de la app.',
-            icon: Icons.notifications_off_outlined,
+          return const Padding(
+            padding: EdgeInsets.only(bottom: BoutiqueSpace.lg),
+            child: ENotice(
+              message: 'Las notificaciones aún no están configuradas en esta '
+                  'versión de la app.',
+              icon: Icons.notifications_off_outlined,
+            ),
           );
         }
         switch (controller.permission) {
           case NotificationPermissionState.notDetermined:
-            return _PermissionInvitation(controller: controller);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: BoutiqueSpace.lg),
+              child: _PermissionInvitation(controller: controller),
+            );
           case NotificationPermissionState.denied:
-            return ENotice(
-              message: 'Las notificaciones están desactivadas en los ajustes '
-                  'del dispositivo. Actívalas ahí para recibir avisos.',
-              actionLabel:
-                  onManagePreferences == null ? null : 'Ver preferencias',
-              onAction: onManagePreferences,
-              icon: Icons.notifications_off_outlined,
+            return Padding(
+              padding: const EdgeInsets.only(bottom: BoutiqueSpace.lg),
+              child: ENotice(
+                message: 'Las notificaciones están desactivadas en los ajustes '
+                    'del dispositivo. Actívalas ahí para recibir avisos.',
+                actionLabel:
+                    onManagePreferences == null ? null : 'Ver preferencias',
+                onAction: onManagePreferences,
+                icon: Icons.notifications_off_outlined,
+              ),
             );
           case NotificationPermissionState.granted:
           case NotificationPermissionState.provisional:
-            if (onManagePreferences == null) {
-              return const SizedBox.shrink();
-            }
-            return ENotice(
-              message: 'Recibes avisos en este dispositivo.',
-              actionLabel: 'Gestionar preferencias',
-              onAction: onManagePreferences,
-              icon: Icons.notifications_outlined,
-            );
+            return const SizedBox.shrink();
         }
       },
     );

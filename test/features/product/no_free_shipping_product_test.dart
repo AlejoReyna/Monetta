@@ -52,15 +52,17 @@ void main() {
       );
       await _pumpFicha(tester, store, product.id);
 
-      expect(find.textContaining(RegExp('gratis desde', caseSensitive: false)),
-          findsNothing);
+      expect(
+        find.textContaining(RegExp('gratis desde', caseSensitive: false)),
+        findsNothing,
+      );
       final services = find.byKey(const Key('product-trust-row'));
       await scrollTo(tester, services);
       final anywhere = find.textContaining(_freeShippingCopy);
       final inServices = find.descendant(of: services, matching: anywhere);
       expect(inServices, findsOneWidget);
       expect(anywhere.evaluate().length, inServices.evaluate().length);
-      expect(find.text('Disponible'), findsOneWidget);
+      expect(find.text('Disponible'), findsNothing);
     },
   );
 }

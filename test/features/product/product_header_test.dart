@@ -5,6 +5,7 @@ import 'package:monetta_app/app/shopper_copy.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
+import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
@@ -399,7 +400,8 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.text('Bolsas'), findsWidgets);
+      expect(find.byType(GuideBanner), findsOneWidget);
+      expect(find.text('Bolsas'), findsNothing);
 
       await tester.tap(find.byType(MonettaProductTile).first);
       await tester.pumpAndSettle();
@@ -415,7 +417,8 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(ProductScreen), findsNothing);
-      expect(find.text('Bolsas'), findsWidgets);
+      expect(find.byType(GuideBanner), findsOneWidget);
+      expect(find.text('Bolsas'), findsNothing);
     });
   });
 }

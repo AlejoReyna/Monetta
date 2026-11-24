@@ -50,7 +50,8 @@ void main() {
       await tester.pumpWidget(_host(store));
       await tester.pumpAndSettle();
 
-      expect(find.text('Favoritos'), findsWidgets);
+      expect(find.text('Favoritos'), findsOneWidget);
+      expect(find.text('Guardados'), findsNothing);
       expect(find.text('Aún no tienes favoritos'), findsOneWidget);
       expect(
         find.text('Explorar el catálogo'),
@@ -77,6 +78,8 @@ void main() {
       await tester.pumpWidget(_host(store));
       await tester.pumpAndSettle();
 
+      expect(find.text('Favoritos'), findsOneWidget);
+      expect(find.text('Guardados'), findsNothing);
       expect(find.text('2 piezas guardadas en esta cuenta.'), findsOneWidget);
       expect(_savedCards(), findsNWidgets(2));
     });

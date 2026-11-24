@@ -7,6 +7,7 @@ import 'package:http/testing.dart';
 import 'package:monetta_app/data/customer_auth/customer_account_config.dart';
 import 'package:monetta_app/data/customer_auth/customer_auth_error.dart';
 import 'package:monetta_app/data/customer_auth/customer_profile.dart';
+import 'package:monetta_app/features/account/profile_photo_picker.dart';
 
 const CustomerAccountConfig _config = CustomerAccountConfig(
   shopDomain: 'shop.example.com',
@@ -79,7 +80,47 @@ void main() {
       expect(decodeProfilePhotoDataUrl(url), bytes);
     });
 
-    test('reject anything that is not a base64 JPEG or PNG data URL', () {
+    test('label HEIC bytes as HEIC and decode them', () {
+      final bytes = Uint8List.fromList([
+        0x00, 0x00, 0x00, 0x18, // box size 24
+        0x66, 0x74, 0x79, 0x70, // ftyp
+        0x68, 0x65, 0x69, 0x63, // heic
+        0x00, 0x00, 0x00, 0x00, // minor version
+        0x6D, 0x69, 0x66, 0x31, // mif1
+        0x68, 0x65, 0x69, 0x63, // heic
+        1, 2, 3,
+      ]);
+      final url = profilePhotoDataUrl(bytes);
+      expect(url, startsWith('data:image/heic;base64,'));
+      expect(decodeProfilePhotoDataUrl(url), bytes);
+      expect(isHeicProfilePhoto(bytes), isTrue);
+      expect(
+        decodeProfilePhotoDataUrl(
+          'data:image/heif;base64,${url.split(',').last}',
+        ),
+        bytes,
+      );
+    });
+
+    test('normalizeProfilePhotoBytes preserves HEIC when fallback is needed',
+        () async {
+      final bytes = Uint8List.fromList([
+        0x00, 0x00, 0x00, 0x18,
+        0x66, 0x74, 0x79, 0x70, // ftyp
+        0x6D, 0x69, 0x66, 0x31, // mif1
+        0x00, 0x00, 0x00, 0x00,
+        0x68, 0x65, 0x69, 0x63, // heic
+        1, 2, 3,
+      ]);
+      final normalized = await normalizeProfilePhotoBytes(bytes);
+      expect(normalized, bytes);
+      expect(
+        profilePhotoDataUrl(normalized),
+        startsWith('data:image/heic;base64,'),
+      );
+    });
+
+    test('reject anything that is not a base64 JPEG, PNG or HEIC data URL', () {
       expect(decodeProfilePhotoDataUrl(null), isNull);
       expect(decodeProfilePhotoDataUrl(''), isNull);
       expect(decodeProfilePhotoDataUrl('https://x.test/a.jpg'), isNull);

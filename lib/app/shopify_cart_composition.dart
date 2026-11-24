@@ -33,6 +33,7 @@ final class ShopifyCartComposition {
     required CartAttribution attribution,
     CheckoutLauncher? checkoutLauncher,
     ExternalCheckoutOpener? externalCheckoutOpener,
+    bool allowPasswordProtectedStorefront = false,
   }) {
     final client = StorefrontClient.forCart(
       config: config,
@@ -50,12 +51,17 @@ final class ShopifyCartComposition {
     return ShopifyCartComposition._(
       controller: controller,
       checkout: ShopifyCheckoutCoordinator(
-        launcher: checkoutLauncher ?? MethodChannelCheckoutLauncher(),
+        launcher: checkoutLauncher ??
+            MethodChannelCheckoutLauncher(
+              resumeAfterStorefrontPassword: allowPasswordProtectedStorefront,
+            ),
         urlPolicy: CheckoutUrlPolicy.forShopDomain(config.shopDomain),
         sessions: sessions,
         externalOpener:
             externalCheckoutOpener ?? const UrlLauncherExternalCheckoutOpener(),
-        passwordProbe: HttpStorefrontPasswordProbe(),
+        passwordProbe: allowPasswordProtectedStorefront
+            ? null
+            : HttpStorefrontPasswordProbe(),
       ),
     );
   }

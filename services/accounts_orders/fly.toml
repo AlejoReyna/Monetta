@@ -32,6 +32,7 @@ primary_region = "dfw"
 [env]
   PORT = "8082"
   NODE_ENV = "production"
+  REWARDS_MAINTENANCE_INTERVAL_MS = "3600000"
 
 [processes]
   app = "node dist/api/server.js"

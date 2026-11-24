@@ -1,5 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { eligibleSubtotal, estimatedEarnCents, maxRedeemableCents, redemptionEligibility } from './rules.js';
+import {
+  eligibleSubtotal,
+  estimatedEarnCents,
+  maxRedeemableCents,
+  redemptionEligibility,
+  resolveTier,
+  tierBonusesUnlocked,
+} from './rules.js';
 import type { RewardsRepository } from './repository.js';
 import type { RewardsEnv } from './rewardsConfig.js';
 import { effectivePolicy } from './rewardsConfig.js';
@@ -36,23 +43,26 @@ export class RewardsService {
   async summary(accountId: string) {
     const policy = this.policy();
     await this.deps.rewards.ensureAccount(accountId, this.deps.shopDomain ?? null);
-    const [balance, dbPolicy] = await Promise.all([
+    const [balance, dbPolicy, completedPurchases] = await Promise.all([
       this.deps.rewards.balance(accountId, this.now()),
       this.deps.rewards.getPolicy(),
+      this.deps.rewards.countCompletedPurchases(accountId),
     ]);
+    const tier = resolveTier(completedPurchases);
     const merged: ProgramPolicy = { ...policy, version: dbPolicy.version };
     return {
       capabilities: {
-        schemaVersion: 1,
-        membership: { supported: false, reason: 'authoritative_rules_unavailable' },
-        tierProgress: { supported: false, reason: 'authoritative_rules_unavailable' },
-        tierBenefits: { supported: false, reason: 'authoritative_rules_unavailable' },
+        schemaVersion: 2,
+        membership: { supported: true, reason: null },
+        tierProgress: { supported: true, reason: null },
+        tierBenefits: { supported: true, reason: null },
       },
+      tier,
       program: {
         enabled: this.deps.env.rewardsEnabled,
         redemptionEnabled: merged.redemptionEnabled,
         currency: merged.currency,
-        earnBps: merged.earnBps,
+        earnBps: tier.cashbackBps,
         maxRedeemBps: merged.maxRedeemBps,
         expiryMonths: merged.expiryMonths,
         wholesaleEarns: merged.wholesaleEarns,
@@ -90,15 +100,19 @@ export class RewardsService {
     }
     const breakdown = eligibleSubtotal(input.lines);
     await this.deps.rewards.ensureAccount(accountId, this.deps.shopDomain ?? null);
-    const balance = await this.deps.rewards.balance(accountId, this.now());
+    const [balance, completedPurchases] = await Promise.all([
+      this.deps.rewards.balance(accountId, this.now()),
+      this.deps.rewards.countCompletedPurchases(accountId),
+    ]);
+    const tier = resolveTier(completedPurchases);
     const maxAllowed = maxRedeemableCents({
       subtotalEligibleCents: breakdown.subtotalEligibleCents,
       availableCents: balance.availableCents,
       maxRedeemBps: policy.maxRedeemBps,
     });
-    // Estimacion claramente identificada (no liberada): base neta propuesta sin canje aun.
+    // Estimacion claramente identificada (no liberada): porcentaje de cashback del nivel activo.
     const estimated = breakdown.subtotalEligibleCents > 0
-      ? estimatedEarnCents({ subtotalEligibleCents: breakdown.subtotalEligibleCents, redeemCents: 0, earnBps: policy.earnBps })
+      ? estimatedEarnCents({ subtotalEligibleCents: breakdown.subtotalEligibleCents, redeemCents: 0, earnBps: tier.cashbackBps })
       : 0;
     const record = await this.deps.rewards.createQuote({
       accountId,
@@ -215,6 +229,7 @@ export class RewardsService {
     eventId: string; orderShopifyId: string; accountId: string | null;
     subtotalEligibleCents: number; lines: QuoteInput['lines'];
     isWholesale: boolean; signals: readonly string[]; currency?: string;
+    discountCodes?: readonly { readonly code: string; readonly amountCents: number }[];
   }): Promise<{ earned: boolean }> {
     const claimed = await this.deps.rewards.inboxClaim(
       args.eventId, 'order_paid', args, args.orderShopifyId, args.accountId,
@@ -228,10 +243,12 @@ export class RewardsService {
       const policy = this.policy();
       const breakdown = eligibleSubtotal(args.lines);
       const base = Math.min(args.subtotalEligibleCents, breakdown.subtotalEligibleCents);
-      // G sobre base elegible (todas las compras generan cashback, incluyendo mayoreo cuando wholesaleEarns=true).
+      const completedBefore = await this.deps.rewards.countCompletedPurchases(args.accountId);
+      const earnBps = resolveTier(completedBefore).cashbackBps;
+      // G sobre base elegible usando el % de cashback del nivel activo del cliente.
       const earn = (args.isWholesale && !policy.wholesaleEarns)
         ? 0
-        : estimatedEarnCents({ subtotalEligibleCents: base, redeemCents: 0, earnBps: policy.earnBps });
+        : estimatedEarnCents({ subtotalEligibleCents: base, redeemCents: 0, earnBps });
       const res = await this.deps.rewards.earnPending({
         accountId: args.accountId,
         orderShopifyId: args.orderShopifyId,
@@ -243,6 +260,20 @@ export class RewardsService {
         eventRef: args.eventId,
         currency: args.currency ?? 'MXN',
       });
+      await this.grantUnlockedTierBonuses(args.accountId, args.eventId, policy, null);
+      // Liquidar cupones Rewards canjeados despues de crear el snapshot del pedido.
+      for (const dc of args.discountCodes ?? []) {
+        const code = dc.code.trim();
+        if (code === '') continue;
+        const match = await this.deps.rewards.findRedemptionByDiscountCode(args.accountId, code);
+        if (!match) continue;
+        const appliedCents = dc.amountCents > 0 ? dc.amountCents : match.requestedCents;
+        await this.deps.rewards.settle({
+          redemptionId: match.id,
+          appliedCents,
+          orderShopifyId: args.orderShopifyId,
+        });
+      }
       await this.deps.rewards.inboxDone(args.eventId, true);
       return { earned: res.created };
     } catch (error) {
@@ -259,11 +290,35 @@ export class RewardsService {
       const res = await this.deps.rewards.releaseForDelivery({
         orderShopifyId: args.orderShopifyId, eventRef: args.eventId, occurredAt: args.occurredAt ?? null,
       });
+      if (res.releasedCents > 0 && res.accountId) {
+        await this.grantUnlockedTierBonuses(res.accountId, args.eventId, this.policy(), args.occurredAt ?? null);
+      }
       await this.deps.rewards.inboxDone(args.eventId, true);
       return res;
     } catch (error) {
       await this.deps.rewards.inboxDone(args.eventId, false, error instanceof Error ? error.message : String(error));
       throw error;
+    }
+  }
+
+  private async grantUnlockedTierBonuses(
+    accountId: string,
+    eventRef: string,
+    policy: ProgramPolicy,
+    occurredAt: Date | null,
+  ): Promise<void> {
+    const completed = await this.deps.rewards.countCompletedPurchases(accountId);
+    const unlocked = tierBonusesUnlocked(completed);
+    for (const milestone of unlocked) {
+      await this.deps.rewards.grantTierBonus({
+        accountId,
+        tierKey: milestone.tierKey,
+        amountCents: milestone.amountCents,
+        ruleVersion: policy.version,
+        eventRef,
+        occurredAt,
+        expiryMonths: policy.expiryMonths,
+      });
     }
   }
 

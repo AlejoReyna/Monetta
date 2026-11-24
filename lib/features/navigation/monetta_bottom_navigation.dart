@@ -22,6 +22,7 @@ const double _kBarMinHeight = 56;
 
 /// Radius of the v4.1 selection capsule behind the current destination.
 const double _kSelectionRadius = 24;
+const Color _kLightSelectionColor = Color(0xFFFBF6EE);
 const double _kBarSidePadding = 10;
 const double _kBarMaxContentWidth = 480;
 // 2 (was 4) so that «Categorías» (about 69 pt in Inter 600 at 13) still fits
@@ -194,9 +195,10 @@ class MonettaBottomNavigation extends StatelessWidget {
                                   ? Colors.black
                                   : null,
                           label: Text(
-                              destination == MonettaBottomDestination.account
-                                  ? (unread > 99 ? '99+' : '$unread')
-                                  : '$bagCount'),
+                            destination == MonettaBottomDestination.account
+                                ? (unread > 99 ? '99+' : '$unread')
+                                : '$bagCount',
+                          ),
                           child: _NavGlyph(destination: destination),
                         ),
                 ),
@@ -213,7 +215,10 @@ class MonettaBottomNavigation extends StatelessWidget {
   /// by halo C: gold at 18 %, 10 px blur, 2 px spread, transparent centre.
   /// The blur is dropped under high contrast and the fill becomes opaque.
   Widget _buildGlassCapsule(
-      BuildContext context, MonettaColors colors, int unread) {
+    BuildContext context,
+    MonettaColors colors,
+    int unread,
+  ) {
     final highContrast = MediaQuery.highContrastOf(context);
     final radius = BorderRadius.circular(_kGlassRadius);
     final narrow = (MediaQuery.maybeSizeOf(context)?.width ?? double.infinity) <
@@ -445,6 +450,10 @@ class _NavItemState extends State<_NavItem> {
     final destination = widget.destination;
     final selected = widget.selected;
     final colors = context.monettaColors;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final selectionColor =
+        isDark ? colors.navigationSelection : _kLightSelectionColor;
+    final selectionRadius = BorderRadius.circular(_kSelectionRadius);
     final label = _labelOf(destination);
     final badge = destination == MonettaBottomDestination.bag
         ? widget.bagCount
@@ -464,7 +473,8 @@ class _NavItemState extends State<_NavItem> {
       label: semanticLabel,
       child: InkWell(
         key: Key('bottom-nav-${destination.name}'),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: selectionRadius,
+        hoverColor: isDark ? null : _kLightSelectionColor,
         onTap: () => widget.onSelected(destination),
         onHighlightChanged: (pressed) => setState(() => _pressed = pressed),
         // The visible label and the badge are already in [semanticLabel].
@@ -484,10 +494,10 @@ class _NavItemState extends State<_NavItem> {
               return DecoratedBox(
                 key: Key('bottom-nav-${destination.name}-selection'),
                 decoration: BoxDecoration(
-                  color: colors.navigationSelection.withValues(
-                    alpha: colors.navigationSelection.a * progress,
+                  color: selectionColor.withValues(
+                    alpha: selectionColor.a * progress,
                   ),
-                  borderRadius: BorderRadius.circular(_kSelectionRadius),
+                  borderRadius: selectionRadius,
                 ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(minHeight: _kBarMinHeight),
@@ -504,11 +514,12 @@ class _NavItemState extends State<_NavItem> {
                         children: [
                           IconTheme.merge(
                             data: IconThemeData(
-                                color: destination ==
-                                            MonettaBottomDestination.bag &&
-                                        widget.wholesaleEligible
-                                    ? const Color(0xFFA58248)
-                                    : color),
+                              color:
+                                  destination == MonettaBottomDestination.bag &&
+                                          widget.wholesaleEligible
+                                      ? const Color(0xFFA58248)
+                                      : color,
+                            ),
                             child: Stack(
                               clipBehavior: Clip.none,
                               children: [
@@ -523,9 +534,10 @@ class _NavItemState extends State<_NavItem> {
                                     left: 16,
                                     top: -6,
                                     child: _BagBadge(
-                                        count: badge,
-                                        account: destination ==
-                                            MonettaBottomDestination.account),
+                                      count: badge,
+                                      account: destination ==
+                                          MonettaBottomDestination.account,
+                                    ),
                                   ),
                               ],
                             ),

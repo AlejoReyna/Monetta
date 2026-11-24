@@ -663,6 +663,9 @@ class _MonettaAppState extends State<MonettaApp> {
           deviceId: deviceId,
           appVersion: buildMetadata.displayVersion,
         ),
+        allowPasswordProtectedStorefront:
+            const String.fromEnvironment('APP_ENV') == 'staging' &&
+                const bool.fromEnvironment('ALLOW_STAGING_PASSWORD_CHECKOUT'),
       );
     }
 

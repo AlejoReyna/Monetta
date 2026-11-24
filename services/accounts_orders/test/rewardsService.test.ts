@@ -31,33 +31,35 @@ describe('rewards service (paquete F)', () => {
     });
   }
 
-  it('emision unica frente a eventos duplicados', async () => {
+  it('emision unica frente a eventos duplicados (PRO 1%)', async () => {
     await paid();
     const again = await paid(ORDER, `ev:paid:${ORDER}`);
     expect(again.earned).toBe(false);
     expect(repo.lotCount()).toBe(1);
     const summary = await service.summary(CUSTOMER);
-    expect(summary.balance.pendingCents).toBe(5400);
+    expect(summary.balance.pendingCents).toBe(1800);
   });
 
-  it('pendiente hasta entrega verificada; preparado/enviado no libera', async () => {
+  it('pendiente hasta entrega verificada; preparado/enviado no libera; primera entrega otorga bono PRO $100', async () => {
     await paid();
     // Sin evento DELIVERED no hay liberacion: el resumen sigue pendiente.
     let summary = await service.summary(CUSTOMER);
-    expect(summary.balance.pendingCents).toBe(5400);
+    expect(summary.balance.pendingCents).toBe(1800);
     expect(summary.balance.availableCents).toBe(0);
     await service.onOrderDelivered({ eventId: 'ev:del:1', orderShopifyId: ORDER });
     summary = await service.summary(CUSTOMER);
     expect(summary.balance.pendingCents).toBe(0);
-    expect(summary.balance.availableCents).toBe(5400);
+    expect(summary.balance.availableCents).toBe(11800);
+    expect(summary.tier.completedPurchases).toBe(1);
+    expect(summary.tier.level).toBe('PRO');
   });
 
-  it('entrega duplicada no duplica saldo', async () => {
+  it('entrega duplicada no duplica saldo ni bono', async () => {
     await paid();
     await service.onOrderDelivered({ eventId: 'ev:del:1', orderShopifyId: ORDER });
     const again = await service.onOrderDelivered({ eventId: 'ev:del:1', orderShopifyId: ORDER });
     expect(again.releasedCents).toBe(0);
-    expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(5400);
+    expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(11800);
   });
 
   it('eventos fuera de orden: entrega antes que pago libera al llegar el pago', async () => {
@@ -67,7 +69,7 @@ describe('rewards service (paquete F)', () => {
       subtotalEligibleCents: 180000, lines: LINES, isWholesale: false, signals: [],
     });
     const summary = await service.summary(CUSTOMER);
-    expect(summary.balance.availableCents).toBe(5400);
+    expect(summary.balance.availableCents).toBe(11800);
     expect(summary.balance.pendingCents).toBe(0);
   });
 
@@ -75,28 +77,28 @@ describe('rewards service (paquete F)', () => {
     await paid();
     await service.onOrderDelivered({ eventId: 'ev:del:1', orderShopifyId: ORDER });
     const c = await service.onOrderCancelled({ eventId: 'ev:cancel:1', orderShopifyId: ORDER });
-    expect(c.reversedCents).toBe(5400);
-    const r = await service.onRefund({ eventId: 'ev:refund:1', orderShopifyId: ORDER, reverseCents: 5400 });
+    expect(c.reversedCents).toBe(1800);
+    const r = await service.onRefund({ eventId: 'ev:refund:1', orderShopifyId: ORDER, reverseCents: 1800 });
     expect(r.reversedCents).toBe(0);
-    expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(0);
+    expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(10000);
   });
 
-  it('devolucion parcial revierte solo la diferencia (3% de lo reembolsado)', async () => {
+  it('devolucion parcial revierte solo el cashback del pedido', async () => {
     await paid();
     await service.onOrderDelivered({ eventId: 'ev:del:1', orderShopifyId: ORDER });
-    // Devuelven $600 de $1,800 -> reversa $18.
-    const r = await service.onRefund({ eventId: 'ev:refund:p', orderShopifyId: ORDER, reverseCents: 1800 });
-    expect(r.reversedCents).toBe(1800);
-    expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(3600);
+    // Devuelven $600 de $1,800 (1% = $6).
+    const r = await service.onRefund({ eventId: 'ev:refund:p', orderShopifyId: ORDER, reverseCents: 600 });
+    expect(r.reversedCents).toBe(600);
+    expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(11200);
   });
 
-  it('mayoreo sí genera Rewards (3% cashback en todas las compras)', async () => {
+  it('mayoreo sí genera Rewards (PRO 1% + bono de nivel)', async () => {
     await service.onOrderPaid({
       eventId: 'ev:paid:ws', orderShopifyId: 'WS1', accountId: CUSTOMER,
       subtotalEligibleCents: 500000, lines: [{ quantity: 5, unitPriceCents: 100000, eligible: true }],
       isWholesale: true, signals: ['tag:mayoreo'],
     });
-    expect((await service.summary(CUSTOMER)).balance.pendingCents).toBe(15000);
+    expect((await service.summary(CUSTOMER)).balance.pendingCents).toBe(5000);
     await service.onOrderDelivered({ eventId: 'ev:del:ws', orderShopifyId: 'WS1' });
     expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(15000);
   });
@@ -108,9 +110,9 @@ describe('rewards service (paquete F)', () => {
       cartRevision: 'rev-1',
       lines: [{ quantity: 1, unitPriceCents: 90000, eligible: true }],
     });
-    expect(q.maxAllowedCents).toBe(5400); // min(5400 disp, 18000)
+    expect(q.maxAllowedCents).toBe(11800); // min(11800 disp, 18000)
     await expect(service.redeem({
-      accountId: CUSTOMER, quoteId: q.quoteId, amountCents: 5401, isWholesaleCart: false, idempotencyKey: 'k-1-ok-12',
+      accountId: CUSTOMER, quoteId: q.quoteId, amountCents: 11801, isWholesaleCart: false, idempotencyKey: 'k-1-ok-12',
     })).rejects.toMatchObject({ code: 'exceeds_limit' });
   });
 
@@ -122,10 +124,10 @@ describe('rewards service (paquete F)', () => {
       lines: [{ quantity: 2, unitPriceCents: 90000, eligible: true }],
     });
     const first = await service.redeem({
-      accountId: CUSTOMER, quoteId: q.quoteId, amountCents: 5400, isWholesaleCart: false, idempotencyKey: 'same-key-1',
+      accountId: CUSTOMER, quoteId: q.quoteId, amountCents: 11800, isWholesaleCart: false, idempotencyKey: 'same-key-1',
     });
     const second = await service.redeem({
-      accountId: CUSTOMER, quoteId: q.quoteId, amountCents: 5400, isWholesaleCart: false, idempotencyKey: 'same-key-1',
+      accountId: CUSTOMER, quoteId: q.quoteId, amountCents: 11800, isWholesaleCart: false, idempotencyKey: 'same-key-1',
     });
     expect(second.reused).toBe(true);
     expect(second.redemption.redemptionId).toBe(first.redemption.redemptionId);
@@ -138,9 +140,9 @@ describe('rewards service (paquete F)', () => {
     await paid();
     const deliveredAt = new Date('2025-01-15T12:00:00Z');
     await service.onOrderDelivered({ eventId: 'ev:del:1', orderShopifyId: ORDER, occurredAt: deliveredAt });
-    // 12 meses despues + 1 dia: expira.
+    // 12 meses despues + 1 dia: expiran lote de compra (1800) y bono PRO (10000).
     const expired = await repo.expireDue(new Date('2026-01-16T12:00:00Z'));
-    expect(expired.expiredCents).toBe(5400);
+    expect(expired.expiredCents).toBe(11800);
     expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(0);
   });
 
@@ -154,10 +156,27 @@ describe('rewards service (paquete F)', () => {
     const { redemption } = await service.redeem({
       accountId: CUSTOMER, quoteId: q.quoteId, amountCents: 5000, isWholesaleCart: false, idempotencyKey: 'abandon-12',
     });
-    // Reserva viva: disponible neto 400.
-    expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(400);
+    // Reserva viva: disponible neto 6800 (11800 - 5000).
+    expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(6800);
     await service.releaseRedemption(CUSTOMER, redemption.redemptionId);
-    expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(5400);
+    expect((await service.summary(CUSTOMER)).balance.availableCents).toBe(11800);
+  });
+
+  it('progresion PRO (1%) -> VIP (2% + $100) -> ÉLITE (3% + $200) sobre 10 compras entregadas', async () => {
+    for (let i = 1; i <= 10; i += 1) {
+      await service.onOrderPaid({
+        eventId: `ev:p:${i}`, orderShopifyId: `T-${i}`, accountId: 'tier-cust',
+        subtotalEligibleCents: 10000, lines: [{ quantity: 1, unitPriceCents: 10000, eligible: true }],
+        isWholesale: false, signals: [],
+      });
+      await service.onOrderDelivered({ eventId: `ev:d:${i}`, orderShopifyId: `T-${i}` });
+    }
+    const s = await service.summary('tier-cust');
+    expect(s.tier.level).toBe('ÉLITE');
+    expect(s.tier.isFinalLevel).toBe(true);
+    expect(s.tier.cashbackBps).toBe(300);
+    // 5 PRO ($1*5) + 5 VIP ($2*5) + bonos PRO($100) + VIP($100) + ELITE($200) = 41500
+    expect(s.balance.availableCents).toBe(500 + 1000 + 10000 + 10000 + 20000);
   });
 
   it('separacion entre cuentas: el saldo de una no financia a otra', async () => {

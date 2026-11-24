@@ -27,8 +27,7 @@ void main() {
       );
       expect(tester.widget<GuideBanner>(find.byType(GuideBanner)).id, banner);
       expect(guideAsset('banner:$banner'), isNotNull);
-      final title = tester.widget<Text>(find.text('Contexto'));
-      expect(title.style?.fontSize, 15);
+      expect(find.text('Contexto'), findsNothing);
       expect(
         find.descendant(
           of: find.byType(GuideBanner),

@@ -520,12 +520,6 @@ class _CollectionScreenState extends State<CollectionScreen> {
           if (SystemLayoutScope.of(context).barEdge == SystemBarEdge.none ||
               !StorefrontPaneScope.ownsNavigationOf(context))
             _CollectionAppBar(onSearch: () => unawaited(openSearch(context))),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(widget.title, style: boutiqueText(size: 15)),
-            ),
-          ),
           if (_bannerId case final id?)
             SliverToBoxAdapter(
               child: Padding(
@@ -553,6 +547,13 @@ class _CollectionScreenState extends State<CollectionScreen> {
                 imageAsset: widget.heroImageAsset,
                 onAction: _scrollToGrid,
                 actionLabel: widget.ctaLabel,
+              ),
+            )
+          else
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(widget.title, style: boutiqueText(size: 15)),
               ),
             ),
           SliverToBoxAdapter(
@@ -925,7 +926,8 @@ class _CollectionAppBar extends StatelessWidget {
       foregroundColor: palette.ink,
       centerTitle: true,
       titleSpacing: 0,
-      leadingWidth: 56,
+      toolbarHeight: bar.toolbarHeight ?? 64,
+      leadingWidth: bar.leadingWidth ?? 64,
       leading: bar.leading,
       title: bar.title,
       actions: bar.actions,

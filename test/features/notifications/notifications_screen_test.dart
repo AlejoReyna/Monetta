@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/theme.dart';
+import 'package:monetta_app/app/account_controller.dart';
 import 'package:monetta_app/app/notification_controller.dart';
+import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
+import 'package:monetta_app/data/local/account_store.dart';
+import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/data/local/order_summary_store.dart';
+import 'package:monetta_app/data/repositories/order_history_repository.dart';
 import 'package:monetta_app/main.dart' show NotificationScope;
 import 'package:monetta_app/data/notifications/notification_models.dart';
 import 'package:monetta_app/features/notifications/notification_inbox.dart';
@@ -85,11 +91,27 @@ void main() {
       ));
       await tester.tap(find.text('Abrir avisos'));
       await tester.pumpAndSettle();
-      expect(find.text('Recibes avisos en este dispositivo.'), findsOneWidget);
+      expect(find.text('Avisos'), findsNothing);
+      expect(find.text('Notificaciones'), findsOneWidget);
+      expect(find.text('Recibes avisos en este dispositivo.'), findsNothing);
+      expect(find.text('Gestionar preferencias'), findsNothing);
+
+      final recentsRect = tester.getRect(find.text('Recientes'));
+      final filterBtn = find.byKey(
+        const ValueKey('notifications-preferences-filter'),
+      );
+      expect(filterBtn, findsOneWidget);
+      expect(
+        find.byTooltip('Gestionar preferencias'),
+        findsOneWidget,
+      );
+      final filterRect = tester.getRect(filterBtn);
+      expect((filterRect.center.dy - recentsRect.center.dy).abs(), lessThan(8));
+
       await tester.tap(find.byKey(const ValueKey('notification-row-n1')));
       await tester.pumpAndSettle();
       expect(controller.opened?.type, 'home');
-      await tester.tap(find.text('Gestionar preferencias'));
+      await tester.tap(filterBtn);
       await tester.pumpAndSettle();
       expect(find.text('Tus notificaciones'), findsOneWidget);
       expect(find.byKey(const ValueKey('save-notification-preferences')),
@@ -197,6 +219,48 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Tu saldo Monetta'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('rewards-balance-card')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('uses AutoRewardsSection when accountController is provided',
+        (tester) async {
+      final db = openTestDatabase();
+      final account = AccountController(
+        accountStore: AccountStore(db),
+        deviceStore: DeviceStore(db),
+        orderHistoryRepository: OrderHistoryRepository(
+          store: OrderSummaryStore(db),
+          config: AccountsOrdersConfig.disabled,
+        ),
+        deviceId: 'dev-notif',
+      )..account = Account(
+          localAccountId: 'acct-1',
+          authProvider: 'monetta',
+          createdAt: DateTime.utc(2026, 8, 27),
+          lastSeenAt: DateTime.utc(2026, 8, 27),
+        );
+      addTearDown(() async {
+        account.dispose();
+        await db.close();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme(),
+          home: NotificationsScreen(
+            inbox: NotificationInbox(),
+            ownerId: 'acct-1',
+            accountController: account,
+            rewardsReader: FakeRewardsReader(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AutoRewardsSection), findsOneWidget);
       expect(
         find.byKey(const ValueKey('rewards-balance-card')),
         findsOneWidget,

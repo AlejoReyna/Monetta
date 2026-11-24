@@ -19,9 +19,11 @@ import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/local/order_summary_store.dart';
 import 'package:monetta_app/data/local/wishlist_store.dart';
 import 'package:monetta_app/data/repositories/order_history_repository.dart';
+import 'package:monetta_app/data/shopify/cart/cart_api.dart';
 import 'package:monetta_app/data/shopify/cart/cart_repository.dart';
 import 'package:monetta_app/data/shopify/cart/checkout_launcher.dart';
 import 'package:monetta_app/data/shopify/cart_attribution.dart';
+import 'package:monetta_app/domain/cart.dart';
 import 'package:monetta_app/features/boutique/client_guide_components.dart';
 import 'package:monetta_app/features/checkout/checkout_screen.dart';
 import 'package:monetta_app/features/checkout/reviewing_checkout.dart';
@@ -29,6 +31,132 @@ import 'package:monetta_app/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../support/shopify_cart_fakes.dart';
+
+class _CheckoutCartApi implements CartApi {
+  final FakeCartApi _delegate = FakeCartApi();
+  final Map<String, Cart> _carts = {};
+  CartBuyerIdentity? get lastBuyerIdentity => _delegate.lastBuyerIdentity;
+
+  @override
+  Future<CartMutationResult> create({
+    required List<CartLineCreateInput> lines,
+    required Map<String, String> attributes,
+    CartBuyerIdentity? buyerIdentity,
+  }) async {
+    if (buyerIdentity != null) {
+      _delegate.lastBuyerIdentity = buyerIdentity;
+    }
+    const cartId = 'gid://shopify/Cart/g39-cart?key=secret';
+    final res = _result(
+      cartId: cartId,
+      items: [
+        for (var i = 0; i < lines.length; i++)
+          (
+            'gid://shopify/CartLine/${i + 1}',
+            lines[i].merchandiseId,
+            lines[i].quantity
+          ),
+      ],
+      buyerIdentity: buyerIdentity,
+    );
+    _carts[cartId] = res.cart!;
+    return res;
+  }
+
+  @override
+  Future<Cart?> get(SensitiveCartId cartId) async =>
+      _carts[cartId.revealForStorefrontRequest()];
+
+  @override
+  Future<CartMutationResult> addLines(
+    SensitiveCartId cartId,
+    List<CartLineCreateInput> lines,
+  ) =>
+      _delegate.addLines(cartId, lines);
+
+  @override
+  Future<CartMutationResult> updateLines(
+    SensitiveCartId cartId,
+    List<CartLineUpdateInput> lines,
+  ) =>
+      _delegate.updateLines(cartId, lines);
+
+  @override
+  Future<CartMutationResult> removeLines(
+    SensitiveCartId cartId,
+    List<String> lineIds,
+  ) =>
+      _delegate.removeLines(cartId, lineIds);
+
+  @override
+  Future<CartMutationResult> updateBuyerIdentity(
+    SensitiveCartId cartId,
+    CartBuyerIdentity identity,
+  ) async {
+    _delegate.lastBuyerIdentity = identity;
+    final key = cartId.revealForStorefrontRequest();
+    final existing = _carts[key];
+    final res = _result(
+      cartId: key,
+      items: existing == null
+          ? const []
+          : [
+              for (final line in existing.lines)
+                (line.id, line.variantId, line.quantity),
+            ],
+      buyerIdentity: identity,
+    );
+    _carts[key] = res.cart!;
+    return res;
+  }
+
+  @override
+  Future<CartMutationResult> replaceDiscountCodes(
+    SensitiveCartId cartId,
+    List<String> discountCodes,
+  ) =>
+      _delegate.replaceDiscountCodes(cartId, discountCodes);
+
+  CartMutationResult _result({
+    required String cartId,
+    required List<(String id, String variantId, int quantity)> items,
+    CartBuyerIdentity? buyerIdentity,
+  }) {
+    const money = CartMoney(amount: '10.00', currencyCode: 'MXN');
+    final timestamp = DateTime.utc(2026, 8, 27);
+    final totalQty = items.fold<int>(0, (sum, item) => sum + item.$3);
+    return CartMutationResult(
+      cart: Cart(
+        id: cartId,
+        checkoutUrl: 'https://monetta.example/checkouts/cn/c1',
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        lines: [
+          for (final item in items)
+            CartLine(
+              id: item.$1,
+              variantId: item.$2,
+              productId: 'gid://shopify/Product/1',
+              title: 'Bolso',
+              variantTitle: 'Única',
+              quantity: item.$3,
+              cost: const CartLineCost(
+                amountPerQuantity: money,
+                subtotal: money,
+                total: money,
+              ),
+            ),
+        ],
+        totalQuantity: totalQty,
+        buyerIdentity: CartBuyerSummary(
+          countryCode: 'MX',
+          isAuthenticated: buyerIdentity?.isAuthenticated ?? false,
+        ),
+        cost: const CartCost(subtotal: money, total: money),
+      ),
+    );
+  }
+}
 
 class _FakeGateway implements CustomerAuthGateway {
   Object? nextError;
@@ -84,6 +212,8 @@ Future<
       CartController cart,
       ShopifyCheckoutCoordinator coordinator,
       _FakeGateway gateway,
+      _CheckoutCartApi api,
+      FakeCheckoutLauncher launcher,
     })> _createHarness() async {
   final db = openTestDatabase();
   final store = CatalogStore(database: db);
@@ -123,10 +253,15 @@ Future<
     ),
     deviceId: 'dev-g39',
   );
+  final api = _CheckoutCartApi();
+  final launcher = FakeCheckoutLauncher([
+    const CheckoutCancelled(),
+    const CheckoutCancelled(),
+  ]);
   final sessions = InMemoryCartSessionStore();
   final cart = CartController(
     reconciler: CartRepository(
-      api: FakeCartApi(),
+      api: api,
       sessions: sessions,
       writes: RecoveringCartWriteCoordinator(),
       attribution: const CartAttribution(
@@ -137,7 +272,7 @@ Future<
     ),
   );
   final coordinator = ShopifyCheckoutCoordinator(
-    launcher: FakeCheckoutLauncher(const []),
+    launcher: launcher,
     urlPolicy: CheckoutUrlPolicy.forShopDomain('monetta.example'),
     sessions: sessions,
   );
@@ -148,6 +283,8 @@ Future<
     cart: cart,
     coordinator: coordinator,
     gateway: gateway,
+    api: api,
+    launcher: launcher,
   );
 }
 
@@ -227,17 +364,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('g39-choice-sheet')), findsOneWidget);
+    expect(h.launcher.presentCalls, 0);
     expect(h.store.bagQuantity, 1);
 
     await tester.tap(guestFinder);
     await tester.pumpAndSettle();
 
-    expect(find.byType(CheckoutFlowScreen), findsOneWidget);
+    expect(find.byType(CheckoutFlowScreen), findsNothing);
+    expect(h.launcher.presentCalls, 1);
     expect(h.store.bagQuantity, 1);
+    await tester.tap(find.byTooltip('Cerrar'));
+    await tester.pumpAndSettle();
   });
 
   testWidgets(
-      'G39 Iniciar sesión autentica y prellena el correo en CheckoutFlowScreen; usuario ya autenticado salta modal',
+      'G39 Iniciar sesión autentica y pasa el correo directo a Shopify; usuario ya autenticado salta modal',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -280,14 +421,16 @@ void main() {
     await tester.tap(cta);
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('g39-sign-in')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
 
     expect(h.account.isSignedIn, isTrue);
     expect(find.byKey(const ValueKey('g39-choice-sheet')), findsNothing);
-    expect(find.byType(CheckoutFlowScreen), findsOneWidget);
-    expect(find.text('cliente@monetta.example'), findsOneWidget);
+    expect(find.byType(CheckoutFlowScreen), findsNothing);
+    expect(h.launcher.presentCalls, 1);
+    expect(h.api.lastBuyerIdentity?.email, 'cliente@monetta.example');
 
-    Navigator.of(tester.element(find.byType(CheckoutFlowScreen))).pop();
+    await tester.tap(find.byTooltip('Cerrar'));
     await tester.pumpAndSettle();
 
     await tester.scrollUntilVisible(
@@ -298,8 +441,13 @@ void main() {
     await tester.ensureVisible(cta);
     await tester.pumpAndSettle();
     await tester.tap(cta);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
     expect(find.byKey(const ValueKey('g39-choice-sheet')), findsNothing);
-    expect(find.byType(CheckoutFlowScreen), findsOneWidget);
+    expect(find.byType(CheckoutFlowScreen), findsNothing);
+    expect(h.launcher.presentCalls, 2);
+
+    await tester.tap(find.byTooltip('Cerrar'));
+    await tester.pumpAndSettle();
   });
 }

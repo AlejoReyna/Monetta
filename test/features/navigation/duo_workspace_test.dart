@@ -419,7 +419,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('checkout spans both sides: form left, order summary right',
+  testWidgets('checkout launches directly from bag without intermediate page',
       (tester) async {
     final shop = await catalog();
     await shop.store.addToBag(shop.single);
@@ -439,22 +439,18 @@ void main() {
     await tester.tap(proceed);
     await settle(tester);
 
-    expect(find.byType(CheckoutFlowScreen), findsOneWidget);
-    expect(
-      tester.getRect(find.byKey(const Key('checkout-duo-form'))),
-      inside(kLeftSide),
-    );
-    final summary = find.byKey(const Key('checkout-duo-summary'));
-    expect(tester.getRect(summary), inside(kRightSide));
-    expect(
-      find.descendant(of: summary, matching: find.text('Tu pedido')),
-      findsOneWidget,
-    );
-
-    await tester.tap(find.byTooltip('Volver'));
-    await settle(tester);
     expect(find.byType(CheckoutFlowScreen), findsNothing);
+    expect(find.text('Abriendo pago seguro…'), findsOneWidget);
     expect(tester.getRect(find.byType(BagScreen)), inside(kRightSide));
+
+    launch.complete(const CheckoutCancelled());
+    await settle(tester);
+
+    expect(find.text('Estamos revisando tu pago'), findsOneWidget);
+    await tester.tap(find.byTooltip('Cerrar'));
+    await settle(tester);
+
+    expect(find.text('Continuar al checkout'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

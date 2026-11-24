@@ -1,12 +1,15 @@
 import Flutter
 import ShopifyCheckoutSheetKit
 import UIKit
+import WebKit
 
 final class ShopifyCheckoutBridge: NSObject, CheckoutDelegate {
   private static let channelName = "mx.monetta.checkout_kit"
 
   private let channel: FlutterMethodChannel
   private var pendingResult: FlutterResult?
+  private weak var checkoutSheet: CheckoutViewController?
+  private var checkoutNavigation: StagingCheckoutNavigation?
 
   init(messenger: FlutterBinaryMessenger) {
     channel = FlutterMethodChannel(
@@ -44,7 +47,23 @@ final class ShopifyCheckoutBridge: NSObject, CheckoutDelegate {
         return
       }
       pendingResult = result
-      ShopifyCheckoutSheetKit.present(checkout: url, from: presenter, delegate: self)
+      let sheet = ShopifyCheckoutSheetKit.present(checkout: url, from: presenter, delegate: self)
+      checkoutSheet = sheet
+      if let arguments = call.arguments as? [String: Any],
+         arguments["resumeAfterStorefrontPassword"] as? Bool == true,
+         let page = sheet.topViewController,
+         let webView = page.view.subviews.compactMap({ $0 as? WKWebView }).first {
+        checkoutNavigation = StagingCheckoutNavigation(
+          webView: webView,
+          page: page,
+          checkoutURL: url,
+          onStorefront: { [weak self] in
+            guard let self else { return }
+            ShopifyCheckoutSheetKit.invalidate()
+            self.finish(self.failed(code: "storefront_instead_of_checkout"), dismiss: true)
+          }
+        )
+      }
     case "invalidate":
       ShopifyCheckoutSheetKit.invalidate()
       result(nil)
@@ -103,10 +122,17 @@ final class ShopifyCheckoutBridge: NSObject, CheckoutDelegate {
     return current
   }
 
-  private func finish(_ value: [String: String]) {
+  private func finish(_ value: [String: String], dismiss: Bool = false) {
     guard let result = pendingResult else { return }
     pendingResult = nil
-    result(value)
+    checkoutNavigation = nil
+    let sheet = checkoutSheet
+    checkoutSheet = nil
+    if dismiss, let sheet, sheet.presentingViewController != nil, !sheet.isBeingDismissed {
+      sheet.dismiss(animated: true) { result(value) }
+    } else {
+      result(value)
+    }
   }
 
   private func failed(code: String) -> [String: String] {
@@ -118,7 +144,7 @@ final class ShopifyCheckoutBridge: NSObject, CheckoutDelegate {
   }
 
   func checkoutDidCancel() {
-    finish(["status": "cancelled"])
+    finish(["status": "cancelled"], dismiss: true)
   }
 
   func checkoutDidFail(error: CheckoutError) {
@@ -146,5 +172,54 @@ final class ShopifyCheckoutBridge: NSObject, CheckoutDelegate {
 
   func checkoutDidEmitWebPixelEvent(event _: PixelEvent) {
     // Payment/customer behavior never crosses the Flutter boundary.
+  }
+}
+
+/// Keeps the password form and the checkout in the same WebKit session.
+/// Shopify sends successful storefront logins to the shop home.
+private final class StagingCheckoutNavigation {
+  private var urlObservation: NSKeyValueObservation?
+  private var loadingObservation: NSKeyValueObservation?
+  private var sawPasswordPage = false
+  private var resumed = false
+  private let checkoutURL: URL
+  private weak var page: UIViewController?
+  private let onStorefront: () -> Void
+
+  init(webView: WKWebView, page: UIViewController, checkoutURL: URL, onStorefront: @escaping () -> Void) {
+    self.page = page
+    self.checkoutURL = checkoutURL
+    self.onStorefront = onStorefront
+    urlObservation = webView.observe(\.url, options: [.new]) { [weak self] view, _ in
+      self?.update(view)
+    }
+    loadingObservation = webView.observe(\.isLoading, options: [.new]) { [weak self] view, _ in
+      self?.update(view)
+    }
+    DispatchQueue.main.async { [weak self, weak webView] in
+      if let webView { self?.update(webView) }
+    }
+  }
+
+  private func update(_ webView: WKWebView) {
+    guard let url = webView.url, url.scheme == "https", url.host == checkoutURL.host else { return }
+    let route = url.pathComponents.dropFirst().first ?? ""
+    if route == "password" {
+      sawPasswordPage = true
+      page?.navigationItem.title = "Contraseña de staging"
+      return
+    }
+    if route == "checkouts" || route == "checkout" {
+      page?.navigationItem.title = ShopifyCheckoutSheetKit.configuration.title
+      return
+    }
+    guard !webView.isLoading, ["", "collections", "products", "pages"].contains(route) else { return }
+    if sawPasswordPage && !resumed {
+      resumed = true
+      // Reuse Shopify's exact cart URL so it can read the password session cookie.
+      webView.load(URLRequest(url: checkoutURL))
+    } else {
+      onStorefront()
+    }
   }
 }

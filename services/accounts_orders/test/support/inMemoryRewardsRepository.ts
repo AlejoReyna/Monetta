@@ -35,6 +35,63 @@ export class InMemoryRewardsRepository implements RewardsRepository {
   async ensureAccount(): Promise<void> {}
   async getPolicy(): Promise<ProgramPolicy> { return this.policy; }
 
+  async countCompletedPurchases(accountId: string): Promise<number> {
+    const refs = new Set<string>();
+    for (const l of this.lots) {
+      if (
+        l.accountId === accountId &&
+        l.sourceKind === 'order_earn' &&
+        (l.state === 'available' || l.state === 'used' || l.state === 'expired')
+      ) {
+        refs.add(l.sourceRef);
+      }
+    }
+    return refs.size;
+  }
+
+  async grantTierBonus(args: {
+    accountId: string;
+    tierKey: 'PRO' | 'VIP' | 'ÉLITE';
+    amountCents: number;
+    ruleVersion: number;
+    eventRef: string;
+    occurredAt?: Date | null;
+    expiryMonths: number;
+  }): Promise<{ granted: boolean }> {
+    if (args.amountCents <= 0) return { granted: false };
+    const sourceRef = `tier_bonus:${args.tierKey}`;
+    const dup = this.lots.find((l) =>
+      l.accountId === args.accountId && l.sourceKind === 'adjustment' && l.sourceRef === sourceRef);
+    if (dup) return { granted: false };
+    const releasedAt = args.occurredAt ?? this.now();
+    const expiresAt = expiryFromRelease(releasedAt, args.expiryMonths);
+    const lot: Lot = {
+      id: this.seq++,
+      accountId: args.accountId,
+      sourceKind: 'adjustment',
+      sourceRef,
+      ruleVersion: 1,
+      amountCents: args.amountCents,
+      remainingCents: args.amountCents,
+      reservedCents: 0,
+      state: 'available',
+      releasedAt,
+      expiresAt,
+    };
+    this.lots.push(lot);
+    this.pushMovement({
+      accountId: args.accountId,
+      type: 'bonus_released',
+      state: 'available',
+      amountCents: args.amountCents,
+      orderShopifyId: null,
+      reason: `Bono de nivel ${args.tierKey}`,
+      lotId: lot.id,
+      redemptionId: null,
+    });
+    return { granted: true };
+  }
+
   async balance(accountId: string, now: Date = this.now()): Promise<BalanceView> {
     let avail = 0; let pend = 0; let resv = 0;
     let next: { cents: number; at: Date } | null = null;
@@ -128,16 +185,17 @@ export class InMemoryRewardsRepository implements RewardsRepository {
 
   async releaseForDelivery(args: {
     orderShopifyId: string; eventRef: string; occurredAt?: Date | null;
-  }): Promise<{ releasedCents: number; lots: number }> {
+  }): Promise<{ releasedCents: number; lots: number; accountId: string | null }> {
     const key = `delivered:${args.orderShopifyId}:${args.eventRef}`;
-    if (this.deliveryEvents.has(key)) return { releasedCents: 0, lots: 0 };
+    if (this.deliveryEvents.has(key)) return { releasedCents: 0, lots: 0, accountId: null };
     this.deliveryEvents.add(key);
     const kinds = this.fulfillmentKinds.get(args.orderShopifyId) ?? [];
     kinds.push({ kind: 'delivered', ref: args.eventRef, at: args.occurredAt ?? this.now() });
     this.fulfillmentKinds.set(args.orderShopifyId, kinds);
-    let released = 0; let n = 0;
+    let released = 0; let n = 0; let accountId: string | null = null;
     for (const lot of this.lots) {
       if (lot.sourceKind !== 'order_earn' || lot.sourceRef !== args.orderShopifyId || lot.state !== 'pending') continue;
+      accountId = lot.accountId;
       const at = args.occurredAt ?? this.now();
       lot.state = 'available';
       lot.releasedAt = at;
@@ -152,7 +210,7 @@ export class InMemoryRewardsRepository implements RewardsRepository {
       released += lot.remainingCents;
       n += 1;
     }
-    return { releasedCents: released, lots: n };
+    return { releasedCents: released, lots: n, accountId };
   }
 
   async reverseEarn(args: {
@@ -268,6 +326,20 @@ export class InMemoryRewardsRepository implements RewardsRepository {
   async findRedemption(accountId: string, redemptionId: string): Promise<RedemptionRecord | null> {
     const r = this.redemptions.get(redemptionId);
     return r && r.accountId === accountId ? stripAlloc(r) : null;
+  }
+
+  async findRedemptionByDiscountCode(accountId: string, discountCode: string): Promise<RedemptionRecord | null> {
+    const target = discountCode.trim().toUpperCase();
+    if (target === '') return null;
+    const activeStates = new Set(['reserved', 'provisioning', 'applied', 'order_committed']);
+    const matches = [...this.redemptions.values()]
+      .filter((r) =>
+        r.accountId === accountId &&
+        r.shopifyDiscountCode != null &&
+        r.shopifyDiscountCode.toUpperCase() === target &&
+        activeStates.has(r.state))
+      .reverse();
+    return matches[0] ? stripAlloc(matches[0]) : null;
   }
 
   async markProvisioning(redemptionId: string, discountId: string, discountCode: string): Promise<void> {

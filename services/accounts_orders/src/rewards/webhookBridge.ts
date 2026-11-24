@@ -8,7 +8,7 @@ interface OrderLike {
   tags?: string;
   customer?: { id: number } | null;
   currency?: string | null;
-  discount_codes?: { code?: string }[];
+  discount_codes?: { code?: string; amount?: string | null }[];
   note_attributes?: { name: string; value: string }[];
   line_items?: {
     variant_id?: number | null; product_id?: number | null;
@@ -61,7 +61,11 @@ export async function bridgeOrderPaid(args: {
   const orderId = String(args.order.id);
   const customerId = args.order.customer ? String(args.order.customer.id) : null;
   const tags = parseTags(args.order.tags);
-  const codes = (args.order.discount_codes ?? []).map((d) => d.code ?? '').filter(Boolean);
+  const rawCodes = args.order.discount_codes ?? [];
+  const codes = rawCodes.map((d) => d.code ?? '').filter(Boolean);
+  const discountCodes = rawCodes
+    .filter((d): d is { code: string; amount?: string | null } => typeof d.code === 'string' && d.code.trim() !== '')
+    .map((d) => ({ code: d.code.trim(), amountCents: cents(d.amount) }));
   const notes: Record<string, string> = {};
   for (const a of args.order.note_attributes ?? []) notes[a.name] = a.value;
   const { isWholesale, signals } = detectWholesale({ tags, discountCodes: codes, noteAttributes: notes });
@@ -75,6 +79,7 @@ export async function bridgeOrderPaid(args: {
     isWholesale,
     signals,
     currency: args.order.currency ?? 'MXN',
+    discountCodes,
   });
 }
 

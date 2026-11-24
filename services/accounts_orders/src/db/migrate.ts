@@ -2,14 +2,14 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getPool, closePool } from './pool.js';
+import { getDirectPool, closePool } from './pool.js';
 import { logger } from '../logger.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = join(__dirname, 'migrations');
 
 export async function runMigrations(): Promise<string[]> {
-  const pool = getPool();
+  const pool = getDirectPool();
   await pool.query(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       filename TEXT PRIMARY KEY,

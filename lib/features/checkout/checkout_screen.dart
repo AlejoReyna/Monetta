@@ -13,11 +13,11 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/account_controller.dart';
 import '../../app/cart_controller.dart';
+import '../../app/catalog_store.dart';
 import '../../app/storefront_layout.dart';
 import '../../data/customer_auth/customer_auth_error.dart';
 import '../../platform/system_layout_context.dart';
@@ -40,6 +40,7 @@ import '../../data/shopify/cart/cart_repository.dart';
 import '../../data/shopify/cart/cart_session_store.dart';
 import '../../data/shopify/cart/checkout_launcher.dart';
 import '../../domain/bag_line.dart';
+import '../../domain/cart.dart';
 import '../../main.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
@@ -94,10 +95,22 @@ void openCheckoutOrders(BuildContext context) {
   unawaited(openOrders(context, controller: account));
 }
 
-/// Starts checkout for the live bag, including the account and payment guards.
+/// Starts checkout directly with Shopify for the live bag, preserving account,
+/// double-charge guards, and post-return verification without an intermediate
+/// "Todo listo" screen.
 Future<void> openCheckout(
   BuildContext context, {
   SecureCheckoutLauncher? launchSecureCheckout,
+  ExternalCheckoutFallback? openExternalCheckout,
+  CheckoutOrderLookup? orderLookup,
+  CheckoutAttemptIdentity? attemptIdentity,
+  Duration orderLookupInterval = kCheckoutOrderLookupInterval,
+  Duration orderLookupTimeout = kCheckoutOrderLookupTimeout,
+  CheckoutOrderDelay? orderLookupDelay,
+  Future<void> Function(BuildContext context, CheckoutOrderMatch match)?
+      onOrderFound,
+  bool correlationAvailable = kCheckoutTokenCorrelationAvailable,
+  Future<bool> Function(Uri uri)? openUri,
 }) async {
   final store = StoreScope.of(context);
   final guard = ReviewingCheckoutScope.maybeOf(context);
@@ -121,7 +134,7 @@ Future<void> openCheckout(
   final accountController = AccountScope.maybeOf(context);
   final hasProductionLauncher =
       controller != null && cart != null && checkout != null;
-  // F05: no capturar contacto/entrega cuando el checkout no puede cerrar.
+  // F05: no iniciar checkout cuando la configuración no puede abrir el pago.
   if (launchSecureCheckout == null && !hasProductionLauncher) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -178,20 +191,464 @@ Future<void> openCheckout(
             };
   final launcher = launchSecureCheckout ?? productionLauncher;
   if (launcher == null) return;
-  // With two sides, checkout spans both: form left, summary right.
-  await DuoWorkspace.taskNavigatorFor(context).push(
-    monettaFadeRoute(
-      StoreScope(
-        notifier: store,
-        child: CheckoutFlowScreen(
-          launchSecureCheckout: launcher,
-          // El coordinador decide al invocar si hay URL fresca; no se
-          // congela estado antes de la reconciliación final.
-          openExternalCheckout: checkout?.openExternalFallback,
-        ),
+
+  final email = accountController?.account?.email?.trim() ?? '';
+  final externalFallback =
+      openExternalCheckout ?? checkout?.openExternalFallback;
+  final resolvedLookup = orderLookup ??
+      (accountController != null && accountController.isSignedIn
+          ? AccountCheckoutOrderLookup(accountController)
+          : null);
+  CheckoutAttemptIdentity currentAttempt() {
+    final cartSnapshot = controller?.snapshot?.cart;
+    return attemptIdentity ??
+        checkoutAttemptFromCart(
+          cartId: cartSnapshot?.id,
+          checkoutUrl: cartSnapshot?.checkoutUrl,
+        );
+  }
+
+  NotificationScope.maybeOf(context)?.recordPushOutcome('checkout_started');
+  final result = await launcher(
+    CheckoutDraft(
+      lines: List<BagLine>.of(store.bagLines),
+      email: email,
+      phone: '',
+    ),
+  );
+  if (!context.mounted) return;
+
+  switch (result) {
+    case CheckoutCompleted():
+      ReviewingCheckoutScope.maybeOf(context)?.clear();
+      await _showCompletedOrderConfirmation(context, email: email);
+    case CheckoutCancelled():
+    case CheckoutFailed():
+      final kind = classifyCheckoutResult(result);
+      final initialPhase = switch (kind) {
+        CheckoutReturnKind.completed => CheckoutReturnPhase.paymentNotCompleted,
+        CheckoutReturnKind.sheetDidNotOpen =>
+          CheckoutReturnPhase.sheetDidNotOpen,
+        CheckoutReturnKind.paymentNotConfirmed => resolvedLookup == null
+            ? CheckoutReturnPhase.reviewing
+            : CheckoutReturnPhase.confirming,
+      };
+      if (initialPhase == CheckoutReturnPhase.reviewing) {
+        ReviewingCheckoutScope.maybeOf(context)?.markActive();
+      }
+      await _showCheckoutReturnSheet(
+        context,
+        store: store,
+        initialPhase: initialPhase,
+        initialFailure: result is CheckoutFailed ? result : null,
+        email: email,
+        launcher: launcher,
+        externalFallback: externalFallback,
+        lookup: resolvedLookup,
+        currentAttempt: currentAttempt,
+        orderLookupInterval: orderLookupInterval,
+        orderLookupTimeout: orderLookupTimeout,
+        orderLookupDelay: orderLookupDelay,
+        correlationAvailable: correlationAvailable,
+        onOrderFound: onOrderFound,
+        openUri: openUri,
+      );
+  }
+}
+
+void _showBrowserFallbackSnackBar(
+  BuildContext context,
+  CheckoutFailed failure,
+  ExternalCheckoutFallback? fallback,
+) {
+  if (!failure.allowExternalBrowser || fallback == null) return;
+  ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+    SnackBar(
+      content: Text(
+        '${failure.userMessage} Abrir el navegador no confirma el pago; '
+        'revisa Mis pedidos si terminaste ahí.',
+      ),
+      action: SnackBarAction(
+        label: 'ABRIR NAVEGADOR',
+        onPressed: () => unawaited(fallback()),
       ),
     ),
   );
+}
+
+Future<void> _showCompletedOrderConfirmation(
+  BuildContext context, {
+  required String email,
+}) async {
+  // Confirmación solo con evidencia del result. CheckoutCompleted no porta
+  // identidad de pedido y la sincronización de Mis pedidos puede aún no incluir
+  // el pedido nuevo: se muestra sin número hasta correlacionar por identidad.
+  final navigator = Navigator.of(context);
+  await showOrderConfirmation(
+    context,
+    orderLabel: null,
+    email: email.isEmpty ? null : email,
+    onViewOrder: () {
+      navigator.pop();
+      if (context.mounted) openCheckoutOrders(context);
+    },
+  );
+}
+
+Future<void> _openMatchedAccountOrder(
+  BuildContext context,
+  CheckoutOrderMatch match, {
+  Future<void> Function(BuildContext context, CheckoutOrderMatch match)?
+      onOrderFound,
+  bool replaceRoute = false,
+}) async {
+  if (onOrderFound != null) {
+    await onOrderFound(context, match);
+    return;
+  }
+  if (!context.mounted) return;
+  final account = AccountScope.maybeOf(context);
+  if (account != null) await account.loadOrders();
+  if (!context.mounted) return;
+  OrderSummary? summary;
+  for (final order in account?.orders ?? const <OrderSummary>[]) {
+    if (order.id == match.orderId ||
+        (order.shopifyOrderId != null &&
+            order.shopifyOrderId == match.orderId)) {
+      summary = order;
+      break;
+    }
+  }
+  if (summary == null || !context.mounted) return;
+  final matched = summary;
+  final route = MaterialPageRoute<void>(
+    builder: (_) => OrderDetailScreen(
+      order: matched,
+      rewardsController: account,
+    ),
+  );
+  if (replaceRoute) {
+    await Navigator.of(context).pushReplacement(route);
+  } else {
+    await Navigator.of(context).push(route);
+  }
+}
+
+Future<void> _openConciergeWhatsAppUri(
+  BuildContext context, {
+  Future<bool> Function(Uri uri)? openUri,
+}) async {
+  final uri = conciergeWhatsAppUri();
+  final open = openUri ??
+      ((target) => launchUrl(target, mode: LaunchMode.externalApplication));
+  final ok = await open(uri);
+  if (!ok && context.mounted) {
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      const SnackBar(content: Text('No se pudo abrir el enlace.')),
+    );
+  }
+}
+
+Future<void> _showCheckoutReturnSheet(
+  BuildContext context, {
+  required CatalogStore store,
+  required CheckoutReturnPhase initialPhase,
+  required CheckoutFailed? initialFailure,
+  required String email,
+  required SecureCheckoutLauncher launcher,
+  required ExternalCheckoutFallback? externalFallback,
+  required CheckoutOrderLookup? lookup,
+  required CheckoutAttemptIdentity Function() currentAttempt,
+  required Duration orderLookupInterval,
+  required Duration orderLookupTimeout,
+  required CheckoutOrderDelay? orderLookupDelay,
+  required bool correlationAvailable,
+  required Future<void> Function(
+    BuildContext context,
+    CheckoutOrderMatch match,
+  )? onOrderFound,
+  required Future<bool> Function(Uri uri)? openUri,
+}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    useSafeArea: true,
+    isScrollControlled: true,
+    builder: (sheetContext) => StoreScope(
+      notifier: store,
+      child: _CheckoutReturnSheet(
+        checkoutContext: context,
+        initialPhase: initialPhase,
+        initialFailure: initialFailure,
+        email: email,
+        launcher: launcher,
+        externalFallback: externalFallback,
+        lookup: lookup,
+        currentAttempt: currentAttempt,
+        orderLookupInterval: orderLookupInterval,
+        orderLookupTimeout: orderLookupTimeout,
+        orderLookupDelay: orderLookupDelay,
+        correlationAvailable: correlationAvailable,
+        onOrderFound: onOrderFound,
+        openUri: openUri,
+      ),
+    ),
+  );
+}
+
+class _CheckoutReturnSheet extends StatefulWidget {
+  const _CheckoutReturnSheet({
+    required this.checkoutContext,
+    required this.initialPhase,
+    required this.initialFailure,
+    required this.email,
+    required this.launcher,
+    required this.externalFallback,
+    required this.lookup,
+    required this.currentAttempt,
+    required this.orderLookupInterval,
+    required this.orderLookupTimeout,
+    required this.orderLookupDelay,
+    required this.correlationAvailable,
+    required this.onOrderFound,
+    required this.openUri,
+  });
+
+  final BuildContext checkoutContext;
+  final CheckoutReturnPhase initialPhase;
+  final CheckoutFailed? initialFailure;
+  final String email;
+  final SecureCheckoutLauncher launcher;
+  final ExternalCheckoutFallback? externalFallback;
+  final CheckoutOrderLookup? lookup;
+  final CheckoutAttemptIdentity Function() currentAttempt;
+  final Duration orderLookupInterval;
+  final Duration orderLookupTimeout;
+  final CheckoutOrderDelay? orderLookupDelay;
+  final bool correlationAvailable;
+  final Future<void> Function(BuildContext context, CheckoutOrderMatch match)?
+      onOrderFound;
+  final Future<bool> Function(Uri uri)? openUri;
+
+  @override
+  State<_CheckoutReturnSheet> createState() => _CheckoutReturnSheetState();
+}
+
+class _CheckoutReturnSheetState extends State<_CheckoutReturnSheet> {
+  late CheckoutReturnPhase _phase = widget.initialPhase;
+  late CheckoutFailed? _failure = widget.initialFailure;
+  String? _browserError;
+  bool _openingSheet = false;
+  int _generation = 0;
+  Timer? _pollTimer;
+  Completer<void>? _pollDelay;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_phase == CheckoutReturnPhase.confirming && widget.lookup != null) {
+      unawaited(_runReturnLookup(widget.lookup!, ++_generation));
+    }
+  }
+
+  @override
+  void dispose() {
+    _generation += 1;
+    _pollTimer?.cancel();
+    final completer = _pollDelay;
+    if (completer != null && !completer.isCompleted) completer.complete();
+    super.dispose();
+  }
+
+  Future<void> _delayPoll(Duration duration) {
+    final injected = widget.orderLookupDelay;
+    if (injected != null) return injected(duration);
+    final completer = Completer<void>();
+    _pollDelay = completer;
+    _pollTimer?.cancel();
+    _pollTimer = Timer(duration, () {
+      if (!completer.isCompleted) completer.complete();
+    });
+    return completer.future;
+  }
+
+  Future<void> _runReturnLookup(
+    CheckoutOrderLookup lookup,
+    int generation,
+  ) async {
+    final decision = await resolvePaymentReturn(
+      lookup: lookup,
+      attempt: widget.currentAttempt(),
+      interval: widget.orderLookupInterval,
+      timeout: widget.orderLookupTimeout,
+      correlationAvailable: widget.correlationAvailable,
+      delay: _delayPoll,
+      isCancelled: () => !mounted || generation != _generation,
+    );
+    if (!mounted || generation != _generation) return;
+    if (decision is CheckoutOrderFound) {
+      ReviewingCheckoutScope.maybeOf(context)?.clear();
+      final checkoutContext = widget.checkoutContext;
+      Navigator.pop(context);
+      if (checkoutContext.mounted) {
+        await _openMatchedAccountOrder(
+          checkoutContext,
+          decision.match,
+          onOrderFound: widget.onOrderFound,
+        );
+      }
+      return;
+    }
+    if (decision is! CheckoutOrderNotFound) {
+      ReviewingCheckoutScope.maybeOf(context)?.markActive();
+    }
+    setState(() {
+      _phase = decision is CheckoutOrderNotFound
+          ? CheckoutReturnPhase.paymentNotCompleted
+          : CheckoutReturnPhase.reviewing;
+    });
+  }
+
+  Future<void> _retry() async {
+    if (_openingSheet) return;
+    final store = StoreScope.of(context);
+    final generation = ++_generation;
+    setState(() {
+      _openingSheet = true;
+      _failure = null;
+      _browserError = null;
+    });
+    try {
+      final result = await widget.launcher(
+        CheckoutDraft(
+          lines: List<BagLine>.of(store.bagLines),
+          email: widget.email,
+          phone: '',
+        ),
+      );
+      if (!mounted || generation != _generation) return;
+      setState(() => _openingSheet = false);
+      switch (result) {
+        case CheckoutCompleted():
+          ReviewingCheckoutScope.maybeOf(context)?.clear();
+          final checkoutContext = widget.checkoutContext;
+          Navigator.pop(context);
+          if (checkoutContext.mounted) {
+            await _showCompletedOrderConfirmation(
+              checkoutContext,
+              email: widget.email,
+            );
+          }
+        case CheckoutCancelled():
+        case CheckoutFailed():
+          _failure = result is CheckoutFailed ? result : null;
+          final kind = classifyCheckoutResult(result);
+          if (kind == CheckoutReturnKind.sheetDidNotOpen) {
+            setState(() {
+              _phase = CheckoutReturnPhase.sheetDidNotOpen;
+            });
+            return;
+          }
+          final lookup = widget.lookup;
+          if (lookup == null) {
+            ReviewingCheckoutScope.maybeOf(context)?.markActive();
+            setState(() => _phase = CheckoutReturnPhase.reviewing);
+            return;
+          }
+          setState(() => _phase = CheckoutReturnPhase.confirming);
+          await _runReturnLookup(lookup, generation);
+      }
+    } finally {
+      if (mounted && generation == _generation) {
+        setState(() => _openingSheet = false);
+      }
+    }
+  }
+
+  Future<void> _openBrowser(ExternalCheckoutFallback fallback) async {
+    if (_openingSheet) return;
+    final guard = ReviewingCheckoutScope.maybeOf(widget.checkoutContext);
+    setState(() {
+      _openingSheet = true;
+      _browserError = null;
+    });
+    var opened = false;
+    try {
+      opened = await fallback();
+    } on Exception {
+      // Keep the retry and browser actions available if the browser fails.
+    }
+    if (opened && widget.checkoutContext.mounted) guard?.markActive();
+    if (!mounted) return;
+    setState(() {
+      _openingSheet = false;
+      if (opened) {
+        _phase = CheckoutReturnPhase.reviewing;
+        _failure = null;
+      } else {
+        _browserError = 'No se pudo abrir el navegador.';
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final fallback = _phase == CheckoutReturnPhase.sheetDidNotOpen &&
+            _failure?.allowExternalBrowser == true
+        ? widget.externalFallback
+        : null;
+    return Material(
+      color: palette.canvas,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          20,
+          16,
+          20,
+          24 + MediaQuery.paddingOf(context).bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                tooltip: 'Cerrar',
+                onPressed: _openingSheet ? null : () => Navigator.pop(context),
+                icon: Icon(Icons.close, color: palette.inkMuted),
+              ),
+            ),
+            CheckoutReturnBanner(
+              phase: _phase,
+              bodyOverride: _phase == CheckoutReturnPhase.sheetDidNotOpen
+                  ? _failure?.userMessage
+                  : null,
+              onRetry: _openingSheet ? null : () => unawaited(_retry()),
+              onViewOrders: () {
+                final checkoutContext = widget.checkoutContext;
+                Navigator.pop(context);
+                if (checkoutContext.mounted) {
+                  openCheckoutOrders(checkoutContext);
+                }
+              },
+              onWhatsApp: () => unawaited(
+                _openConciergeWhatsAppUri(context, openUri: widget.openUri),
+              ),
+            ),
+            if (fallback != null)
+              BoutiqueButton(
+                label: 'Abrir en navegador',
+                filled: false,
+                onPressed: _openingSheet
+                    ? null
+                    : () => unawaited(_openBrowser(fallback)),
+              ),
+            if (_browserError case final error?) Text(error),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 CartSessionScope _checkoutSessionScope(CartScope cart, String? accountId) =>
@@ -393,7 +850,7 @@ Future<void> showBagDrawer(
   if (ModalRoute.of(context)?.settings.name == DuoWorkspace.bagRoute) return;
   final origin = FocusManager.instance.primaryFocus;
   final store = StoreScope.of(context);
-  await showGeneralDialog<void>(
+  final proceed = await showGeneralDialog<bool>(
     context: context,
     anchorPoint: presentationAnchor(context),
     routeSettings: const RouteSettings(name: DuoWorkspace.bagRoute),
@@ -428,6 +885,12 @@ Future<void> showBagDrawer(
   );
   if (origin?.context?.mounted == true && origin!.canRequestFocus) {
     origin.requestFocus();
+  }
+  if (proceed == true && context.mounted) {
+    await openCheckout(
+      context,
+      launchSecureCheckout: launchSecureCheckout,
+    );
   }
 }
 
@@ -501,6 +964,27 @@ class BagScreen extends StatefulWidget {
 class _BagScreenState extends State<BagScreen> {
   CartSessionScope? _requestedScope;
   String? _requestedIntentShape;
+  bool _openingCheckout = false;
+
+  Future<void> _continueToCheckout() async {
+    if (_openingCheckout) return;
+    final navigator = Navigator.of(context);
+    if (widget.drawerTitle != null &&
+        ModalRoute.of(context)?.settings.name == DuoWorkspace.bagRoute &&
+        navigator.canPop()) {
+      navigator.pop(true);
+      return;
+    }
+    setState(() => _openingCheckout = true);
+    try {
+      await openCheckout(
+        context,
+        launchSecureCheckout: widget.launchSecureCheckout,
+      );
+    } finally {
+      if (mounted) setState(() => _openingCheckout = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -542,7 +1026,7 @@ class _BagScreenState extends State<BagScreen> {
               ),
             ),
       body: SafeArea(
-        bottom: true,
+        bottom: drawerTitle == null && !widget.embedded,
         child: Column(
           children: [
             if (drawerTitle != null)
@@ -568,10 +1052,16 @@ class _BagScreenState extends State<BagScreen> {
             Expanded(
               child: SystemUsableSurface(
                 child: lines.isEmpty
-                    ? _EmptyBag(embedded: widget.embedded)
+                    ? _EmptyBag(
+                        embedded: widget.embedded,
+                        onContinueShopping: drawerTitle != null
+                            ? () => Navigator.of(context).pop()
+                            : null,
+                      )
                     : _BagContents(
                         lines: lines,
-                        launchSecureCheckout: widget.launchSecureCheckout,
+                        onContinueToCheckout:
+                            _openingCheckout ? null : _continueToCheckout,
                         cartController: cartScope?.notifier,
                         cartScope: sessionScope,
                         localIntent: localIntent,
@@ -580,14 +1070,6 @@ class _BagScreenState extends State<BagScreen> {
                       ),
               ),
             ),
-            if (drawerTitle != null)
-              SafeArea(
-                top: false,
-                child: TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Seguir comprando'),
-                ),
-              ),
           ],
         ),
       ),
@@ -646,7 +1128,7 @@ class _BagScreenState extends State<BagScreen> {
 class _BagContents extends StatelessWidget {
   const _BagContents({
     required this.lines,
-    required this.launchSecureCheckout,
+    required this.onContinueToCheckout,
     required this.cartController,
     required this.cartScope,
     required this.localIntent,
@@ -655,7 +1137,7 @@ class _BagContents extends StatelessWidget {
   });
 
   final List<BagLine> lines;
-  final SecureCheckoutLauncher? launchSecureCheckout;
+  final VoidCallback? onContinueToCheckout;
   final CartController? cartController;
   final CartSessionScope? cartScope;
   final List<LocalCartIntent> localIntent;
@@ -669,7 +1151,6 @@ class _BagContents extends StatelessWidget {
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
     final count = store.bagQuantity;
-    final subtotal = store.bagSubtotal;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -742,25 +1223,36 @@ class _BagContents extends StatelessWidget {
         final scope = cartScope;
         final hasRemoteCart = controller?.scopedSnapshot?.scope == scope &&
             controller?.snapshot?.cart != null;
-        void continueToCheckout() => unawaited(
-              openCheckout(
-                context,
-                launchSecureCheckout: launchSecureCheckout,
-              ),
-            );
 
-        final summary = controller != null && scope != null && hasRemoteCart
-            ? ShopifyCartSummary(
-                controller: controller,
-                scope: scope,
-                localIntent: localIntent,
-                onContinue: inDrawer ? null : continueToCheckout,
-              )
-            : _OrderSummary(
-                subtotal: subtotal,
-                ctaLabel: 'Continuar al checkout',
-                onContinue: inDrawer ? null : continueToCheckout,
-              );
+        final payLabel = onContinueToCheckout == null
+            ? 'Abriendo pago seguro…'
+            : (inDrawer ? 'Continuar al pago' : 'Continuar al checkout');
+        final isLight = Theme.of(context).brightness == Brightness.light;
+        final boutiqueCta = BoutiqueButton(
+          key: const ValueKey('bag-continue-button'),
+          label: payLabel,
+          filled: !isLight,
+          onPressed: onContinueToCheckout,
+        );
+        final payButton = SizedBox(
+          width: double.infinity,
+          child: isLight
+              ? GuideGlassSurface(
+                  halo: true,
+                  radius: MonettaTokens.radiusPill,
+                  child: boutiqueCta,
+                )
+              : boutiqueCta,
+        );
+
+        final Widget? summary =
+            controller != null && scope != null && hasRemoteCart
+                ? ShopifyCartSummary(
+                    controller: controller,
+                    scope: scope,
+                    localIntent: localIntent,
+                  )
+                : null;
 
         final bagIds = {for (final line in lines) line.product.id};
         final recommendations = embedded
@@ -776,8 +1268,6 @@ class _BagContents extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _CheckoutProgress(activeIndex: 0),
-                    const SizedBox(height: 8),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -794,12 +1284,17 @@ class _BagContents extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.only(top: 64),
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 const PurchasePolicyNotice(
                                   key: ValueKey('purchase-policy-notice'),
                                 ),
                                 const SizedBox(height: 16),
-                                summary,
+                                payButton,
+                                if (summary != null) ...[
+                                  const SizedBox(height: 16),
+                                  summary,
+                                ],
                               ],
                             ),
                           ),
@@ -815,27 +1310,37 @@ class _BagContents extends StatelessWidget {
           );
         }
 
-        return ListView(
-          padding: const EdgeInsets.only(bottom: 32),
-          children: [
-            if (!inDrawer) const _CheckoutProgress(activeIndex: 0),
-            if (!inDrawer) heading,
-            lineTiles,
-            incentive,
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: summary,
-            ),
-            recommendations,
-            if (inDrawer)
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: 32 + (inDrawer ? MediaQuery.paddingOf(context).bottom : 0),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              heading,
+              lineTiles,
+              incentive,
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                child: BoutiqueButton(
-                  label: 'Continuar al pago',
-                  onPressed: continueToCheckout,
-                ),
+                child: payButton,
               ),
-          ],
+              if (summary != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  child: summary,
+                ),
+              recommendations,
+              if (inDrawer)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  child: Center(
+                    child: _ContinueShoppingButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         );
       },
     );
@@ -895,11 +1400,8 @@ class CheckoutFlowScreen extends StatefulWidget {
 }
 
 class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
   final _email = TextEditingController();
-  final _phone = TextEditingController();
-  bool _reviewing = false;
   bool _openingSheet = false;
   bool _checkingOrder = false;
   bool _orderFound = false;
@@ -931,7 +1433,6 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
     _finishPollDelay();
     _scrollController.dispose();
     _email.dispose();
-    _phone.dispose();
     super.dispose();
   }
 
@@ -955,17 +1456,6 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
     if (completer != null && !completer.isCompleted) completer.complete();
   }
 
-  void _review() {
-    FocusScope.of(context).unfocus();
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    setState(() => _reviewing = true);
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 260),
-      curve: Curves.easeOut,
-    );
-  }
-
   CheckoutOrderLookup? _lookup() {
     final injected = widget.orderLookup;
     if (injected != null) return injected;
@@ -984,35 +1474,15 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
     );
   }
 
-  void _showBrowserFallback(CheckoutFailed failure) {
-    if (!failure.allowExternalBrowser) return;
-    final fallback = widget.openExternalCheckout;
-    if (fallback == null) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${failure.userMessage} Abrir el navegador no confirma el pago; '
-          'revisa Mis pedidos si terminaste ahí.',
-        ),
-        action: SnackBarAction(
-          label: 'ABRIR NAVEGADOR',
-          onPressed: () => unawaited(fallback()),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _openConciergeWhatsApp() async {
-    final uri = conciergeWhatsAppUri();
-    final open = widget.openUri ??
-        ((target) => launchUrl(target, mode: LaunchMode.externalApplication));
-    final ok = await open(uri);
-    if (!ok && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo abrir el enlace.')),
+  void _showBrowserFallback(CheckoutFailed failure) =>
+      _showBrowserFallbackSnackBar(
+        context,
+        failure,
+        widget.openExternalCheckout,
       );
-    }
-  }
+
+  Future<void> _openConciergeWhatsApp() =>
+      _openConciergeWhatsAppUri(context, openUri: widget.openUri);
 
   void _viewOrders() => openCheckoutOrders(context);
 
@@ -1024,36 +1494,13 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
     ReviewingCheckoutScope.maybeOf(context)?.clear();
   }
 
-  Future<void> _openMatchedOrder(CheckoutOrderMatch match) async {
-    final handler = widget.onOrderFound;
-    if (handler != null) {
-      await handler(context, match);
-      return;
-    }
-    if (!mounted) return;
-    final account = AccountScope.maybeOf(context);
-    if (account != null) await account.loadOrders();
-    if (!mounted) return;
-    OrderSummary? summary;
-    for (final order in account?.orders ?? const <OrderSummary>[]) {
-      if (order.id == match.orderId ||
-          (order.shopifyOrderId != null &&
-              order.shopifyOrderId == match.orderId)) {
-        summary = order;
-        break;
-      }
-    }
-    if (summary == null || !mounted) return;
-    final matched = summary;
-    await Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => OrderDetailScreen(
-          order: matched,
-          rewardsController: account,
-        ),
-      ),
-    );
-  }
+  Future<void> _openMatchedOrder(CheckoutOrderMatch match) =>
+      _openMatchedAccountOrder(
+        context,
+        match,
+        onOrderFound: widget.onOrderFound,
+        replaceRoute: true,
+      );
 
   Future<void> _pay() async {
     if (_retryBlocked) return;
@@ -1073,7 +1520,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
           CheckoutDraft(
             lines: lines,
             email: email,
-            phone: _phone.text.trim(),
+            phone: '',
           ),
         );
         if (!mounted || generation != _returnGeneration) return;
@@ -1082,40 +1529,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
           case CheckoutCompleted():
             _deactivateReviewing();
             setState(() => _returnPhase = null);
-            // Confirmación solo con evidencia del result. CheckoutCompleted no
-            // porta identidad de pedido y la sincronización de Mis pedidos
-            // puede aún no incluir el pedido nuevo: tomar el primer
-            // displayNumber atribuiría a la compra un pedido anterior. Se
-            // muestra el estado honesto sin número hasta correlacionar por
-            // identidad autoritativa.
-            final accountController = AccountScope.maybeOf(context);
-            final navigator = Navigator.of(context);
-            final controllerForOrders = accountController;
-            final signedIn = controllerForOrders?.isSignedIn == true;
-            if (!mounted) return;
-            await showOrderConfirmation(
-              context,
-              orderLabel: null,
-              email: email.isEmpty ? null : email,
-              onViewOrder: () {
-                navigator.popUntil((route) => route.isFirst);
-                final controller = controllerForOrders;
-                if (controller != null && signedIn) {
-                  unawaited(
-                    openAccount(navigator.context, controller: controller),
-                  );
-                } else {
-                  ScaffoldMessenger.maybeOf(navigator.context)?.showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Inicia sesión para ver Mis pedidos. Te enviamos la '
-                        'confirmación a tu correo.',
-                      ),
-                    ),
-                  );
-                }
-              },
-            );
+            await _showCompletedOrderConfirmation(context, email: email);
           case CheckoutCancelled():
           case CheckoutFailed():
             if (result is CheckoutFailed) _showBrowserFallback(result);
@@ -1211,9 +1625,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
       appBar: _BoutiqueBar(
         leading: IconButton(
           tooltip: 'Volver',
-          onPressed: _reviewing
-              ? () => setState(() => _reviewing = false)
-              : () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back, size: 20),
         ),
         title: 'Checkout',
@@ -1222,36 +1634,26 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
         bottom: true,
         child: ViewRelativeLayout(
           builder: (context, box, origin) {
-            final form = _reviewing
-                ? _ReviewPanel(
-                    email: _email.text,
-                    phone: _phone.text,
-                    openingSheet: _openingSheet,
-                    returnPhase: _returnPhase,
-                    returnDetail: _returnDetail,
-                    payEnabled: !_retryBlocked,
-                    showPayButton: !_orderFound,
-                    paymentMethods: widget.availablePaymentMethods,
-                    selectedPayment: _selectedPayment,
-                    onSelectPayment: (value) =>
-                        setState(() => _selectedPayment = value),
-                    onEdit: () => setState(() => _reviewing = false),
-                    onPay: () => unawaited(_pay()),
-                    onViewOrders: _viewOrders,
-                    onWhatsApp: () => unawaited(_openConciergeWhatsApp()),
-                  )
-                : _ContactForm(
-                    formKey: _formKey,
-                    email: _email,
-                    phone: _phone,
-                    onContinue: _review,
-                  );
+            final form = _ReviewPanel(
+              email: _email.text,
+              openingSheet: _openingSheet,
+              returnPhase: _returnPhase,
+              returnDetail: _returnDetail,
+              payEnabled: !_retryBlocked,
+              showPayButton: !_orderFound,
+              paymentMethods: widget.availablePaymentMethods,
+              selectedPayment: _selectedPayment,
+              onSelectPayment: (value) =>
+                  setState(() => _selectedPayment = value),
+              onPay: () => unawaited(_pay()),
+              onViewOrders: _viewOrders,
+              onWhatsApp: () => unawaited(_openConciergeWhatsApp()),
+            );
 
             final summary = _CheckoutSummary(
               lines: store.bagLines,
               subtotal: store.bagSubtotal,
             );
-            final progress = _CheckoutProgress(activeIndex: _reviewing ? 2 : 1);
 
             // A two-sided window: the form on the left of the crease and the
             // order summary held on the right, each scrolling on its own.
@@ -1266,14 +1668,9 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                       key: const Key('checkout-duo-form'),
                       controller: _scrollController,
                       padding: const EdgeInsets.only(bottom: 40),
-                      child: Column(
-                        children: [
-                          progress,
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                            child: form,
-                          ),
-                        ],
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+                        child: form,
                       ),
                     ),
                   ),
@@ -1300,45 +1697,40 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             return SingleChildScrollView(
               controller: _scrollController,
               padding: const EdgeInsets.only(bottom: 40),
-              child: Column(
-                children: [
-                  progress,
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final wide = constraints.maxWidth >= 900;
-                      if (!wide) {
-                        return Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                              child: form,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                              child: summary,
-                            ),
-                          ],
-                        );
-                      }
-                      return Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1120),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(flex: 6, child: form),
-                                const SizedBox(width: 56),
-                                Expanded(flex: 4, child: summary),
-                              ],
-                            ),
-                          ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide = constraints.maxWidth >= 900;
+                  if (!wide) {
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+                          child: form,
                         ),
-                      );
-                    },
-                  ),
-                ],
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                          child: summary,
+                        ),
+                      ],
+                    );
+                  }
+                  return Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1120),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(flex: 6, child: form),
+                            const SizedBox(width: 56),
+                            Expanded(flex: 4, child: summary),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             );
           },
@@ -1412,128 +1804,6 @@ class _BoutiqueBar extends StatelessWidget implements PreferredSizeWidget {
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(.5),
         child: Container(height: .5, color: palette.hairline),
-      ),
-    );
-  }
-}
-
-class _CheckoutProgress extends StatelessWidget {
-  const _CheckoutProgress({required this.activeIndex});
-
-  final int activeIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    const labels = ['Bolsa', 'Entrega', 'Pago', 'Confirmación'];
-    if (StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))) {
-      return Semantics(
-        value: labels.join(', '),
-        child: Container(
-          key: const ValueKey('checkout-progress-enlarged'),
-          width: double.infinity,
-          color: palette.surfaceDeep,
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            'Paso ${activeIndex + 1} de ${labels.length} · ${labels[activeIndex]}',
-            style: boutiqueText(size: 12, weight: FontWeight.w600),
-          ),
-        ),
-      );
-    }
-    return Container(
-      color: palette.surfaceDeep,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
-          child: Row(
-            children: [
-              for (var index = 0; index < labels.length; index++) ...[
-                if (index > 0)
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      color:
-                          index <= activeIndex ? palette.ink : palette.hairline,
-                    ),
-                  ),
-                _ProgressStep(
-                  label: labels[index],
-                  number: index + 1,
-                  active: index == activeIndex,
-                  complete: index < activeIndex,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProgressStep extends StatelessWidget {
-  const _ProgressStep({
-    required this.label,
-    required this.number,
-    required this.active,
-    required this.complete,
-  });
-
-  final String label;
-  final int number;
-  final bool active;
-  final bool complete;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Semantics(
-      label:
-          '$label, ${active ? 'paso actual' : complete ? 'completado' : 'pendiente'}',
-      child: Column(
-        children: [
-          Container(
-            width: 26,
-            height: 26,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: active || complete ? palette.ink : palette.surface,
-              border: Border.all(
-                color: active || complete ? palette.ink : palette.hairline,
-              ),
-            ),
-            child: complete
-                ? Icon(Icons.check, size: 13, color: palette.canvas)
-                : Text(
-                    '$number',
-                    style: boutiqueText(
-                      size: 11,
-                      color: active ? palette.canvas : palette.inkMuted,
-                      weight: FontWeight.w600,
-                      height: 1,
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 5),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 88),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                label.toUpperCase(),
-                maxLines: 1,
-                softWrap: false,
-                style: boutiqueEyebrow(
-                  size: 8,
-                  color: active || complete ? palette.ink : palette.inkMuted,
-                ).copyWith(letterSpacing: 1.0),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1846,7 +2116,8 @@ class _BagRecommendations extends StatelessWidget {
                           right: 4,
                           child: ProductQuickAddButton(
                             key: ValueKey(
-                                'bag-recommendation-add-${product.id}'),
+                              'bag-recommendation-add-${product.id}',
+                            ),
                             product: product,
                             productName: product.title,
                           ),
@@ -1863,76 +2134,24 @@ class _BagRecommendations extends StatelessWidget {
   }
 }
 
-class _OrderSummary extends StatelessWidget {
-  const _OrderSummary({
-    required this.subtotal,
-    required this.ctaLabel,
-    required this.onContinue,
-  });
+class _ContinueShoppingButton extends StatelessWidget {
+  const _ContinueShoppingButton({required this.onPressed});
 
-  final double subtotal;
-  final String ctaLabel;
-  final VoidCallback? onContinue;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    return Container(
-      key: const ValueKey('bag-order-summary'),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BoutiqueRadius.card,
-        border: Border.all(color: palette.hairline, width: .5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Resumen de compra',
-            style: clientGuideStyle(context, MonettaTokens.sectionTitle),
-          ),
-          const SizedBox(height: 18),
-          _SummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
-          const SizedBox(height: 10),
-          _SummaryRow(
-            label: 'Envío',
-            value: 'Se calcula en Shopify',
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Container(height: .5, color: palette.hairline),
-          ),
-          _SummaryRow(
-            label: 'Total estimado',
-            value: kMoney.format(subtotal),
-            prominent: true,
-          ),
-          if (onContinue != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              'Estimación local · totales finales en Shopify.',
-              style: boutiqueText(size: 11, color: palette.inkMuted),
-            ),
-            const SizedBox(height: 18),
-            BoutiqueButton(label: ctaLabel, onPressed: onContinue),
-            const SizedBox(height: 12),
-            Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 7,
-              runSpacing: 4,
-              children: [
-                Icon(Icons.lock_outline, size: 14, color: palette.inkMuted),
-                Text(
-                  'Pagos seguros con Shopify.',
-                  textAlign: TextAlign.center,
-                  style: boutiqueText(size: 11, color: palette.inkMuted),
-                ),
-              ],
-            ),
-          ],
-        ],
+    return TextButton(
+      style: TextButton.styleFrom(foregroundColor: palette.ink),
+      onPressed: onPressed,
+      child: Text(
+        'Seguir comprando',
+        style: boutiqueText(
+          size: 14,
+          weight: FontWeight.w500,
+          color: palette.ink,
+        ),
       ),
     );
   }
@@ -1985,187 +2204,6 @@ class _SummaryRow extends StatelessWidget {
   }
 }
 
-class _ContactForm extends StatelessWidget {
-  const _ContactForm({
-    required this.formKey,
-    required this.email,
-    required this.phone,
-    required this.onContinue,
-  });
-
-  final GlobalKey<FormState> formKey;
-  final TextEditingController email;
-  final TextEditingController phone;
-  final VoidCallback onContinue;
-
-  String? _required(String? value) =>
-      value == null || value.trim().isEmpty ? 'Completa este campo' : null;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Form(
-      key: formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('¿Cómo te contactamos?', style: boutiqueDisplay(28)),
-          const SizedBox(height: 8),
-          Text(
-            'La dirección y el envío se capturan en el checkout seguro de '
-            'Shopify para no pedirlos dos veces. Totales finales también '
-            'vienen de Shopify.',
-            style: boutiqueText(size: 13, color: palette.inkMuted),
-          ),
-          const SizedBox(height: 28),
-          Text(
-            'Contacto'.toUpperCase(),
-            style: boutiqueEyebrow(size: 10, color: palette.inkMuted),
-          ),
-          const SizedBox(height: 12),
-          _CheckoutField(
-            controller: email,
-            label: 'Correo electrónico',
-            keyboardType: TextInputType.emailAddress,
-            autofillHints: const [AutofillHints.email],
-            validator: (value) {
-              final required = _required(value);
-              if (required != null) return required;
-              return value!.contains('@') ? null : 'Ingresa un correo válido';
-            },
-          ),
-          const SizedBox(height: 12),
-          _CheckoutField(
-            controller: phone,
-            label: 'Teléfono',
-            keyboardType: TextInputType.phone,
-            autofillHints: const [AutofillHints.telephoneNumber],
-            validator: _required,
-          ),
-          const SizedBox(height: 24),
-          const _DeliveryOption(),
-          const SizedBox(height: 24),
-          BoutiqueButton(label: 'REVISAR PEDIDO', onPressed: onContinue),
-        ],
-      ),
-    );
-  }
-}
-
-class _CheckoutField extends StatelessWidget {
-  const _CheckoutField({
-    required this.controller,
-    required this.label,
-    required this.validator,
-    this.keyboardType,
-    this.autofillHints,
-  }) : inputFormatters = null;
-
-  final TextEditingController controller;
-  final String label;
-  final FormFieldValidator<String> validator;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final Iterable<String>? autofillHints;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      autofillHints: autofillHints,
-      style: boutiqueText(size: 14, color: palette.ink),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: boutiqueText(size: 13, color: palette.inkMuted),
-        floatingLabelStyle: boutiqueText(size: 11, color: palette.ink),
-        filled: true,
-        fillColor: palette.surfaceDeep,
-        contentPadding: const EdgeInsets.fromLTRB(15, 17, 15, 14),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BoutiqueRadius.control,
-          borderSide: BorderSide(color: palette.hairline, width: 0.5),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BoutiqueRadius.control,
-          borderSide: BorderSide(color: palette.ink, width: 1),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BoutiqueRadius.control,
-          borderSide: BorderSide(color: palette.sale, width: .8),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BoutiqueRadius.control,
-          borderSide: BorderSide(color: palette.sale, width: 1),
-        ),
-      ),
-    );
-  }
-}
-
-class _DeliveryOption extends StatelessWidget {
-  const _DeliveryOption();
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BoutiqueRadius.card,
-        border: Border.all(color: palette.ink, width: .8),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 16,
-            height: 16,
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: palette.ink),
-            ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: palette.ink,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Envío estándar',
-                  style: boutiqueText(
-                    size: 13,
-                    weight: FontWeight.w500,
-                    color: palette.ink,
-                  ),
-                ),
-                Text(
-                  '5 - 7 días hábiles',
-                  style: boutiqueText(size: 11, color: palette.inkMuted),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            'SE CALCULA EN SHOPIFY',
-            style: boutiqueEyebrow(size: 9, color: palette.ink),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// The first pay control stays up, disabled, while we confirm. Settled
 /// banners own their own actions, and banner 3 has no retry.
 bool _showsCheckoutPayButton(CheckoutReturnPhase? phase) {
@@ -2175,7 +2213,6 @@ bool _showsCheckoutPayButton(CheckoutReturnPhase? phase) {
 class _ReviewPanel extends StatelessWidget {
   const _ReviewPanel({
     required this.email,
-    required this.phone,
     required this.openingSheet,
     required this.returnPhase,
     this.returnDetail,
@@ -2184,14 +2221,12 @@ class _ReviewPanel extends StatelessWidget {
     required this.paymentMethods,
     required this.selectedPayment,
     required this.onSelectPayment,
-    required this.onEdit,
     required this.onPay,
     required this.onViewOrders,
     required this.onWhatsApp,
   });
 
   final String email;
-  final String phone;
   final bool openingSheet;
   final CheckoutReturnPhase? returnPhase;
   final String? returnDetail;
@@ -2200,7 +2235,6 @@ class _ReviewPanel extends StatelessWidget {
   final List<String> paymentMethods;
   final String? selectedPayment;
   final ValueChanged<String> onSelectPayment;
-  final VoidCallback onEdit;
   final VoidCallback onPay;
   final VoidCallback onViewOrders;
   final VoidCallback onWhatsApp;
@@ -2208,33 +2242,22 @@ class _ReviewPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
+    final cleanEmail = email.trim();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Todo listo', style: boutiqueDisplay(28)),
         const SizedBox(height: 8),
         Text(
-          'Revisa tu contacto. Dirección, envío e impuestos finales se '
-          'confirman en Shopify.',
+          'Revisa tu pedido y continúa al pago seguro.',
           style: boutiqueText(size: 13, color: palette.inkMuted),
         ),
         const SizedBox(height: 28),
-        _ReviewBlock(
-          title: 'Contacto',
-          value: '$email\n$phone',
-          onEdit: onEdit,
-          editLabel: 'Cambiar',
-        ),
-        _ReviewBlock(
-          title: 'Dirección de envío',
-          value: 'Se captura en Shopify Checkout\n'
-              'No la pedimos aquí para no duplicarla.',
-        ),
-        _ReviewBlock(
-          title: 'Método de envío',
-          value: '5 - 7 días hábiles\n'
-              'Se calcula en Shopify',
-        ),
+        if (cleanEmail.isNotEmpty)
+          _ReviewBlock(
+            title: 'Contacto',
+            value: cleanEmail,
+          ),
         _PaymentBlock(
           methods: paymentMethods,
           selected: selectedPayment,
@@ -2452,14 +2475,10 @@ class _ReviewBlock extends StatelessWidget {
   const _ReviewBlock({
     required this.title,
     required this.value,
-    this.onEdit,
-    this.editLabel = 'Editar',
   });
 
   final String title;
   final String value;
-  final VoidCallback? onEdit;
-  final String editLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -2486,7 +2505,6 @@ class _ReviewBlock extends StatelessWidget {
             child:
                 Text(value, style: boutiqueText(size: 13, color: palette.ink)),
           ),
-          if (onEdit != null) _BagTextAction(label: editLabel, onTap: onEdit!),
         ],
       ),
     );
@@ -2574,17 +2592,48 @@ class _CheckoutSummary extends StatelessWidget {
             ),
           Container(height: .5, color: palette.hairline),
           const SizedBox(height: 14),
-          _SummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
-          const SizedBox(height: 8),
-          _SummaryRow(
-            label: 'Envío estimado',
-            value: 'Se calcula en Shopify',
-          ),
-          const SizedBox(height: 14),
-          _SummaryRow(
-            label: 'Total estimado',
-            value: kMoney.format(subtotal),
-            prominent: true,
+          Builder(
+            builder: (context) {
+              final cart = CartScope.maybeOf(context)?.notifier?.snapshot?.cart;
+              final allocatedApplications = cart?.discountApplications
+                      .where((item) => item.totalAllocatedAmount != null)
+                      .toList(growable: false) ??
+                  const <CartDiscountApplication>[];
+              final hasShopifyDiscounts =
+                  cart != null && allocatedApplications.isNotEmpty;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SummaryRow(
+                    label: 'Subtotal',
+                    value: hasShopifyDiscounts
+                        ? '${cart.cost.subtotal.amount} ${cart.cost.subtotal.currencyCode}'
+                        : kMoney.format(subtotal),
+                  ),
+                  for (final application in allocatedApplications) ...[
+                    const SizedBox(height: 8),
+                    _SummaryRow(
+                      label: application.code != null
+                          ? 'Descuento (${application.code})'
+                          : application.kind ==
+                                  CartDiscountApplicationKind.automatic
+                              ? 'Descuento automático'
+                              : 'Descuento aplicado',
+                      value:
+                          '−${application.totalAllocatedAmount!.amount} ${application.totalAllocatedAmount!.currencyCode}',
+                    ),
+                  ],
+                  const SizedBox(height: 14),
+                  _SummaryRow(
+                    label: 'Total estimado',
+                    value: hasShopifyDiscounts
+                        ? '${cart.cost.total.amount} ${cart.cost.total.currencyCode}'
+                        : kMoney.format(subtotal),
+                    prominent: true,
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -2612,10 +2661,11 @@ class _ProductImage extends StatelessWidget {
 }
 
 class _EmptyBag extends StatelessWidget {
-  const _EmptyBag({this.embedded = false});
+  const _EmptyBag({this.embedded = false, this.onContinueShopping});
 
   /// Beside the catalog there is no store to go back to.
   final bool embedded;
+  final VoidCallback? onContinueShopping;
 
   @override
   Widget build(BuildContext context) {
@@ -2665,7 +2715,7 @@ class _EmptyBag extends StatelessWidget {
       );
     }
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -2700,6 +2750,10 @@ class _EmptyBag extends StatelessWidget {
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
+            if (onContinueShopping != null) ...[
+              const SizedBox(height: 12),
+              _ContinueShoppingButton(onPressed: onContinueShopping!),
+            ],
           ],
         ),
       ),

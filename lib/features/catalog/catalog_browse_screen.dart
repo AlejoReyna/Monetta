@@ -473,7 +473,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       extendBody: false,
       backgroundColor: context.boutique.canvas,
       appBar: AppBar(
-        toolbarHeight: 76,
+        toolbarHeight: 64,
         backgroundColor: context.boutique.bar,
         foregroundColor: context.boutique.ink,
         surfaceTintColor: Colors.transparent,

@@ -5,6 +5,7 @@
  */
 export interface AccountsOrdersConfig {
   readonly databaseUrl: string;
+  readonly databaseUrlUnpooled: string;
   readonly port: number;
   readonly nodeEnv: string;
   readonly shopDomain: string;
@@ -131,6 +132,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
     databaseUrl:
       env.DATABASE_URL ??
       'postgres://accounts_orders:accounts_orders@localhost:5434/accounts_orders',
+    databaseUrlUnpooled: (env.DATABASE_URL_UNPOOLED ?? '').trim(),
     port: int(env.PORT, 8082),
     nodeEnv,
     shopDomain: (env.SHOPIFY_STORE_DOMAIN ?? '').trim(),

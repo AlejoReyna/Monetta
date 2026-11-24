@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
@@ -57,9 +59,8 @@ void main() {
     expect(store.wishlist.contains(product.id), isTrue);
     expect(find.text('Guardado ✓'), findsOneWidget);
     // Recomendaciones con ProductCard de lectura.
-    await tester.scrollUntilVisible(
+    await tester.ensureVisible(
       find.byKey(const ValueKey('bag-recommendations')),
-      400,
     );
     expect(
       find.byKey(const ValueKey('bag-recommendations')),
@@ -101,6 +102,28 @@ void main() {
     expect(find.byType(MonettaImage), findsOneWidget);
   });
 
+  testWidgets('checkout confirms a purchase after the bag becomes empty',
+      (tester) async {
+    final store = await _loadedStore();
+    await store.addToBag(store.products.firstWhere((item) => item.isInStock));
+    final checkout = Completer<CheckoutResult>();
+    await tester.pumpWidget(
+      _app(store, BagScreen(launchSecureCheckout: (_) => checkout.future)),
+    );
+    final pay = find.byKey(const ValueKey('bag-continue-button'));
+    await tester.ensureVisible(pay);
+    await tester.tap(pay);
+    await tester.pump();
+
+    await tester.runAsync(store.clearBagAfterCheckout);
+    await tester.pump();
+    expect(pay, findsNothing);
+
+    checkout.complete(const CheckoutCompleted());
+    await tester.pumpAndSettle();
+    expect(find.text('¡Gracias por tu compra!'), findsOneWidget);
+  });
+
   testWidgets('review lists no invented payment methods', (tester) async {
     final store = await _loadedStore();
     await store.addToBag(store.products.firstWhere((item) => item.isInStock));
@@ -114,13 +137,6 @@ void main() {
       ),
     );
     await tester.pump();
-
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'buyer@example.invalid');
-    await tester.enterText(fields.at(1), '8112345678');
-    await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-    await tester.tap(find.text('REVISAR PEDIDO'));
-    await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('payment-hosted-notice')), findsOneWidget);
     expect(find.textContaining('Tarjeta de crédito'), findsNothing);
@@ -148,13 +164,6 @@ void main() {
       ),
     );
     await tester.pump();
-
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'buyer@example.invalid');
-    await tester.enterText(fields.at(1), '8112345678');
-    await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-    await tester.tap(find.text('REVISAR PEDIDO'));
-    await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('CONTINUAR AL PAGO SEGURO'));
     await tester.tap(find.text('CONTINUAR AL PAGO SEGURO'));
     await tester.pumpAndSettle();
@@ -174,7 +183,8 @@ void main() {
     await store.addToBag(product);
 
     await tester.pumpWidget(
-        _app(store, const BagScreen(drawerTitle: 'Agregado al carrito')));
+      _app(store, const BagScreen(drawerTitle: 'Agregado al carrito')),
+    );
     await tester.pump();
 
     expect(find.text('Agregado al carrito'), findsOneWidget);

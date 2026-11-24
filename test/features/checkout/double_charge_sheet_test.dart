@@ -103,7 +103,7 @@ void main() {
     expect(find.text(kCheckoutDoubleChargeBody), findsOneWidget);
     expect(find.text(kCheckoutReturnViewOrdersLabel), findsOneWidget);
     expect(find.text(kCheckoutDoubleChargePayAnywayLabel), findsOneWidget);
-    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+    expect(find.text('Todo listo'), findsNothing);
     expect(harness.launches, 0);
   });
 
@@ -118,7 +118,8 @@ void main() {
     await _tapCartCheckout(tester);
 
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
-    expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
+    expect(find.text('Todo listo'), findsNothing);
+    expect(harness.launches, 1);
   });
 
   testWidgets('a new cart token keeps the warning and still shows the sheet', (
@@ -141,7 +142,7 @@ void main() {
     await _tapCartCheckout(tester);
 
     expect(find.text(kCheckoutDoubleChargeTitle), findsOneWidget);
-    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+    expect(find.text('Todo listo'), findsNothing);
     expect(harness.guard.isActive, isTrue);
   });
 
@@ -183,7 +184,7 @@ void main() {
     await tester.pumpAndSettle();
     await _tapCartCheckout(tester);
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
-    expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
+    expect(harness.launches, 1);
   });
 
   testWidgets('a restarted app shows the sheet while the bag is not empty', (
@@ -227,7 +228,7 @@ void main() {
     await _tapCartCheckout(tester);
 
     expect(find.text(kCheckoutDoubleChargeTitle), findsOneWidget);
-    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+    expect(find.text('Todo listo'), findsNothing);
   });
 
   testWidgets('a warning older than 24 hours opens checkout directly', (
@@ -237,15 +238,25 @@ void main() {
     final guard = ReviewingCheckoutCart(clock: () => now)..markActive();
     final harness = await _BagHarness.create(guard: guard);
     addTearDown(harness.dispose);
+    var activeAtLaunch = true;
 
-    await tester.pumpWidget(harness.app());
+    await tester.pumpWidget(
+      harness.app(
+        onLaunch: () {
+          activeAtLaunch = guard.isActive;
+          return const CheckoutCompleted();
+        },
+      ),
+    );
     await tester.pumpAndSettle();
     now = now.add(kCheckoutReviewingWarningLifetime);
     await _tapCartCheckout(tester);
 
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
-    expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
+    expect(find.text('Todo listo'), findsNothing);
+    expect(activeAtLaunch, isFalse);
     expect(guard.isActive, isFalse);
+    expect(harness.launches, 1);
   });
 
   testWidgets('view orders opens history and does not start checkout', (
@@ -263,7 +274,8 @@ void main() {
 
     expect(find.text('Mis pedidos'), findsWidgets);
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
-    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+    expect(find.text('Todo listo'), findsNothing);
+    expect(harness.launches, 0);
     expect(harness.guard.isActive, isTrue);
   });
 
@@ -279,8 +291,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('checkout-double-charge-pay')));
     await tester.pumpAndSettle();
 
-    expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
+    expect(find.text('Todo listo'), findsNothing);
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
+    expect(harness.launches, 1);
     expect(harness.guard.isActive, isTrue);
   });
 
@@ -393,12 +406,6 @@ Future<void> _tapCartCheckout(WidgetTester tester) async {
 
 Future<void> _openReview(WidgetTester tester) async {
   await tester.pump();
-  final fields = find.byType(TextFormField);
-  await tester.enterText(fields.at(0), 'buyer@example.invalid');
-  await tester.enterText(fields.at(1), '8112345678');
-  await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-  await tester.tap(find.text('REVISAR PEDIDO'));
-  await tester.pumpAndSettle();
   await tester.ensureVisible(find.byKey(const ValueKey('checkout-pay-button')));
 }
 
@@ -463,6 +470,7 @@ final class _BagHarness {
     ReviewingWarningStore? warningStore,
     DateTime Function()? clock,
     bool restore = false,
+    CheckoutResult Function()? onLaunch,
   }) {
     return MaterialApp(
       theme: buildTheme(),
@@ -481,7 +489,7 @@ final class _BagHarness {
         child: BagScreen(
           launchSecureCheckout: (_) async {
             launches += 1;
-            return const CheckoutCancelled();
+            return onLaunch?.call() ?? const CheckoutCancelled();
           },
         ),
       ),

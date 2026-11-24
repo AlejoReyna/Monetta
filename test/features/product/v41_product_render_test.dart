@@ -217,7 +217,85 @@ void main() {
       await tester.pumpAndSettle();
       await capture(tester, 'recommendations-$suffix');
       expect(tester.takeException(), isNull);
-      final link = find.byKey(const ValueKey('product-set-Más de la marca'));
+
+      final brandRail = find.byKey(const ValueKey('Más de la marca'));
+      expect(brandRail, findsOneWidget);
+      expect(
+        find.descendant(
+          of: brandRail,
+          matching: find.byKey(const Key('product-rail')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: brandRail,
+          matching: find.byTooltip('Productos anteriores'),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: brandRail,
+          matching: find.byTooltip('Productos siguientes'),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('product-set-Más de la marca')),
+        findsNothing,
+      );
+      expect(find.text('Ver más de la marca'), findsNothing);
+      expect(
+        find.byKey(const ValueKey('product-set-Relacionados')),
+        findsNothing,
+      );
+      expect(find.text('Ver relacionados'), findsNothing);
+      final relatedRail = find.byKey(const ValueKey('Relacionados'));
+      expect(find.text('Relacionados'), findsOneWidget);
+      expect(relatedRail, findsOneWidget);
+      expect(
+        find.descendant(
+          of: relatedRail,
+          matching: find.byKey(const Key('product-rail')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: relatedRail,
+          matching: find.byTooltip('Productos anteriores'),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: relatedRail,
+          matching: find.byTooltip('Productos siguientes'),
+        ),
+        findsNothing,
+      );
+
+      final recentHeading = find.text('Vistos hace un momento');
+      expect(recentHeading, findsOneWidget);
+      final recentRail = find.byKey(const ValueKey('Vistos hace un momento'));
+      expect(
+        find.descendant(
+          of: recentRail,
+          matching: find.byTooltip('Productos anteriores'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: recentRail,
+          matching: find.byTooltip('Productos siguientes'),
+        ),
+        findsOneWidget,
+      );
+      final link =
+          find.byKey(const ValueKey('product-set-Vistos hace un momento'));
+      expect(link, findsOneWidget);
       position.jumpTo(
         (position.pixels + tester.getTopLeft(link).dy - 400)
             .clamp(0.0, position.maxScrollExtent),
@@ -226,10 +304,10 @@ void main() {
       await tester.tap(link.hitTestable());
       await tester.pumpAndSettle();
       final grid =
-          find.byKey(const ValueKey('product-set-grid-Más de la marca'));
+          find.byKey(const ValueKey('product-set-grid-Vistos hace un momento'));
       expect(grid, findsOneWidget);
       final expected = store
-          .moreFromBrand('coach', excluding: store.products.last.id, limit: 40)
+          .recentlyViewed(excluding: store.products.last.id, limit: 40)
           .map((p) => p.id)
           .toSet();
       expect(

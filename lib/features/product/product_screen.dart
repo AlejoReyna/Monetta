@@ -12,10 +12,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
-import '../../app/monetta_tokens.g.dart';
 import '../../app/storefront_layout.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
+import '../../data/accounts_orders/accounts_orders_config.dart';
 import '../../data/media/media_url.dart';
 import '../../data/shopify/cart_attribution.dart';
 import '../../domain/product.dart';
@@ -32,6 +32,7 @@ import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
 import '../checkout/mini_cart.dart';
 import '../catalog/product_controls.dart';
+import '../rewards/rewards_components.dart';
 import 'product_recommendations.dart';
 import 'product_zoom.dart';
 import '../navigation/guide_chrome.dart';
@@ -56,6 +57,7 @@ class ProductScreen extends StatefulWidget {
     this.endSectionsBuilder,
     this.shippingPolicy,
     this.returnsPolicy,
+    this.showRewardsEstimate,
     this.onClose,
     super.key,
   });
@@ -74,6 +76,7 @@ class ProductScreen extends StatefulWidget {
   /// Only current, approved policy content may enable these accordions.
   final String? shippingPolicy;
   final String? returnsPolicy;
+  final bool? showRewardsEstimate;
   final VoidCallback? onClose;
 
   @override
@@ -257,8 +260,9 @@ class _ProductScreenState extends State<ProductScreen> {
   Widget _recommendationSection(
     BuildContext context,
     String title,
-    List<Product> products,
-  ) =>
+    List<Product> products, {
+    bool showControls = true,
+  }) =>
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -269,9 +273,23 @@ class _ProductScreenState extends State<ProductScreen> {
             child: Text(title, style: boutiqueSectionHeading(context: context)),
           ),
           const SizedBox(height: 16),
-          _Rail(key: ValueKey(title), title: title, products: products),
+          _Rail(
+            key: ValueKey(title),
+            title: title,
+            products: products,
+            showControls: showControls,
+          ),
         ],
       );
+
+  Widget? _rewardsEstimateTrailing(double price, bool inStock) {
+    final enabled = widget.showRewardsEstimate ??
+        AccountsOrdersConfig.fromEnvironment().enabled;
+    if (!enabled || !inStock || !price.isFinite || price <= 0) return null;
+    final estimatedCents = ((price * 100).round() * 100 + 5000) ~/ 10000;
+    if (estimatedCents < 50) return null;
+    return RewardsEstimateLabel(estimatedCents: estimatedCents);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -479,6 +497,7 @@ class _ProductScreenState extends State<ProductScreen> {
                         price: price,
                         compare: compare,
                         sixMsiAmount: selected?.sixMsiInstallmentAmount,
+                        trailing: _rewardsEstimateTrailing(price, inStock),
                         currentKey: const Key('product-price'),
                         size: 22,
                         inStock: inStock,
@@ -500,35 +519,47 @@ class _ProductScreenState extends State<ProductScreen> {
                         ),
                       ],
                       if (inStock) ...[
-                        LayoutBuilder(builder: (context, constraints) {
-                          final slot = SizedBox(
-                            key: _purchaseSlot,
-                            height: _fixedAdd ? _inlineAddHeight : null,
-                            child: _fixedAdd ? null : addButton,
-                          );
-                          final buy = PurchaseOutlineButton(
-                            key: const Key('purchase-buy-now'),
-                            label: 'Comprar ahora',
-                            textColor: palette.ink,
-                            onPressed: _adding ? null : () => _buyNow(product),
-                          );
-                          if (constraints.maxWidth < 360 ||
-                              MediaQuery.textScalerOf(context).scale(14) > 16) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [slot, const SizedBox(height: 8), buy],
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final slot = SizedBox(
+                              key: _purchaseSlot,
+                              height: _fixedAdd ? _inlineAddHeight : null,
+                              child: _fixedAdd ? null : addButton,
                             );
-                          }
-                          return Row(children: [
-                            Expanded(child: slot),
-                            const SizedBox(width: 8),
-                            Expanded(child: buy),
-                          ]);
-                        }),
+                            final buy = PurchaseOutlineButton(
+                              key: const Key('purchase-buy-now'),
+                              label: 'Comprar ahora',
+                              textColor: palette.ink,
+                              onPressed:
+                                  _adding ? null : () => _buyNow(product),
+                            );
+                            if (constraints.maxWidth < 360 ||
+                                MediaQuery.textScalerOf(context).scale(14) >
+                                    16) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  slot,
+                                  const SizedBox(height: 8),
+                                  buy,
+                                ],
+                              );
+                            }
+                            return Row(
+                              children: [
+                                Expanded(child: slot),
+                                const SizedBox(width: 8),
+                                Expanded(child: buy),
+                              ],
+                            );
+                          },
+                        ),
                         const SizedBox(height: BoutiqueSpace.lg),
                       ],
-                      _AvailabilityLine(inStock: inStock),
-                      const SizedBox(height: BoutiqueSpace.lg),
+                      if (!inStock) ...[
+                        _AvailabilityLine(inStock: inStock),
+                        const SizedBox(height: BoutiqueSpace.lg),
+                      ],
                       const ClientGuideServices(
                         key: Key('product-trust-row'),
                       ),
@@ -550,11 +581,13 @@ class _ProductScreenState extends State<ProductScreen> {
                         _BoutiqueAccordion(
                           label: 'Descripción',
                           open: _open.contains('descripcion'),
-                          onTap: () => setState(() {
-                            _open.contains('descripcion')
-                                ? _open.remove('descripcion')
-                                : _open.add('descripcion');
-                          }),
+                          onTap: () => setState(
+                            () {
+                              _open.contains('descripcion')
+                                  ? _open.remove('descripcion')
+                                  : _open.add('descripcion');
+                            },
+                          ),
                           child: Text(
                             description,
                             style: boutiqueText(
@@ -621,9 +654,19 @@ class _ProductScreenState extends State<ProductScreen> {
                   ),
                 ),
                 if (related.isNotEmpty)
-                  _recommendationSection(context, 'Relacionados', related),
+                  _recommendationSection(
+                    context,
+                    'Relacionados',
+                    related,
+                    showControls: false,
+                  ),
                 if (sameBrand.isNotEmpty)
-                  _recommendationSection(context, 'Más de la marca', sameBrand),
+                  _recommendationSection(
+                    context,
+                    'Más de la marca',
+                    sameBrand,
+                    showControls: false,
+                  ),
                 if (recent.isNotEmpty)
                   _recommendationSection(
                     context,
@@ -971,6 +1014,7 @@ class _AvailabilityLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (inStock) return const SizedBox.shrink();
     final palette = context.boutique;
     return Row(
       children: [
@@ -979,13 +1023,13 @@ class _AvailabilityLine extends StatelessWidget {
           height: 6,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: inStock ? MonettaTokens.success : palette.sale,
+            color: palette.sale,
           ),
         ),
         const SizedBox(width: BoutiqueSpace.sm),
         Expanded(
           child: Text(
-            inStock ? 'Disponible' : 'Esta opción no está disponible',
+            'Esta opción no está disponible',
             style: boutiqueText(size: 12, color: palette.inkMuted, height: 1.4),
           ),
         ),
@@ -1074,9 +1118,15 @@ class _BoutiqueAccordion extends StatelessWidget {
 /// Lazy common cards over one stable set, with manual paging and a full-set
 /// route. Each real ID appears once; reduced motion uses immediate movement.
 class _Rail extends StatefulWidget {
-  const _Rail({required this.products, required this.title, super.key});
+  const _Rail({
+    required this.products,
+    required this.title,
+    this.showControls = true,
+    super.key,
+  });
   final List<Product> products;
   final String title;
+  final bool showControls;
   @override
   State<_Rail> createState() => _RailState();
 }
@@ -1206,30 +1256,31 @@ class _RailState extends State<_Rail> {
                 },
               ),
             ),
-            Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                IconButton(
-                  tooltip: 'Productos anteriores',
-                  onPressed: () => _move(-tileWidth),
-                  icon: const Icon(Icons.chevron_left),
-                ),
-                TextButton(
-                  key: ValueKey('product-set-${widget.title}'),
-                  onPressed: _viewSet,
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.boutique.ink,
+            if (widget.showControls)
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  IconButton(
+                    tooltip: 'Productos anteriores',
+                    onPressed: () => _move(-tileWidth),
+                    icon: const Icon(Icons.chevron_left),
                   ),
-                  child: Text('Ver ${widget.title.toLowerCase()}'),
-                ),
-                IconButton(
-                  tooltip: 'Productos siguientes',
-                  onPressed: () => _move(tileWidth),
-                  icon: const Icon(Icons.chevron_right),
-                ),
-              ],
-            ),
+                  TextButton(
+                    key: ValueKey('product-set-${widget.title}'),
+                    onPressed: _viewSet,
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.boutique.ink,
+                    ),
+                    child: Text('Ver ${widget.title.toLowerCase()}'),
+                  ),
+                  IconButton(
+                    tooltip: 'Productos siguientes',
+                    onPressed: () => _move(tileWidth),
+                    icon: const Icon(Icons.chevron_right),
+                  ),
+                ],
+              ),
           ],
         );
       },

@@ -3,9 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/app/theme.dart';
+import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/main.dart';
+import 'package:monetta_app/platform/system_layout_context.dart';
 
 Future<CatalogStore> _loadedStore() async {
   final store = CatalogStore(database: openTestDatabase());
@@ -36,7 +38,8 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Bolsas'), findsOneWidget);
+    expect(find.byType(GuideBanner), findsOneWidget);
+    expect(find.text('Bolsas'), findsNothing);
     expect(find.textContaining('piezas ordenadas por'), findsNothing);
     expect(find.text('Más nuevas'), findsNothing);
     expect(find.text('extracted'), findsNothing);
@@ -248,5 +251,56 @@ void main() {
       expect(find.byKey(const Key('collection-filter-button')), findsOneWidget);
       expect(find.byTooltip('Filtros'), findsOneWidget);
     }
+  });
+
+  testWidgets(
+      'collection header does not double-count top occlusion and media padding',
+      (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+
+    final store = await _loadedStore();
+    addTearDown(store.dispose);
+
+    const geometry = SystemLayoutContext(
+      supported: true,
+      occlusions: [
+        ReservedRegion(
+          bounds: Rect.fromLTWH(120, 0, 150, 62),
+          active: true,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: Size(390, 844),
+          padding: EdgeInsets.only(top: 62, bottom: 34),
+          viewPadding: EdgeInsets.only(top: 62, bottom: 34),
+        ),
+        child: MaterialApp(
+          theme: buildTheme(),
+          home: SystemLayoutScope(
+            geometry: geometry,
+            child: StoreScope(
+              notifier: store,
+              child: const CollectionScreen(
+                title: 'Bolsas',
+                filter: CollectionFilter(category: 'bolsa'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final searchButtonRect = tester.getRect(find.byTooltip('Buscar'));
+    final bannerRect = tester.getRect(find.byType(GuideBanner));
+    expect(searchButtonRect.top, greaterThanOrEqualTo(62));
+    expect(searchButtonRect.bottom, lessThanOrEqualTo(126));
+    expect(bannerRect.top, closeTo(62 + 64 + 8, 1.0));
   });
 }
